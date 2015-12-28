@@ -145,7 +145,7 @@ hr.small {
   position: relative;
   width: 100%;
   height: 100%;
-  background: url(https://pixabay.com/static/uploads/photo/2013/04/07/14/03/strauss-101472_960_720.jpg) no-repeat center center scroll;
+  background: url(../images/bg0.jpg) no-repeat center center scroll;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   background-size: cover;
@@ -171,8 +171,8 @@ hr.small {
   display: table;
   width: 100%;
   height: 400px;
-  color: #fff;
-  background: url(https://pixabay.com/static/uploads/photo/2014/05/03/00/43/ocean-336613_960_720.jpg) no-repeat center center scroll;
+  color: #FFF;
+  background: url(../images/bg1.jpg) no-repeat center center scroll;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   background-size: cover;
