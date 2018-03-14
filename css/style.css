@@ -10,6 +10,10 @@ body {
   font-family: "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
+.hi {
+    font-family: 'Pacifico', cursive;
+    padding-bottom:20px;
+}
 .text-vertical-center {
   display: table-cell;
   text-align: center;
@@ -219,4 +223,14 @@ hr.small {
 
 footer {
   padding: 100px 0;
+}
+
+.fa-plane {
+    color: rgb(0, 255, 0);
+    opacity: 1;
+
+}
+.fa-car {
+    color: rgb(255, 0, 0);
+    opacity: 1;
 }
