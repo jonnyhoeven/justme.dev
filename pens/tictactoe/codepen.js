@@ -61,8 +61,8 @@ var thisGame = {
             }
 
             // create our html object
-            cellCont += "<span class='fa-stack fa-2x border' onclick='cellOnClick(" + ind + ")' style='cursor:pointer;'>";
-            cellCont += "<i class='fa fa-square-o fa-stack' ></i > <i id='" + this.divCanvas + "Cell" + ind + "' class='" + cellClassNames + "'></i>";
+            cellCont += "<span class='fa-stack fa-3x border' onclick='cellOnClick(" + ind + ")' style='cursor:pointer;'>";
+            cellCont += "<i class='fa fa-square-o fa-stack-2x' ></i > <i id='" + this.divCanvas + "Cell" + ind + "' class='" + cellClassNames + "'></i>";
             cellCont += "</span >";
             //<b>" + ind + "</b>: <i>(" + tCellProps.locX + "," + tCellProps.locY  + ")</i> [" + tCellProps.cellSumIds + "]";
 
