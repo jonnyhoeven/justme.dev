@@ -18,7 +18,7 @@ var thisGame = {
     }],
 
     gameSize: 4, // size of square grid
-    divCanvas: "divCanvas", //Dom object for drawing grids cells
+    divCanvas: "divTicTacToe", //Dom object for drawing grids cells
 
     gridState: null, // holds the grid values 
     cellSums: null,
