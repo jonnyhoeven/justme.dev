@@ -1,7 +1,8 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="node_modules/vue/dist/vue.js"></script>
+    <script src="js/vue.min.js"></script>
+    <title>Just Make It! - Jonny van der Hoeven</title>
     <link rel="shortcut icon" type="image/png" href="/images/favicon.png"/>
     <link rel="stylesheet" type="text/css" href="css/app.css" />
     <link rel="stylesheet" type="text/css" href="css/font-awesome.css" />
@@ -10,7 +11,7 @@
 <body>
 
     <div id="vue-menu" class="menu">
-        <img src="/images/logo.png" class="logo">
+        <img src="images/logo.png" class="logo">
         <a v-for="item in items" v-bind:href="item.url" :key="item.id" class="menuitem">
             <p><i v-bind:class="item.icon" class="fa fa-2x"></i> {{ item.name }}</p>
         </a>
@@ -53,8 +54,8 @@
     </div>
     <div class="clearfix"></div>
 
-    <script src="menu.js"></script>
-    <script src="portfolio.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/portfolio.js"></script>
 
 </body>
 </html>
