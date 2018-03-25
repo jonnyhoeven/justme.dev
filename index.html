@@ -1,317 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Just Make It! by Jonny van der Hoeven">
-    <meta name="keywords" content="Jonny van der Hoeven, portfolio, just make it, github, codepen, codecamp, about, resume, PHP, CSS, JS, Java, MySQL, jQuery, maker, makerspace, 3d printing, electrical engineering, software developer, web developer, backend developer, frontend developer, stage technician, audio visual technology, computer vision, augmented reality">
-    <title>Just make it!</title>
-
-    <!-- local style sheet -->
-    <link rel="stylesheet" type="text/css" href="css/style.css">
-    <!-- font awesome-->
-    <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" />
-    <!-- google fonts api -->
-    <link rel="stylesheet" type="text/css" href="/css/gfont.css" />
-    <!-- animate.css -->
-    <link rel="stylesheet" type="text/css" href="css/animate.css">
-    <!-- Bootstrap -->
-    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="js/jquery-1.11.3.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="js/bootstrap.min.js"></script>
-    <script src="pens/tictactoe/codepen.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="node_modules/vue/dist/vue.js"></script>
+    <link rel="shortcut icon" type="image/png" href="/images/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="css/app.css" />
+    <link rel="stylesheet" type="text/css" href="css/font-awesome.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
 </head>
-
 <body>
-    <!-- Header -->
-    <header id="top" class="header animated fadeIn">
-        <div class="text-vertical-center">
-            <h1 class="animated tada hi">Hi</h1>
-            <br>
-            <a href="#about" class="btn btn-dark btn-lg">Learn More</a>
-        </div>
-    </header>
 
-    <!-- About -->
-    <section id="about" class="about">
-        <div class="container-fluid">
-            <div class="row">
+    <div id="vue-menu" class="menu">
+        <img src="/images/logo.png" class="logo">
+        <a v-for="item in items" v-bind:href="item.url" :key="item.id" class="menuitem">
+            <p><i v-bind:class="item.icon" class="fa fa-2x"></i> {{ item.name }}</p>
+        </a>
+    </div>
 
-                <div class="col-lg-12 text-center">
-                        <p class="lead">Hi, my name is Jonny,
-                                absolute nerd about computer vision, neural networks and immersive or augmented reality.
-                                A Web developer deeply in love with laravel and a electronics engineer in love with arduino and especially the sound of servo controllers.
-                                I have 10 years experience with audio visual systems in a production environment and I've been playing with and creating software since the age of eight.
-                                I believe autodidactic skills and fun are the most important driving factors during personal development, 
-                                I'm currently Lead Developer for CruiseReizen.nl looking for a new position.
-                </div>
-
-            </div>
-            <!-- /.row -->
-        </div>
-        <!-- /.container -->
-    </section>
-
-    <!-- Other places -->
-    <section id="services" class="services bg-primary">
-        <div class="container-fluid">
-            <div class="row text-center">
-                <div class="col-lg-10 col-lg-offset-1">
-
-                    <h1 class="hi">Online presence</h1>
-
-                    <div class="row">
-                        <div class="col-md-2 col-sm-6">
-                            <a href="https://nl.linkedin.com/in/jonnyhoeven">
-                                <div class="service-item">
-                                    <span class="fa-stack fa-4x">
-                                        <i class="fa fa-circle fa-stack-2x"></i>
-                                        <i class="fa fa-linkedin fa-stack-1x text-primary"></i>
-                                    </span>
-                                    <h4>
-                                        <div class="btn btn-light">
-                                            <strong>LinkedIn</strong>
-                                        </div>
-                                    </h4>
-                                </div>
-                            </a>
-                        </div>
-
-                        <div class="col-md-2 col-sm-6">
-                            <a href="https://www.github.com/jonnyhoeven/">
-                                <div class="service-item">
-                                    <span class="fa-stack fa-4x">
-                                        <i class="fa fa-circle fa-stack-2x"></i>
-                                        <i class="fa fa-github fa-stack-1x text-primary"></i>
-                                    </span>
-                                    <h4>
-                                        <div class="btn btn-light">
-                                            <strong>GitHub</strong>
-                                        </div>
-                                    </h4>
-                                </div>
-                            </a>
-                        </div>
-
-                        <div class="col-md-2 col-sm-6">
-                            <a href="https://codepen.io/jonnyhoeven/">
-                                <div class="service-item">
-                                    <span class="fa-stack fa-4x">
-                                        <i class="fa fa-circle fa-stack-2x"></i>
-                                        <i class="fa fa-codepen fa-stack-1x text-primary"></i>
-                                    </span>
-                                    <h4>
-                                        <div class="btn btn-light">
-                                            <strong>CodePen</strong>
-                                        </div>
-                                    </h4>
-                                </div>
-                            </a>
-                        </div>
-
-                        <div class="col-md-2 col-sm-6">
-                            <a href="http://www.thingiverse.com/jonnyhoeven/designs">
-                                <div class="service-item">
-                                    <span class="fa-stack fa-4x">
-                                        <i class="fa fa-circle fa-stack-2x"></i>
-                                        <i class="fa fa-print fa-stack-1x text-primary"></i>
-                                    </span>
-                                    <h4>
-                                        <div class="btn btn-light">
-                                            <strong>3D Printing</strong>
-                                        </div>
-                                    </h4>
-                                </div>
-                            </a>
-                        </div>
-
-                        <div class="col-md-2 col-sm-6">
-                            <a href="https://www.instagram.com/jonnyhoeven">
-                                <div class="service-item">
-                                    <span class="fa-stack fa-4x">
-                                        <i class="fa fa-circle fa-stack-2x"></i>
-                                        <i class="fa fa-instagram fa-stack-1x text-primary"></i>
-                                    </span>
-                                    <h4>
-                                        <div class="btn btn-light">
-                                            <strong>Instagram</strong>
-                                        </div>
-                                    </h4>
-                                </div>
-                            </a>
-                        </div>
-
-                        <div class="col-md-2 col-sm-6">
-                            <a href="https://www.youtube.com/jonnyhoeven">
-                                <div class="service-item">
-                                    <span class="fa-stack fa-4x">
-                                        <i class="fa fa-circle fa-stack-2x"></i>
-                                        <i class="fa fa-youtube fa-stack-1x text-primary"></i>
-                                    </span>
-
-                                    <h4>
-                                        <div class="btn btn-light">
-                                            <strong>YouTube</strong>
-                                        </div>
-                                    </h4>
-                                </div>
-                            </a>
-                        </div>
-
-                    </div>
-                    <!-- /.row (nested) -->
-                </div>
-                <!-- /.col-lg-10 -->
-            </div>
-            <!-- /.row -->
-        </div>
-        <!-- /.container -->
-    </section>
-
-    <!-- Callout -->
-    <section class="callout">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-lg-10 col-lg-offset-1 text-center">
-                    <h1 class="hi">Play</h1>
-                    <div id="divTicTacToe"></div>
+    <div id="vue-portfolio">
+        <div class="portfolio">
+            <div v-for="item in items"
+                v-on:click="test(item)"
+                v-bind:key="item.id"
+                class="portfolioitem">
+                
+                <h5>{{ item.name }}</h5>
+                <img v-bind:src="item.image" class="portfolioimage">
             </div>
         </div>
-    </section>
-
-    <!-- Portfolio -->
-    <section id="portfolio" class="portfolio text-center">
-    <div class="container-fluid">
-            <div class="row">
-                <div class="col-lg-10 col-lg-offset-1 text-center">
-
-                    <h1 class="hi">Portfolio</h1>
-
-                    <div class="row">
-
-                        <div class="col-md-6 col-sm-12">
-                            <div class="portfolio-item">
-                                <a href="https://www.cruisreizen.nl">
-                                    <h1>CruiseReizen.nl</h1>
-                                    <img style="height:200px;" class="img-portfolio img-fluid shadow" src="images/cruisereizen.jpg">
-                                    <h4>
-                                        <i>(PHP)</i>
-                                    </h4>
-                                </a>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 col-sm-12">
-                            <div class="portfolio-item">
-                                <a href="https://www.palmolivewellness.nl">
-                                    <h1>PalmoliveWellness.nl</h1>
-                                    <img style="height:200px;" class="img-portfolio img-fluid shadow" src="images/palmolive.jpg">
-                                    <h4>
-                                        <i>(PHP / Laravel)</i>
-                                    </h4>
-                                </a>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 col-sm-12">
-                            <div class="portfolio-item">
-                                <a href="https://github.com/jonnyhoeven/CVTI">
-                                    <h1>Camera & Lighting controls</h1>
-                                    <img style="height:200px;" class="img-portfolio img-fluid shadow" src="images/cvti.jpg">
-                                    <h4>
-                                        <i>(VB.net)</i>
-                                    </h4>
-                                </a>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 col-sm-12">
-                            <div class="portfolio-item">
-                                <a href="https://github.com/jonnyhoeven/schnitzel">
-                                    <h1>Twitter GeoJson Parser</h1>
-                                    <img style="height:200px;" class="img-portfolio img-fluid shadow" src="images/schnitzel.jpg">
-                                    <h4>
-                                        <i>(JavaScript)</i>
-                                    </h4>
-                                </a>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 col-sm-12">
-                            <div class="portfolio-item">
-                                <a href="https://github.com/jonnyhoeven/Unity-Augmented-Game">
-                                    <h1>AR demo</h1>
-                                    <img style="height:200px;" class="img-portfolio img-fluid shadow" src="images/vuforia.jpg">
-                                    <h4>
-                                        <i>(Java / C#)</i>
-                                    </h4>
-                                </a>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 col-sm-12">
-                            <div class="portfolio-item">
-                                <a href="https://github.com/jonnyhoeven/DMXControl">
-                                    <h1>OpenDMX Controls</h1>
-                                    <img style="height:200px;" class="img-portfolio img-fluid shadow" src="images/opendmx.jpg">
-                                    <h4>
-                                        <i>(VB.Net)</i>
-                                    </h4>
-                                </a>
-                            </div>
-                        </div>
-
-                    </div>
-                    <!-- /.row (nested) -->
-                </div>
-                <!-- /.col-lg-10 -->
+        <transition name="slide-fade">
+            <div v-show="showdetail" class="portfoliodetail">
+                <h4>{{ selectedItem.name }}</h4>
+                
+                <p>
+                    <img v-bind:src="selectedItem.image" class="detailimage">
+                    <h4>{{ selectedItem.readme }}</h4>
+                    <h6>({{ selectedItem.type }}) <u><a v-bind:href="selectedItem.url">View repository</a></u></h6>
+                </p>
+                <div class="clearfix"></div>
             </div>
-            <!-- /.row -->
-        </div>
-        <!-- /.container -->
-    </section>
+        </transition>
+    </div>
 
-    <!-- Call to Action -->
-    <aside class="call-to-action bg-primary">
-        <div class="container-fluid">
 
-            <div class="row">
-                <div class="col-lg-12 text-center">
-                    <h1 class="hi">
-                        For more information or collaboration,
-                    </h1>
-                </div>
-            </div>
+    <div class="contact">
+            <img src="images/jonny.jpg" class="contactimage">   
+            <h6>
+                For more information feel free to contact me:<br>
+                <br>
+            <i class="fa fa-envelope-o fa-fw"></i>
+            <a href="mailto:jonnyhoeven@gmail.com">jonnyhoeven@gmail.com</a>
+            </h6>
+    </div>
+    <div class="clearfix"></div>
 
-            <div class="row">
-                <div class="col-lg-4 col-lg-offset-4 text-center well text-center">
-                        <h4><strong>Jonny van der Hoeven</strong></h4>
-                        <ul class="list-unstyled">
-                            <li>
-                                <i class="fa fa-envelope-o fa-fw"></i>
-                                <a href="mailto:jonnyhoeven@gmail.com">jonnyhoeven@gmail.com</a>
-                            </li>
-                        </ul>
-                </div>
-            </div>
-
-        </div>
-    </aside>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-lg-10 col-lg-offset-1 text-center">
-                    <p class="text-muted">Copyright &copy; Jonny van der Hoeven 2018</p>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <script src="menu.js"></script>
+    <script src="portfolio.js"></script>
 
 </body>
-
 </html>
+
+
+
