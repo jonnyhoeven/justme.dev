@@ -1,8 +1,8 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="js/vue.min.js"></script>
-    <title>Just Make It! - Jonny van der Hoeven</title>
+    <script src="js/vue.js"></script>
+    <title>Jonny van der Hoeven - Just Make it!</title>
     <link rel="shortcut icon" type="image/png" href="/images/favicon.png"/>
     <link rel="stylesheet" type="text/css" href="css/app.css" />
     <link rel="stylesheet" type="text/css" href="css/font-awesome.css" />
@@ -13,50 +13,76 @@
     <div id="vue-menu" class="menu">
         <img src="images/logo.png" class="logo">
         <a v-for="item in items" v-bind:href="item.url" :key="item.id" class="menuitem">
-            <p><i v-bind:class="item.icon" class="fa fa-2x"></i> {{ item.name }}</p>
+            <p><i v-bind:class="item.icon" class="fa"></i> {{ item.name }}</p>
         </a>
     </div>
 
     <div id="vue-portfolio">
-        <div class="portfolio">
+        
+        <div class="portfoliomenu">
             <div v-for="item in items"
-                v-on:click="test(item)"
-                v-bind:key="item.id"
-                class="portfolioitem">
-                
-                <h5>{{ item.name }}</h5>
-                <img v-bind:src="item.image" class="portfolioimage">
+                v-on:click="highlight(item)"
+                v-bind:class="{ active: item.selected }"
+                class="portfoliomenuitem">
+                <h3>{{ item.name }}</h3>
+                <img v-bind:src="item.image" class="portfoliomenuimage">    
             </div>
         </div>
-        <transition name="slide-fade">
-            <div v-show="showdetail" class="portfoliodetail">
-                <h4>{{ selectedItem.name }}</h4>
+        
+            <div v-for="item in items"
+                v-on:click="highlight(item)"
+                v-show="item.selected"
+                v-bind:key="item.id">
+                <div  class="portfoliodetailitem">
+
+                <h2>{{ item.longName }}</h2>
                 
-                <p>
-                    <img v-bind:src="selectedItem.image" class="detailimage">
-                    <h4>{{ selectedItem.readme }}</h4>
-                    <h6>({{ selectedItem.type }}) <u><a v-bind:href="selectedItem.url">View repository</a></u></h6>
-                </p>
-                <div class="clearfix"></div>
+                <img v-bind:src="item.image"  align="left" v-bind:class="{ active: item.selected }" class="portfoliodetailimage">
+                
+                <h4 v-html="item.readme"></h4>
+                
+                <h6>
+                    ({{ item.type }})
+                    <u><a v-bind:href="item.url">View repository</a></u>
+                </h6>
             </div>
-        </transition>
+            </div>
+
     </div>
 
 
-    <div class="contact">
+
+
+
+
+    <div id="vue-contact">
+        <div v-if="showcontact" class="contact">
             <img src="images/jonny.jpg" class="contactimage">   
-            <h6>
+            <h3>
                 For more information feel free to contact me:<br>
                 <br>
             <i class="fa fa-envelope-o fa-fw"></i>
             <a href="mailto:jonnyhoeven@gmail.com">jonnyhoeven@gmail.com</a>
-            </h6>
-    </div>
-    <div class="clearfix"></div>
+            </h3>
+        </div>
 
+    </div>
     <script src="js/menu.js"></script>
     <script src="js/portfolio.js"></script>
+    <script src="js/contact.js"></script>
 
+    <script type="text/javascript">
+        var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+        (function(){
+        var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+        s1.async=true;
+        s1.src='https://embed.tawk.to/5abf30a64b401e45400e3961/default';
+        s1.charset='UTF-8';
+        s1.setAttribute('crossorigin','*');
+        s0.parentNode.insertBefore(s1,s0);
+        })();
+    </script>
+    
 </body>
 </html>
 
