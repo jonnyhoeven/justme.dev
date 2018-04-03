@@ -20,18 +20,18 @@ new Vue({
             {
                 id: 1,
                 selected: false,
-                name: 'OpenData',
+                name: 'Open Data',
                 longName: 'Twitter OpenData GeoJSON parser',
                 url: 'https://github.com/jonnyhoeven/schnitzel',
                 image: '/images/schnitzel.jpg',
                 type: 'JavaScript',
-                readme: `A compact geojson opendata parser/viewer with map overlay uses OpenData released by twitter.`
+                readme: `A compact geojson opendata parser/viewer with map overlay includes example Twitter OpenData dataset offers sorting finding and highlight specific users with map overlay based on GeoJson Format.`
             },
             {
                 id: 2,
                 selected: false,
                 name: 'Integration',
-                longName: 'Stage DMX and Camera integrated interface for concert de Doelenn hall.',
+                longName: 'DMX and Camera frontend interface for concert hall de Doelen.',
                 url: 'https://github.com/jonnyhoeven/CVTI',
                 image: '/images/cvti.jpg',
                 type: 'VB.net',
@@ -43,7 +43,7 @@ new Vue({
             {
                 id: 3,
                 selected: false,
-                name: 'OpenDMX',
+                name: 'Open DMX',
                 longName: 'OpenDMX node connected .NET Usercontrols',
                 url: 'https://github.com/jonnyhoeven/DMXControl',
                 image: '/images/opendmx.jpg',
