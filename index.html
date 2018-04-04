@@ -11,61 +11,66 @@
 <body>
 
     <div id="vue-menu" class="menu">
-        <img src="images/logo.png" class="logo">
-        <a v-for="item in items" v-bind:href="item.url" :key="item.id" class="menuitem">
-            <p><i v-bind:class="item.icon" class="fa"></i> {{ item.name }}</p>
-        </a>
+            <img src="images/logo.png" class="logo animated tada">
+            <a v-for="item in items" v-bind:href="item.url" :key="item.id" class="menuitem">
+                <p><i v-bind:class="item.icon" class="fa fa-2x"></i> {{ item.name }}</p>
+            </a>
+    </div>
+
+    <div class="welcomebox">
+        <h1>
+            <img src="images/jonny.jpg" class="contactimage">
+            Hi, nice you could Make it!
+        </h1>
     </div>
 
     <div id="vue-portfolio">
-        
+
         <div class="portfoliomenu">
             <div v-for="item in items"
                 v-on:click="highlight(item)"
                 v-bind:class="{ active: item.selected }"
                 class="portfoliomenuitem">
+
                 <h3>{{ item.name }}</h3>
                 <img v-bind:src="item.image" class="portfoliomenuimage">    
+
             </div>
         </div>
-        
-            <div v-for="item in items"
-                v-on:click="highlight(item)"
-                v-show="item.selected"
-                v-bind:key="item.id">
-                <div  class="portfoliodetailitem">
+
+        <div v-for="item in items"
+            v-on:click="highlight(item)"
+            v-show="item.selected"
+            v-bind:key="item.id">
+            
+            <div class="portfoliodetailitem">
 
                 <h2>{{ item.longName }}</h2>
-                
+
                 <img v-bind:src="item.image"  align="left" v-bind:class="{ active: item.selected }" class="portfoliodetailimage">
-                
+
                 <h4 v-html="item.readme"></h4>
-                
+
                 <h5>
                     ({{ item.type }})
                     <u><a v-bind:href="item.url">View repository</a></u>
                 </h5>
             </div>
-            </div>
+        </div>
+    
     </div>
 
-
-
-    <div id="vue-contact">
-        <div v-if="showcontact" class="contact">
-            <img src="images/jonny.jpg" class="contactimage">   
-            <h3>
-                For more information feel free to contact me:<br>
-                <br>
+    <div class="contact">
+        <h3>
+            For more information feel free to contact me:<br>
+            <br>
             <i class="fa fa-envelope-o fa-fw"></i>
             <a href="mailto:jonnyhoeven@gmail.com">jonnyhoeven@gmail.com</a>
-            </h3>
-        </div>
-
+        </h3>
     </div>
-    <script src="js/menu.js"></script>
-    <script src="js/portfolio.js"></script>
-    <script src="js/contact.js"></script>
+
+    <script src="js/menu.js?v=1"></script>
+    <script src="js/portfolio.js?v=1"></script>
 
     <script type="text/javascript">
         var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
@@ -78,7 +83,7 @@
         s0.parentNode.insertBefore(s1,s0);
         })();
     </script>
-    
+
 </body>
 </html>
 
