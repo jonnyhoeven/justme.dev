@@ -1,8 +1,49 @@
+
 new Vue({
-    el: '#vue-portfolio',
+    el: '#vue-app',
     data: {
-        detailItems: [],
-        items: [
+        contactMessage: 'For more information feel free to contact me:',
+        contactEmailText: 'jonnyhoeven@gmail.com',
+        contactEmail: 'mailto:jonnyhoeven@gmail.com',
+        welcomeMessage: 'Hi, nice you could Make it!',
+        
+        menuItems: [{
+                id: 0,
+                name: 'LinkedIn',
+                url: 'https://nl.linkedin.com/in/jonnyhoeven',
+                icon: 'fa-linkedin'
+            },
+            {
+                id: 1,
+                name: 'GitHub',
+                url: 'https://www.github.com/jonnyhoeven',
+                icon: 'fa-github'
+            },
+            {
+                id: 2,
+                name: 'CodePen',
+                url: 'https://codepen.io/jonnyhoeven',
+                icon: 'fa-codepen'
+            },
+            {
+                id: 3,
+                name: 'Thingiverse',
+                url: 'https://www.thingiverse.com/jonnyhoeven/designs',
+                icon: 'fa-print'
+            },
+            {
+                id: 4,
+                name: 'Instagram',
+                url: 'https://www.instagram.com/jonnyhoeven',
+                icon: 'fa-instagram'
+            },
+            {
+                id: 5,
+                name: 'YouTube',
+                url: 'https://www.youtube.com/jonnyhoeven',
+                icon: 'fa-youtube'
+            }],
+        portfolioItems: [
             {
                 id: 0,
                 selected: true,
@@ -14,7 +55,7 @@ new Vue({
                 readme: `Unity demo game for android devices.
                 This is a simple demonstration of gaming elements using augmented reality features found in the Vuforia imaging SDK used in combination with the Unity game engine.
                 Objective of the game is to collect the dropped logo's by tapping the screen while the character pathfind it's way to you destination.
-                Print out included Marker0.png start app and point the camera to the target (Do not dither the image while scaling).
+                Print out included Marker0.png start app and point the camera to the target.
                 Unsigned android apk included.`
             },
             {
@@ -69,10 +110,19 @@ new Vue({
     },
     methods: {
         highlight: function (item) {
-            this.items.forEach(function (el) {
+            this.portfolioItems.forEach(function (el) {
                 el.selected = false;
             })
             item.selected = !item.selected;
         }
     }
 });
+
+var options = {
+    strings: ['Hi!', '', 'Nice you made it.', 'Just Make it!'],
+    typeSpeed: 60,
+    smartBackspace: true,
+    backSpeed: 60,
+    backDelay: 700,
+  }
+  
