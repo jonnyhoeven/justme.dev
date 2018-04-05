@@ -104,7 +104,7 @@ new Vue({
                 readme: `Optimized development deployment process,
                 PDO wrapper class for detecting and logging unprepared statements.
                 Automated database cleanup and optimizations, performance logging and per page analytics to compare database versions and codechanges.
-                API integrations feed parsing database entries and daily development operations.`
+                API integrations and daily development operations.`
             }
         ]
     },

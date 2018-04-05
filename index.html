@@ -18,9 +18,9 @@
 
         <div class="welcomebox dark">
             <h1>
-                <p class="test"></p>
+                <p class="typedtext"></p>
                 <br>
-                <img src="images/jonny.jpg" class="contactimage">
+                <img src="images/jonny.jpg" class="welcomeimage">
             </h1>
         </div>
 
@@ -51,7 +51,7 @@
                     <h5 v-html="item.readme"></h5>
                     <h5>
                         ({{ item.type }})
-                        <u><a v-bind:href="item.url">View</a></u>
+                        <a v-bind:href="item.url">View</a>
                     </h5>
                 </div>
             </div>
@@ -70,7 +70,7 @@
     <script src="js/app.js?v=1"></script>
     <script src="js/typed.js?v=1"></script>
     <script>
-        var typed = new Typed(".test", options);
+        var typed = new Typed(".typedtext", options);
     </script>
 </body>
 </html>
