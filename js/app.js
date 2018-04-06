@@ -92,19 +92,6 @@ new Vue({
                 readme: `A salvaged project aimed to develop userControls for OPEN DMX usb nodes in Visual Studio.Net.
                 With form designer it's pretty easy to drag and drop customized layouts. I eventually decided for a different hardware
                 device platform featuring better specs. Networking and DMX mixing has not been implemented.`
-            },
-            {
-                id: 4,
-                selected: false,
-                name: 'PHP',
-                longName: 'PHP development for leading dutch travel agency',
-                url: 'https://cruisereizen.nl',
-                image: '/images/cruisereizen.jpg',
-                type: 'PHP',
-                readme: `Optimized development deployment process,
-                PDO wrapper class for detecting and logging unprepared statements.
-                Automated database cleanup and optimizations, performance logging and per page analytics to compare database versions and codechanges.
-                API integrations and daily development operations.`
             }
         ]
     },
@@ -119,10 +106,17 @@ new Vue({
 });
 
 var options = {
-    strings: ['Hi!', '', 'Nice you made it.', 'Just Make it!'],
-    typeSpeed: 60,
+    strings: [
+        'Hi!',
+        'Nice you made it!',
+        'Fancy web platforms up above,',
+        'GitHub stuff down below.',
+        'And a obligatory.',
+        'Just Make it!'
+    ],
+    typeSpeed: 40,
     smartBackspace: true,
-    backSpeed: 60,
-    backDelay: 700,
+    backSpeed: 20,
+    backDelay: 500,
   }
   

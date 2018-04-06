@@ -1,26 +1,39 @@
 <html>
 <head>
-    <script src="js/vue.min.js"></script>
+    <script src="js/vue.js"></script>
     <title>Jonny van der Hoeven - Just Make it!</title>
+    
     <link rel="shortcut icon" type="image/png" href="/images/favicon.png"/>
-    <link rel="stylesheet" type="text/css" href="css/app.css" />
+    <link rel="stylesheet" type="text/css" href="css/app.css?v=1" />
     <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
 </head>
 <body>
     <div id="vue-app">
         <div class="menu">
             <img src="images/logo.png" class="logo animated tada" align="left">
-            <a v-for="item in menuItems" v-bind:href="item.url" :key="item.id" class="menuitem">
-                <p><i v-bind:class="item.icon" class="fa fa-2x"></i> {{ item.name }}</p>
+            <a v-for="item in menuItems"
+                v-bind:href="item.url"
+                :key="item.id"
+                class="menuitem">
+
+                <i v-bind:class="item.icon"
+                    class="fa fa-2x"
+                    target="_blank">
+                </i>
+
+                {{ item.name }}
+
             </a>
         </div>
 
         <div class="welcomebox dark">
             <h1>
-                <p class="typedtext"></p>
+                <div class="card card-1">
+                <img src="images/jonny.jpg" class="welcomeimage dropshadow" >
                 <br>
-                <img src="images/jonny.jpg" class="welcomeimage">
+                <p class="typedtext"></p>
+                </div>
             </h1>
         </div>
 
@@ -51,7 +64,8 @@
                     <h5 v-html="item.readme"></h5>
                     <h5>
                         ({{ item.type }})
-                        <a v-bind:href="item.url">View</a>
+                        <a v-bind:href="item.url" target="_blank">View</a>
+                        <button @click="item.selected  = false">Hide</button>
                     </h5>
                 </div>
             </div>
