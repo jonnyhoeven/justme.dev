@@ -11,7 +11,9 @@
 <body>
     <div id="vue-app">
         <div class="menu">
+
             <img src="images/logo.png" class="logo animated tada" align="left">
+
             <a v-for="item in menuItems"
                 v-bind:href="item.url"
                 :key="item.id"
@@ -65,7 +67,6 @@
                     <h5>
                         ({{ item.type }})
                         <a v-bind:href="item.url" target="_blank">View</a>
-                        <button @click="item.selected  = false">Hide</button>
                     </h5>
                 </div>
             </div>
