@@ -54,9 +54,9 @@ new Vue({
                 type: 'Java / C#',
                 readme: `Unity demo game for android devices.
                 This is a simple demonstration of gaming elements using augmented reality features found in the Vuforia imaging SDK used in combination with the Unity game engine.
-                Objective of the game is to collect the dropped logo's by tapping the screen while the character pathfind it's way to you destination.
-                Print out included Marker0.png start app and point the camera to the target.
-                Unsigned android apk included.`
+                Objective of the game is to collect the dropped logo's by tapping the screen while the character pathfinds it's way to your tapping location.
+                Prefixes on Vuforia Marker0.png print it out or show it on some screen.
+                Unsigned Android apk included.`
             },
             {
                 id: 1,
@@ -111,7 +111,7 @@ var options = {
         'Nice you made it!',
         'Fancy web platforms up above,',
         'GitHub stuff down below.',
-        'And a obligatory.',
+        'And a obligatory:',
         'Just Make it!'
     ],
     typeSpeed: 40,
