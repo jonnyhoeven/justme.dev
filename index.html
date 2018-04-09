@@ -16,11 +16,11 @@
             <a v-for="menu in menus"
                 v-bind:href="menu.url"
                 :key="menu.id"
-                class="menuitem">
+                class="menuitem"
+                target="_blank">
 
                 <i v-bind:class="menu.icon"
-                    class="fa fa-2x"
-                    target="_blank">
+                    class="fa fa-2x">
                 </i>
 
                 {{ menu.name }}
