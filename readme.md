@@ -1,2 +1,2 @@
-This is a githui.io repository to view this as intended, please visit:
-[jonnyhoeven.github.io](https://jonnyhoeven.github.io) 
+This is a github.io pages repository, hosted on:
+[jonnyhoeven.github.io](https://jonnyhoeven.github.io)
