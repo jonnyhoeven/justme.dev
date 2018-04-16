@@ -7,7 +7,7 @@ new Vue({
         contactEmail: 'mailto:jonnyhoeven@gmail.com',
         welcomeMessage: 'Hi, nice you could Make it!',
         
-        menus: [{
+        menuitems: [{
                 id: 0,
                 name: 'LinkedIn',
                 url: 'https://nl.linkedin.com/in/jonnyhoeven',
@@ -43,7 +43,7 @@ new Vue({
                 url: 'https://www.youtube.com/jonnyhoeven',
                 icon: 'fa-youtube'
             }],
-        portfolios: [
+        portfolioitems: [
             {
                 id: 0,
                 selected: true,
@@ -52,12 +52,11 @@ new Vue({
                 url: 'https://github.com/jonnyhoeven/Unity-Augmented-Game',
                 image: '/images/vuforia.jpg',
                 type: 'Java / C#',
-                readme: `Unity demo game for android devices.
+                readme: `Unity tabletop demo game for android devices.
                 This is a simple demonstration of gaming elements using augmented reality features found in the Vuforia
-                imaging SDK used in combination with the Unity game engine. Objective of the game is to collect the
+                imaging SDK is used in combination with the Unity game engine. Objective of the game is to collect the
                 dropped logo's by tapping the screen while the character pathfinds it's way to your tapping location.
-                Prefixes on Vuforia Marker0.png print it out or show it on some screen.
-                Unsigned Android apk included.`
+                Fixes 3D models to Vuforia Marker0.png (included). Just start the app and make sure the marker is visible.`
             },
             {
                 id: 1,
@@ -67,8 +66,8 @@ new Vue({
                 url: 'https://github.com/jonnyhoeven/schnitzel',
                 image: '/images/schnitzel.jpg',
                 type: 'JavaScript',
-                readme: `A compact geojson opendata parser/viewer with map overlay includes example Twitter
-                OpenData dataset offers sorting finding and highlight specific users with map overlay based on GeoJson Format.`
+                readme: `A compact geojson opendata parser/viewer with Twitter
+                OpenData dataset overlay offers seeking,sorting and live map view, based on GeoJson Format.`
             },
             {
                 id: 2,
@@ -79,8 +78,8 @@ new Vue({
                 image: '/images/cvti.jpg',
                 type: 'VB.net',
                 readme: `Touch Interface developed for Concert Hall de Doelen.
-                Main purpose is a interface for multiple wall mouted touch display devices with inputs
-                for multiple cameras, mechanical hatches and lighting programs. Allows incorperation of
+                A user friendly and simple interface shared by multiple wall mouted touch display devices with integrated
+                controls for multiple cameras and DMX controlled mechanical hatches and lighting programs. Allows incorperation of
                 <a href="https://github.com/jonnyhoeven/DMXControl">OpenDMX</a> for local Node Control.`
             },
             {
@@ -99,7 +98,7 @@ new Vue({
     },
     methods: {
         highlight: function (portfolio) {
-            this.portfolios.forEach(function (el) {
+            this.portfolioitems.forEach(function (el) {
                 el.selected = false;
             })
             portfolio.selected = !portfolio.selected;
