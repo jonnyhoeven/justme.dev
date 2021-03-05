@@ -27,7 +27,7 @@ new Vue({
                 icon: 'fa-print'
             },
             {
-                id: 5,
+                id: 4,
                 name: 'YouTube',
                 url: 'https://www.youtube.com/jonnyhoeven',
                 icon: 'fa-youtube'
