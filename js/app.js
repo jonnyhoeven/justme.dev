@@ -9,25 +9,25 @@ new Vue({
         
         menuitems: [
             {
-                id: 1,
+                id: 0,
                 name: 'GitHub',
                 url: 'https://www.github.com/jonnyhoeven',
                 icon: 'fa-github'
             },
             {
-                id: 2,
+                id: 1,
                 name: 'CodePen',
                 url: 'https://codepen.io/jonnyhoeven',
                 icon: 'fa-codepen'
             },
             {
-                id: 3,
+                id: 2,
                 name: 'Thingiverse',
                 url: 'https://www.thingiverse.com/jonnyhoeven/designs',
                 icon: 'fa-print'
             },
             {
-                id: 4,
+                id: 3,
                 name: 'YouTube',
                 url: 'https://www.youtube.com/jonnyhoeven',
                 icon: 'fa-youtube'
