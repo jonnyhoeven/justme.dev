@@ -7,12 +7,7 @@ new Vue({
         contactEmail: 'mailto:jonnyhoeven@gmail.com',
         welcomeMessage: 'Hi, nice you could Make it!',
         
-        menuitems: [{
-                id: 0,
-                name: 'LinkedIn',
-                url: 'https://nl.linkedin.com/in/jonnyhoeven',
-                icon: 'fa-linkedin'
-            },
+        menuitems: [
             {
                 id: 1,
                 name: 'GitHub',
