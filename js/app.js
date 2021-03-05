@@ -27,12 +27,6 @@ new Vue({
                 icon: 'fa-print'
             },
             {
-                id: 4,
-                name: 'Instagram',
-                url: 'https://www.instagram.com/jonnyhoeven',
-                icon: 'fa-instagram'
-            },
-            {
                 id: 5,
                 name: 'YouTube',
                 url: 'https://www.youtube.com/jonnyhoeven',
