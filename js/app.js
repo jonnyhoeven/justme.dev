@@ -4,7 +4,7 @@ new Vue({
   data: {
     contactMessage: "For more information feel free to contact me:",
     contactEmailText: "jonnyhoeven@gmail.com",
-    contactEmail: "mailto:jonnyhoeven@gmail.com",
+    contactEmail: "mailto:jonny@justme.nl",
     welcomeMessage: "Hi, nice you could Make it!",
 
     menuitems: [
