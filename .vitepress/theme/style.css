@@ -182,6 +182,7 @@
 .articleImage {
     width: 250pt;
     margin: 17pt 15pt 5pt 0;
+    padding: 10pt 10pt 10pt 10pt;
     border: 0;
     float: left;
 }
