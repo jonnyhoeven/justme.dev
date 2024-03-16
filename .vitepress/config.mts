@@ -57,6 +57,6 @@ export default defineConfig({
         },
     },
     sitemap: {
-        hostname: 'https://justme.dev'
+        hostname: 'https://www.justme.dev'
     }
 })
