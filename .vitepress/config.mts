@@ -21,6 +21,9 @@ export default defineConfig({
         editLink: {
             pattern: 'https://github.com/jonnyhoeven/justme.dev/edit/main/:path'
         },
+        search: {
+          provider: 'local'
+        },
         nav: [
             {text: 'Home', link: '/'},
             {text: 'Projects', link: '/projects'},
