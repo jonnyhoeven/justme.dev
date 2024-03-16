@@ -1,24 +1,26 @@
 ---
-# https://vitepress.dev/reference/default-theme-home-page
 layout: home
 
 hero:
   name: "JustMe.dev"
-  text: "Developer Blog & Portfolio"
-  tagline: My great project tagline
+  text: "Developer Blog"
+  tagline: Just make IT!
+  image:
+    src: /images/ava.jpg
+    alt: JustMe.dev
   actions:
     - theme: brand
-      text: Markdown Examples
-      link: /markdown-examples
+      text: Projects
+      link: /projects
     - theme: alt
-      text: API Examples
-      link: /api-examples
+      text: Blog
+      link: /blog
 
 features:
-  - title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature B
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  - title: Kubernetes Gitops workshop
+    details: Create your own Kubernetes cluster using K3S, ArgoCD and deploy your first application using GitOps.
+  - title: Gorilla CLI
+    details: Gorilla CLI powers your command-line using LLM. Simply state your objective, and Gorilla CLI will generate potential commands for execution.
   - title: Feature C
     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
 ---
