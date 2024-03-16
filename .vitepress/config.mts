@@ -5,7 +5,7 @@ export default defineConfig({
     lang: 'en-US',
     title: "JustMe.dev",
     description: "JustMe.dev Developer Blog - Jonny van der Hoeven (Just Make IT!)",
-    cleanUrls: true,
+    /*cleanUrls: true,*/
     markdown: {
         image: {
             lazyLoading: true
@@ -21,9 +21,9 @@ export default defineConfig({
         editLink: {
             pattern: 'https://github.com/jonnyhoeven/justme.dev/edit/main/:path'
         },
-        search: {
+        /*search: {
           provider: 'local'
-        },
+        },*/
         nav: [
             {text: 'Home', link: '/'},
             {text: 'Projects', link: '/projects'},
