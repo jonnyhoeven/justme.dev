@@ -34,7 +34,7 @@ export default defineConfig({
             {icon: 'linkedin', link: 'https://www.linkedin.com/in/jonnyhoeven/'},
             {
                 icon: {
-                    svg: '<img src="/google.png" style="height:17pt;"/>',
+                    svg: '<img src="/google.png" style="height:17pt;" alt="Google"/>',
                 },
                 link: 'https://g.dev/jonnyvanderhoeven'
             },
@@ -57,6 +57,6 @@ export default defineConfig({
         },
     },
     sitemap: {
-        hostname: 'https://www.justme.dev'
+        hostname: 'https://justme.dev'
     }
 })

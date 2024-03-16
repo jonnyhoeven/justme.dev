@@ -3,7 +3,7 @@
 This is a GitHub.io pages repository, hosted on:
 [jonnyhoeven.github.io](https://jonnyhoeven.github.io)
 [JustMe.dev](https://justme.dev)
-[JustMe.dev](https://www.justme.dev)
+[JustMe.dev](https://justme.dev)
 
 ## Requirements
 
