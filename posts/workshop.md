@@ -4,7 +4,6 @@ image: /opendmx.jpg
 author: Jonny van der Hoeven
 date: 2022-10-10
 outline: deep
-layout: doc
 ---
 This is a simple demonstration of gaming elements using augmented reality 
 features found in the Vuforia imaging SDK used in combination with the Unity game engine. Objective of the game 
