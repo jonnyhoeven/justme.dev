@@ -8,7 +8,7 @@ import { data as posts } from './data/posts.data.js'
 
 # Blog
 
-Latest blog posts about software development, programming, and other tech related topics.
+Latest blog posts about software development, programming and other tech related topics.
 
 <div v-for="post of posts">
   <h2>{{ post.frontmatter.title }}</h2>
