@@ -11,7 +11,7 @@ prev:
 outline: deep
 ---
 This workshop is designed to provide a basic understanding of Kubernetes and ArgoCD.
-During the workshop, we'll be deploying a simple application to a Kubernetes cluster using Kubectl, and then we'll deploy the same application using ArgoCD.
+This Workshop will teach you how to create your own Kubernetes cluster using K3S and use ArgoCD to deploy your first application from a Git-Ops perspective. This is the way.
 ---
 
 # {{ $frontmatter.title }}
@@ -28,19 +28,19 @@ allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></
 
 This workshop is designed to provide a basic understanding of Kubernetes and ArgoCD.
 
-During the workshop, we'll be deploying a simple application to a Kubernetes cluster using Kubectl, and then we'll
+During the workshop, we'll be deploying a simple application to a Kubernetes cluster using Kubectl and then we'll
 deploy
 the same application using ArgoCD.
 
 ### Kubernetes concepts
 
-Kubernetes is a container orchestration platform that automates deployment, scaling, and management of containerized
+Kubernetes is a container orchestration platform that automates deployment, scaling and management of containerized
 applications.
 
 It's declarative, meaning you define the desired state of the system and Kubernetes automatically changes
 the current state to the desired state the best way it can.
 
-It's designed to be extensible and scalable, and it's built to handle a wide range of workloads, from stateless
+It's designed to be extensible and scalable and it's built to handle a wide range of workloads, from stateless
 to stateful applications.
 
 ### Extendable - Custom Resource Definitions (CRD's)
@@ -53,7 +53,7 @@ This allows developers to create their own resources or controllers to manage th
 
 For example, the ArgoCD operator creates a new resource called an Application. This resource can be used to define
 applications and their configuration in a declarative way. It's then up to the ArgoCD operator to manage these
-applications and ensure they are in the desired state.
+applications and ensure they're in the desired state.
 
 It's important to understand that CRD's are methods to extend the Kubernetes API and create new resources. This concept
 is used in many operators, controllers, helm charts, ingress classes, storage classes to create new resources and manage
@@ -73,7 +73,7 @@ put the system in a certain state, you declare the desired state and Kubernetes 
 ### Health Checks
 
 Health checks are integral to determine if a container is healthy or not. Kubernetes supports three types of health
-checks: livenessProbe, readinessProbe, and startupProbe.
+checks: livenessProbe, readinessProbe and startupProbe.
 
 Kubernetes utilizes Health Probes to determine if a container is healthy or not. If a container isn't healthy,
 Kubernetes will restart the container. Afterwards Kubernetes will not send traffic to that container.
@@ -94,7 +94,7 @@ A Pod is the smallest deployable unit in Kubernetes. A Pod represents a single i
 cluster. Pods contain one or more containers. When a Pod runs multiple containers, the
 containers are managed as a single entity and share the same resources.
 
-More importantly, containers in a pod share the same lifecycle, they are started together, stopped together, and are
+More importantly, containers in a pod share the same lifecycle, they're started together, stopped together and are
 considered atomic.
 
 A Pod can be considered a separate subnetwork, containers within a pod are effectively behind NAT (Network Address
@@ -121,7 +121,7 @@ Another important concept in Kubernetes is Namespaces. Namespaces are used to di
 different tenants, teams or applications.
 
 It's a powerful tool to divide resources and provides isolation between different applications. Commonly used to
-divide resources between different environments like development, staging, and production.
+divide resources between different environments like development, staging and production.
 Ideally the only difference between staging and production should be a namespace Configmap and Secrets.
 
 The ```default``` namespace is the default namespace for objects with no other namespace. It's important to note that
@@ -133,7 +133,7 @@ applications. It's important to note that resources in different namespaces can 
 ConfigMaps are a Kubernetes resources that allows decoupled configuration artifacts from image content in an
 effort to keep containerized applications portable.
 
-When you need to store sensitive information, such as passwords, OAuth tokens, and SSH keys, you can use Secrets.
+When you need to store sensitive information, such as passwords, OAuth tokens and SSH keys, you can use Secrets.
 If you need to store non-sensitive configuration data, you can use ConfigMaps.
 
 ConfigMaps and Secrets can be mounted as files or environment variables in a Pod. Containers in a pod might need to be
@@ -163,7 +163,7 @@ Most of these classes are provided by the cloud provider or need to be installed
 K3s is a lightweight Kubernetes distribution. It is a fully compliant Kubernetes distribution some differences.
 
 K3S is a lightweight Kubernetes distribution. It is a fully compliant Kubernetes distribution with some differences.
-It's a perfect candidate for edge computing, IoT, and CI/CD. It's lightweight, easy to install, and has a small
+It's a perfect candidate for edge computing, IoT and CI/CD. It's lightweight, easy to install and has a small
 footprint.
 
 K8S contains a lot of features in the default build that are not always needed, helm charts for most missing k3s
@@ -179,7 +179,7 @@ Some feature differences:
 
 ### Helm
 
-Helm is a package manager for Kubernetes. It allows you to define, install, and upgrade complex Kubernetes applications.
+Helm is a package manager for Kubernetes. It allows you to define, install and upgrade complex Kubernetes applications.
 Helm is a tool that streamlines installing and managing Kubernetes applications.
 
 Think of it like apt/yum/homebrew for Kubernetes. Helm charts allow you to define values that control the applied
@@ -292,8 +292,8 @@ sudo k3d cluster list
 
 ## Access the cluster using Kubectl
 
-Kubeconfig is a file that holds information about clusters, including the hostname, certificate authority, and
-authentication information. It's located at `~/.kube/config` by default, and can be used by other
+Kubeconfig is a file that holds information about clusters, including the hostname, certificate authority and
+authentication information. It's located at `~/.kube/config` by default and can be used by other
 applications to connect to the cluster. Keep this file secure, it's the **key** to your cluster.
 
 You can get the kubeconfig file from K3D by running:
@@ -339,8 +339,8 @@ Browse around, check the `Nodes`, `Namespaces`, `Custom Resource Definitions` an
 
 ## Some notes about Namespaces
 
-Namespaces divide cluster resources and quota's
-They are intended for use in environments with many users spread across multiple teams or
+Namespaces divide cluster resources and quota's.
+They're intended for use in environments with many users spread across multiple teams or
 projects. Namespaces are not a security feature, to isolate different users or namespaces from each other we need tools
 like [Loft](https://loft.sh/) that leverage RBAC (Role based account control) to securely isolate namespaces
 across teams.
@@ -373,7 +373,7 @@ We'll deploy nginx web server to our cluster.
 
 The `-n` or `--namespace` parameter is used to specify the namespace to deploy the application to.
 If you don't provide a namespace, the application will deploy to the `default` namespace.
-Resulting in hard to manage, hard to find resources and naming conflicts.
+Resulting in hard to find, hard to manage and naming conflicts.
 
 ```bash
 kubectl create deployment nginx --image=nginx -n workshop
@@ -408,7 +408,7 @@ kubectl get pod -n workshop
 kubectl delete pod $(kubectl get pods -n workshop -o jsonpath="{.items[*].metadata.name}") -n workshop
 ```
 
-The `pod` gets deleted, and a new one is created to replace it. This is because the `deployment` is set to have 1
+The `pod` gets deleted and a new one is created to replace it. This is because the `deployment` is set to have 1
 replica, so if the `pod` is deleted, a new one is created to replace it.
 
 - List the `pods` again
@@ -419,7 +419,7 @@ kubectl get pod -n workshop
 
 The `pod` is running again, but now it's got a _different_ name.
 
-It's important to note that the `deployment` manifest manages the `pod`, and a `pod` can be replicated.
+It's important to note that the `deployment` manifest manages the `pod` and a `pod` can be replicated.
 
 To avoid downtime it's recommended to use `Evict` or `Taint` instead of deleting definitions.
 This will result in kubernetes creating a new `pod` and wait for it to be ready before deleting the old `evicted pod`.
@@ -469,7 +469,7 @@ kubectl apply -f ./namespace/cat-app/cat-app.Ingress.yaml -n cat-app
 kubectl apply -f ./namespace/cat-app/ -n cat-app
 ```
 
-- Get familiar with the files in the `cat-app` folder, and try to understand what each file does.
+- Get familiar with the files in the `cat-app` folder and try to understand what each file does.
 - Notice the URL in the cat-app.Ingress.yaml file, this is the `URL`, `Virtual Host` you'll use to access the cat-app.
 - Notice the `Service` file, this is the service that will be used to expose the cat-app to the internet. it uses the
   type `ClusterIP`.
@@ -494,7 +494,7 @@ kubectl get ingress -n cat-app
 ```
 
 Ingress is a collection of classes that allow inbound connections to reach the cluster services. It can be configured to
-give services externally-reachable URLs, load balance traffic, terminate SSL, offer name-based virtual hosting, and
+give services externally-reachable URLs, load balance traffic, terminate SSL, offer name-based virtual hosting and
 more.
 
 ```text
@@ -511,7 +511,7 @@ cat-app   <none>   cat-app.k3d.local   172.20.0.2,172.20.0.3,172.20.0.4   80    
 
 ### Accessing the cat-app
 
-First we need to update our hosts file, normally you'll use a DNS server to resolve the URL to the IP address, and sign
+First we need to update our hosts file, normally you'll use a DNS server to resolve the URL to the IP address and sign
 TLS certificates automatically with `let's encrypt` or a `Common Authority` certificate.
 
 - Use the output above to update your hosts file:
@@ -574,7 +574,7 @@ Kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath='{.data.pas
 - username: `admin`
 - password: `password from previous command`
 
-Normally we would delete this initial secret after using it, and set a new admin password, Ffr now we'll keep it
+Normally we would delete this initial secret after using it and set a new admin password, Ffr now we'll keep it
 as is.
 
 - This repository includes an [argocd.Repository](/namespace/argocd/repository/argocd.Repository.yaml) file.
@@ -620,7 +620,7 @@ kubectl apply -f ./namespace/argocd/application/argocd.Application.yaml -n argoc
 Since we added the application to the repository and sync is enabled in the ArgoCD Application manifest file, it will
 automatically maintain the ArgoCD namespace based on the repository state.
 
-- Try deleting the cat-app in the ArgoCD gui, and see what happens
+- Try deleting the cat-app in the ArgoCD gui and see what happens
 
 Argo cd notices that the cat-app is missing and will automatically recreate/heal.
 
