@@ -178,3 +178,10 @@
     border: 0;
     float: left;
 }
+
+.articleImage {
+    width: 250pt;
+    margin: 17pt 15pt 5pt 0;
+    border: 0;
+    float: left;
+}

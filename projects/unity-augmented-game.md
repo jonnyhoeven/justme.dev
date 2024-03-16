@@ -5,13 +5,17 @@ githost: https://github.com
 user: jonnyhoeven
 project: unity-augmented-game
 languages: Java | C#
-date: 2014-01-01
 prev:
     text: 'Projects'
     link: '/projects'
 ---
 The Augmented Reality Mobile Game project is an immersive gaming experience designed specifically for Android devices, leveraging Vuforia technology to seamlessly track images and overlay dynamic 3D models onto real-world surroundings. By harnessing the power of Unity game engine in conjunction with Vuforia imaging SDK, this project showcases the seamless integration of augmented reality elements into the gaming realm.
 ---
+
+# {{ $frontmatter.title }}
+
+<img :src="$frontmatter.image" class="articleImage">
+
 In this engaging game, players are tasked with collecting dropped logos by tapping the screen as the character navigates its way towards their tapping location. The placement of captivating 3D models is intricately linked to the Vuforia Marker0.png image, included within the project. To embark on this AR gaming adventure, simply launch the app and ensure the marker is in view to activate the augmented reality features and immerse yourself in a truly interactive gameplay experience.
 
 ## Unlocking the Power of Augmented Reality on Android: A Guide to Using Vuforia Imaging SDK
