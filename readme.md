@@ -18,9 +18,10 @@ nvm use
 - VitePress
 
 ```bash
-npm add -D vitepress
-npm add -D vue
+#npm add -D vitepress
+#npm add -D vue
 #npx vitepress init
+npm install
 ```
 
 ## Development
