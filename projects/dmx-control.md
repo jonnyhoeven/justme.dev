@@ -1,6 +1,6 @@
 ---
 title: Open DMX control
-image: /opendmx.jpg
+image: /images/opendmx.jpg
 githost: https://github.com
 user: jonnyhoeven
 project: dmx-control

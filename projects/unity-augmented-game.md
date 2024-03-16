@@ -1,6 +1,6 @@
 ---
 title: Augmented Reality Mobile Game
-image: /vuforia.jpg
+image: /images/vuforia.jpg
 githost: https://github.com
 user: jonnyhoeven
 project: unity-augmented-game
