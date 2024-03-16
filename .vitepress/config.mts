@@ -53,7 +53,7 @@ export default defineConfig({
         },
         footer: {
             message: 'Released under the MIT License.',
-            copyright: 'Copyright © 2023-present Jonny van der Hoeven You'
+            copyright: 'Copyright © 2024 Jonny van der Hoeven',
         },
     },
     sitemap: {
