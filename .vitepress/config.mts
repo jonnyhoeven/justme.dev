@@ -11,6 +11,7 @@ export default defineConfig({
             lazyLoading: true
         }
     },
+    lastUpdated: true,
     themeConfig: {
         logo: {
             light: '/logo.png',
