@@ -6,7 +6,7 @@ export default defineConfig({
     title: "JustMe.dev",
     description: "JustMe.dev Developer Blog - Jonny van der Hoeven (Just Make IT!)",
     base: "/",
-    /*cleanUrls: true,*/
+    cleanUrls: true,
     markdown: {
         image: {
             lazyLoading: true
@@ -15,16 +15,16 @@ export default defineConfig({
     lastUpdated: true,
     themeConfig: {
         logo: {
-            light: '/logo.png',
-            dark: '/logo_dark.png',
+            light: '/images/logo.png',
+            dark: '/images/logo_dark.png',
             alt: 'JH',
         },
         editLink: {
             pattern: 'https://github.com/jonnyhoeven/justme.dev/edit/main/:path'
         },
-        /*search: {
+        search: {
           provider: 'local'
-        },*/
+        },
         nav: [
             {text: 'Home', link: '/'},
             {text: 'Projects', link: '/projects'},
@@ -35,7 +35,7 @@ export default defineConfig({
             {icon: 'linkedin', link: 'https://www.linkedin.com/in/jonnyhoeven/'},
             {
                 icon: {
-                    svg: '<img src="/google.png" style="height:17pt;" alt="Google"/>',
+                    svg: '<img src="/images/google.png" style="height:17pt;" alt="Google"/>',
                 },
                 link: 'https://g.dev/jonnyvanderhoeven'
             },
@@ -54,7 +54,7 @@ export default defineConfig({
         },
         footer: {
             message: 'Released under the MIT License.',
-            copyright: 'Copyright © 2024 Jonny van der Hoeven',
+            copyright: 'Copyright © 2024 Jonny van der Hoeven.',
         },
     },
     sitemap: {
