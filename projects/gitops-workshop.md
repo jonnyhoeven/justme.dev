@@ -8,10 +8,10 @@ languages: Kubernetes
 prev:
     text: Projects
     link: /projects
-outline: 3
+outline: deep
 ---
 This workshop is designed to provide a basic understanding of Kubernetes and ArgoCD.
-During the workshop, we'll be deploying a simple application to a Kubernetes cluster using kubectl, and then we'll deploy the same application using ArgoCD.
+During the workshop, we'll be deploying a simple application to a Kubernetes cluster using Kubectl, and then we'll deploy the same application using ArgoCD.
 ---
 
 # {{ $frontmatter.title }}
@@ -28,7 +28,7 @@ allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></
 
 This workshop is designed to provide a basic understanding of Kubernetes and ArgoCD.
 
-During the workshop, we'll be deploying a simple application to a Kubernetes cluster using kubectl, and then we'll
+During the workshop, we'll be deploying a simple application to a Kubernetes cluster using Kubectl, and then we'll
 deploy
 the same application using ArgoCD.
 
@@ -193,18 +193,19 @@ Helm charts can be installed as a regular application in ArgoCD.
 Helm charts are handled differently with ArgoCD to provide rollbacks and prevent influence from volatile external
 sources.
 
-## Git-ops with ArgoCD
+## ArgoCD
 
-ArgoCD is highly available (on all nodes have replicated state), It's a continuous delivery tool for Kubernetes based on
-external sources, most commonly git repositories.
+ArgoCD can be installed as highly available (all nodes have replicated state) or on one node. 
+It's a continuous delivery tool for Kubernetes based on external sources, 
+most commonly git repositories.
 
-It follows the GitOps pattern of using Git repositories as the source of truth for defining the desired application
-state. ArgoCD is very declarative and all it's configuration is stored in a Git repository also.
+It follows the GitOps pattern of using Git repositories as the source of _truth_ for defining the desired application
+state. ArgoCD is very declarative and all it's configuration is stored in a Git repositories.
 
 
 # The Workshop
 
-We're going to deploy a simple application to a Kubernetes cluster using kubectl,
+We're going to deploy a simple application to a Kubernetes cluster using Kubectl,
 then we'll deploy the same application using ArgoCD,
 along the way we'll be checking out multiple tools to configure a kubernetes cluster.
 
@@ -216,12 +217,12 @@ Let's get started, first open up a terminal to run linux/bash commands.
 
 We'll need some tools to get our cluster running.
 
-### Kubectl
+### Kubectl (Kube-Cuttle or Kube-Control)
 
 Kubectl is a command line tool for controlling Kubernetes clusters. It's used to deploy, inspect and
 manage cluster.
 
-[Reference](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
+[Reference](https://kubernetes.io/docs/tasks/tools/install-Kubectl-linux/)
 
 ```bash
 # apt-transport-https may be a dummy package; if so, you can skip that package
@@ -253,6 +254,7 @@ wget -q -O - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
 
 - **Linux** Install Docker.io:
 
+[Reference](https://packages.debian.org/sid/docker.io)
 ```bash
 sudo apt install docker.io
 sudo groupadd docker
@@ -274,7 +276,7 @@ So for now, it's recommended to use the Mirantis Free version of Lens.
 [Reference](https://k3d.io/v5.3.0/usage/commands/k3d_cluster_create/)
 
 We'll be creating 1 server and 2 agents for our cluster. Normally for high availability you'll want to have at least 2
-control planes, with 2 agents/workers. For this example we'll keep it simple.
+control planes, with 2 agents/workers _each_. For this example we'll keep it simple.
 
 We'll name this cluster `workshop`.
 
@@ -288,7 +290,7 @@ Once completed, you can check the status of your cluster by running:
 sudo k3d cluster list
 ```
 
-## Access the cluster using kubectl
+## Access the cluster using Kubectl
 
 Kubeconfig is a file that holds information about clusters, including the hostname, certificate authority, and
 authentication information. It's located at `~/.kube/config` by default, and can be used by other
@@ -377,7 +379,7 @@ Resulting in hard to manage, hard to find resources and naming conflicts.
 kubectl create deployment nginx --image=nginx -n workshop
 ```
 
-- Check the `deployment` and `pod` status with kubectl
+- Check the `deployment` and `pod` status with Kubectl
 
 ```bash
 kubectl get deployment -n workshop
@@ -447,7 +449,7 @@ easily replicate them across different clusters or namespaces.
 
 __Before starting make sure you're in the correct working directory.__
 
-- Create the `cat-app` namespace using kubectl:
+- Create the `cat-app` namespace using Kubectl:
 
 ```bash
 kubectl create namespace cat-app
@@ -461,7 +463,7 @@ kubectl apply -f ./namespace/cat-app/cat-app.Service.yaml -n cat-app
 kubectl apply -f ./namespace/cat-app/cat-app.Ingress.yaml -n cat-app
 ```
 
-- You can deploy a complete folder using kubectl, this will deploy all the files in one folder, try it.
+- You can deploy a complete folder using Kubectl, this will deploy all the files in one folder, try it.
 
 ```bash
 kubectl apply -f ./namespace/cat-app/ -n cat-app
@@ -471,7 +473,7 @@ kubectl apply -f ./namespace/cat-app/ -n cat-app
 - Notice the URL in the cat-app.Ingress.yaml file, this is the `URL`, `Virtual Host` you'll use to access the cat-app.
 - Notice the `Service` file, this is the service that will be used to expose the cat-app to the internet. it uses the
   type `ClusterIP`.
-- For now check the `deployment` and `pod` status with kubectl or lens.
+- For now check the `deployment` and `pod` status with Kubectl or lens.
 
 ```bash
 kubectl get deployment -n cat-app
@@ -481,7 +483,7 @@ kubectl get deployment -n cat-app
 kubectl get pod -n cat-app
 ````
 
-- Check the service and ingress status with kubectl or lens.
+- Check the service and ingress status with Kubectl or lens.
 
 ```bash
 kubectl get service -n cat-app
@@ -563,7 +565,7 @@ kubectl apply -f ./namespace/argocd -n argocd
 - We should delete this `ConfigMap` manifest and create a new password.
 
 ```bash
-kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath='{.data.password}' | base64 --decode
+Kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath='{.data.password}' | base64 --decode
 ```
 
 *** Ignore the `%` when pasting the password. ***
@@ -577,7 +579,7 @@ as is.
 
 - This repository includes an [argocd.Repository](/namespace/argocd/repository/argocd.Repository.yaml) file.
 - Update the repo url in this file to your forked repository.
-- Apply the Repository using kubectl.
+- Apply the Repository using Kubectl.
 
 ```bash
 kubectl apply -f ./namespace/argocd/repository/argocd.Repository.yaml -n argocd
@@ -601,7 +603,7 @@ kubectl apply -f ./namespace/argocd/application/cat-app.application.yaml -n argo
 
 ### ArgoCD can Git Ops itself
 
-We just deployed the cat app using ArgoCD, but we still needed kubectl to apply the application. ArgoCD can also manage
+We just deployed the cat app using ArgoCD, but we still needed Kubectl to apply the application. ArgoCD can also manage
 itself using GitOps, we can deploy the `cat-app` by adding a new file in the `namespace/argocd/application` folder.
 
 - First edit [argocd.application.yaml](/namespace/argocd/application/argocd.Application.yaml) and change `repoURL` to
