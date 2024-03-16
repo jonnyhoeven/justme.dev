@@ -14,7 +14,7 @@ Open DMX control is a project that aims to develop userControls for OPEN DMX USB
 With the use of the form designer, users can easily drag and drop customized layouts for controlling DMX devices.
 ---
 
-# {{ frontmatter.title }}
+# {{ $frontmatter.title }}
 
 While the project was salvaged, it was eventually decided to switch to a different hardware device platform with better
 specs. As of now, networking and DMX mixing functionalities have not been implemented in this project.

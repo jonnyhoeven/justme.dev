@@ -16,6 +16,6 @@ controls for managing multiple cameras, DMX-controlled mechanical hatches, and l
 user experience.
 ---
 
-# {{ frontmatter.title }}
+# {{ $frontmatter.title }}
 
 Documentation can be found [here](https://github.com/jonnyhoeven/CVTI/blob/master/doc/Documentatie%20CVTI.htm).
