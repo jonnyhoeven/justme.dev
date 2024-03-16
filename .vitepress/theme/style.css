@@ -118,6 +118,11 @@
   }
 }
 
+
+.float {
+    animation: float 5.5s ease-out infinite;
+}
+
 /**
  * Component: Custom Block
  * -------------------------------------------------------------------------- */
@@ -135,5 +140,29 @@
 
 .DocSearch {
   --docsearch-primary-color: var(--vp-c-brand-1) !important;
+}
+
+/**
+ * Component: Hero floating avatar
+ * -------------------------------------------------------------------------- */
+
+@keyframes float {
+    0% {
+        box-shadow: 0 5px 10px 0px rgba(0,0,0,0.25);
+        transform: translatey(-125pt) translateX(-125pt) scale(1);
+    }
+    50% {
+        box-shadow: 0 7px 12px 0px rgba(0,0,0,0.28);
+        transform: translatey(-125pt) translateX(-124pt) scale(1.015);
+    }
+    100% {
+        box-shadow: 0 5px 10px 0px rgba(0,0,0,0.25);
+        transform: translatey(-125pt) translateX(-125pt) scale(1);
+    }
+}
+
+.VPImage {
+    border-radius: 9999px;
+    animation: float 5.5s ease-out infinite;
 }
 
