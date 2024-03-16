@@ -2,6 +2,8 @@
 
 This is a GitHub.io pages repository, hosted on:
 [jonnyhoeven.github.io](https://jonnyhoeven.github.io)
+[JustMe.dev](https://justme.dev)
+[JustMe.dev](https://www.justme.dev)
 
 ## Requirements
 
@@ -26,3 +28,5 @@ npm add -D vue
 ```bash
 npm run docs:dev
 ```
+
+## Commit to main to update hosted site
