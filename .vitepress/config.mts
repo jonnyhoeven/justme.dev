@@ -35,7 +35,7 @@ export default defineConfig({
             {icon: 'linkedin', link: 'https://www.linkedin.com/in/jonnyhoeven/'},
             {
                 icon: {
-                    svg: '<img src="/images/google.png" style="height:17pt;" alt="Google"/>',
+                    svg: '<img src="/images/google.png" style="height:15pt;" alt="Google"/>',
                 },
                 link: 'https://g.dev/jonnyvanderhoeven'
             },
