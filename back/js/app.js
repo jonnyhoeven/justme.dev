@@ -40,7 +40,7 @@ new Vue({
         name: "Mobile AR",
         longName: "Augmented Reality Mobile Game based on Vuforia and Unity.",
         url: "https://github.com/jonnyhoeven/Unity-Augmented-Game",
-        image: "/images/vuforia.jpg",
+        image: "/vuforia.jpg",
         type: "Java / C#",
         readme: `Unity tabletop demo game for android devices.
                 This is a simple demonstration of gaming elements using augmented reality features found in the Vuforia
@@ -55,7 +55,7 @@ new Vue({
         longName:
           "DMX and Camera frontend interface for concert hall de Doelen.",
         url: "https://github.com/jonnyhoeven/CVTI",
-        image: "/images/cvti.jpg",
+        image: "/cvti.jpg",
         type: "VB.net",
         readme: `Touch Interface developed for Concert Hall de Doelen.
                 A user friendly and simple interface shared by multiple wall mouted touch display devices with integrated
@@ -68,7 +68,7 @@ new Vue({
         name: "Open DMX",
         longName: "OpenDMX node connected .NET Usercontrols",
         url: "https://github.com/jonnyhoeven/DMXControl",
-        image: "/images/opendmx.jpg",
+        image: "/opendmx.jpg",
         type: "VB.Net",
         readme: `A salvaged project aimed to develop userControls for OPEN DMX usb nodes in Visual Studio.Net.
                 With form designer it's pretty easy to drag and drop customized layouts. I eventually decided for a different hardware

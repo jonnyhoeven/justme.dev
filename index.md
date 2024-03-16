@@ -6,7 +6,7 @@ hero:
   text: "Developer Blog"
   tagline: Just make IT!
   image:
-    src: /images/ava.jpg
+    src: /ava.jpg
     alt: JustMe.dev
   actions:
     - theme: brand

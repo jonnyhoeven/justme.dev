@@ -1,6 +1,6 @@
 ---
 title: Add more stuff
-image: /images/opendmx.jpg
+image: /opendmx.jpg
 author: Jonny van der Hoeven
 date: 2022-10-10
 outline: deep

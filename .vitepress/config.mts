@@ -12,8 +12,8 @@ export default defineConfig({
     },
     themeConfig: {
         logo: {
-            light: '/images/logo.png',
-            dark: '/images/logo_dark.png',
+            light: '/logo.png',
+            dark: '/logo_dark.png',
             alt: 'JH Logo',
         },
         nav: [
@@ -26,7 +26,7 @@ export default defineConfig({
             {icon: 'linkedin', link: 'https://www.linkedin.com/in/jonnyhoeven/'},
             {
                 icon: {
-                    svg: '<img src="./images/google.png" style="height:17pt;"/>',
+                    svg: '<img src="/google.png" style="height:17pt;"/>',
                 },
                 link: 'https://g.dev/jonnyvanderhoeven'
             },
