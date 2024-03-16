@@ -28,6 +28,8 @@ npm install
 
 ```bash
 npm run docs:dev
+npm run docs:build
+npm run docs:preview
 ```
 
 ## Commit to main to update hosted site
