@@ -1,4 +1,4 @@
-# JonnyHoeven GitHub.io Blog & Portfolio
+# JonnyHoeven GitHub.io Blog
 
 This is a GitHub.io pages repository, hosted on:
 [jonnyhoeven.github.io](https://jonnyhoeven.github.io)
