@@ -34,19 +34,19 @@ To kickstart your journey into AR development with Vuforia Imaging SDK, follow t
 
 - Integrate Vuforia into Your Android App: Follow the Vuforia installation instructions to incorporate the SDK into your Android project.
 
-- Understand Vuforia's Features: Familiarize yourself with Vuforia's key features, including image recognition, object tracking, and augmented reality experiences.
+- Understand Vuforia's Features: Familiarize yourself with Vuforia's key features, including image recognition, object tracking and augmented reality experiences.
 
-- Create Your AR Experience: Start building your AR application by defining targets, implementing interactive elements, and testing your app on an Android device or emulator.
+- Create Your AR Experience: Start building your AR application by defining targets, implementing interactive elements and testing your app on an Android device or emulator.
 
 - Applications of Vuforia Imaging SDK
 
 Vuforia Imaging SDK opens up a world of possibilities for creating captivating AR experiences on Android devices. Here are some common use cases of Vuforia in the realm of AR development:
 
-- Educational Applications: Immersive learning experiences that bring textbooks, historical artifacts, and scientific concepts to life.
+- Educational Applications: Immersive learning experiences that bring textbooks, historical artifacts and scientific concepts to life.
 
-- Retail and Marketing: Virtual try-on experiences, interactive product demos, and brand engagement campaigns.
+- Retail and Marketing: Virtual try-on experiences, interactive product demos and brand engagement campaigns.
 
-- Gaming and Entertainment: Augmented reality games, virtual reality experiences, and interactive storytelling apps.
+- Gaming and Entertainment: Augmented reality games, virtual reality experiences and interactive storytelling apps.
 
 ## Tips for Optimizing Your AR App
 
