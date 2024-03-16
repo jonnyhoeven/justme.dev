@@ -1,6 +1,5 @@
 ---
 title: Git Ops Workshop
-permalink: /about/
 image: /gitops-workshop.png
 githost: https://github.com
 user: jonnyhoeven
