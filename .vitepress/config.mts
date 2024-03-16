@@ -5,6 +5,7 @@ export default defineConfig({
     lang: 'en-US',
     title: "JustMe.dev",
     description: "JustMe.dev Developer Blog - Jonny van der Hoeven (Just Make IT!)",
+    base: "/",
     /*cleanUrls: true,*/
     markdown: {
         image: {
@@ -39,7 +40,7 @@ export default defineConfig({
                 link: 'https://g.dev/jonnyvanderhoeven'
             },
         ],
-        sidebar: {
+        sideba1r: {
             '/posts/': [
                 {
                     text: 'Blog',
