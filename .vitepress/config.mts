@@ -16,7 +16,10 @@ export default defineConfig({
         logo: {
             light: '/logo.png',
             dark: '/logo_dark.png',
-            alt: 'JH Logo',
+            alt: 'JH',
+        },
+        editLink: {
+            pattern: 'https://github.com/jonnyhoeven/justme.dev/edit/main/:path'
         },
         nav: [
             {text: 'Home', link: '/'},
