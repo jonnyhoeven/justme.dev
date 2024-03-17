@@ -1,6 +1,6 @@
 ---
 title: Git Ops Workshop
-image: /gitops-workshop.png
+image: /images/gitops-workshop.png
 githost: https://github.com
 user: jonnyhoeven
 project: workshop
@@ -11,15 +11,18 @@ prev:
 outline: deep
 ---
 This workshop is designed to provide a basic understanding of Kubernetes and ArgoCD.
-This Workshop will teach you how to create your own Kubernetes cluster using K3S and use ArgoCD to deploy your first application from a Git-Ops perspective. This is the way.
+This Workshop will teach you how to create your own Kubernetes cluster using K3S and ArgoCD to deploy your first 
+application from a Git-Ops perspective. This is the `Git-Ops` way.
 ---
 
 # {{ $frontmatter.title }}
 
-<iframe     src="https://docs.google.com/presentation/d/e/2PACX-1vTwUNGkjI-YYRBIXGol9IpAwuzhIPCXTP01DUP8k-cV1_0Z8Kilxw6VyfaXS70pRMfuTJeTrYkpZS0C/embed?start=false&loop=false&delayms=15000" 
-    frameborder="0" width="100%"
-         height="414pt" 
-allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+<iframe           src="https://docs.google.com/presentation/d/e/2PACX-1vTwUNGkjI-YYRBIXGol9IpAwuzhIPCXTP01DUP8k-cV1_0Z8Kilxw6VyfaXS70pRMfuTJeTrYkpZS0C/embed?start=false&loop=false&delayms=15000" 
+          frameborder="0" width="100%"
+               height="414pt" 
+      allowfullscreen="true" 
+   mozallowfullscreen="true" 
+webkitallowfullscreen="true"></iframe>
 
 
 ## GitOps using ArgoCD
@@ -193,17 +196,7 @@ Helm charts can be installed as a regular application in ArgoCD.
 Helm charts are handled differently with ArgoCD to provide rollbacks and prevent influence from volatile external
 sources.
 
-## ArgoCD
-
-ArgoCD can be installed as highly available (all nodes have replicated state) or on one node. 
-It's a continuous delivery tool for Kubernetes based on external sources, 
-most commonly git repositories.
-
-It follows the GitOps pattern of using Git repositories as the source of _truth_ for defining the desired application
-state. ArgoCD is very declarative and all it's configuration is stored in a Git repositories.
-
-
-# The Workshop
+## The Workshop
 
 We're going to deploy a simple application to a Kubernetes cluster using Kubectl,
 then we'll deploy the same application using ArgoCD,
@@ -213,7 +206,16 @@ We'll end up with a cluster you can tinker with from your own git repository.
 
 Let's get started, first open up a terminal to run linux/bash commands.
 
-## Requirements
+ArgoCD can be installed as highly available (all nodes have replicated state) or on one node. 
+It's a continuous delivery tool for Kubernetes based on external sources, 
+most commonly git repositories.
+
+It follows the GitOps pattern of using Git repositories as the source of _truth_ for defining the desired application
+state. ArgoCD is very declarative and all it's configuration is stored in a Git repositories.
+
+
+
+### Requirements
 
 We'll need some tools to get our cluster running.
 
@@ -271,7 +273,7 @@ So for now, it's recommended to use the Mirantis Free version of Lens.
 - [Lens](https://k8slens.dev/desktop.html) (Mirantis)
 - [Open Lens](https://flathub.org/apps/dev.k8slens.OpenLens) (Open Source version)
 
-## Starting your Kubernetes cluster
+### Starting your Kubernetes cluster
 
 [Reference](https://k3d.io/v5.3.0/usage/commands/k3d_cluster_create/)
 
@@ -290,7 +292,7 @@ Once completed, you can check the status of your cluster by running:
 sudo k3d cluster list
 ```
 
-## Access the cluster using Kubectl
+### Access the cluster using Kubectl
 
 Kubeconfig is a file that holds information about clusters, including the hostname, certificate authority and
 authentication information. It's located at `~/.kube/config` by default and can be used by other
@@ -324,7 +326,7 @@ kubectl cluster-info
 kubectl get nodes
 ```
 
-## Access the cluster using Lens
+### Access the cluster using Lens
 
 Setup Lens to use the new cluster by adding a new cluster from the [kubeconfig.yaml](kubeconfig.yaml) file.
 
@@ -337,7 +339,7 @@ Now you can access the `k3d-workshop` cluster using Lens.
 
 Browse around, check the `Nodes`, `Namespaces`, `Custom Resource Definitions` and `Pods`.
 
-## Some notes about Namespaces
+### Some notes about Namespaces
 
 Namespaces divide cluster resources and quota's.
 They're intended for use in environments with many users spread across multiple teams or
@@ -359,7 +361,7 @@ kubectl get namespaces
 - `kube-node-lease`, This namespace is used for the lease objects associated with each `node` which improves the
   performance of the `node` heartbeats as the cluster scales.
 
-## Create your own namespace
+### Create your own namespace
 
 Let's create a new namespace and deploy an application in the `workshop` namespace.
 
@@ -373,7 +375,7 @@ We'll deploy nginx web server to our cluster.
 
 The `-n` or `--namespace` parameter is used to specify the namespace to deploy the application to.
 If you don't provide a namespace, the application will deploy to the `default` namespace.
-Resulting in hard to find, hard to manage and naming conflicts.
+Resulting in naming conflicts and hard to find, hard to manage resources.
 
 ```bash
 kubectl create deployment nginx --image=nginx -n workshop

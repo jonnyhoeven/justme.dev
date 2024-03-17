@@ -1,6 +1,6 @@
 ---
 title: Camera & Lighting Interface
-image: /images//cvti.jpg
+image: /images/cvti.jpg
 githost: https://github.com
 user: jonnyhoeven
 project: CVTI
