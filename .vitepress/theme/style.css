@@ -110,51 +110,12 @@
     :root {
         --vp-home-hero-image-filter: blur(56px);
     }
-    .float {
-        animation: float 5.5s ease-out infinite;
-    }
-
-    @keyframes float {
-        0% {
-            box-shadow: 0 5px 10px 0px rgba(0, 0, 0, 0.25);
-            transform: translatey(-125pt) translateX(-125pt) scale(1);
-        }
-        50% {
-            box-shadow: 0 7px 12px 0px rgba(0, 0, 0, 0.28);
-            transform: translatey(-125pt) translateX(-124pt) scale(1.015);
-        }
-        100% {
-            box-shadow: 0 5px 10px 0px rgba(0, 0, 0, 0.25);
-            transform: translatey(-125pt) translateX(-125pt) scale(1);
-        }
-    }
-
-
 }
 
 @media (min-width: 960px) {
     :root {
         --vp-home-hero-image-filter: blur(68px);
     }
-    .float {
-        animation: float 5.5s ease-out infinite;
-    }
-
-    @keyframes float {
-        0% {
-            box-shadow: 0 5px 10px 0px rgba(0, 0, 0, 0.25);
-            transform: translatey(-125pt) translateX(-125pt) scale(1);
-        }
-        50% {
-            box-shadow: 0 7px 12px 0px rgba(0, 0, 0, 0.28);
-            transform: translatey(-125pt) translateX(-124pt) scale(1.015);
-        }
-        100% {
-            box-shadow: 0 5px 10px 0px rgba(0, 0, 0, 0.25);
-            transform: translatey(-125pt) translateX(-125pt) scale(1);
-        }
-    }
-
 }
 
 
@@ -181,49 +142,26 @@
  * Component: Hero floating avatar
  * -------------------------------------------------------------------------- */
 
-
-
 .VPImage.image-src {
     border-radius: 9999px;
-    animation: float 5.5s ease-out infinite;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    animation: float 5.3s ease-out infinite;
 }
 
-.shieldButton {
-    margin-top: 10pt;
-    padding-right: 5pt;
-    float: right;
-}
-
-.listImage {
-    width: 130pt;
-    margin: 5pt 15pt 10pt 0;
-    border: 0;
-    float: left;
-}
-
-.articleImage {
-    width: 250pt;
-    margin: 17pt 15pt 5pt 0;
-    padding: 10pt 10pt 10pt 10pt;
-    border: 0;
-    float: left;
-}
-
-.float {
-    animation: float 5.5s ease-out infinite;
-}
 
 @keyframes float {
     0% {
-        box-shadow: 0 5px 10px 0px rgba(0, 0, 0, 0.25);
-        transform: translatey(-125pt) translateX(-125pt) scale(1);
+        box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.25);
+        transform: translatey(-50%) translateX(-50%) scale(1);
     }
     50% {
-        box-shadow: 0 7px 12px 0px rgba(0, 0, 0, 0.28);
-        transform: translatey(-125pt) translateX(-124pt) scale(1.015);
+        box-shadow: 0 7px 12px 2px rgba(0, 0, 0, 0.28);
+        transform: translatey(-49.8%) translateX(-50.2%) scale(1.0125);
     }
     100% {
-        box-shadow: 0 5px 10px 0px rgba(0, 0, 0, 0.25);
-        transform: translatey(-125pt) translateX(-125pt) scale(1);
+        box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.25);
+        transform: translatey(-50%) translateX(-50%) scale(1);
     }
 }

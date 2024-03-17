@@ -4,7 +4,7 @@ import {defineConfig} from 'vitepress'
 export default defineConfig({
     lang: 'en-US',
     title: "JustMe.dev",
-    description: "JustMe.dev Developer Blog - Jonny van der Hoeven (Just Make IT!)",
+    description: "JustMe.dev - Developer Blog by Jonny van der Hoeven (Just Make IT!)",
     base: "/",
     cleanUrls: true,
     markdown: {

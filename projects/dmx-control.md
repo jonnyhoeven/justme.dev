@@ -1,9 +1,10 @@
 ---
 title: Open DMX control
+date: 2021-08-01
 image: /images/opendmx.jpg
 githost: https://github.com
 user: jonnyhoeven
-project: dmx-control
+project_name: dmx-control
 languages: VB.Net
 prev:
   text: 'Projects'

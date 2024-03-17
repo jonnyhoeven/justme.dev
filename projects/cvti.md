@@ -1,9 +1,10 @@
 ---
 title: Camera & Lighting Interface
+date: 2021-08-01
 image: /images/cvti.jpg
 githost: https://github.com
 user: jonnyhoeven
-project: CVTI
+project_name: CVTI
 languages: VB.Net
 prev:
     text: Projects

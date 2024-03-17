@@ -1,21 +1,21 @@
 ---
 title: Git Ops Workshop
+date: 2021-08-01
 image: /images/gitops-workshop.png
 githost: https://github.com
 user: jonnyhoeven
-project: workshop
+project_name: workshop
 languages: Kubernetes
 prev:
     text: Projects
     link: /projects
 outline: deep
 ---
-This workshop is designed to provide a basic understanding of Kubernetes and ArgoCD.
-This Workshop will teach you how to create your own Kubernetes cluster using K3S and ArgoCD to deploy your first 
+This workshop is designed to provide a basic understanding of Kubernetes and ArgoCD and will teach you how to create your own Kubernetes cluster using K3S and ArgoCD to deploy your first 
 application from a Git-Ops perspective. This is the `Git-Ops` way.
 ---
 
-# {{ $frontmatter.title }}
+## {{ $frontmatter.title }}
 
 <iframe           src="https://docs.google.com/presentation/d/e/2PACX-1vTwUNGkjI-YYRBIXGol9IpAwuzhIPCXTP01DUP8k-cV1_0Z8Kilxw6VyfaXS70pRMfuTJeTrYkpZS0C/embed?start=false&loop=false&delayms=15000" 
           frameborder="0" width="100%"

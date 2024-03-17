@@ -1,9 +1,10 @@
 ---
 title: Augmented Reality Mobile Game
+date: 2021-08-01
 image: /images/vuforia.jpg
 githost: https://github.com
 user: jonnyhoeven
-project: unity-augmented-game
+project_name: unity-augmented-game
 languages: Java | C#
 prev:
     text: 'Projects'
