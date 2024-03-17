@@ -8,19 +8,20 @@ project_name: workshop
 languages: Kubernetes
 outline: deep
 ---
-This workshop is designed to provide a basic understanding of Kubernetes and ArgoCD and will teach you how to create your own Kubernetes cluster using K3S and ArgoCD to deploy your first 
+This workshop is designed to provide a basic understanding of Kubernetes and ArgoCD and will teach you how to create
+your own Kubernetes cluster using K3S and ArgoCD to deploy your first
 application from a Git-Ops perspective. This is the `Git-Ops` way.
 ---
 
 ## {{ $frontmatter.title }}
 
-<iframe           src="https://docs.google.com/presentation/d/e/2PACX-1vTwUNGkjI-YYRBIXGol9IpAwuzhIPCXTP01DUP8k-cV1_0Z8Kilxw6VyfaXS70pRMfuTJeTrYkpZS0C/embed?start=false&loop=false&delayms=15000" 
-          frameborder="0" width="100%"
-               height="414pt" 
-      allowfullscreen="true" 
-   mozallowfullscreen="true" 
+<iframe
+src="https://docs.google.com/presentation/d/e/2PACX-1vTwUNGkjI-YYRBIXGol9IpAwuzhIPCXTP01DUP8k-cV1_0Z8Kilxw6VyfaXS70pRMfuTJeTrYkpZS0C/embed?start=false&loop=false&delayms=15000"
+frameborder="0" width="100%"
+height="414pt"
+allowfullscreen="true"
+mozallowfullscreen="true"
 webkitallowfullscreen="true"></iframe>
-
 
 ## GitOps using ArgoCD
 
@@ -153,22 +154,14 @@ availability using the other nodes.
 This also applies to pods, when a pod is draining it will not accept new connections and will gracefully terminate.
 **Don't delete pods when there is no other replica, use the drain command.**
 
-### Persistent Volumes Claims and Storage Classes
-
-It's important to note that k3s is a lightweight Kubernetes distribution and does not come with most storage classes.
-Most of these classes are provided by the cloud provider or need to be installed manually when on bare metal.
-
 ### Difference between k3s and k8s
 
-K3s is a lightweight Kubernetes distribution. It is a fully compliant Kubernetes distribution some differences.
+K3s is a lightweight Kubernetes distribution. It's a fully compliant Kubernetes distribution with some differences.
 
-K3S is a lightweight Kubernetes distribution. It is a fully compliant Kubernetes distribution with some differences.
-It's a perfect candidate for edge computing, IoT and CI/CD. It's lightweight, easy to install and has a small
+It's a perfect candidate for edge computing, IoT and CI/CD. It's easy to install and has a small
 footprint.
 
-K8S contains a lot of features in the default build that are not always needed, helm charts for most missing k3s
-features
-can also be installed via helm charts.
+K8S contains a lot more features that are not always needed.
 
 Some feature differences:
 
@@ -182,35 +175,31 @@ Some feature differences:
 Helm is a package manager for Kubernetes. It allows you to define, install and upgrade complex Kubernetes applications.
 Helm is a tool that streamlines installing and managing Kubernetes applications.
 
-Think of it like apt/yum/homebrew for Kubernetes. Helm charts allow you to define values that control the applied
+Think of it like `apt`, `yum` or `Homebrew` for Kubernetes. Helm charts allow you to define values that control the
+applied
 Kubernetes manifests.
 
 Helm charts are available for most applications and services.
 
 When ArgoCD is available on a cluster it's important to note that helm can be handled differently in ArgoCD.
-Helm charts can be installed as a regular application in ArgoCD.
-
-Helm charts are handled differently with ArgoCD to provide rollbacks and prevent influence from volatile external
-sources.
+Helm charts can be installed and managed as a regular application with ArgoCD.
 
 ## The Workshop
 
 We're going to deploy a simple application to a Kubernetes cluster using Kubectl,
 then we'll deploy the same application using ArgoCD,
-along the way we'll be checking out multiple tools to configure a kubernetes cluster.
+along the way we'll be checking out multiple tools to configure a Kubernetes cluster.
 
 We'll end up with a cluster you can tinker with from your own git repository.
 
 Let's get started, first open up a terminal to run linux/bash commands.
 
-ArgoCD can be installed as highly available (all nodes have replicated state) or on one node. 
-It's a continuous delivery tool for Kubernetes based on external sources, 
+ArgoCD can be installed as highly available (all nodes have replicated state) or on one node.
+It's a continuous delivery tool for Kubernetes based on external sources,
 most commonly git repositories.
 
 It follows the GitOps pattern of using Git repositories as the source of _truth_ for defining the desired application
 state. ArgoCD is very declarative and all it's configuration is stored in a Git repositories.
-
-
 
 ### Requirements
 
@@ -254,6 +243,7 @@ wget -q -O - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
 - **Linux** Install Docker.io:
 
 [Reference](https://packages.debian.org/sid/docker.io)
+
 ```bash
 sudo apt install docker.io
 sudo groupadd docker
@@ -421,7 +411,7 @@ The `pod` is running again, but now it's got a _different_ name.
 It's important to note that the `deployment` manifest manages the `pod` and a `pod` can be replicated.
 
 To avoid downtime it's recommended to use `Evict` or `Taint` instead of deleting definitions.
-This will result in kubernetes creating a new `pod` and wait for it to be ready before deleting the old `evicted pod`.
+This will result in Kubernetes creating a new `pod` and wait for it to be ready before deleting the old `evicted pod`.
 
 - Delete the `deployment` and check the `pod` status again.
 
@@ -503,7 +493,7 @@ cat-app   <none>   cat-app.k3d.local   172.20.0.2,172.20.0.3,172.20.0.4   80    
 
 - Notice the `cat-app.k3d.local` URL, this is the URL you'll use to access the cat-app.
 - Notice the `ADDRESS` field, this is the IP address of the service, it's a `ClusterIP` type service and is available on
-  all kubernetes Nodes in the cluster. If a node does not have the cat-app `pod`, it will forward the request to other
+  all Kubernetes Nodes in the cluster. If a node does not have the cat-app `pod`, it will forward the request to other
   nodes that host the cat-app `pod` selector.
 - More commonly you'll see `LoadBalancer` type services, which use cloud provider's or on premises load balancers to
   expose the services to other networks/internet.
