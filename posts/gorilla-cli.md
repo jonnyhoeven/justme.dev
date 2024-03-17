@@ -5,7 +5,7 @@ image: /images/gorilla-cli.png
 githost: https://github.com
 user: gorilla-llm
 project_name: gorilla-cli
-languages: VB.Net
+languages: Python
 editLink: true
 ---
 Gorilla CLI powers your command-line interactions with a user-centric tool. Simply state your objective, and Gorilla CLI
