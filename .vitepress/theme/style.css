@@ -110,18 +110,53 @@
     :root {
         --vp-home-hero-image-filter: blur(56px);
     }
+    .float {
+        animation: float 5.5s ease-out infinite;
+    }
+
+    @keyframes float {
+        0% {
+            box-shadow: 0 5px 10px 0px rgba(0, 0, 0, 0.25);
+            transform: translatey(-125pt) translateX(-125pt) scale(1);
+        }
+        50% {
+            box-shadow: 0 7px 12px 0px rgba(0, 0, 0, 0.28);
+            transform: translatey(-125pt) translateX(-124pt) scale(1.015);
+        }
+        100% {
+            box-shadow: 0 5px 10px 0px rgba(0, 0, 0, 0.25);
+            transform: translatey(-125pt) translateX(-125pt) scale(1);
+        }
+    }
+
+
 }
 
 @media (min-width: 960px) {
     :root {
         --vp-home-hero-image-filter: blur(68px);
     }
+    .float {
+        animation: float 5.5s ease-out infinite;
+    }
+
+    @keyframes float {
+        0% {
+            box-shadow: 0 5px 10px 0px rgba(0, 0, 0, 0.25);
+            transform: translatey(-125pt) translateX(-125pt) scale(1);
+        }
+        50% {
+            box-shadow: 0 7px 12px 0px rgba(0, 0, 0, 0.28);
+            transform: translatey(-125pt) translateX(-124pt) scale(1.015);
+        }
+        100% {
+            box-shadow: 0 5px 10px 0px rgba(0, 0, 0, 0.25);
+            transform: translatey(-125pt) translateX(-125pt) scale(1);
+        }
+    }
+
 }
 
-
-.float {
-    animation: float 5.5s ease-out infinite;
-}
 
 /**
  * Component: Custom Block
@@ -146,20 +181,7 @@
  * Component: Hero floating avatar
  * -------------------------------------------------------------------------- */
 
-@keyframes float {
-    0% {
-        box-shadow: 0 5px 10px 0px rgba(0, 0, 0, 0.25);
-        transform: translatey(-125pt) translateX(-125pt) scale(1);
-    }
-    50% {
-        box-shadow: 0 7px 12px 0px rgba(0, 0, 0, 0.28);
-        transform: translatey(-125pt) translateX(-124pt) scale(1.015);
-    }
-    100% {
-        box-shadow: 0 5px 10px 0px rgba(0, 0, 0, 0.25);
-        transform: translatey(-125pt) translateX(-125pt) scale(1);
-    }
-}
+
 
 .VPImage.image-src {
     border-radius: 9999px;
@@ -185,4 +207,23 @@
     padding: 10pt 10pt 10pt 10pt;
     border: 0;
     float: left;
+}
+
+.float {
+    animation: float 5.5s ease-out infinite;
+}
+
+@keyframes float {
+    0% {
+        box-shadow: 0 5px 10px 0px rgba(0, 0, 0, 0.25);
+        transform: translatey(-125pt) translateX(-125pt) scale(1);
+    }
+    50% {
+        box-shadow: 0 7px 12px 0px rgba(0, 0, 0, 0.28);
+        transform: translatey(-125pt) translateX(-124pt) scale(1.015);
+    }
+    100% {
+        box-shadow: 0 5px 10px 0px rgba(0, 0, 0, 0.25);
+        transform: translatey(-125pt) translateX(-125pt) scale(1);
+    }
 }
