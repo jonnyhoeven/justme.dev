@@ -3,8 +3,8 @@ import {defineConfig} from 'vitepress'
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
     lang: 'en-US',
-    title: "JustMe.dev",
-    description: "JustMe.dev - Developer Blog by Jonny van der Hoeven (Just Make IT!)",
+    title: "justme.dev",
+    description: "justme.dev - Developer Blog by Jonny van der Hoeven (Just Make IT!)",
     base: "/",
     cleanUrls: true,
     markdown: {
@@ -46,8 +46,6 @@ export default defineConfig({
                     text: 'Blog',
                     items: [
                         {text: 'All Posts', link: '/blog'},
-                        {text: 'Latest Post', link: '/blog/latest-post'},
-                        {text: 'Second Post', link: '/blog/second-post'}
                     ],
                 }
             ]
