@@ -6,9 +6,6 @@ githost: https://github.com
 user: jonnyhoeven
 project_name: workshop
 languages: Kubernetes
-prev:
-    text: Projects
-    link: /projects
 outline: deep
 ---
 This workshop is designed to provide a basic understanding of Kubernetes and ArgoCD and will teach you how to create your own Kubernetes cluster using K3S and ArgoCD to deploy your first 

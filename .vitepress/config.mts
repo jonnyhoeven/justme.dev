@@ -48,7 +48,15 @@ export default defineConfig({
                         {text: 'All Posts', link: '/blog'},
                     ],
                 }
-            ]
+            ],
+            '/projects/': [
+                {
+                    text: 'Projects',
+                    items: [
+                        {text: 'All Projects', link: '/projects'},
+                    ],
+                }
+            ],
         },
         footer: {
             message: 'Released under the MIT License.',

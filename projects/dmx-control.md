@@ -6,9 +6,6 @@ githost: https://github.com
 user: jonnyhoeven
 project_name: dmx-control
 languages: VB.Net
-prev:
-  text: 'Projects'
-  link: '/projects'
 editLink: true
 ---
 Open DMX control is a project that aims to develop userControls for OPEN DMX USB nodes in Visual Studio.Net.

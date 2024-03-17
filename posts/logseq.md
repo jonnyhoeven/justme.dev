@@ -17,6 +17,8 @@ features for organizing and structuring your notes.
 
 # {{ $frontmatter.title }}
 
+<img src="/images/logseq.png" class="articleImage">
+
 Logseq's Whiteboard feature lets you organize your knowledge and ideas using a spatial canvas with shapes
 , drawings, website embeds, and connectors. You can visually group and link your notes and
 external media (such as videos and images), enabling visual thinkers to compose, remix, annotate, and
