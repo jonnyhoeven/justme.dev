@@ -366,7 +366,7 @@ Let's create a new namespace and deploy an application in the `workshop` namespa
 kubectl create namespace workshop
 ```
 
-### Deploy an application manually
+### Deploy your application manually
 
 We'll deploy nginx web server to our cluster.
 
@@ -567,7 +567,7 @@ kubectl apply -f ./namespace/argocd -n argocd
 Kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath='{.data.password}' | base64 --decode
 ```
 
-*** Ignore the `%` when pasting the password. ***
+**Ignore the `%` when pasting the password.**
 
 - Browse to [argocd.k3d.local](https://argocd.k3d.local)
 - username: `admin`
