@@ -1,6 +1,6 @@
 ---
 title: Open DMX control
-date: 2021-08-01
+date: 2014-08-14
 image: /images/opendmx.jpg
 githost: https://github.com
 user: jonnyhoeven

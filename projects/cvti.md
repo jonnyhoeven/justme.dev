@@ -1,6 +1,6 @@
 ---
 title: Camera & Lighting Interface
-date: 2021-08-01
+date: 2014-08-16
 image: /images/cvti.jpg
 githost: https://github.com
 user: jonnyhoeven
