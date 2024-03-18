@@ -8,14 +8,14 @@ project_name: grumpyipsum
 languages: Vue | PHP
 ---
 Grumpy ipsum, the crowdsourcing negative Lorem Ipsum generator
+This web project uses vue frontend with a laravel/eloquent backend to crowdsource negative content
+for use instead of positive content. The project is a work in progress and is not yet ready for users.
 ---
 
 # {{ $frontmatter.title }}
 
 <img :src="$frontmatter.image" class="articleImage">
 
-This web project uses vue frontend with a laravel/eloquent backend to crowdsource negative content 
-for use instead of positive content. The project is a work in progress and is not yet ready for users.
 
 
 ## Project environment
