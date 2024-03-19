@@ -2,12 +2,12 @@
 layout: home
 
 hero:
-  name: "justme.dev"
+  name: "Justme.dev"
   text: "Developer Blog"
   tagline: Just make it!
   image:
     src: /images/ava.jpg
-    alt: justme.dev
+    alt: Justme.dev
   actions:
     - theme: brand
       text: Projects
