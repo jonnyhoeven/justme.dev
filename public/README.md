@@ -15,8 +15,8 @@ Insert the following code in the `head` section of your pages:
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-    <meta name="apple-mobile-web-app-title" content="Justme.dev">
-    <meta name="application-name" content="Justme.dev">
+    <meta name="apple-mobile-web-app-title" content="justme.dev">
+    <meta name="application-name" content="justme.dev">
     <meta name="msapplication-TileColor" content="#603cba">
     <meta name="theme-color" content="#ffffff">
 

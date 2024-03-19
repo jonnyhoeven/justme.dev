@@ -1,4 +1,4 @@
-# Justme.dev VitePress hosted on GitHub.io
+# justme.dev VitePress hosted on GitHub.io
 
 This is a GitHub.io pages repository, hosted on:
 [jonnyhoeven.github.io](https://jonnyhoeven.github.io)
