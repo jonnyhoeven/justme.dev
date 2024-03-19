@@ -27,28 +27,43 @@ webkitallowfullscreen="true"></iframe>
 
 ### Introduction
 
-This workshop is designed to provide a basic understanding of Kubernetes and ArgoCD.
+This workshop is designed to provide basic understanding of Kubernetes and ArgoCD.
 
-During the workshop, we'll be deploying a simple application to a Kubernetes cluster using Kubectl and then we'll
-deploy
-the same application using ArgoCD.
+During the workshop, we'll be deploying a simple application to your Kubernetes cluster using Kubectl. Later we'll
+deploy the same application using ArgoCD using your new git repository. Meanwhile, we'll be checking out multiple tools
+to communicate with and control Kubernetes clusters.
+
+After this workshop:
+
+- You'll have a development Kubernetes cluster you can tinker with from your own git repository.
+  This means you'll be able to _deploy_, _update_ and _delete_ applications remotely and declaratively from your
+  own (private) git repository to your development cluster.
+
+- Inside out, your cluster will be managed by ArgoCD, which will be managed by the contents of your git repository.
+  It's looking for changes in your git repository and will apply them to your cluster.
+- You'll be able to deploy applications using kubectl, use manifest files and ArgoCD or Git-Ops to
+  deploy your `manifests`.
+- You'll understand the difference between `declarative` vs `imperative` statements and the vital importance of proper
+  `health checks` in conjunction with `livenessProbe`, `readinessProbe` and `startupProbe`.
+- Yes, kubernetes has some deep dark `logic`, it's a declarative system that will try to maintain the desired state and
+  might do some unexpected things if you're not careful. Puppet and Ansible are also imperative systems, they will do
+  the same thing every time you run them.
+- You'll understand the difference between `Pods`, `Services`, `Ingress`, `Namespaces`, `ConfigMaps` and `Secrets`.
+- You'll understand the difference between `K3S` and `K8S` and the importance of `Helm` and `Lens`.
 
 ### Kubernetes concepts
 
-Kubernetes is a container orchestration platform that automates deployment, scaling and management of containerized
-applications.
-
-It's declarative, meaning you define the desired state of the system and Kubernetes automatically changes
-the current state to the desired state the best way it can.
-
-It's designed to be extensible and scalable and it's built to handle a wide range of workloads, from stateless
-to stateful applications.
+- Kubernetes is a container orchestration platform that automates deployment, scaling and management of containerized
+  applications.
+- It's declarative, meaning you define the desired state of the system and Kubernetes automatically changes the current
+  state to the desired state the best way it can.
+- It's designed to be extensible and scalable and it's built to handle a wide range of workloads, from stateless
+  to stateful applications.
 
 ### Extendable - Custom Resource Definitions (CRD's)
 
-Kubernetes utilizes Custom Resource Definitions (CRDs) for extendability.
-
-CRDs allow extendability for the Kubernetes API by creating new resources classes.
+- Kubernetes utilizes Custom Resource Definitions (CRDs) for extendability.
+- CRDs allow extendability for the Kubernetes API by creating new resources classes.
 
 This allows developers to create their own resources or controllers to manage these resources.
 
