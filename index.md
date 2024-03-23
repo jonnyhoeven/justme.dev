@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "justme.dev"
   text: "Developer Blog"
-  tagline: Just make ot!
+  tagline: Just make it!
   image:
     src: /images/ava.jpg
     alt: justme.dev

@@ -1,8 +1,7 @@
 import {createContentLoader} from 'vitepress'
 import transformPage from '../lib/transformPage'
-import fetchReadme from '../lib/fetchReadme'
 
-export default () => createContentLoader('projects/*.md', {
+export default () => createContentLoader('project/*.md', {
     includeSrc: false, // include raw markdown source?
     render: false,     // include rendered full page HTML?
     excerpt: false,    // include excerpt?

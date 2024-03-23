@@ -1,11 +1,13 @@
 ---
 title: Augmented Reality Mobile Game
+type: project
 date: 2021-08-01
 image: /images/vuforia.jpg
 githost: https://github.com
 user: jonnyhoeven
 project: unity-augmented-game
 branch: master
+fetchReadme: true
 languages: Java, C#
 intro: The Augmented Reality Mobile Game project is an immersive gaming experience designed specifically for Android
     devices, leveraging Vuforia technology to seamlessly track images and overlay dynamic 3D models onto real-world

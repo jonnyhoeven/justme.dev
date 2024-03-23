@@ -3,7 +3,7 @@ import fetchReadme from "../lib/fetchReadme.js";
 
 export default async (pageData, {siteConfig}) => {
     pageData = transformPage(pageData);
-    pageData.frontmatter.readme = await fetchReadme(pageData.frontmatter.readmeUrl);
+    pageData.frontmatter.readme = pageData.frontmatter.fetchReadme ?  await fetchReadme(pageData.frontmatter.readmeUrl) : null;
     return pageData;
 }
 

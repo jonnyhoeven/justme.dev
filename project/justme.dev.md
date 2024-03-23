@@ -1,11 +1,13 @@
 ---
 title: Justme.dev
+type: project
 date: 2014-08-16
-image: /images/cvti.jpg
+image: /images/justme.dev.png
 githost: https://github.com
 user: jonnyhoeven
 project: justme.dev
 branch: main
+fetchReadme: true 
 languages: CSS,Typescript,Vue
 intro: This VitePress site's source code is also available on GitHub. I needed a static site generator.
     VitePress is specifically designed for documentation websites. It is built on top of Vue,
