@@ -4,7 +4,7 @@ date: 2021-08-01
 image: /images/logseq.png
 githost: https://github.com
 user: logseq
-project_name: logseq
+project: logseq
 languages: Markdown
 editLink: true
 ---
