@@ -17,6 +17,14 @@ export default async () => {
             ['meta', {name: 'application-name', content: 'Justme.dev'}],
             ['meta', {name: 'msapplication-TileColor', content: '#603cba'}],
             ['meta', {name: 'theme-color', content: '#ffffff'}],
+            ['script', {src: 'https://www.googletagmanager.com/gtag/js?id=G-KX1KJ3KEMB'}],
+            ['script',
+                {},
+                  `window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', 'G-KX1KJ3KEMB');`
+            ]
         ],
         base: "/",
         cleanUrls: true,
