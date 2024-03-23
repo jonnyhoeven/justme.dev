@@ -17,20 +17,31 @@ defineProps(['frontmatter'])
          class="shieldButton"
     >
     <Badge v-for="lang of frontmatter.langArr" :text="lang"
-           type="info"
            class="shieldButton"
+           type="info"
            style="margin-right:5pt"
     />
+
+
     <a target="_blank"
        class="textButton"
        :href="frontmatter.externalUrl"
     >
-      <span class="VPBadge shieldButton">View on GitHub</span>
+      <Badge text="View on GitHub"
+             type="tip"
+             class="shieldButton"
+             style="margin-right:5pt"
+      />
     </a>
   </div>
 </template>
 
 <style>
+
+.VPBadge .shieldButton {
+
+}
+
 .badge-bar {
   margin: 10pt 0 20pt 0;
 }
