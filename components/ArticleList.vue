@@ -1,5 +1,5 @@
 <script setup>
-import BadgesComponent from '/components/badges.vue';
+import Badges from '/components/Badges.vue';
 
 defineProps(['page']);
 </script>
@@ -12,10 +12,9 @@ defineProps(['page']);
         <div class="listImage" :style="{backgroundImage: 'url('+ page.frontmatter.image +')'}"></div>
       </div>
       <div class="layercontent">
-
         <p><strong>{{ page.frontmatter.title }}</strong></p>
         <span v-html="page.frontmatter.intro"></span>
-        <BadgesComponent :frontmatter="page.frontmatter"/>
+        <Badges :frontmatter="page.frontmatter"/>
       </div>
     </div>
   </a>
@@ -30,19 +29,18 @@ defineProps(['page']);
 
 .container_row {
   display: grid;
-  margin: 10pt 0 20pt 0;
-  padding: 10pt;
 }
 
 .layerbg, .layerimg {
   grid-column: 1;
   grid-row: 1;
-  margin: 15pt 20pt 20pt 0pt;
+  margin: 15pt 0 0 0;
 }
 
 .layercontent {
   grid-column: 2;
   grid-row: 1;
+  margin: 0 0 0 20pt;
 }
 
 .listImage {
@@ -53,18 +51,25 @@ defineProps(['page']);
   background-repeat: no-repeat;
   border-radius: 6pt;
   border: 1px solid var(--vp-c-brand-soft);
-  transition: all .3s ease-out;
+  transition: all 1s ease-in-out;
 }
 
 .container_row:hover .listImage {
-  scale: 1.03;
+  transform: skew(-0deg, -4deg) rotate(2deg) scale(1.08);
 }
 
 .listImagebg {
   width: 180pt; /*or 70%, or what you want*/
   height: 100pt; /*or 70%, or what you want*/
   background-image: linear-gradient(-28deg, rgb(15, 196, 93) 50%, rgb(34, 188, 238) 50%);
-  filter: blur(25pt);
+  filter: blur(40pt);
   z-index: -10;
+  transition: all 0.5s ease-in-out;
 }
+
+.container_row:hover .listImagebg {
+  transform: skew(-1.5deg, -0.5deg) rotate(-0.4deg) scale(1.05);
+  filter: blur(20pt);
+}
+
 </style>

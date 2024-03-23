@@ -1,7 +1,7 @@
 ---
 title: Justme.dev
 type: project
-date: 2014-08-16
+date: 2024-03-01
 image: /images/justme.dev.png
 githost: https://github.com
 user: jonnyhoeven
@@ -14,6 +14,6 @@ intro: This VitePress site's source code is also available on GitHub. I needed a
     a modern build tool for frontend development.
 ---
 <script setup>
-import ArticleItem from '/components/articleItem.vue';
+import ArticleItem from '/components/ArticleItem.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>

@@ -3,10 +3,9 @@ layout: home
 ---
 
 <script setup>
-import { data as posts} from './data/blog.data.js';
-import ArticleListitem from '/components/articleListItem.vue';
+import {data as pages} from './data/blog.data.js';
+import ArticleList from '/components/ArticleList.vue';
 </script>
 
 # Blog
-
-<ArticleListitem v-for="post of posts" :page="post"/>
+<ArticleList v-for="page of pages" :page="page"/>

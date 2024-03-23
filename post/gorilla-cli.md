@@ -14,6 +14,7 @@ intro: Gorilla CLI powers your command-line interactions with a user-centric too
     Azure, GitHub, Conda, Curl, Sed, and many more. No more recalling intricate CLI arguments! 🦍
 ---
 <script setup>
-import ArticleItem from '/components/articleItem.vue';
+import ArticleItem from '/components/ArticleItem.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
+

@@ -14,6 +14,6 @@ intro: Grumpy ipsum, the crowd-sourced negative Lorem Ipsum generator
     for use instead of positive content. The project is a work in progress and is not yet ready for users.
 ---
 <script setup>
-import ArticleItem from '/components/articleItem.vue';
+import ArticleItem from '/components/ArticleItem.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>

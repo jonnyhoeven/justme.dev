@@ -15,7 +15,7 @@ intro: The Augmented Reality Mobile Game project is an immersive gaming experien
     showcases the seamless integration of augmented reality elements into the gaming realm.
 ---
 <script setup>
-import ArticleItem from '/components/articleItem.vue';
+import ArticleItem from '/components/ArticleItem.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 

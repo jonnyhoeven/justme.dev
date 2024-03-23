@@ -2,12 +2,12 @@
 layout: home
 
 hero:
-  name: "justme.dev"
+  name: "Justme.dev"
   text: "Developer Blog"
   tagline: Just make it!
   image:
     src: /images/ava.jpg
-    alt: justme.dev
+    alt: Justme.dev
   actions:
     - theme: brand
       text: Projects
@@ -17,14 +17,13 @@ hero:
       link: /blog
 
 features:
-  - title: <a href="/projects/gitops-workshop">Kubernetes Git-Ops Workshop</a>
-    details: <a href="/projects/gitops-workshop">This Workshop will teach you how to create your own Kubernetes cluster using K3S and use ArgoCD to deploy 
-             your first application from a Git-Ops perspective. This is the way.</a>
-  - title: <a href="/posts/gorilla-cli">Gorilla CLI</a>
-    details: <a href="/posts/gorilla-cli">Gorilla CLI powers your command-line using LLM. Simply state your objective and Gorilla CLI will generate 
+  - title: <a href="/project/workshop">Kubernetes Git-Ops Workshop</a>
+    details: <a href="/project/workshop">This Workshop will teach you how to create your own Kubernetes cluster using K3S and use ArgoCD to deploy 
+             your first application from a Git-Ops perspective.</a>
+  - title: <a href="/post/gorilla-cli">Gorilla CLI</a>
+    details: <a href="/post/gorilla-cli">Gorilla CLI powers your command-line using LLM. Simply state your objective and Gorilla CLI will generate 
              potential commands for execution.</a>
-  - title: <a href="/posts/logseq">Logseq</a>
-    details: <a href="/posts/logseq">Logseq is a privacy-first, open-source platform for knowledge sharing and management. It focuses on privacy, 
+  - title: <a href="/post/logseq">Logseq</a>
+    details: <a href="/post/logseq">Logseq is a privacy-first, open-source platform for knowledge sharing and management. It focuses on privacy, 
              longevity and user control.</a>
 ---
-

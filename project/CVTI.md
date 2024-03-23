@@ -15,6 +15,6 @@ intro: Introducing the Touch Interface designed for the Concert Hall de Doelen, 
     user experience.
 ---
 <script setup>
-import ArticleItem from '/components/articleItem.vue';
+import ArticleItem from '/components/ArticleItem.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>

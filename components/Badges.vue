@@ -32,7 +32,7 @@ defineProps(['frontmatter'])
 
 <style>
 .badge-bar {
-  padding-top: 10pt;
+  margin: 10pt 0 20pt 0;
 }
 .shieldButton {
   margin-top: 12pt;

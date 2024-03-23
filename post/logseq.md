@@ -16,6 +16,6 @@ intro: Logseq is a knowledge management and collaboration platform that focuses 
     features for organizing and structuring your notes.
 ---
 <script setup>
-import ArticleItem from '/components/articleItem.vue';
+import ArticleItem from '/components/ArticleItem.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>

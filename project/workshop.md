@@ -15,6 +15,6 @@ intro: This workshop is designed to provide a basic understanding of Kubernetes 
     application from a Git-Ops perspective. This is the `Git-Ops` way.
 ---
 <script setup>
-import ArticleItem from '/components/articleItem.vue';
+import ArticleItem from '/components/ArticleItem.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>

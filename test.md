@@ -1,5 +1,5 @@
 <script setup>
-import Testbed from '/components/testbed.vue';
+import Testbed from '/components/Testbed.vue';
 </script>
 
 # Testbed

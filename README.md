@@ -1,7 +1,4 @@
-This is a GitHub.io pages repository, hosted on:
-[jonnyhoeven.github.io](https://jonnyhoeven.github.io)
-[justme.dev](https://justme.dev)
-[justme.dev](https://justme.dev)
+This VitePress site is hosted from GitHub.io pages at [www.Justme.dev](https://www.justme.dev).
 
 ## Requirements
 
@@ -16,9 +13,6 @@ nvm use
 - VitePress
 
 ```bash
-#npm add -D vitepress
-#npm add -D vue
-#npx vitepress init
 npm install
 ```
 
@@ -30,4 +24,4 @@ npm run docs:build
 npm run docs:preview
 ```
 
-## Commit to main to update hosted site
+Commit to the `main` branch to trigger [deployment](https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml).

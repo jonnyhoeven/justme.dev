@@ -4,9 +4,9 @@ layout: home
 
 <script setup>
 import { data as pages} from './data/projects.data.js';
-import ArticleListitem from '/components/articleListItem.vue';
+import ArticleList from '/components/ArticleList.vue';
 </script>
 
 # Projects
 
-<ArticleListitem v-for="page of pages" :page="page"/>
+<ArticleList v-for="page of pages" :page="page"/>
