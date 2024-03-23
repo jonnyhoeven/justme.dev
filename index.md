@@ -28,6 +28,3 @@ features:
              longevity and user control.</a>
 ---
 
-
-
-

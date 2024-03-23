@@ -20,7 +20,7 @@ export default async () => {
             ['script', {src: 'https://www.googletagmanager.com/gtag/js?id=G-KX1KJ3KEMB'}],
             ['script',
                 {},
-                  `window.dataLayer = window.dataLayer || [];
+                `window.dataLayer = window.dataLayer || [];
                   function gtag(){dataLayer.push(arguments);}
                   gtag('js', new Date());
                   gtag('config', 'G-KX1KJ3KEMB');`
@@ -81,7 +81,8 @@ export default async () => {
             },
             footer: {
                 message: 'Released under the MIT License.',
-                copyright: 'Copyright © 2024 Jonny van der Hoeven.',
+                copyright: 'Copyright © 2024 Jonny van der Hoeven.</br>' +
+                    '<img style="float:right" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml/badge.svg?branch=main">',
             },
         },
         sitemap: {
@@ -90,5 +91,3 @@ export default async () => {
         transformPageData
     })
 }
-
-
