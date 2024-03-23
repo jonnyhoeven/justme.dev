@@ -1,5 +1,6 @@
 <script setup>
 import BadgesComponent from '../components/badges.vue';
+
 defineProps(['frontmatter'])
 </script>
 
@@ -20,8 +21,6 @@ defineProps(['frontmatter'])
 
 
 <style>
-
-
 .container_row {
   display: grid;
   padding: 10pt;
