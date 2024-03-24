@@ -32,7 +32,7 @@ defineProps(['frontmatter'])
 
 .articleImage {
   width: 100%; /*or 70%, or what you want*/
-  height: 250pt; /*or 70%, or what you want*/
+  height: 270pt; /*or 70%, or what you want*/
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
