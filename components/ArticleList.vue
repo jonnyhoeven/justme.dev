@@ -12,7 +12,7 @@ defineProps(['page']);
         <div class="listImage" :style="{backgroundImage: 'url('+ page.frontmatter.image +')'}"></div>
       </div>
       <div class="layercontent">
-        <p><strong>{{ page.frontmatter.title }}</strong></p>
+        <h3 style="margin:15pt 0 10pt;">{{ page.frontmatter.title }}</h3>
         <span v-html="page.frontmatter.intro"></span>
         <Badges :frontmatter="page.frontmatter"/>
       </div>
