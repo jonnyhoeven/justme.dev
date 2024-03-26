@@ -1,4 +1,4 @@
-name: Justme.dev Deployment
+name: Deployment
 
 on:
   # Runs on pushes targeting the `main` branch. Change this to `master` if you're
