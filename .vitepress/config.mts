@@ -87,9 +87,10 @@ export default async () => {
                 ],
             },
             footer: {
-                message: 'Released under the MIT License.',
+                message: 'Released under the <a href="https://raw.githubusercontent.com/jonnyhoeven/justme.dev/main/LICENSE">MIT</a> License.',
                 copyright: 'Copyright © 2024 Jonny van der Hoeven.</br>' +
-                    '<img style="float:right" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml/badge.svg?branch=main">',
+                    '<img class="homeBadge" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml/badge.svg?branch=main">' +
+                    '<img class="homeBadge" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/github-code-scanning/codeql/badge.svg">'
             },
         },
         sitemap: {

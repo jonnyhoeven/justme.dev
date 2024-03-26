@@ -168,3 +168,8 @@
         transform: translatey(-50%) translateX(-50%) scale(1);
     }
 }
+
+.homeBadge {
+    float: right;
+    padding-left: 10pt;
+}
