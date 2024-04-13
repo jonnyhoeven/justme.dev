@@ -41,8 +41,8 @@ infrastructure management, making it easier for operators to focus on other crit
 of Harvester is its integration with Rancher, allowing operators to manage their VM workloads alongside their Kubernetes
 clusters. This integration provides a unified platform for managing all types of workloads, making it easier to optimize
 resources and improve overall network performance. Additionally, Harvester's support for distributed block storage and
-tiering, as well as its ability to create, edit, clone, and export volumes, makes it an ideal choice for managing storage
-in edge networks. Overall, Harvester is a powerful tool for edge networks, providing a modern, open-source, and
+tiering, as well as its ability to create, edit, clone, and export volumes, makes it an ideal choice for managing
+storage in edge networks. Overall, Harvester is a powerful tool for edge networks, providing a modern, open-source, and
 interoperable infrastructure solution that can help operators streamline their infrastructure management and improve
 overall network performance.
 

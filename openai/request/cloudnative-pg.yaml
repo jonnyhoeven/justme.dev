@@ -1,0 +1,26 @@
+title: CloudNative Postgres
+type: post
+date: 2024-04-15
+image: /images/tpa.png
+fetchReadme: false
+fetchML: true
+githost: https://raw.githubusercontent.com/
+user: cloudnative-pg
+project: cloudnative-pg
+branch: main
+languages: Go, Shell
+editLink: false
+model: meta-llama/Llama-2-7b-chat-hf
+messages:
+  - role: system
+    content: >2-
+      You are a developer writing a blog, Intro using 4 to 6 sentences, Blog Post using 12 to 15 sentences.
+      Desired format:
+      Intro: -||-
+      BlogPost: -||-
+  - role: "user"
+    content: >2-
+        Write a blog post about CloudNative Postgres using the following GitHub readme: CloudNativePG is a
+        comprehensive platform designed to seamlessly manage PostgreSQL databases within Kubernetes environments, 
+        covering the entire operational lifecycle from initial deployment to ongoing maintenance.
+      

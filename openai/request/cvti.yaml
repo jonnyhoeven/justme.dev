@@ -1,0 +1,16 @@
+title: Camera & Lighting Interface
+type: project
+date: 2014-08-16
+image: /images/cvti.jpg
+fetchReadme: true
+githost: https://raw.githubusercontent.com
+user: jonnyhoeven
+project: CVTI
+branch: master
+readmeFile: README.md
+languages: Visual Basic .NET
+fetchML: false
+outline: deep
+intro: This workshop is designed to provide a basic understanding of Kubernetes and ArgoCD and will teach you how to create
+  your own Kubernetes cluster using K3S and ArgoCD to deploy your first
+  application from a Git-Ops perspective. This is the `Git-Ops` way.

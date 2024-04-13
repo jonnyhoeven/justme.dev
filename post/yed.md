@@ -30,16 +30,17 @@ type: post
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
-Yed's multi-document interface is particularly useful for developers who need to create multiple diagrams simultaneously.
-This feature allows them to work on different diagrams without having to open and close multiple files, saving time and
-increasing productivity. Additionally, Yed's cross-platform compatibility means that developers can use the same software
-on different operating systems, eliminating the need to learn multiple diagramming tools.  Moreover, Yed's proprietary
-software license allows developers to use a single copy of the software gratis, making it a cost-effective option for
-individuals and organizations alike. This license also allows developers to distribute their diagrams to others, making
-it easier to collaborate and share ideas.  In conclusion, Yed is an excellent choice for developers who need a reliable
-and versatile diagramming tool. Its multi-document interface, cross-platform compatibility, and proprietary software
-license make it a powerful tool for structuring drawing infrastructure. With Yed, developers can create high-quality
-diagrams quickly and efficiently, making it an essential tool for any development project.
+Yed's multi-document interface is particularly useful for developers who need to create multiple diagrams
+simultaneously. This feature allows them to work on different diagrams without having to open and close multiple files,
+saving time and increasing productivity. Additionally, Yed's cross-platform compatibility means that developers can use
+the same software on different operating systems, eliminating the need to learn multiple diagramming tools.  Moreover,
+Yed's proprietary software license allows developers to use a single copy of the software gratis, making it a cost-
+effective option for individuals and organizations alike. This license also allows developers to distribute their
+diagrams to others, making it easier to collaborate and share ideas.  In conclusion, Yed is an excellent choice for
+developers who need a reliable and versatile diagramming tool. Its multi-document interface, cross-platform
+compatibility, and proprietary software license make it a powerful tool for structuring drawing infrastructure. With
+Yed, developers can create high-quality diagrams quickly and efficiently, making it an essential tool for any
+development project.
 
 
 <ArticleFooter :frontmatter="$frontmatter"/>

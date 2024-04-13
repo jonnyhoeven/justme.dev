@@ -5,6 +5,8 @@
     "vue": "^3.4.21"
   },
   "scripts": {
+    "docs:generate": "python3 openai/process.py",
+    "docs:models": "python3 openai/models.py > openai/models.json",
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview"

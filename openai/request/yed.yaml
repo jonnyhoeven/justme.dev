@@ -1,0 +1,22 @@
+title: yEd
+type: post
+date: 2021-08-01
+image: /images/yed.png
+fetchReadme: false
+fetchML: true
+externalUrl: https://www.yworks.com/products/yed
+editLink: false
+model: meta-llama/Llama-2-7b-chat-hf
+messages:
+  - role: system
+    content: >2-
+      You are a developer writing a blog, Intro using 4 to 6 sentences, Blog Post using 12 to 15 sentences.
+      Desired format:
+      Intro: -||-
+      BlogPost: -||-
+  - role: "user"
+    content: >2-
+      Write a blog post about Yed and what it means for structuring drawing infrastructure
+      based on the following github readme: yEd is a general-purpose diagramming program with a multi-document interface.
+      It is a cross-platform application written in Java that runs on Windows, Linux, Mac OS, and other platforms that support the Java Virtual Machine. It is released under a proprietary software license, that allows using a single copy gratis.
+      yEd is a powerful desktop application that can be used to quickly and effectively generate high-quality diagrams. It runs on all Windows, Unix/Linux, and Mac OS versions.

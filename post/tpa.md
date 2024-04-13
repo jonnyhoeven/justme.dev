@@ -45,21 +45,21 @@ user: EnterpriseDB
 <ArticleItem :frontmatter="$frontmatter"/>
 
 TPA is an open-source tool that uses Ansible to deploy Postgres clusters according to EDB's recommendations. The tool
-embodies the best practices followed by EDB, informed by many years of experience with deploying and supporting Postgres.
-TPA provides a declarative configuration mechanism that allows you to describe a Postgres cluster in a text file,
-config.yml. With TPA, you can easily provision servers, configure the operating system, install and configure Postgres
-and associated components, run automated tests on the cluster, and deploy future changes to your configuration.  One of
-the standout features of TPA is its ability to automate the deployment and management of Postgres clusters. With TPA, you
-can easily deploy Postgres clusters on AWS EC2 instances or Docker containers, or deploy to existing servers or VMs by
-specifying connection details. TPA also provides a range of configuration options for tweaking kernel settings, creating
-users and SSH keys, installing packages, defining systemd services, setting up log rotation, and more.  Another benefit
-of using TPA is its ability to run automated tests on the cluster after deployment. This ensures that your Postgres
-cluster is functioning correctly and can detect any issues early on. Additionally, TPA makes it easy to deploy future
-changes to your configuration, such as changing Postgres settings, installing and upgrading packages, adding new servers,
-and more.  In conclusion, TPA is a powerful tool for structuring Postgres projects and staying on top of management. With
-its declarative configuration mechanism and built-in automation features, TPA makes it easy to deploy and manage Postgres
-clusters with ease. Whether you're a seasoned developer or just starting out, TPA is an invaluable resource for any
-Postgres project.
+embodies the best practices followed by EDB, informed by many years of experience with deploying and supporting
+Postgres. TPA provides a declarative configuration mechanism that allows you to describe a Postgres cluster in a text
+file, config.yml. With TPA, you can easily provision servers, configure the operating system, install and configure
+Postgres and associated components, run automated tests on the cluster, and deploy future changes to your configuration.
+One of the standout features of TPA is its ability to automate the deployment and management of Postgres clusters. With
+TPA, you can easily deploy Postgres clusters on AWS EC2 instances or Docker containers, or deploy to existing servers or
+VMs by specifying connection details. TPA also provides a range of configuration options for tweaking kernel settings,
+creating users and SSH keys, installing packages, defining systemd services, setting up log rotation, and more.  Another
+benefit of using TPA is its ability to run automated tests on the cluster after deployment. This ensures that your
+Postgres cluster is functioning correctly and can detect any issues early on. Additionally, TPA makes it easy to deploy
+future changes to your configuration, such as changing Postgres settings, installing and upgrading packages, adding new
+servers, and more.  In conclusion, TPA is a powerful tool for structuring Postgres projects and staying on top of
+management. With its declarative configuration mechanism and built-in automation features, TPA makes it easy to deploy
+and manage Postgres clusters with ease. Whether you're a seasoned developer or just starting out, TPA is an invaluable
+resource for any Postgres project.
 
 
 <ArticleFooter :frontmatter="$frontmatter"/>
