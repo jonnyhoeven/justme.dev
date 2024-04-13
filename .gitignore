@@ -1,8 +1,7 @@
 .env
 .vitepress/dist
 .vitepress/cache
-.idea
 .vscode
 /node_modules/
-/.idea/
 /openai/models.json
+/.idea
