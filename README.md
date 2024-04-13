@@ -29,7 +29,7 @@ Commit to the `main` branch to trigger [deployment](https://github.com/jonnyhoev
 
 ## Usage
 
-Create request files in the `requests` folder, for example: [logseq.yaml](request/logseq.yaml).
+Create request files in the `requests` folder, for example: [logseq.yaml](openai/request/logseq.yaml).
 
 Copy the .env.example file to .env and fill in the required fields.
 
@@ -47,7 +47,7 @@ python3 process.py
 
 ## Notes
 
-- The OpenAI api response will be saved in the [response](response) folder with the same name as the request file.
+- The OpenAI api response will be saved in the `./openai/response` folder with the same name as the request file.
 - The generated markdown will be saved in a sub folder defined by `request type` using the same name as the request file
   and
   the suffix `.md`.
