@@ -5,13 +5,14 @@ import yaml
 import pickle
 import requests
 import textwrap
-from dotenv import dotenv_values
+import os
+from dotenv import load_dotenv
 from openai import OpenAI
 
-config = dotenv_values('.env')
-req_path = config['REQUEST_PATH']
-api_key = config['OPENAI_API_KEY']
-api_url = config['API_URL']
+load_dotenv()
+req_path = os.environ['REQUEST_PATH']
+api_key = os.environ['OPENAI_API_KEY']
+api_url = os.environ['API_URL']
 yaml_file_delim = '---'
 max_width = 120
 
