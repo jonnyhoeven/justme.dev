@@ -5,3 +5,5 @@
 /node_modules/
 /openai/models.json
 /.idea
+/project/
+/post/
