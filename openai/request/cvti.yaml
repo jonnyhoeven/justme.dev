@@ -11,6 +11,5 @@ readmeFile: README.md
 languages: Visual Basic .NET
 fetchML: false
 outline: deep
-intro: This workshop is designed to provide a basic understanding of Kubernetes and ArgoCD and will teach you how to create
-  your own Kubernetes cluster using K3S and ArgoCD to deploy your first
-  application from a Git-Ops perspective. This is the `Git-Ops` way.
+intro: While the project was salvaged, it was eventually decided to switch to a different hardware device platform with 
+  better specs. As of now, networking and DMX mixing functionalities have not been implemented in this project.
