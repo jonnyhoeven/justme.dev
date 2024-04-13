@@ -1,18 +1,17 @@
-from os import listdir, linesep
-from os.path import isfile
-from os.path import join
+from os import listdir, linesep, environ
+from os.path import isfile, join
 import yaml
 import pickle
 import requests
 import textwrap
-import os
+
 from dotenv import load_dotenv
 from openai import OpenAI
 
 load_dotenv()
-req_path = os.environ['REQUEST_PATH']
-api_key = os.environ['OPENAI_API_KEY']
-api_url = os.environ['API_URL']
+req_path = environ['REQUEST_PATH']
+api_key = environ['OPENAI_API_KEY']
+api_url = environ['API_URL']
 yaml_file_delim = '---'
 max_width = 120
 
