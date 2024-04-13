@@ -18,6 +18,7 @@ user: jonnyhoeven
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
+ import ArticleFooter from '/components/ArticleFooter.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
@@ -51,3 +52,5 @@ diving into the world of DMX is sure to ignite your passion for creativity and e
 bright and the DMX signals flow seamlessly!   ![Windows Screenshot](http://jonnyhoeven.github.io/images/cvti.jpg)  Visual
 Studio .NET 2015 (VB.net)  Allows incorperation of  https://github.com/jonnyhoeven/DMXControl,  Does not include
 networking code for client -> OpenDMX Node Server setup (it was dropped early on in favour of commercial solutions).
+
+<ArticleFooter :frontmatter="$frontmatter"/>

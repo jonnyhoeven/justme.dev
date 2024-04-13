@@ -26,6 +26,7 @@ type: post
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
+ import ArticleFooter from '/components/ArticleFooter.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
@@ -40,3 +41,5 @@ and versatile diagramming tool. Its multi-document interface, cross-platform com
 license make it a powerful tool for structuring drawing infrastructure. With Yed, developers can create high-quality
 diagrams quickly and efficiently, making it an essential tool for any development project.
 
+
+<ArticleFooter :frontmatter="$frontmatter"/>

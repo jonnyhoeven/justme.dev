@@ -40,6 +40,7 @@ user: EnterpriseDB
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
+ import ArticleFooter from '/components/ArticleFooter.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
@@ -60,3 +61,5 @@ its declarative configuration mechanism and built-in automation features, TPA ma
 clusters with ease. Whether you're a seasoned developer or just starting out, TPA is an invaluable resource for any
 Postgres project.
 
+
+<ArticleFooter :frontmatter="$frontmatter"/>

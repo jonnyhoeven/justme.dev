@@ -17,6 +17,7 @@ user: jonnyhoeven
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
+ import ArticleFooter from '/components/ArticleFooter.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
@@ -26,3 +27,5 @@ version manager  ```bash curl -o- https//raw.githubusercontent.com/nvm-sh/nvm/v0
 use ```  - VitePress  ```bash npm install ```  ## Development  ```bash npm run docs:dev npm run docs:build npm run
 docs:preview ```  Commit to the `main` branch to trigger
 [deployment](https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml).
+
+<ArticleFooter :frontmatter="$frontmatter"/>

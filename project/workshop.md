@@ -18,6 +18,7 @@ user: jonnyhoeven
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
+ import ArticleFooter from '/components/ArticleFooter.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
@@ -241,3 +242,5 @@ cluster  - To keep your system clean, you can delete the cluster by running:  ``
 ```  - You can also delete the kubeconfig file by running:  ```bash rm ~/.kube/config ```  - Optionally restore the
 original kubeconfig file you had before by running:  ```bash mv ~/.kube/config<UUID> ~/.kube/config ```  - Restore your
 `hosts` file to its original state.  ```bash sudo nano /etc/hosts ```
+
+<ArticleFooter :frontmatter="$frontmatter"/>

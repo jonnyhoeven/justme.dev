@@ -34,6 +34,7 @@ user: logseq
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
+ import ArticleFooter from '/components/ArticleFooter.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
@@ -56,3 +57,5 @@ its flexible and customizable workflows, real-time collaboration capabilities, a
 essential tool for any developer looking to streamline their processes and stay organized. Whether you're managing a
 small project or a large-scale initiative, logseq is the
 
+
+<ArticleFooter :frontmatter="$frontmatter"/>

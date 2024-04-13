@@ -29,6 +29,7 @@ user: EnterpriseDB
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
+ import ArticleFooter from '/components/ArticleFooter.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
@@ -42,3 +43,5 @@ arguments. With Gorilla CLI, you can work more efficiently and effectively, free
 matter most. 🕒 So why wait? Give Gorilla CLI a try today and experience the power of user-centric CLI management for
 yourself! 🚀
 
+
+<ArticleFooter :frontmatter="$frontmatter"/>

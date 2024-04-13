@@ -19,6 +19,7 @@ user: jonnyhoeven
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
+ import ArticleFooter from '/components/ArticleFooter.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
@@ -59,3 +60,5 @@ Vuforia Imaging SDK offers a robust platform for bringing your AR visions to lif
 of interactive storytelling, unleash your creativity, and embark on an exciting journey into the realm of augmented
 reality with Vuforia Imaging SDK. The world of AR awaits – are you ready to revolutionize the way we see and interact
 with the world around us?
+
+<ArticleFooter :frontmatter="$frontmatter"/>

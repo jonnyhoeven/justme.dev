@@ -31,6 +31,7 @@ user: harvester
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
+ import ArticleFooter from '/components/ArticleFooter.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
@@ -45,3 +46,5 @@ in edge networks. Overall, Harvester is a powerful tool for edge networks, provi
 interoperable infrastructure solution that can help operators streamline their infrastructure management and improve
 overall network performance.
 
+
+<ArticleFooter :frontmatter="$frontmatter"/>

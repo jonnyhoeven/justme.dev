@@ -27,6 +27,7 @@ user: cloudnative-pg
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
+ import ArticleFooter from '/components/ArticleFooter.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
@@ -38,3 +39,5 @@ feedback, and organizing your application's features in a logical and intuitive 
 your application with real users to ensure that it meets their needs and is easy to use. By following these tips and best
 practices, you can design a user-friendly application that will help you build a successful product.
 
+
+<ArticleFooter :frontmatter="$frontmatter"/>
