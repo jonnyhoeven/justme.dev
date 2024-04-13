@@ -60,10 +60,9 @@ jobs:
         run: |
           python openai/process.py
       - name: Commit and push content changes
-        uses: devops-infra/action-commit-push@master
+        uses: actions-js/push@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          commit_message: Update content
 
       - name: Setup Node
         uses: actions/setup-node@v4
