@@ -106,11 +106,31 @@
             #22bcee 50%
     );
     --vp-home-hero-image-filter: blur(44px);
+
+    --ls-listitem-image-col: 1;
+    --ls-listitem-image-row: 1;
+    --ls-listitem-image-width: 100%;
+    --ls-listitem-image-height: 120pt;
+    --ls-listitem-image-bg-blur: 35px;
+    --ls-listitem-image-bg-blur-hover: 20px;
+    --ls-listitem-content-col: 1;
+    --ls-listitem-content-row: 2;
+    --ls-listitem-image-padding: 0pt 0pt 0pt 0pt;
+
 }
 
 @media (min-width: 640px) {
     :root {
-        --vp-home-hero-image-filter: blur(56px);
+        --vp-home-hero-image-filter: blur(30px);
+        --ls-listitem-image-col: 1;
+        --ls-listitem-image-row: 1;
+        --ls-listitem-image-width: 100pt;
+        --ls-listitem-image-height: 100pt;
+        --ls-listitem-image-bg-blur: 40px;
+        --ls-listitem-image-bg-blur-hover: 35px;
+        --ls-listitem-content-col: 2;
+        --ls-listitem-content-row: 1;
+        --ls-listitem-image-padding: 14pt 0pt 0pt 0pt;
     }
 }
 

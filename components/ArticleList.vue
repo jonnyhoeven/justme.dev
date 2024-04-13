@@ -32,26 +32,27 @@ defineProps(['page']);
 }
 
 .layerbg, .layerimg {
-  grid-column: 1;
-  grid-row: 1;
-  margin: 15pt 0 0 0;
+  grid-column: var(--ls-listitem-image-col);
+  grid-row: var(--ls-listitem-image-row);
+  padding: var(--ls-listitem-image-padding);
 }
 
 .layercontent {
-  grid-column: 2;
-  grid-row: 1;
-  margin: 0 0 0 20pt;
+  grid-column: var(--ls-listitem-content-col);
+  grid-row: var(--ls-listitem-content-row);
+  margin: 10pt 0 20pt 0;
 }
 
 .listImage {
-  width: 180pt; /*or 70%, or what you want*/
-  height: 100pt; /*or 70%, or what you want*/
+  width: var(--ls-listitem-image-width);
+  height: var(--ls-listitem-image-height);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   border-radius: 6pt;
   border: 1px solid var(--vp-c-brand-soft);
   transition: all 1s ease-in-out;
+  padding: var(--ls-listitem-image-padding);
 }
 
 .container_row:hover .listImage {
@@ -59,17 +60,18 @@ defineProps(['page']);
 }
 
 .listImagebg {
-  width: 180pt; /*or 70%, or what you want*/
-  height: 100pt; /*or 70%, or what you want*/
+  width: var(--ls-listitem-image-width);
+  height: var(--ls-listitem-image-height);
   background-image: linear-gradient(-28deg, rgb(15, 196, 93) 50%, rgb(34, 188, 238) 50%);
-  filter: blur(40pt);
+  filter: blur(var(--ls-listitem-image-bg-blur));
   z-index: -10;
   transition: all 0.5s ease-in-out;
+  padding: var(--ls-listitem-image-padding);
 }
 
 .container_row:hover .listImagebg {
   transform: skew(-1.5deg, -0.5deg) rotate(-0.4deg) scale(1.05);
-  filter: blur(20pt);
+  filter: blur(var(--ls-listitem-image-bg-blur-hover));
 }
 
 </style>

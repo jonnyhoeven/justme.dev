@@ -52,7 +52,7 @@ defineProps(['frontmatter'])
   transition: all 1s ease-in-out;
   background: linear-gradient(45deg, #22bcee, #0fc45d, #99cde1, #0c5e83);
   background-size: 800% 800%;
-  filter: blur(35pt);
+  filter: blur(var(--ls-listitem-image-bg-blur));
 
   -webkit-animation: glow 20s ease infinite;
   -moz-animation: glow 20s ease infinite;
@@ -61,7 +61,7 @@ defineProps(['frontmatter'])
 
 .container_row:hover .articleImagebg {
   transform: skew(-1.5deg, -0.5deg) rotate(-0.5deg) scale(1.04);
-  filter: blur(20pt);
+  filter: blur(var(--ls-listitem-image-bg-blur-hover));
 }
 
 @-webkit-keyframes glow {

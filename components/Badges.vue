@@ -3,31 +3,32 @@ defineProps(['frontmatter'])
 </script>
 
 <template>
-  <div class="badge-bar">
-    <img :src=frontmatter.watchersUrl
-         class="shieldButton"
+  <div
+      class="badge-bar">
+    <img v-if="frontmatter.watchersUrl"
+         :src=frontmatter.watchersUrl
          alt="Watchers"
-    >
-    <img :src="frontmatter.starsUrl"
+         class="shieldButton"
+    />
+    <img v-if="frontmatter.starsUrl" :src="frontmatter.starsUrl"
          alt="Stars"
          class="shieldButton"
-    >
-    <img :src="frontmatter.forksUrl"
+    />
+    <img v-if="frontmatter.forksUrl" :src="frontmatter.forksUrl"
          alt="Forks"
          class="shieldButton"
-    >
+    />
     <Badge v-for="lang of frontmatter.langArr" :text="lang"
            class="shieldButton"
            type="info"
            style="margin-right:5pt"
     />
-
-
     <a target="_blank"
        class="textButton"
+       v-if="frontmatter.externalUrl"
        :href="frontmatter.externalUrl"
     >
-      <Badge text="View on GitHub"
+      <Badge :text="frontmatter.externalUrlLabel"
              type="tip"
              class="shieldButton"
              style="margin-right:5pt"
@@ -45,6 +46,7 @@ defineProps(['frontmatter'])
 .badge-bar {
   margin: 10pt 0 20pt 0;
 }
+
 .shieldButton {
   margin-top: 12pt;
   margin-right: 3pt;
