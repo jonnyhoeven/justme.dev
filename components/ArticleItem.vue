@@ -14,7 +14,6 @@ defineProps(['frontmatter'])
     </div>
   </div>
   <p v-html="frontmatter.intro"></p>
-  <p v-html="frontmatter.readme"></p>
 </template>
 
 
