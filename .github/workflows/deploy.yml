@@ -25,7 +25,6 @@ concurrency:
 
 env:
   # Set the build directory for VitePress
-  VITEPRESS_DIR: .vitepress/dist
   REQUEST_PATH: openai/request
   API_URL: https://api.aimlapi.com/
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -78,7 +77,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: $VITEPRESS_DIR
+          path: .vitepress/dist
 
   # Deployment job
   deploy:
