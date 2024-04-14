@@ -21,7 +21,7 @@ export default async () => {
             ['link', {rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: ''}],
             ['link', {
                 rel: 'stylesheet',
-                href: 'https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400&display=swap'
+                href: 'https://fonts.googleapis.com/css2?family=Fira:wght@400&display=swap'
             }],
             //Google Analytics
             ['script', {src: 'https://www.googletagmanager.com/gtag/js?id=G-KX1KJ3KEMB'}],
