@@ -43,8 +43,8 @@ export default async () => {
         lastUpdated: true,
         themeConfig: {
             logo: {
-                light: '/images/logo.png',
-                dark: '/images/logo_dark.png',
+                light: '/images/logo.webp',
+                dark: '/images/logo_dark.webp',
                 alt: 'JH Logo',
             },
             editLink: {
@@ -63,7 +63,7 @@ export default async () => {
                 {icon: 'linkedin', link: 'https://www.linkedin.com/in/jonnyhoeven/'},
                 {
                     icon: {
-                        svg: '<img src="/images/google.png" style="height:15pt;" alt="Google"/>',
+                        svg: '<img src="/images/google.webp" style="height:15pt;" alt="Google"/>',
                     },
                     link: 'https://g.dev/jonnyvanderhoeven'
                 },
@@ -89,8 +89,8 @@ export default async () => {
             footer: {
                 message: 'Released under the <a href="https://raw.githubusercontent.com/jonnyhoeven/justme.dev/main/LICENSE">MIT</a> License.',
                 copyright: 'Copyright © 2024 Jonny van der Hoeven.</br>' +
-                    '<img class="homeBadge" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml/badge.svg?branch=main">' +
-                    '<img class="homeBadge" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/github-code-scanning/codeql/badge.svg">'
+                    '<img alt="Github deploy workflow status badge" class="homeBadge" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml/badge.svg?branch=main">' +
+                    '<img alt="Github code scanning badge" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/github-code-scanning/codeql/badge.svg">'
             },
         },
         sitemap: {

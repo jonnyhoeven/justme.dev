@@ -3,6 +3,10 @@
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/.vitepress/cache" />
+      <excludeFolder url="file://$MODULE_DIR$/.vitepress/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/post" />
+      <excludeFolder url="file://$MODULE_DIR$/project" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

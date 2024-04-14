@@ -1,7 +1,7 @@
 title: Git Ops Workshop
 type: project
 date: 2021-08-01
-image: /images/gitops-workshop.png
+image: /images/gitops-workshop.webp
 fetchReadme: true
 githost: https://raw.githubusercontent.com
 user: jonnyhoeven
