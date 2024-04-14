@@ -51,7 +51,7 @@
 
     --vp-c-brand-1: var(--vp-c-green-1);
     --vp-c-brand-2: var(--vp-c-green-2);
-    --vp-c-brand-3: var(--vp-c-green-3);
+    --vp-c-brand-3: #1e5b3d;
     --vp-c-brand-soft: var(--vp-c-green-soft);
 
     --vp-c-tip-1: var(--vp-c-brand-1);
