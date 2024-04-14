@@ -89,8 +89,8 @@ export default async () => {
             footer: {
                 message: 'Released under the <a href="https://raw.githubusercontent.com/jonnyhoeven/justme.dev/main/LICENSE">MIT</a> License.',
                 copyright: 'Copyright © 2024 Jonny van der Hoeven.</br>' +
-                    '<img alt="Github deploy workflow status badge" class="homeBadge" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml/badge.svg?branch=main">' +
-                    '<img alt="Github code scanning badge" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/github-code-scanning/codeql/badge.svg">'
+                    '<a href="https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml" target="_blank"><img alt="Github deploy workflow status badge" class="homeBadge" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml/badge.svg?branch=main"></a>' +
+                    '<a href="https://github.com/jonnyhoeven/justme.dev/actions/workflows/github-code-scanning/codeql" target="_blank"><img alt="Github code scanning badge" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/github-code-scanning/codeql/badge.svg"></a>'
             },
         },
         sitemap: {
