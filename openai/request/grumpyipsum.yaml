@@ -1,7 +1,7 @@
 title: Grumpy Ipsum
 type: project
 date: 2020-05-21
-image: /images/grumpyipsum.jpg
+image: /images/grumpyipsum.webp
 fetchReadme: true
 githost: https://raw.githubusercontent.com
 user: jonnyhoeven
