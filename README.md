@@ -1,11 +1,10 @@
 This VitePress site is hosted from GitHub.io pages at [www.Justme.dev](https://www.justme.dev).
-It's able to process request yaml files to generate markdown files using the OpenAI API.
 
 ## Setup / Requirements
 
 ### OpenAI API key
 
-Only needed for generating content from OpenAI.
+Only needed if generating content from OpenAI.
 
 ### Updated env file
 
