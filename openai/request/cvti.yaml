@@ -11,7 +11,8 @@ readmeFile: README.md
 languages: Visual Basic .NET
 fetchML: false
 outline: deep
-intro: Introducing the Camera & Lighting Interface (CVTI) software. This software is designed to control a camera and 
-  lighting system for a machine vision application. The software is written in Visual Basic .NET and is designed to run 
-  on a Windows operating system. The software provides a user-friendly interface for controlling the camera and lighting 
+intro: Introducing the Camera & Lighting Interface (CVTI) software. This software is designed to control a camera and
+  lighting system for a machine vision application. The software is written in Visual Basic .NET and is designed to run
+  on a Windows operating system. The software provides a user-friendly interface for controlling the camera and lighting
   system, allowing the user to adjust camera settings, capture images, and control the lighting system.
+  It's not a machine vision application.

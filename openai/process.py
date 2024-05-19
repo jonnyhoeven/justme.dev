@@ -120,7 +120,7 @@ for file in [f for f in listdir(req_path) if isfile(join(req_path, f))]:
                       " import ArticleItem from '/components/ArticleItem.vue';" + linesep +
                       " import ArticleFooter from '/components/ArticleFooter.vue';" + linesep +
                       '</script>' + linesep +
-                      '<ArticleItem :frontmatter="$frontmatter"/>' + linesep + linesep +
+                      '<ArticleItem :frontmatter="$frontmatter"/>' + linesep +
                       my_wrap.fill(post) + linesep +
                       readme + linesep + linesep +
                       '<ArticleFooter :frontmatter="$frontmatter"/>' + linesep

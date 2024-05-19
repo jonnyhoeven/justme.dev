@@ -10,7 +10,7 @@ project: harvester
 branch: master
 languages: Go, Shell, Other
 editLink: false
-model: meta-llama/Llama-2-7b-chat-hf
+model: google/gemma-7b-it
 messages:
   - role: system
     content: >2-

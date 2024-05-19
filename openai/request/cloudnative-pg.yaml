@@ -10,7 +10,7 @@ project: cloudnative-pg
 branch: main
 languages: Go, Shell
 editLink: false
-model: meta-llama/Llama-2-7b-chat-hf
+model: google/gemma-7b-it
 messages:
   - role: system
     content: >2-
