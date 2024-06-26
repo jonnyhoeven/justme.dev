@@ -83,7 +83,7 @@ export default async () => {
                     {
                         text: 'Project',
                         items: [
-                            {text: 'All Projects', link: '/projects'},
+                            {text: 'All Projects', link: '/project'},
                         ],
                     }
                 ],

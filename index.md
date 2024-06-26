@@ -11,7 +11,7 @@ hero:
   actions:
     - theme: brand
       text: Projects
-      link: /projects
+      link: /project
     - theme: alt
       text: Blog
       link: /blog
