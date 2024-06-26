@@ -57,7 +57,7 @@ export default async () => {
             },
             nav: [
                 {text: 'Home', link: '/'},
-                {text: 'projects', link: '/project'},
+                {text: 'Projects', link: '/project'},
                 {text: 'Blog', link: '/blog'}
             ],
             socialLinks: [
