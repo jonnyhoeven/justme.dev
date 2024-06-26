@@ -14,11 +14,10 @@ model: google/gemma-7b-it
 messages:
   - role: system
     content: >2-
-      You are a developer writing a blog, Intro using 4 to 6 sentences, Blog Post using 12 to 15 sentences. You are not allowed to use the * character in your response.
+      You are a developer writing a blog, Intro using 4 to 6 sentences, Blog Post using 12 to 15 sentences.
       Desired format:
       Intro: -||-
       BlogPost: -||-
-
   - role: "user"
     content: >2-
         Write a blog post about CloudNative Postgres using the following GitHub readme: CloudNativePG is a
