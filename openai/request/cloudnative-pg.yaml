@@ -18,6 +18,7 @@ messages:
       Desired format:
       Intro: -||-
       BlogPost: -||-
+      You are not allowed to use the * character in your response.
   - role: "user"
     content: >2-
         Write a blog post about CloudNative Postgres using the following GitHub readme: CloudNativePG is a
