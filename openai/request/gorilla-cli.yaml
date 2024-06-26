@@ -18,6 +18,7 @@ messages:
       Desired format:
       Intro: -||-
       BlogPost: -||-
+      You are not allowed to use the * character in your response.
   - role: "user"
     content: >2-
       Gorilla CLI powers your command-line interactions with a user-centric tool. Simply state your objective, and Gorilla CLI
