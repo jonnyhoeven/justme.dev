@@ -11,5 +11,4 @@ readmeFile: README.md
 languages: Kubernetes
 fetchML: false
 outline: deep
-intro: This workshop is designed to provide a basic understanding of Kubernetes. You'll be creating your own development
-  kubernetes cluster using K3S and afterwards we'll deploy an application using ArgoCD. This is the Git-Ops way.
+intro: This Workshop will help create your own Kubernetes cluster using K3S and ArgoCD. Deploy your first application from a Git-Ops perspective.
