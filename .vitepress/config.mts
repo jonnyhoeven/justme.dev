@@ -24,14 +24,9 @@ export default async () => {
                 href: 'https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400&display=swap'
             }],
             //Google Analytics
+            ['script', {async: 'true', src: 'https://www.googletagmanager.com/gtag/js?id=G-KX1KJ3KEMB'}],
+            ['script', {}, "window.dataLayer = window.dataLayer || [];\nfunction gtag(){dataLayer.push(arguments);}\ngtag('js', new Date());\ngtag('config', 'G-KX1KJ3KEMB');"],
             ['script', {src: 'https://www.googletagmanager.com/gtag/js?id=G-KX1KJ3KEMB'}],
-            ['script',
-                {},
-                `window.dataLayer = window.dataLayer || [];
-                  function gtag(){dataLayer.push(arguments);}
-                  gtag('js', new Date());
-                  gtag('config', 'G-KX1KJ3KEMB');`
-            ],
         ],
         base: "/",
         cleanUrls: true,
