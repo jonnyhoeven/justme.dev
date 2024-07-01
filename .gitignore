@@ -5,8 +5,8 @@
 /node_modules/
 /openai/models.json
 #/openai/response/*.bin
-/project/*.md
-/post/*.md
+#/project/*.md
+#/post/*.md
 /.idea
 #/project/*.md
 #/post/*.md
