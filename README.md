@@ -70,10 +70,10 @@ trigger [deployment](https://github.com/jonnyhoeven/justme.dev/actions/workflows
 ## Notes
 
 - Create request files in the `requests` folder, for example: [logseq.yaml](openai/request/logseq.yaml).
-- Run the `npm run docs:generate` command to generate the markdown files.
-- Or push to main to let the GitHub action do the work.
+- Run the `npm run docs:generate` command to generate the markdown files locally.
+- When pushing to `main` GitHub action does `generate`, `build` and `deploy`.
 - The OpenAI response will be saved in the response folder.
 - The generated markdown will be saved in a sub folder defined by `request type` using the same name as the request file
   and the suffix `.md`.
-- Rename/delete corresponding response files to force the script to retrieve data from `openai`
+- Delete corresponding `response.bin` in `./openai/response` to force the script to retrieve data from `openai`
   again.
