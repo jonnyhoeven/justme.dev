@@ -5,7 +5,7 @@ export default async () => {
     return defineConfig({
         lang: 'en-US',
         title: "Justme.dev",
-        description: "Justme.dev - Developer blog by Jonny van der Hoeven. Just me, making IT.",
+        description: "Justme.dev - Developer blog by Jonny van der Hoeven. Just me, making it.",
         head: [
             ['link', {rel: 'apple-touch-icon', sizes: '76x76', href: '/apple-touch-icon.png'}],
             ['link', {rel: 'image/png', sizes: '32x32', href: '/favicon-32x32.png'}],
@@ -31,9 +31,13 @@ export default async () => {
         transformHead: ({pageData}) => {
             const head: HeadConfig[] = []
             head.push(['meta', {property: 'og:title', content: pageData.frontmatter.title}])
-            head.push(['meta', {property: 'og:description', content: pageData.frontmatter.intro}])
+            head.push(['meta', {property: 'og:description', content: pageData.frontmatter.description}])
             head.push(['meta', {property: 'og:type', content: 'article'}])
-            head.push(['meta', {property: 'og:image', content: 'https://www.justme.dev' + pageData.frontmatter.image}])
+            head.push(['meta', {
+                property: 'og:image',
+                content: 'https://www.justme.dev' + pageData.frontmatter.image ? pageData.frontmatter.image : '/images/logo.webp'
+            }])
+            head.push(['meta', {property: 'og:image-alt', content: pageData.frontmatter.title}])
             return head
         },
         base: "/",
