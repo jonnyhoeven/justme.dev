@@ -1,4 +1,4 @@
-import {defineConfig} from 'vitepress'
+import {defineConfig, HeadConfig} from 'vitepress'
 import transformPageData from './transformPageData';
 
 export default async () => {
@@ -28,6 +28,14 @@ export default async () => {
             ['script', {}, "window.dataLayer = window.dataLayer || [];\nfunction gtag(){dataLayer.push(arguments);}\ngtag('js', new Date());\ngtag('config', 'G-KX1KJ3KEMB');"],
             ['script', {src: 'https://www.googletagmanager.com/gtag/js?id=G-KX1KJ3KEMB'}],
         ],
+        transformHead: ({pageData}) => {
+            const head: HeadConfig[] = []
+            head.push(['meta', {property: 'og:title', content: pageData.frontmatter.title}])
+            head.push(['meta', {property: 'og:description', content: pageData.frontmatter.intro}])
+            head.push(['meta', {property: 'og:type', content: 'article'}])
+            head.push(['meta', {property: 'og:image', content: 'https://www.justme.dev' + pageData.frontmatter.image}])
+            return head
+        },
         base: "/",
         cleanUrls: true,
         markdown: {
@@ -91,7 +99,7 @@ export default async () => {
             },
         },
         sitemap: {
-            hostname: 'https://www.justme.dev'
+            hostname: 'https://www.justme.dev/'
         },
         transformPageData
     })
