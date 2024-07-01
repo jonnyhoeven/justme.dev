@@ -3,7 +3,7 @@ type: project
 date: 2020-05-21
 image: /images/grumpyipsum.webp
 fetchReadme: true
-githost: https://raw.githubusercontent.com
+gitlink: https://github.com/jonnyhoeven/grumpyipsum
 user: jonnyhoeven
 project: grumpyipsum
 branch: master

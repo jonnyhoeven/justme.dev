@@ -3,7 +3,7 @@ type: project
 date: 2014-08-16
 image: /images/cvti.webp
 fetchReadme: true
-githost: https://raw.githubusercontent.com
+gitlink: https://github.com/jonnyhoeven/CVTI
 user: jonnyhoeven
 project: CVTI
 branch: master

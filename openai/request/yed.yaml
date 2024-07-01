@@ -6,7 +6,7 @@ fetchReadme: false
 fetchML: true
 externalUrl: https://www.yworks.com/products/yed
 editLink: false
-model: google/gemma-7b-it
+model: openchat/openchat-3.5-1210
 messages:
   - role: system
     content: >2-

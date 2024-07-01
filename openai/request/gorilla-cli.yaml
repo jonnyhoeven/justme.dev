@@ -4,13 +4,13 @@ date: 2024-03-28
 image: /images/gorilla-cli.webp
 fetchReadme: false
 fetchML: true
-githost: https://raw.githubusercontent.com/
-user: EnterpriseDB
+gitlink: https://github.com/gorilla-llm/gorilla-cli
+user: gorilla-cli
 project: tpa
 branch: main
 languages: Python, Jinja, Shell, Dockerfile
 editLink: false
-model: google/gemma-7b-it
+model: openchat/openchat-3.5-1210
 messages:
   - role: system
     content: >2-
@@ -18,10 +18,9 @@ messages:
       Desired format:
       Intro: -||-
       BlogPost: -||-
-      You are not allowed to use the * character in your response.
   - role: "user"
     content: >2-
       Gorilla CLI powers your command-line interactions with a user-centric tool. Simply state your objective, and Gorilla CLI
       will generate potential commands for execution. Gorilla today supports ~1500 APIs, including Kubernetes, AWS, GCP,
-      Azure, GitHub, Conda, Curl, Sed, and many more. No more recalling intricate CLI arguments! 🦍
+      Azure, GitHub, Conda, Curl, Sed, and many more. No more recalling intricate CLI arguments!
       

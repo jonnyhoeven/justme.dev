@@ -3,7 +3,7 @@ type: project
 date: 2024-03-01
 image: /images/justme.dev.webp
 fetchReadme: true
-githost: https://raw.githubusercontent.com
+gitlink: https://github.com/jonnyhoeven/justme.dev
 user: jonnyhoeven
 project: justme.dev
 branch: main

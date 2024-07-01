@@ -4,13 +4,13 @@ date: 2024-04-18
 image: /images/pg.webp
 fetchReadme: false
 fetchML: true
-githost: https://raw.githubusercontent.com/
+gitlink: https://github.com/pgadmin-org/pgadmin4
 user: pgadmin-org
 project: pgadmin4
 branch: master
 languages: Python 62.9%, JavaScript 32.5%, PLpgSQL 2.6%, Shell 0.6%, TypeScript 0.5%, CSS 0.3%, Other 0.6%
 editLink: false
-model: meta-llama/Llama-2-70b-chat-hf
+model: openchat/openchat-3.5-1210
 messages:
   - role: system
     content: >2-
@@ -20,7 +20,7 @@ messages:
       BlogPost: -||-
   - role: "user"
     content: >2-
-        Write a blog post about pgAdmin4 using the following readme: pgAdmin is the leading Open Source management tool 
+        Write a blog post about pgAdmin4 using the following, pgAdmin is the leading Open Source management tool 
         for Postgres, the world's most advanced Open Source database. pgAdmin 4 is designed to meet the needs of both 
         novice and experienced Postgres users alike, providing a powerful graphical interface that simplifies the creation, 
         maintenance and use of database objects. pgAdmin 4 is a complete rewrite of pgAdmin, built using Python and Javascript/jQuery.

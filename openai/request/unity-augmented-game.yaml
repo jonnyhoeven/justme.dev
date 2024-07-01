@@ -3,7 +3,7 @@ type: project
 date: 2021-08-01
 image: /images/vuforia.webp
 fetchReadme: true
-githost: https://raw.githubusercontent.com
+gitlink: https://github.com/jonnyhoeven/unity-augmented-game
 user: jonnyhoeven
 project: unity-augmented-game
 branch: master
