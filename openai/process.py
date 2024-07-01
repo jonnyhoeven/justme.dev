@@ -21,19 +21,18 @@ client = OpenAI(
 )
 
 
-def get_readme(githost, user, project, branch, readme_file):
-    if githost \
-            and user \
+def get_readme(user, project, branch, readme_file):
+    if user \
             and project \
             and readme_file:
-        u = f'{githost}/{user}/{project}/{branch}/{readme_file}'
+        u = f'https://raw.githubusercontent.com/{user}/{project}/{branch}/{readme_file}'
         r = requests.get(u)
         if r.status_code != 200:
             print(f'Error: No 200 response {u}')
             return ''
         return r.text
     else:
-        print(f'Warning: Missing githost, user, project, or readme_file')
+        print(f'Warning: Missing gitlink, user, project, or readme_file')
         return ''
 
 
@@ -92,7 +91,7 @@ for file in [f for f in listdir(req_path) if isfile(join(req_path, f))]:
 
     #  Fetch Readme
     if req.get('fetchReadme', False):
-        readme = get_readme(req['githost'], req['user'], req['project'], req['branch'], req['readmeFile'])
+        readme = get_readme(req['user'], req['project'], req['branch'], req['readmeFile'])
 
     if req.get('fetchML', False):
         if isfile(resPath):
