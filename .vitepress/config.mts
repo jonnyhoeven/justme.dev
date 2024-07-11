@@ -1,4 +1,5 @@
-import {defineConfig, HeadConfig} from 'vitepress'
+/*import {defineConfig, HeadConfig} from 'vitepress'*/
+import {defineConfig} from 'vitepress'
 import transformPageData from './transformPageData';
 
 export default async () => {
@@ -28,6 +29,7 @@ export default async () => {
             ['script', {}, "window.dataLayer = window.dataLayer || [];\nfunction gtag(){dataLayer.push(arguments);}\ngtag('js', new Date());\ngtag('config', 'G-KX1KJ3KEMB');"],
             ['script', {src: 'https://www.googletagmanager.com/gtag/js?id=G-KX1KJ3KEMB'}],
         ],
+/*
         transformHead: ({pageData}) => {
             const head: HeadConfig[] = []
             head.push(['meta', {property: 'og:title', content: pageData.frontmatter.title}])
@@ -40,6 +42,7 @@ export default async () => {
             head.push(['meta', {property: 'og:image-alt', content: pageData.frontmatter.title}])
             return head
         },
+*/
         base: "/",
         cleanUrls: true,
         markdown: {
