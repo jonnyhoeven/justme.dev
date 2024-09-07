@@ -3,18 +3,18 @@ type: post
 date: 2023-04-13
 image: /images/harvester.webp
 fetchReadme: false
-fetchML: true
-gitlink: https://github.com/harvester/harvester
+fetchML: false
+githost: https://github.com
 user: harvester
 project: harvester
 branch: master
 languages: Go, Shell, Other
 editLink: false
-model: openchat/openchat-3.5-1210
+model: google/gemma-7b-it
 messages:
   - role: system
     content: >2-
-      You're a developer writing a blog, Intro using 4 sentences, Blog Post using 10, don't use "*".
+      You are a developer writing a blog, Intro using 4 to 6 sentences, Blog Post using 12 to 15 sentences.
       Desired format:
       Intro: -||-
       BlogPost: -||-

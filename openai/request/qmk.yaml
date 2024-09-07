@@ -3,18 +3,18 @@ type: post
 date: 2023-04-14
 image: /images/qmk.webp
 fetchReadme: false
-fetchML: true
-gitlink: https://github.com/qmk/qmk_firmware
+fetchML: false
+githost: https://github.com
 user: qmk
 project: qmk_firmware
 branch: master
 languages: C, C++, Makefile, Python, Shell, Nix
 editLink: false
-model: openchat/openchat-3.5-1210
+model: google/gemma-7b-it
 messages:
   - role: system
     content: >2-
-      You're a developer writing a blog, Intro using 4 to 6 sentences, Blog Post using 12 to 15 sentences, don't use "*".
+      You are a developer writing a blog, Intro using 4 to 6 sentences, Blog Post using 12 to 15 sentences.
       Desired format:
       Intro: -||-
       BlogPost: -||-

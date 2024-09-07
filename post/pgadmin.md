@@ -53,5 +53,4 @@ can be deployed on-premises or in the cloud, and supports integration with popul
 This flexibility makes it an ideal choice for organizations looking to standardize on a single database management tool
 across
 
-
 <ArticleFooter :frontmatter="$frontmatter"/>

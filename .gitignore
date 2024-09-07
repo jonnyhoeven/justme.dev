@@ -2,9 +2,9 @@
 .vitepress/dist
 .vitepress/cache
 .vscode
+.idea
 /node_modules/
 /openai/models.json
 /openai/response/*.bin
 #/project/*.md
 #/post/*.md
-/.idea

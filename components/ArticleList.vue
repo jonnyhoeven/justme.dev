@@ -40,7 +40,7 @@ defineProps(['page']);
 .layercontent {
   grid-column: var(--ls-listitem-content-col);
   grid-row: var(--ls-listitem-content-row);
-  margin: 10pt 0 20pt 0;
+  margin: 10pt 0 20pt 22pt;
 }
 
 .listImage {

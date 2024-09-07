@@ -12,5 +12,5 @@ fetchML: false
 outline: deep
 languages: Vue, PHP
 intro: Grumpy ipsum, the crowd-sourced negative Lorem Ipsum generator
-  This web project uses vue frontend with a laravel/eloquent backend to crowdsource negative content
-  for use instead of positive content. The project is a work in progress and is not yet ready for users.
+  This web project uses vue laravel/eloquent to crowdsource negative content
+  instead of positive content. The project is a work in progress and is not yet ready for users.

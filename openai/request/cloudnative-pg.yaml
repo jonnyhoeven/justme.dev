@@ -3,14 +3,14 @@ type: post
 date: 2024-04-15
 image: /images/pg.webp
 fetchReadme: false
-fetchML: true
-gitlink: https://github.com/cloudnative-pg/cloudnative-pg
+fetchML: false
+githost: https://raw.githubusercontent.com/
 user: cloudnative-pg
 project: cloudnative-pg
 branch: main
 languages: Go, Shell
 editLink: false
-model: openchat/openchat-3.5-1210
+model: google/gemma-7b-it
 messages:
   - role: system
     content: >2-

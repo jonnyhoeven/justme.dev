@@ -3,7 +3,7 @@ type: post
 date: 2021-08-01
 image: /images/yed.webp
 fetchReadme: false
-fetchML: true
+fetchML: false
 externalUrl: https://www.yworks.com/products/yed
 editLink: false
 model: openchat/openchat-3.5-1210
