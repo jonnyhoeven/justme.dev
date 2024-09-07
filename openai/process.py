@@ -83,7 +83,7 @@ for file in [f for f in listdir(req_path) if isfile(join(req_path, f))]:
     my_wrap = textwrap.TextWrapper(width=120)
     basename = file.split('.')[0]
     resPath = f'openai/response/{basename}.bin'
-    dst_path = f'{req["type"]}/{basename}.md'
+    dst_path = f'{req["type"]}s/{basename}.md'
     readme = ''
     post = ''
     res = {}

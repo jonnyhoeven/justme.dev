@@ -7,4 +7,4 @@
 /openai/models.json
 /openai/response/*.bin
 #/project/*.md
-#/post/*.md
+#/postss/*.md
