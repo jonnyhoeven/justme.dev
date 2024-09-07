@@ -3,13 +3,13 @@ branch: master
 date: 2014-08-16
 fetchML: false
 fetchReadme: true
-githost: https://raw.githubusercontent.com
+gitlink: https://github.com/jonnyhoeven/CVTI
 image: /images/cvti.webp
-intro: This software is designed to control camera and
-  lighting systems. The software is written in Visual Basic .NET and is designed to run on a Windows operating systems. The
-  software provides a user-friendly interface for all kinds of users. Allowing users to adjust camera settings, capture
-  images, and control the lighting and corresponding hatches.
-languages: Visual Basic
+intro: Introducing the Camera & Lighting Interface (CVTI) software. This software is designed to control camera and lighting
+  systems. The software is written in Visual Basic .NET and is designed to run on Windows operating systems. The software
+  provides a user-friendly interface for all kinds of users. Allowing users to adjust camera settings, capture images, and
+  control the lighting and corresponding hatches.
+languages: Visual Basic .NET
 outline: deep
 project: CVTI
 readmeFile: README.md
@@ -25,6 +25,7 @@ user: jonnyhoeven
 
 Camera &amp; Visual Touch Interface
 
+
 While the project was salvaged, it was eventually decided to switch to a different hardware device platform with better
 specs. As of now, networking and DMX mixing functionalities have not been implemented in this project.
 
@@ -32,6 +33,7 @@ In the realm of lighting and stage effects, DMX (Digital Multiplex) is a crucial
 revolutionized the way we control and manipulate lighting fixtures. Whether you're a seasoned lighting professional or
 just starting to delve into the world of stage lighting, understanding DMX is essential for creating captivating visual
 experiences.
+What is DMX?
 
 ## Core components of a DMX system
 
@@ -76,13 +78,13 @@ Challenges and Considerations
 
 - Let the lights shine bright and the DMX signals flow seamlessly!
 
+
 ![Windows Screenshot](http://jonnyhoeven.github.io/images/cvti.jpg)
 
 Visual Studio .NET 2015 (VB.net)
 
-Allows incorperation of  https://github.com/jonnyhoeven/DMXControl,
-Does not include networking code for client -> OpenDMX Node Server setup (it was dropped early on in favour of
-commercial solutions).
+Allows incorperation of  https://github.com/jonnyhoeven/DMXControl, 
+Does not include networking code for client -> OpenDMX Node Server setup (it was dropped early on in favour of commercial solutions).
 
 
 <ArticleFooter :frontmatter="$frontmatter"/>

@@ -3,7 +3,7 @@ branch: master
 date: 2021-08-01
 fetchML: false
 fetchReadme: true
-githost: https://raw.githubusercontent.com
+gitlink: https://github.com/jonnyhoeven/unity-augmented-game
 image: /images/vuforia.webp
 intro: The Augmented Reality Mobile Game project is an immersive gaming experience designed specifically for Android devices,
   leveraging Vuforia technology to seamlessly track images and overlay dynamic 3D models onto real-world surroundings. By

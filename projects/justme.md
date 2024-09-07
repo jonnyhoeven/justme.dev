@@ -3,7 +3,7 @@ branch: main
 date: 2024-03-01
 fetchML: false
 fetchReadme: true
-githost: https://raw.githubusercontent.com
+gitlink: https://github.com/jonnyhoeven/justme.dev
 image: /images/justme.dev.webp
 intro: This site's source code is also available on GitHub. I needed a static site generator. VitePress is specifically designed
   for documentation websites. It is built on top of Vue, a modern build tool for frontend development.
@@ -47,16 +47,18 @@ nvm use
 
 #### Python & pip
 
+*Only needed if generating content from OpenAI.*
+
 ```bash
 sudo apt install python3
 python3 -m pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
 #### Install dependencies
 
 ```bash
 npm install
-pip install -r requirements.txt
 ```
 
 ## How to use
@@ -93,12 +95,12 @@ trigger [deployment](https://github.com/jonnyhoeven/justme.dev/actions/workflows
 ## Notes
 
 - Create request files in the `requests` folder, for example: [logseq.yaml](openai/request/logseq.yaml).
-- Run the `npm run docs:generate` command to generate the markdown files.
-- Or push to main to let the GitHub action do the work.
+- Run the `npm run docs:generate` command to generate the markdown files locally.
+- When pushing to `main` GitHub action does `generate`, `build` and `deploy`.
 - The OpenAI response will be saved in the response folder.
 - The generated markdown will be saved in a sub folder defined by `request type` using the same name as the request file
   and the suffix `.md`.
-- Rename/delete corresponding response files to force the script to retrieve data from `openai`
+- Delete corresponding `response.bin` in `./openai/response` to force the script to retrieve data from `openai`
   again.
 
 

@@ -6,14 +6,6 @@ fetchML: false
 fetchReadme: false
 githost: https://raw.githubusercontent.com/
 image: /images/tpa.webp
-intro: '**
-
-
-  TPA is an orchestration tool that simplifies the deployment and management of Postgres clusters. It leverages Ansible to
-  deploy clusters according to EDB''s recommendations, incorporating best practices gained from years of experience.
-
-
-  **'
 languages: Python, Jinja, Shell, Dockerfile
 messages:
 - content: 'You are a developer writing a blog, Intro using 4 to 6 sentences, Blog Post using 12 to 15 sentences. Desired
@@ -38,7 +30,6 @@ messages:
 model: google/gemma-7b-it
 project: tpa
 title: Trusted Postgres Architect
-total_tokens: 696
 type: post
 user: EnterpriseDB
 ---
@@ -47,11 +38,7 @@ user: EnterpriseDB
  import ArticleFooter from '/components/ArticleFooter.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
-**  TPA offers a declarative configuration mechanism to describe a Postgres cluster, encompassing its topology,
-configuration details, and resources. To get started, run `tpaexec configure` to generate an initial configuration based
-on high-level choices. The generated configuration file, `config.yml`, can be edited to suit your needs. With this
-configuration, TPA can provision servers, configure operating systems, install and configure Postgres components, and
-run automated tests. It also enables deploying future changes to the cluster with ease.
+
 
 
 <ArticleFooter :frontmatter="$frontmatter"/>

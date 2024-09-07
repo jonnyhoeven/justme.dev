@@ -3,11 +3,10 @@ branch: master
 date: 2020-05-21
 fetchML: false
 fetchReadme: true
-githost: https://raw.githubusercontent.com
+gitlink: https://github.com/jonnyhoeven/grumpyipsum
 image: /images/grumpyipsum.webp
-intro: Grumpy ipsum, the crowd-sourced negative Lorem Ipsum generator This web project uses vue frontend with a laravel/eloquent
-  backend to crowdsource negative content for use instead of positive content. The project is a work in progress and is not
-  yet ready for users.
+intro: Grumpy ipsum, the crowd-sourced negative Lorem Ipsum generator This web project uses vue laravel/eloquent to crowdsource
+  negative content instead of positive content. The project is a work in progress and is not yet ready for users.
 languages: Vue, PHP
 outline: deep
 project: grumpyipsum
