@@ -74,7 +74,7 @@ export default async () => {
             },
             nav: [
                 {text: 'Home', link: '/'},
-                {text: 'Projects', link: '/project'},
+                {text: 'Projects', link: '/projects'},
                 {text: 'Blog', link: '/blog'}
             ],
             socialLinks: [
@@ -87,24 +87,6 @@ export default async () => {
                     link: 'https://g.dev/jonnyvanderhoeven'
                 },
             ],
-            sidebar: {
-                '/posts/': [
-                    {
-                        text: 'Blog',
-                        items: [
-                            {text: 'All Posts', link: '/blog'},
-                        ],
-                    }
-                ],
-                '/project/': [
-                    {
-                        text: 'Project',
-                        items: [
-                            {text: 'Projects', link: '/project'},
-                        ],
-                    }
-                ],
-            },
             footer: {
                 message: 'Released under the <a href="https://raw.githubusercontent.com/jonnyhoeven/justme.dev/main/LICENSE">MIT</a> License.',
                 copyright: '© 2024 Jonny van der Hoeven.</br>' +
