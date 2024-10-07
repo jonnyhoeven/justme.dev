@@ -2,7 +2,8 @@
   "type": "module",
   "devDependencies": {
     "vitepress": "^1.0.0-rc.45",
-    "vue": "^3.4.21"
+    "vue": "^3.4.21",
+    "@vueuse/core": "^11.0.3"
   },
   "scripts": {
     "docs:generate": "python3 openai/process.py",

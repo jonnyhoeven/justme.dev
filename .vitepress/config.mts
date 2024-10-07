@@ -1,5 +1,5 @@
-/*import {defineConfig, HeadConfig} from 'vitepress'*/
-import {defineConfig} from 'vitepress'
+import {defineConfig, HeadConfig} from 'vitepress'
+//import {defineConfig} from 'vitepress'
 import transformPageData from './transformPageData';
 
 export default async () => {
@@ -36,20 +36,18 @@ export default async () => {
                   gtag('config', 'G-KX1KJ3KEMB');`
             ],
         ],
-/*
         transformHead: ({pageData}) => {
             const head: HeadConfig[] = []
-            head.push(['meta', {property: 'og:title', content: pageData.frontmatter.title}])
+            //head.push(['meta', {property: 'og:title', content: pageData.frontmatter.title}])
             head.push(['meta', {property: 'og:description', content: pageData.frontmatter.description}])
-            head.push(['meta', {property: 'og:type', content: 'article'}])
-            head.push(['meta', {
-                property: 'og:image',
-                content: 'https://www.justme.dev' + pageData.frontmatter.image ? pageData.frontmatter.image : '/images/logo.webp'
-            }])
-            head.push(['meta', {property: 'og:image-alt', content: pageData.frontmatter.title}])
+            //head.push(['meta', {property: 'og:type', content: 'article'}])
+            //head.push(['meta', {
+            //    property: 'og:image',
+            //    content: 'https://www.justme.dev' + pageData.frontmatter.image ? pageData.frontmatter.image : '/images/logo.webp'
+            //}])
+            //head.push(['meta', {property: 'og:image-alt', content: pageData.frontmatter.title}])
             return head
         },
-*/
         base: "/",
         cleanUrls: true,
         markdown: {
@@ -78,7 +76,7 @@ export default async () => {
                 {text: 'Blog', link: '/blog'}
             ],
             socialLinks: [
-                {icon: 'github', link: 'https://github.com/jonnyhoeven'},
+                {icon: 'github', link: 'https://github.com/jonnyhoeven/'},
                 {icon: 'linkedin', link: 'https://www.linkedin.com/in/jonnyhoeven/'},
                 {
                     icon: {

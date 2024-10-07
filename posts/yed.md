@@ -1,31 +1,51 @@
----
-date: 2021-08-01
-editLink: false
-externalUrl: https://www.yworks.com/products/yed
-fetchML: false
-fetchReadme: false
-image: /images/yed.webp
-messages:
-- content: 'You''re a developer writing a blog, Intro using 4 to 6 sentences, Blog Post using 12 to 15 sentences, don''t use
-    "*". Desired format: Intro: -||- BlogPost: -||-'
-  role: system
-- content: 'Write a blog post about Yed and what it means for structuring drawing infrastructure based on the following github
-    readme: yEd is a general-purpose diagramming program with a multi-document interface. It is a cross-platform application
-    written in Java that runs on Windows, Linux, Mac OS, and other platforms that support the Java Virtual Machine. It is
-    released under a proprietary software license, that allows using a single copy gratis. yEd is a powerful desktop application
-    that can be used to quickly and effectively generate high-quality diagrams. It runs on all Windows, Unix/Linux, and Mac
-    OS versions.'
-  role: user
-model: openchat/openchat-3.5-1210
-title: yEd
-type: post
----
-<script setup>
- import ArticleItem from '/components/ArticleItem.vue';
- import ArticleFooter from '/components/ArticleFooter.vue';
-</script>
-<ArticleItem :frontmatter="$frontmatter"/>
-
-
-
-<ArticleFooter :frontmatter="$frontmatter"/>
+    ---
+    date: 2021-08-01
+    editLink: false
+    externalUrl: https://www.yworks.com/products/yed
+    fetchML: false
+    fetchReadme: false
+    image: /images/yed.webp
+    title: yEd
+    type: post
+    ---
+    <script setup>
+     import ArticleItem from '/components/ArticleItem.vue';
+     import ArticleFooter from '/components/ArticleFooter.vue';
+    </script>
+    <ArticleItem :frontmatter="$frontmatter"/>
+    
+    # yEd: A Powerful Tool for Structuring Drawing Infrastructure
+    
+    ## Introduction
+    
+    yEd is a general-purpose diagramming program with a multi-document interface. It is a cross-platform application written
+    in Java that runs on Windows, Linux, Mac OS, and other platforms that support the Java Virtual Machine. It is released
+    under a proprietary software license, allowing the use of a single copy for free.
+    
+    ## What is yEd?
+    
+    yEd is a powerful desktop application that can be used to quickly and effectively generate high-quality diagrams. It is
+    a versatile tool that supports a wide range of diagram types, making it an ideal choice for structuring drawing
+    infrastructure. Whether you're creating flowcharts, network diagrams, or organizational charts, yEd provides the tools
+    and features you need to create professional-quality diagrams.
+    
+    ## Cross-Platform Compatibility
+    
+    One of the standout features of yEd is its cross-platform compatibility. Written in Java, it runs on all Windows,
+    Unix/Linux, and Mac OS versions. This means that regardless of your operating system, you can leverage the power of yEd
+    to create and manage your diagrams.
+    
+    ## Integration with Confluence
+    
+    In addition to its standalone capabilities, yEd can also be used inside Confluence with a plugin. This integration
+    allows you to create and edit diagrams directly within your Confluence pages, making it easier to incorporate visual
+    elements into your documentation and collaborate with your team.
+    
+    ## Conclusion
+    
+    In conclusion, yEd is a powerful, versatile, and user-friendly diagramming tool. Its cross-platform compatibility and
+    integration with Confluence make it an invaluable tool for anyone involved in structuring drawing infrastructure.
+    Whether you're a project manager, a software developer, or a systems analyst, yEd can help you visualize and communicate
+    complex ideas and processes with ease.
+    
+    <ArticleFooter :frontmatter="$frontmatter"/>

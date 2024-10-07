@@ -7,17 +7,6 @@ fetchReadme: false
 githost: https://github.com
 image: /images/harvester.webp
 languages: Go, Shell, Other
-messages:
-- content: 'You are a developer writing a blog, Intro using 4 to 6 sentences, Blog Post using 12 to 15 sentences. Desired
-    format: Intro: -||- BlogPost: -||-'
-  role: system
-- content: 'Write a blog post about harvester and what it does, how it can be used for edge networks. based on the following
-    github readme: Harvester is a modern, open, interoperable, hyperconverged infrastructure  (HCI) solution built on Kubernetes.
-    It is an open-source alternative designed for operators seeking a cloud-native  HCI solution. Harvester runs on bare metal
-    servers and provides integrated virtualization and distributed storage  capabilities. In addition to traditional virtual
-    machines (VMs), Harvester supports containerized environments  automatically through integration with Rancher. '
-  role: user
-model: google/gemma-7b-it
 project: harvester
 title: Harvester
 type: post
@@ -29,6 +18,34 @@ user: harvester
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
+# Harvester: A Modern Solution for Edge Networks
 
+## Introduction
+
+Harvester is a cutting-edge, open, interoperable, hyperconverged infrastructure (HCI) solution that is built on the
+robust foundation of Kubernetes. It presents itself as an open-source alternative specifically designed for operators
+who are in search of a cloud-native HCI solution.
+
+## Harvester in Action
+
+Harvester operates on bare metal servers and offers integrated virtualization and distributed storage capabilities. This
+means that it not only supports traditional virtual machines (VMs) but also automatically supports containerized
+environments. This is made possible through its seamless integration with Rancher, a complete software stack for teams
+adopting containers.
+
+## Harvester for Edge Networks
+
+Edge networks, which bring computation and data storage closer to the location where it is needed, to improve response
+times and save bandwidth, can greatly benefit from Harvester. With its cloud-native approach, Harvester can help edge
+networks achieve lower latency, higher efficiency, and more robust security. Its ability to run on bare metal servers
+means that it can be deployed directly on edge devices, reducing the need for additional network hops and thus further
+reducing latency.
+
+## Conclusion
+
+In conclusion, Harvester is a modern, open-source HCI solution that is not only capable of running VMs but also supports
+containerized environments. Its integration with Rancher and ability to run on bare metal servers makes it an ideal
+solution for edge networks. With Harvester, operators can leverage the power of Kubernetes and cloud-native technologies
+to build efficient, secure, and low-latency edge networks.
 
 <ArticleFooter :frontmatter="$frontmatter"/>

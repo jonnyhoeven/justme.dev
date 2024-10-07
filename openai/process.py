@@ -68,20 +68,20 @@ def save_ml_response(p, r):
     f.close()
 
 
-for file in [f for f in listdir(req_path) if isfile(join(req_path, f))]:
+for reqFile in [f for f in listdir(req_path) if isfile(join(req_path, f))]:
     #  Load request file
-    rqPath = join(req_path, file)
-    with open(rqPath, 'r') as f:
+    rqFile = join(req_path, reqFile)
+    with open(rqFile, 'r') as f:
         req = yaml.safe_load(f)
     if not req:
-        print(f'Error loading {rqPath}')
+        print(f'Error loading {rqFile}')
         break
     if not req['type']:
-        print(f'Error: Missing type in {rqPath}')
+        print(f'Error: Missing type in {rqFile}')
         break
 
     my_wrap = textwrap.TextWrapper(width=120)
-    basename = file.split('.')[0]
+    basename = reqFile.split('.')[0]
     resPath = f'openai/response/{basename}.bin'
     dst_path = f'{req["type"]}s/{basename}.md'
     readme = ''
@@ -99,7 +99,7 @@ for file in [f for f in listdir(req_path) if isfile(join(req_path, f))]:
         else:
             print(f'Fetching response from api: {resPath}')
             if not req['model'] or not req['messages']:
-                print(f'Error: Missing model or messages in {rqPath}')
+                print(f'Error: Missing model or messages in {rqFile}')
                 break
             res = retrieve_ml_response(req['model'], req['messages'])
             save_ml_response(resPath, res)
