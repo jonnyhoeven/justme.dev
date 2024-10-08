@@ -5,19 +5,17 @@ fetchML: false
 fetchReadme: true
 gitlink: https://github.com/jonnyhoeven/CVTI
 image: /images/cvti.webp
-languages: Visual Basic .NET
-outline: deep
-project: CVTI
-user: jonnyhoeven
-readmeFile: README.md
-title: Camera & Lighting Interface
-type: project
-intro: |
-  Introducing the Camera & Lighting Interface (CVTI) software. This software is designed to control camera and lighting
+intro: Introducing the Camera & Lighting Interface (CVTI) software. This software is designed to control camera and lighting
   systems. The software is written in Visual Basic .NET and is designed to run on Windows operating systems. The software
   provides a user-friendly interface for all kinds of users. Allowing users to adjust camera settings, capture images, and
   control the lighting and corresponding hatches.
-editLink: false
+languages: Visual Basic .NET
+outline: deep
+project: CVTI
+readmeFile: README.md
+title: Camera & Lighting Interface
+type: project
+user: jonnyhoeven
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';

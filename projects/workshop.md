@@ -5,8 +5,7 @@ fetchML: false
 fetchReadme: true
 gitlink: https://github.com/jonnyhoeven/workshop
 image: /images/gitops-workshop.webp
-intro: |
-  This Workshop will help create your own Kubernetes cluster using K3S and ArgoCD. Deploy your first application from
+intro: This Workshop will help create your own Kubernetes cluster using K3S and ArgoCD. Deploy your first application from
   a Git-Ops perspective.
 languages: Kubernetes
 outline: deep
@@ -15,7 +14,6 @@ readmeFile: README.md
 title: Git Ops Workshop
 type: project
 user: jonnyhoeven
-editLink: false
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';

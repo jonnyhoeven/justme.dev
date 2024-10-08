@@ -5,8 +5,7 @@ fetchML: false
 fetchReadme: true
 gitlink: https://github.com/jonnyhoeven/justme.dev
 image: /images/justme.dev.webp
-intro: |
-  This site's source code is also available on GitHub. I needed a static site generator. VitePress is specifically designed
+intro: This site's source code is also available on GitHub. I needed a static site generator. VitePress is specifically designed
   for documentation websites. It is built on top of Vue, a modern build tool for frontend development.
 languages: CSS,Typescript,Vue
 outline: deep
@@ -15,7 +14,6 @@ readmeFile: README.md
 title: Justme.dev
 type: project
 user: jonnyhoeven
-editLink: false
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
