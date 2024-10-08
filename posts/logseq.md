@@ -1,18 +1,23 @@
 ---
-branch: master
-date: 2021-08-01
-editLink: true
-githost: https://github.com
-image: /images/logseq.webp
-languages: Markdown
 project: logseq
-title: Logseq
-type: post
 user: logseq
+gitlink: https://github.com/cloudnative-pg/cloudnative-pg
+githost: https://github.com
+branch: master
+readmeFile: README.md
+type: post
+title: Logseq
+date: 2021-08-01
+outline: deep
 intro: |
     Logseq is a privacy-focused, open-source note-taking application that aims to secure your notes from prying eyes, a
     common goal for many online note apps. It is a hidden gem in the Tools for Thought space, providing a powerful platform
     for structuring projects and staying on top of management tasks.
+fetchReadme: false
+editLink: true
+image: /images/logseq.webp
+languages: Markdown
+fetchML: false
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';

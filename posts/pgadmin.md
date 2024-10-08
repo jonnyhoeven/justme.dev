@@ -1,19 +1,23 @@
 ---
-branch: master
-date: 2024-04-18
-editLink: true
-fetchReadme: false
-githost: https://raw.githubusercontent.com/
-image: /images/pg.webp
-languages: Python, JavaScript, PLpgSQL, Shell, TypeScript, CSS, Other
 project: pgadmin4
-title: pgAdmin 4
-type: post
 user: pgadmin-org
+gitlink: https://pgadmin-org/pgadmin4
+githost: https://raw.githubusercontent.com/
+branch: master
+readmeFile: README.md
+type: post
+title: pgAdmin 4
+date: 2024-04-18
+outline: deep
 intro: |
     pgAdmin 4 is the leading open-source management tool for Postgres, the world's most advanced open-source database. It is
     designed to cater to both novice and experienced Postgres users, providing a powerful graphical interface that
     simplifies the creation, maintenance, and use of database objects.
+fetchReadme: false
+editLink: true
+image: /images/pg.webp
+languages: Python, JavaScript, PLpgSQL, Shell, TypeScript, CSS, Other
+fetchML: false
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';

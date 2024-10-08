@@ -1,18 +1,23 @@
 ---
-branch: master
-date: 2023-04-13
-editLink: true
-githost: https://github.com
-image: /images/harvester.webp
-languages: Go, Shell, Other
 project: harvester
-title: Harvester
-type: post
 user: harvester
+gitlink: https://github.com/harvester/harvester
+githost: https://github.com
+branch: master
+readmeFile: README.md
+type: post
+title: Harvester
+date: 2023-04-13
+outline: deep
 intro: |
     Harvester is a cutting-edge, open, interoperable, hyperconverged infrastructure (HCI) solution that is built on the
     robust foundation of Kubernetes. It presents itself as an open-source alternative specifically designed for operators
     who are in search of a cloud-native HCI solution.
+fetchReadme: false
+editLink: true
+image: /images/harvester.webp
+languages: Go, Shell, Other
+fetchML: false
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';

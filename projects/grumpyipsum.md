@@ -5,7 +5,8 @@ fetchML: false
 fetchReadme: true
 gitlink: https://github.com/jonnyhoeven/grumpyipsum
 image: /images/grumpyipsum.webp
-intro: Grumpy ipsum, the crowd-sourced negative Lorem Ipsum generator This web project uses vue laravel/eloquent to crowdsource
+intro: |
+  Grumpy ipsum, the crowd-sourced negative Lorem Ipsum generator This web project uses vue laravel/eloquent to crowdsource
   negative content instead of positive content. The project is a work in progress and is not yet ready for users.
 languages: Vue, PHP
 outline: deep
@@ -14,6 +15,7 @@ readmeFile: README.md
 title: Grumpy Ipsum
 type: project
 user: jonnyhoeven
+editLink: false
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';

@@ -1,19 +1,24 @@
 ---
-branch: main
-date: 2024-03-28
-editLink: true
-githost: https://raw.githubusercontent.com/
-image: /images/edb.webp
-languages: Python, Jinja, Shell, Dockerfile
 project: tpa
-title: Trusted Postgres Architect
-type: post
 user: EnterpriseDB
+gitlink: https://github.com/cloudnative-pg/cloudnative-pg
+githost: https://raw.githubusercontent.com/
+branch: main
+readmeFile: README.md
+type: post
+title: Trusted Postgres Architect
+date: 2024-03-28
+outline: deep
 intro: |
     Trusted Postgres Architect (TPA) is an orchestration tool that leverages Ansible to deploy Postgres clusters in line
     with EDB's recommendations. TPA encapsulates the best practices followed by EDB, informed by years of experience with
     deploying and supporting Postgres. These recommendations are applicable to both quick testbed setups and production
     environments.
+fetchReadme: false
+editLink: true
+image: /images/edb.webp
+languages: Python, Jinja, Shell, Dockerfile
+fetchML: false
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';

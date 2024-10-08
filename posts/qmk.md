@@ -1,19 +1,24 @@
 ---
-branch: master
-date: 2023-04-14
-editLink: true
-githost: https://github.com
-image: /images/qmk.webp
-languages: C, C++, Makefile, Python, Shell, Nix
 project: qmk_firmware
-title: Quantum Mechanical Keyboard
-type: post
 user: qmk
+gitlink: https://github.com/cloudnative-pg/cloudnative-pg
+githost: https://github.com
+branch: master
+readmeFile: README.md
+type: post
+title: Quantum Mechanical Keyboard
+date: 2023-04-14
+outline: deep
 intro: |
     Quantum Mechanical Keyboard (QMK) is an open-source community that focuses on the development of computer input devices.
     The community encompasses a wide range of input devices, including keyboards, mice, and MIDI devices. A dedicated group
     of collaborators maintains various aspects of QMK, including QMK Firmware, QMK Configurator, QMK Toolbox, qmk.fm, and
     its documentation.
+fetchReadme: false
+editLink: true
+image: /images/qmk.webp
+languages: C, C++, Makefile, Python, Shell, Nix
+fetchML: false
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';

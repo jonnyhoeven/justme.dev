@@ -1,14 +1,18 @@
 ---
-date: 2021-08-01
-editLink: true
-externalUrl: https://www.yworks.com/products/yed
-image: /images/yed.webp
-title: yEd
 type: post
+title: yEd
+date: 2021-08-01
+outline: deep
 intro: |
     yEd is a general-purpose diagramming program with a multi-document interface. It is a cross-platform application written
     in Java that runs on Windows, Linux, macOS, and other platforms that support the Java Virtual Machine. It is released
     under a proprietary software license, allowing the use of a single copy for free.
+fetchReadme: false
+editLink: true
+image: /images/yed.webp
+languages: Go, Shell
+externalUrl: https://www.yworks.com/products/yed
+fetchML: false
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
