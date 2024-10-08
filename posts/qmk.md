@@ -1,9 +1,7 @@
 ---
 branch: master
 date: 2023-04-14
-editLink: false
-fetchML: false
-fetchReadme: false
+editLink: true
 githost: https://github.com
 image: /images/qmk.webp
 languages: C, C++, Makefile, Python, Shell, Nix
@@ -11,23 +9,17 @@ project: qmk_firmware
 title: Quantum Mechanical Keyboard
 type: post
 user: qmk
+intro: |
+    Quantum Mechanical Keyboard (QMK) is an open-source community that focuses on the development of computer input devices.
+    The community encompasses a wide range of input devices, including keyboards, mice, and MIDI devices. A dedicated group
+    of collaborators maintains various aspects of QMK, including QMK Firmware, QMK Configurator, QMK Toolbox, qmk.fm, and
+    its documentation.
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
  import ArticleFooter from '/components/ArticleFooter.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
-
-# Quantum Mechanical Keyboard: An Open Source Community for Input Devices
-
-## Introduction
-
-Quantum Mechanical Keyboard (QMK) is an open-source community that focuses on the development of computer input devices.
-The community encompasses a wide range of input devices, including keyboards, mice, and MIDI devices. A dedicated group
-of collaborators maintains various aspects of QMK, including QMK Firmware, QMK Configurator, QMK Toolbox, qmk.fm, and
-its documentation.
-
-## What is QMK?
 
 QMK is more than just a project; it's a vibrant community centered around developing computer input devices. The
 community is diverse, encompassing all sorts of input devices, from keyboards and mice to MIDI devices. This diversity

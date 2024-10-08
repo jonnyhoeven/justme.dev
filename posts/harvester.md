@@ -1,9 +1,7 @@
 ---
 branch: master
 date: 2023-04-13
-editLink: false
-fetchML: false
-fetchReadme: false
+editLink: true
 githost: https://github.com
 image: /images/harvester.webp
 languages: Go, Shell, Other
@@ -11,22 +9,16 @@ project: harvester
 title: Harvester
 type: post
 user: harvester
+intro: |
+    Harvester is a cutting-edge, open, interoperable, hyperconverged infrastructure (HCI) solution that is built on the
+    robust foundation of Kubernetes. It presents itself as an open-source alternative specifically designed for operators
+    who are in search of a cloud-native HCI solution.
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
  import ArticleFooter from '/components/ArticleFooter.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
-
-# Harvester: A Modern Solution for Edge Networks
-
-## Introduction
-
-Harvester is a cutting-edge, open, interoperable, hyperconverged infrastructure (HCI) solution that is built on the
-robust foundation of Kubernetes. It presents itself as an open-source alternative specifically designed for operators
-who are in search of a cloud-native HCI solution.
-
-## Harvester in Action
 
 Harvester operates on bare metal servers and offers integrated virtualization and distributed storage capabilities. This
 means that it not only supports traditional virtual machines (VMs) but also automatically supports containerized

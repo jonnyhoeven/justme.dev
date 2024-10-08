@@ -1,8 +1,7 @@
 ---
 branch: master
 date: 2024-04-18
-editLink: false
-fetchML: false
+editLink: true
 fetchReadme: false
 githost: https://raw.githubusercontent.com/
 image: /images/pg.webp
@@ -11,22 +10,16 @@ project: pgadmin4
 title: pgAdmin 4
 type: post
 user: pgadmin-org
+intro: |
+    pgAdmin 4 is the leading open-source management tool for Postgres, the world's most advanced open-source database. It is
+    designed to cater to both novice and experienced Postgres users, providing a powerful graphical interface that
+    simplifies the creation, maintenance, and use of database objects.
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
  import ArticleFooter from '/components/ArticleFooter.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
-
-# pgAdmin 4: The Leading Open Source Management Tool for Postgres
-
-## Introduction
-
-pgAdmin 4 is the leading open-source management tool for Postgres, the world's most advanced open-source database. It is
-designed to cater to both novice and experienced Postgres users, providing a powerful graphical interface that
-simplifies the creation, maintenance, and use of database objects.
-
-## What is pgAdmin 4?
 
 pgAdmin 4 is a complete rewrite of pgAdmin, built using Python and Javascript/jQuery. It is a testament to the evolution
 of database management tools, offering a more streamlined and efficient approach to managing Postgres databases.

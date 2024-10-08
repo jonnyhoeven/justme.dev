@@ -1,9 +1,7 @@
 ---
 branch: master
 date: 2021-08-01
-editLink: false
-fetchML: false
-fetchReadme: false
+editLink: true
 githost: https://github.com
 image: /images/logseq.webp
 languages: Markdown
@@ -11,22 +9,16 @@ project: logseq
 title: Logseq
 type: post
 user: logseq
+intro: |
+    Logseq is a privacy-focused, open-source note-taking application that aims to secure your notes from prying eyes, a
+    common goal for many online note apps. It is a hidden gem in the Tools for Thought space, providing a powerful platform
+    for structuring projects and staying on top of management tasks.
 ---
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
  import ArticleFooter from '/components/ArticleFooter.vue';
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
-
-# Logseq: A Powerful Tool for Project Structure and Management
-
-## Introduction
-
-Logseq is a privacy-focused, open-source note-taking application that aims to secure your notes from prying eyes, a
-common goal for many online note apps. It is a hidden gem in the Tools for Thought space, providing a powerful platform
-for structuring projects and staying on top of management tasks.
-
-## What is Logseq?
 
 Logseq is more than just a note-taking app. It is a comprehensive tool that can be used for project management,
 research, article writing, and presentation preparation. It has been a daily driver for many users, including myself,
