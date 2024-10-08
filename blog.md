@@ -3,7 +3,7 @@ layout: home
 title: Projects
 intro: |
     A collection of blog posts for dev ops developers.
-image: /images/logo.webp
+image: /images/ava.webp
 ---
 
 <script setup>

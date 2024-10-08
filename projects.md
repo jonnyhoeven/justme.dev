@@ -3,7 +3,7 @@ layout: home
 title: Projects
 intro: |
   A collection of projects I have worked on.
-image: /images/logo.webp
+image: /images/ava.webp
 ---
 
 <script setup>
