@@ -3,8 +3,8 @@ defineProps(['frontmatter'])
 </script>
 
 <template>
-  <div
-      class="badge-bar">
+  <div v-if="frontmatter"
+       class="badge-bar">
     <img v-if="frontmatter.watchersUrl"
          :src=frontmatter.watchersUrl
          alt="Watchers"
@@ -18,7 +18,7 @@ defineProps(['frontmatter'])
          alt="Forks"
          class="shieldButton"
     />
-    <Badge v-for="lang of frontmatter.langArr" :text="lang"
+    <Badge v-if="frontmatter.langArr" v-for="lang of frontmatter.langArr" :text="lang"
            class="shieldButton"
            type="info"
            style="margin-right:5pt"

@@ -1,19 +1,20 @@
 <script setup>
-import Badges from '/components/Badges.vue';
+import Badges from './Badges.vue';
 
 defineProps(['page']);
 </script>
 
 <template v-if="page">
   <a :href="page.url" class="nolinkdecor">
-    <div class="container_row">
+    <div v-if="page.frontmatter" class="container_row">
       <div class="listImagebg layerbg"></div>
       <div class="layerimg">
-        <div class="listImage" :style="{backgroundImage: 'url('+ page.frontmatter.image +')'}"></div>
+        <div v-if="page.frontmatter.image" class="listImage"
+             :style="{backgroundImage: 'url('+ page.frontmatter.image +')'}"></div>
       </div>
-      <div class="layercontent">
+      <div v-if="page.frontmatter.title" class="layercontent">
         <h3 style="margin:15pt 0 10pt;">{{ page.frontmatter.title }}</h3>
-        <span v-html="page.frontmatter.intro"></span>
+        <span v-if="page.frontmatter.intro" v-html="page.frontmatter.intro"></span>
         <Badges :frontmatter="page.frontmatter"/>
       </div>
     </div>

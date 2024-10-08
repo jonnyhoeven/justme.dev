@@ -1,19 +1,19 @@
 <script setup>
-import Badges from './Badges.vue';
+import Badges from './Badges.vue'
 
 defineProps(['frontmatter'])
 </script>
 
 <template>
-  <h1>{{ frontmatter.title }}</h1>
-  <div class="container_row">
+  <h1 v-if="frontmatter && frontmatter.title">{{ frontmatter.title }}</h1>
+  <div v-if="frontmatter" class="container_row">
     <div class="articleImagebg layerbg"></div>
     <div class="layerimg">
-      <div class="articleImage" :style="{backgroundImage: 'url('+ frontmatter.image +')'}"></div>
+      <div v-if="frontmatter.image" class="articleImage" :style="{backgroundImage: 'url('+ frontmatter.image +')'}"></div>
       <Badges :frontmatter="frontmatter"/>
     </div>
   </div>
-  <p v-html="frontmatter.intro"></p>
+  <p v-if="frontmatter && frontmatter.intro" v-html="frontmatter.intro"></p>
 </template>
 
 
@@ -65,37 +65,37 @@ defineProps(['frontmatter'])
 
 @-webkit-keyframes glow {
   0% {
-    background-position: 4% 0%
+    background-position: 4% 0
   }
   50% {
     background-position: 97% 100%
   }
   100% {
-    background-position: 4% 0%
+    background-position: 4% 0
   }
 }
 
 @-moz-keyframes glow {
   0% {
-    background-position: 4% 0%
+    background-position: 4% 0
   }
   50% {
     background-position: 97% 100%
   }
   100% {
-    background-position: 4% 0%
+    background-position: 4% 0
   }
 }
 
 @keyframes glow {
   0% {
-    background-position: 4% 0%
+    background-position: 4% 0
   }
   50% {
     background-position: 97% 100%
   }
   100% {
-    background-position: 4% 0%
+    background-position: 4% 0
   }
 }
 
