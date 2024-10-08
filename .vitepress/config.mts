@@ -6,6 +6,7 @@ export default async () => {
     return defineConfig({
         lang: 'en-US',
         title: "Justme.dev",
+        srcExclude: ['/README.md'],
         description: "Justme.dev - Developer blog by Jonny van der Hoeven. Just me, making it.",
         head: [
             ['link', {rel: 'apple-touch-icon', sizes: '76x76', href: '/apple-touch-icon.png'}],
@@ -38,14 +39,17 @@ export default async () => {
         ],
         transformHead: ({pageData}) => {
             const head: HeadConfig[] = []
-            //head.push(['meta', {property: 'og:title', content: pageData.frontmatter.title}])
-            head.push(['meta', {property: 'og:description', content: pageData.frontmatter.description}])
-            //head.push(['meta', {property: 'og:type', content: 'article'}])
-            //head.push(['meta', {
-            //    property: 'og:image',
-            //    content: 'https://www.justme.dev' + pageData.frontmatter.image ? pageData.frontmatter.image : '/images/logo.webp'
-            //}])
-            //head.push(['meta', {property: 'og:image-alt', content: pageData.frontmatter.title}])
+            const pf = pageData.frontmatter
+            //head.push(['meta', {property: 'debug:pagedata', content: JSON.stringify(pageData) }])
+            head.push(['meta', {property: 'og:site_name', content: 'Justme.dev' }])
+            head.push(['meta', {property: 'og:title', content: pf.title ? pf.title : 'Justme.dev' }])
+            head.push(['meta', {property: 'og:description', content: pf.intro ? pf.intro : 'Just me, developer blog' }])
+            head.push(['meta', {property: 'og:type', content: 'article' }])
+            head.push(['meta', {property: 'og:url', content: `https://www.justme.dev/${pageData.relativePath}` }])
+            head.push(['meta', {property: 'og:image', content: `https://www.justme.dev${(pf && pf.image) ? pf.image : '/images/ava.webp' }` }])
+            head.push(['meta', {property: 'og:locale', content: 'en_US' }])
+            head.push(['meta', {property: 'og:author', content: 'Jonny van der Hoeven' }])
+            head.push(['meta', {property: 'og:section', content: 'Software engineering' }])
             return head
         },
         base: "/",
