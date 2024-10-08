@@ -2,7 +2,7 @@
 layout: home
 title: Projects
 intro: |
-    A collection of blog posts for dev ops developers.
+    A collection of blog posts for dev ops developers, system administrators and software developers. 
 image: /images/ava.webp
 ---
 
