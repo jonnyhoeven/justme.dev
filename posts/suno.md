@@ -44,7 +44,7 @@ just a few clicks. I kinda like the idea of creating your own developer playlist
 
 
 <iframe width="90%" height="400" style="margin: 0; padding-top:15pt; auto; display: block;"
-    src="http://www.youtube.com/embed/videoseries?list=PLSERDVdeUnOO8trXobBjzU3i9vKr3hlRa"
+    src="https://www.youtube.com/embed/videoseries?list=PLSERDVdeUnOO8trXobBjzU3i9vKr3hlRa"
     title="YouTube video player" frameborder="0" 
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
     referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
