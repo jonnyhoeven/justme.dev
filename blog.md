@@ -1,5 +1,9 @@
 ---
 layout: home
+title: Projects
+intro: |
+    A collection of blog posts for dev ops developers.
+image: /images/logo.webp
 ---
 
 <script setup>
