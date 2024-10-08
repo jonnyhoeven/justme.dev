@@ -1,0 +1,91 @@
+---
+branch: master
+date: 2014-08-16
+fetchML: false
+fetchReadme: false
+gitlink: https://github.com/jonnyhoeven/CVTI
+image: 
+intro: 
+languages: Visual Basic .NET
+outline: deep
+project: CVTI
+readmeFile: README.md
+title: test
+type: project
+user: jonnyhoeven
+editLink: false
+---
+<script setup>
+import { ref } from 'vue';
+import { onMounted } from 'vue';
+import ArticleItem from '/components/ArticleItem.vue';
+import ArticleFooter from '/components/ArticleFooter.vue';
+import { useGeolocation } from '@vueuse/core';
+const { coords, locatedAt, error, resume, pause } = useGeolocation();
+
+
+
+onMounted(() => {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+    const audioElement = document.querySelector('audio');
+    console.log(audioElement);
+    const track = audioCtx.createMediaElementSource(audioElement);
+});
+    const play = () => {
+      audioElement.play();
+      if (audioContext.state === "suspended") {
+      audioCtx.resume();
+      }
+      audioElement.play();
+    };
+</script>
+
+<!--<ArticleItem :frontmatter="$frontmatter"/>-->
+<!--<audio src="/myCoolTrack.mp3"></audio>-->
+
+<h1>test</h1>
+Speed:
+<svg width="150" height="100" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="50" r="40" stroke="black" stroke-width="4" fill="white" />
+  <line x1="50" y1="50" x2="50" y2="10" style="stroke:rgb(255,0,0);stroke-width:2" transform="rotate(0 50 50)"/>
+  <text x="105" y="90" style="font: italic 10px sans-serif;">{{coords.speed || 0}} mph</text>
+</svg>
+
+<pre lang="json">
+{{
+        JSON.stringify(
+          {
+            coords: {
+              accuracy: coords.accuracy,
+              latitude: coords.latitude,
+              longitude: coords.longitude,
+              altitude: coords.altitude,
+              altitudeAccuracy: coords.altitudeAccuracy,
+              heading: coords.heading,
+              speed: coords.speed,
+            },
+            locatedAt,
+            error: error ? error.message : error,
+          },
+          null,
+          2,
+        )
+}}
+</pre>
+
+<!--
+<button @click="play" class="btn">
+Play
+</button>
+-->
+
+<button @click="pause">
+  Pause watch
+</button>
+|
+<button @click="resume">
+  Start watch
+</button>
+
+<ArticleFooter :frontmatter="$frontmatter"/>
