@@ -32,7 +32,7 @@ def get_readme(user, project, branch, readme_file):
             return ''
         return r.text
     else:
-        print(f'Warning: Missing gitlink, user, project, or readme_file')
+        print(f'Warning: Missing user, project, or readme_file')
         return ''
 
 
