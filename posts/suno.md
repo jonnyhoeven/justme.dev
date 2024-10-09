@@ -51,7 +51,7 @@ just a few clicks. I kinda like the idea of creating your own developer playlist
 
 ## Exploring content
 
-It's not only a great way to explore music style available, the [interface](https://suno.com/explore)
+It's not only a great way to explore music styles available, the [interface](https://suno.com/explore)
 is pretty cool from a html design standpoint.
 
 ## Conclusion
