@@ -40,22 +40,24 @@ export default async () => {
         transformHead: ({pageData}) => {
             const head: HeadConfig[] = []
             const pf = pageData.frontmatter
-            //head.push(['meta', {property: 'debug:pagedata', content: JSON.stringify(pageData) }])
+            head.push(['meta', {property: 'og:type', content: 'article'}])
             head.push(['meta', {property: 'og:site_name', content: 'Justme.dev'}])
             head.push(['meta', {property: 'og:title', content: pf.title ? pf.title : 'Just make it!'}])
             head.push(['meta', {
                 property: 'og:description',
                 content: pf.intro ? pf.intro : 'This is my developer blog, where I share insights, experiences, and tutorials related to software development. I cover a wide range of topics including JavaScript, Python, TypeScript, and more. I also discuss my projects, providing a behind-the-scenes look at my development process. Whether you\'re a seasoned developer or just starting out, I hope you find the content here informative and inspiring.'
             }])
-            head.push(['meta', {property: 'og:type', content: 'article'}])
-            head.push(['meta', {property: 'og:url', content: `https://www.justme.dev/${pageData.relativePath}`}])
+            head.push(['meta', {property: 'og:url', content: `https://justme.dev/${pageData.relativePath}`}])
             head.push(['meta', {
                 property: 'og:image',
-                content: `https://www.justme.dev${(pf && pf.image) ? pf.image : '/images/justme.dev.webp'}`
+                content: `https://justme.dev${(pf && pf.image) ? pf.image : '/images/justme.dev.webp'}`
             }])
             head.push(['meta', {property: 'og:locale', content: 'en_US'}])
-            head.push(['meta', {property: 'og:author', content: 'Jonny van der Hoeven'}])
-            head.push(['meta', {property: 'og:section', content: 'Software engineering'}])
+            head.push(['meta', {property: 'og:site_name', content: 'Justme.dev'}])
+            head.push(['meta', {property: 'article:author', content: 'https://justme.dev/'}])
+            head.push(['meta', {property: 'article:publisher', content: 'https://justme.dev/'}])
+            head.push(['meta', {property: 'article:published_time', content: pf.date ? pf.date : '2024-01-01'}])
+            head.push(['meta', {property: 'article:modified_time', content: pf.date ? pf.date : '2024-01-01'}])
             return head
         },
         base: "/",
@@ -103,7 +105,7 @@ export default async () => {
             },
         },
         sitemap: {
-            hostname: 'https://www.justme.dev/'
+            hostname: 'https://justme.dev/'
         },
         transformPageData
     })
