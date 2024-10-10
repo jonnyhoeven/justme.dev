@@ -1,20 +1,17 @@
 ---
-branch: master
-date: 2014-08-16
-fetchML: false
-fetchReadme: false
-gitlink: https://github.com/jonnyhoeven/CVTI
-image: 
-intro: 
-languages: Visual Basic .NET
+type: post
+title: Testing GeoLocation from browser
+date: 2024-10-10
 outline: deep
-project: CVTI
-readmeFile: README.md
-title: test
-type: project
-user: jonnyhoeven
-editLink: false
+intro: |
+    Just a simple test that I can easily host to test in the wild
+fetchReadme: false
+editLink: true
+image: /images/suno.svg
+externalUrl: https://suno.com/
+fetchML: false
 ---
+
 <script setup>
 import { ref } from 'vue';
 import { onMounted } from 'vue';
@@ -22,8 +19,6 @@ import ArticleItem from '/components/ArticleItem.vue';
 import ArticleFooter from '/components/ArticleFooter.vue';
 import { useGeolocation } from '@vueuse/core';
 const { coords, locatedAt, error, resume, pause } = useGeolocation();
-
-
 
 onMounted(() => {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
