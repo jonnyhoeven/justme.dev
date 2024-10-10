@@ -1,4 +1,3 @@
-
 This VitePress site is hosted from GitHub.io pages at [www.Justme.dev](https://www.justme.dev).
 
 ## Requirements
@@ -9,7 +8,8 @@ Only needed if generating content from OpenAI.
 
 ### Updated env file
 
-Copy the [.env.example](.env.example) file to [.env](.env) and fill in the required fields.
+Copy the [.env.example](https://github.com/jonnyhoeven/justme.dev/blob/main/.env.example) file to `.env` and fill in the
+required fields.
 
 ```bash
 cp .env.example .env
@@ -74,7 +74,8 @@ trigger [deployment](https://github.com/jonnyhoeven/justme.dev/actions/workflows
 
 ## Notes
 
-- Create request files in the `requests` folder, example: [open-ai-usage.yaml.example](https://github.com/jonnyhoeven/justme.dev/blob/main/openai/request/open-ai-usage.yaml.example).
+- Create request files in the `requests` folder,
+  [open-ai-usage.yaml.example](https://github.com/jonnyhoeven/justme.dev/blob/main/openai/request/open-ai-usage.yaml.example).
 - Run the `npm run docs:generate` command to generate the markdown files locally.
 - When pushing to `main` GitHub action does `generate`, `build` and `deploy`.
 - The OpenAI response will be saved in the response folder.
