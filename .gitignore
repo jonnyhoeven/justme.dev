@@ -8,3 +8,4 @@
 /openai/response/*.bin
 #/project/*.md
 #/postss/*.md
+/projects/
