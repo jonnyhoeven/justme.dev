@@ -3,7 +3,7 @@ layout: home
 title: Projects
 intro: |
     A collection of blog posts for dev ops developers, system administrators and software developers. 
-image: /images/ava.webp
+image: /images/justme.dev.webp
 ---
 
 <script setup>

@@ -51,7 +51,7 @@ export default async () => {
             head.push(['meta', {property: 'og:url', content: `https://www.justme.dev/${pageData.relativePath}`}])
             head.push(['meta', {
                 property: 'og:image',
-                content: `https://www.justme.dev${(pf && pf.image) ? pf.image : '/images/ava.webp'}`
+                content: `https://www.justme.dev${(pf && pf.image) ? pf.image : '/images/justme.dev.webp'}`
             }])
             head.push(['meta', {property: 'og:locale', content: 'en_US'}])
             head.push(['meta', {property: 'og:author', content: 'Jonny van der Hoeven'}])

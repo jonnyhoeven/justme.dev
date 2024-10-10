@@ -3,7 +3,7 @@ layout: home
 title: Projects
 intro: |
   A collection of projects over the years, that might be interesting.
-image: /images/ava.webp
+image: /images/justme.dev.webp
 ---
 
 <script setup>
