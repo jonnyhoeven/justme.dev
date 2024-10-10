@@ -1,4 +1,4 @@
-This VitePress site is hosted from GitHub.io pages at [www.Justme.dev](https://www.justme.dev).
+This VitePress site is hosted from GitHub.io pages at [justme.dev](https://justme.dev).
 
 ## Requirements
 
