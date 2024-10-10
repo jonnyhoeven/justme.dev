@@ -1,3 +1,4 @@
+
 This VitePress site is hosted from GitHub.io pages at [www.Justme.dev](https://www.justme.dev).
 
 ## Requirements
@@ -73,7 +74,7 @@ trigger [deployment](https://github.com/jonnyhoeven/justme.dev/actions/workflows
 
 ## Notes
 
-- Create request files in the `requests` folder, for example: [logseq.yaml.example](openai/request/logseq.yaml.example).
+- Create request files in the `requests` folder, example: [open-ai-usage.yaml.example](openai/request/open-ai-usage.yaml.example).
 - Run the `npm run docs:generate` command to generate the markdown files locally.
 - When pushing to `main` GitHub action does `generate`, `build` and `deploy`.
 - The OpenAI response will be saved in the response folder.
