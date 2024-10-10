@@ -9,7 +9,7 @@ intro: |
     enthusiast, Suno offers a unique platform to explore new sounds and ideas.
 fetchReadme: false
 editLink: true
-image: /images/suno.svg
+image: /images/suno.png
 externalUrl: https://suno.com/
 fetchML: false
 ---
