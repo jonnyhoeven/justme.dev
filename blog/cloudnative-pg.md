@@ -5,7 +5,7 @@ gitlink: https://github.com/cloudnative-pg/cloudnative-pg
 githost: https://raw.githubusercontent.com/
 branch: main
 readmeFile: README.md
-type: post
+type: blog
 title: CloudNative Postgres Operator
 date: 2024-04-15
 outline: deep

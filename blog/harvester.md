@@ -5,7 +5,7 @@ gitlink: https://github.com/harvester/harvester
 githost: https://github.com
 branch: master
 readmeFile: README.md
-type: post
+type: blog
 title: Harvester
 date: 2023-04-13
 outline: deep

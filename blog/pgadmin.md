@@ -1,8 +1,8 @@
 ---
 project: pgadmin4
 user: pgadmin-org
-gitlink: https://www.pgadmin.org/
-type: post
+gitlink: https://github.com/pgadmin-org/pgadmin4
+type: blog
 title: pgAdmin 4
 date: 2024-04-18
 outline: deep

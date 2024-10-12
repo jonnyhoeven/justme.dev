@@ -5,7 +5,7 @@ gitlink: https://github.com/cloudnative-pg/cloudnative-pg
 githost: https://github.com
 branch: master
 readmeFile: README.md
-type: post
+type: blog
 title: Logseq
 date: 2021-08-01
 outline: deep

@@ -29,7 +29,7 @@ model: meta-llama/Llama-2-7b-chat-hf
 project: logseq
 title: Logseq
 total_tokens: 612
-type: post
+type: blog
 user: logseq
 ---
 <script setup>

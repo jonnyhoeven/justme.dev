@@ -45,7 +45,7 @@ class MLResponseHandler:
     def parse_ml_response(response):
         data = dict()
         message = response.choices[0].message.content
-        if 'Blog Post:' in message:
+        if 'Blog blog:' in message:
             data['intro'] = message.split('Blog Post:')[0].split('Intro:')[1].strip()
             data['post'] = message.split('Blog Post:')[1].strip()
         else:

@@ -1,5 +1,5 @@
 ---
-type: post
+type: blog
 title: yEd
 date: 2021-08-01
 outline: deep

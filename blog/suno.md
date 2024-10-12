@@ -1,5 +1,5 @@
 ---
-type: post
+type: blog
 title: Suno
 date: 2024-10-08
 outline: deep

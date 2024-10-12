@@ -5,7 +5,7 @@ gitlink: https://github.com/cloudnative-pg/cloudnative-pg
 githost: https://raw.githubusercontent.com/
 branch: main
 readmeFile: README.md
-type: post
+type: blog
 title: Trusted Postgres Architect
 date: 2024-03-28
 outline: deep
