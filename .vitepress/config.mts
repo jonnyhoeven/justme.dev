@@ -89,6 +89,7 @@ export default async () => {
             ],
             socialLinks: [
                 {icon: 'github', link: 'https://github.com/jonnyhoeven/'},
+                {icon: 'youtube', link: 'https://www.youtube.com/@JustDevMe'},
                 {icon: 'linkedin', link: 'https://www.linkedin.com/in/jonnyhoeven/'},
                 {
                     icon: {
