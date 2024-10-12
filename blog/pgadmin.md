@@ -1,10 +1,7 @@
 ---
 project: pgadmin4
 user: pgadmin-org
-gitlink: https://pgadmin-org/pgadmin4
-githost: https://raw.githubusercontent.com/
-branch: master
-readmeFile: README.md
+gitlink: https://www.pgadmin.org/
 type: post
 title: pgAdmin 4
 date: 2024-04-18

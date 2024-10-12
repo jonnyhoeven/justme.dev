@@ -1,7 +1,7 @@
 import {createContentLoader} from 'vitepress'
 import transformPage from '../lib/transformPage'
 
-export default () => createContentLoader('posts/*.md', {
+export default () => createContentLoader('blog/*.md', {
     includeSrc: false, // include raw markdown source?
     render: false,     // include rendered full page HTML?
     excerpt: false,    // include excerpt?
