@@ -4,8 +4,8 @@ title: yEd
 date: 2021-08-01
 outline: deep
 intro: |
-    yEd is a general-purpose diagramming program with a multi-document interface. It is a cross-platform application written
-    in Java that runs on Windows, Linux, macOS, and other platforms that support the Java Virtual Machine. It is released
+    yEd is a general-purpose diagramming program with a multi-document interface. A cross-platform application written
+    in Java that runs on Windows, Linux, macOS, and other platforms that support the Java Virtual Machine. It's released
     under a proprietary software license, allowing the use of a single copy for free.
 fetchReadme: false
 editLink: true
@@ -20,7 +20,7 @@ fetchML: false
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
-yEd is a powerful desktop application that can be used to quickly and effectively generate high-quality diagrams. It is
+yEd is a powerful desktop application that can be used to quickly and effectively generate high-quality diagrams. It's
 a versatile tool that supports a wide range of diagram types, making it an ideal choice for structuring drawing
 infrastructure. Whether you're creating flowcharts, network diagrams, or organizational charts, yEd provides the tools
 and features you need to create professional-quality diagrams.

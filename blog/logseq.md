@@ -11,7 +11,7 @@ date: 2021-08-01
 outline: deep
 intro: |
     Logseq is a privacy-focused, open-source note-taking application that aims to secure your notes from prying eyes, a
-    common goal for many online note apps. It is a hidden gem in the Tools for Thought space, providing a powerful platform
+    common goal for many online note apps. It's a hidden gem in the Tools for Thought space, providing a powerful platform
     for structuring projects and staying on top of management tasks.
 fetchReadme: false
 editLink: true
@@ -25,7 +25,7 @@ fetchML: false
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
-Logseq is more than just a note-taking app. It is a comprehensive tool that can be used for project management,
+Logseq is more than just a note-taking app. A comprehensive tool that can be used for project management,
 research, article writing, and presentation preparation. It has been a daily driver for many users, including myself,
 for the last two months, proving its reliability and efficiency.
 
@@ -36,13 +36,13 @@ someone who simply wants to keep their notes organized and secure, Logseq is a t
 
 ## Standout Features
 
-One of the standout features of Logseq is its open-source nature, which means it is constantly being improved by a
+One of the standout features of Logseq is its open-source nature, which means it's constantly being improved by a
 community of developers. It also ensures that your notes are secure and private. Additionally, its powerful project
 management features make it an ideal tool for staying on top of tasks and deadlines.
 
 ## Getting Started with Logseq
 
-Getting started with Logseq is easy. As an open-source tool, it is freely available for anyone to use. Simply download
+Getting started with Logseq is easy. As an open-source tool, it's freely available for anyone to use. Simply download
 the application, and you can start organizing your projects and notes in a secure and efficient manner.
 
 ## Conclusion

@@ -32,7 +32,7 @@ adopting containers.
 
 ## Harvester for Edge Networks
 
-Edge networks, which bring computation and data storage closer to the location where it is needed, to improve response
+Edge networks, which bring computation and data storage closer to the location where it's needed, to improve response
 times and save bandwidth, can greatly benefit from Harvester. With its cloud-native approach, Harvester can help edge
 networks achieve lower latency, higher efficiency, and more robust security. Its ability to run on bare metal servers
 means that it can be deployed directly on edge devices, reducing the need for additional network hops and thus further

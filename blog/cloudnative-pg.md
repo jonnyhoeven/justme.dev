@@ -10,7 +10,7 @@ title: CloudNative Postgres Operator
 date: 2024-04-15
 outline: deep
 intro: |
-    Cloud Native PostgreSQL is a Kubernetes operator that automates the management of PostgreSQL clusters. It is designed to
+    Cloud Native PostgreSQL is a Kubernetes operator that automates the management of PostgreSQL clusters. It's designed to
     be a fully-featured PostgreSQL operator that can be used to deploy, manage, and scale PostgreSQL clusters in a
     Kubernetes environment. The operator is built using the Operator Framework, which is a toolkit that provides a set of
     tools and best practices for building Kubernetes operators. Cloud Native PostgreSQL is designed to be easy to use and to

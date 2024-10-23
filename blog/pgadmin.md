@@ -7,7 +7,7 @@ title: pgAdmin 4
 date: 2024-04-18
 outline: deep
 intro: |
-    pgAdmin 4 is the leading open-source management tool for Postgres, the world's most advanced open-source database. It is
+    pgAdmin 4 is the leading open-source management tool for Postgres, the world's most advanced open-source database. it's
     designed to cater to both novice and experienced Postgres users, providing a powerful graphical interface that
     simplifies the creation, maintenance, and use of database objects.
 fetchReadme: false
@@ -22,7 +22,7 @@ fetchML: false
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
-pgAdmin 4 is a complete rewrite of pgAdmin, built using Python and Javascript/jQuery. It is a testament to the evolution
+pgAdmin 4 is a complete rewrite of pgAdmin, built using Python and Javascript/jQuery. It's a testament to the evolution
 of database management tools, offering a more streamlined and efficient approach to managing Postgres databases.
 
 ## User Experience
