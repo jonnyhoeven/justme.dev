@@ -66,7 +66,16 @@ spec:
       secretKey: mysecretkey
 ```
 
-Create a `Scheduled Backup` or `Backup` CRD to start WAL archiving using Barman to your bucket.
+Create a Cloud Native Postgres Operator `Scheduled Backup` or `Backup` Custom Resource Definition to start WAL archiving
+using Barman to your bucket.
+
+### Debugging
+
+If you don't see files appearing in your bucket:
+
+- Check the Postgres Operator Pod logs what's wrong or to see which Postgres Node is being sourced
+  for [Barman](https://cloudnative-pg.io/documentation/1.16/backup_recovery/) to export to your S3 bucket.
+- Check the logs in the Postgres Cluster Node Pod currently exporting.
 
 > [!TIP]
 > MySQL Operator can also be configured to use MinIO for backups.
