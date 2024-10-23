@@ -1,6 +1,6 @@
 ---
 type: blog
-title: Google Site Reliability Engineering Book
+title: Google Site Reliability Engineering Books
 date: 2024-10-23
 outline: deep
 intro: |
