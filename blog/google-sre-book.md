@@ -21,9 +21,10 @@ fetchML: false
 
 ## Overview
 
-`Building Secure & Reliable Systems` is a definitive guide for SRE professionals. It covers a wide range of topics, from
-security fundamentals to advanced reliability practices. The book is structured to provide both theoretical knowledge
-and practical applications, making it a valuable resource for both beginners and experienced practitioners.
+[Building Secure & Reliable Systems](https://sre.google/books/building-secure-reliable-systems/) is a definitive guide
+for SRE professionals. It covers a wide range of topics, from security fundamentals to advanced reliability practices.
+The book is structured to provide both theoretical knowledge and practical applications, making it a valuable resource
+for both beginners and experienced practitioners.
 
 ## Key Takeaways
 
