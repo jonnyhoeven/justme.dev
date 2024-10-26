@@ -3,12 +3,26 @@ import {defineConfig, HeadConfig} from 'vitepress'
 import transformPageData from './transformPageData';
 
 export default async () => {
+    const author = 'Jonny van der Hoeven'
+    const siteName = 'Justme.dev'
+    const lang= 'en-US'
     return defineConfig({
-        lang: 'en-US',
-        title: "Justme.dev",
+        lang: lang,
+        title: siteName,
         srcExclude: ['/README.md'],
-        description: "Justme.dev - Developer blog by Jonny van der Hoeven. Just me, making it.",
+        description: `${siteName} - Developer blog by ${author}. Just me, making it.`,
         head: [
+
+            // Static Opengraph stuff
+            ['meta', {property: 'og:sitename', content: siteName}],
+            ['meta', {property: 'og:locale', content: lang}],
+            ['meta', {property: 'og:type', content: 'article'}],
+            ['meta', {property: 'article:author', content: author}],
+            ['meta', {name: 'author', content: author}],
+            ['meta', {property: 'article:publisher', content: 'JustMeDev'}],
+            ['meta', {property: 'twitter:domain', content: 'justme.dev'}],
+            ['meta', {property: 'twitter:card', content: 'summary_large_image'}],
+
             ['link', {rel: 'apple-touch-icon', sizes: '76x76', href: '/apple-touch-icon.png'}],
             ['link', {rel: 'image/png', sizes: '32x32', href: '/favicon-32x32.png'}],
             ['link', {rel: 'image/png', sizes: '16x16', href: '/favicon-16x16.png'}],
@@ -40,24 +54,25 @@ export default async () => {
         transformHead: ({pageData}) => {
             const head: HeadConfig[] = []
             const pf = pageData.frontmatter
-            head.push(['meta', {property: 'og:type', content: 'article'}])
-            head.push(['meta', {property: 'og:site_name', content: 'Justme.dev'}])
+            const intro_plh = 'This is my developer blog, where I share insights, experiences, and tutorials related to software development. I cover a wide range of topics including JavaScript, Python, TypeScript, and more. I also discuss my projects, providing a behind-the-scenes look at my development process. Whether you\'re a seasoned developer or just starting out, I hope you find the content here informative and inspiring.'
+            const image_plh = '/images/justme.dev.webp'
+            const intro = (pf && pf.intro) ? pf.intro : intro_plh
+            const image = `https://justme.dev${(pf && pf.image) ? pf.image : image_plh}`
+
             head.push(['meta', {property: 'og:title', content: pf.title ? pf.title : 'Just make it!'}])
             head.push(['meta', {
-                property: 'og:description',
-                content: pf.intro ? pf.intro : 'This is my developer blog, where I share insights, experiences, and tutorials related to software development. I cover a wide range of topics including JavaScript, Python, TypeScript, and more. I also discuss my projects, providing a behind-the-scenes look at my development process. Whether you\'re a seasoned developer or just starting out, I hope you find the content here informative and inspiring.'
+                name: 'description', property: 'og:description', content: intro
             }])
             head.push(['meta', {property: 'og:url', content: `https://justme.dev/${pageData.relativePath}`}])
             head.push(['meta', {
                 property: 'og:image',
-                content: `https://justme.dev${(pf && pf.image) ? pf.image : '/images/justme.dev.webp'}`
+                content: image
             }])
-            head.push(['meta', {property: 'og:locale', content: 'en_US'}])
-            head.push(['meta', {property: 'og:site_name', content: 'Justme.dev'}])
-            head.push(['meta', {property: 'article:author', content: 'https://justme.dev/'}])
-            head.push(['meta', {property: 'article:publisher', content: 'https://justme.dev/'}])
             head.push(['meta', {property: 'article:published_time', content: pf.date ? pf.date : '2024-01-01'}])
             head.push(['meta', {property: 'article:modified_time', content: pf.date ? pf.date : '2024-01-01'}])
+            head.push(['meta', {name: 'twitter:image', content: image}])
+            head.push(['meta', {property: 'twitter:url', content: `https://justme.dev/${pageData.relativePath}`}])
+            head.push(['meta', {property: 'twitter:description', content: intro}])
             return head
         },
         base: "/",
@@ -72,7 +87,7 @@ export default async () => {
             logo: {
                 light: '/images/logo.webp',
                 dark: '/images/logo_dark.webp',
-                alt: 'JH Logo',
+                alt: 'Logo',
                 width: 50,
                 height: 50
             },
@@ -99,7 +114,7 @@ export default async () => {
                 },
             ],
             footer: {
-                message: '© 2024 Jonny van der Hoeven, released under the <a href="https://raw.githubusercontent.com/jonnyhoeven/justme.dev/main/LICENSE">MIT license</a>.',
+                message: '© 2024 - <a href="https://raw.githubusercontent.com/jonnyhoeven/justme.dev/main/LICENSE">MIT license</a>.',
                 copyright: '<a href="https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml" target="_blank">' +
                     '   <img alt="Github deploy workflow status badge" class="homeBadge" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml/badge.svg?branch=main">' +
                     '</a>' +
