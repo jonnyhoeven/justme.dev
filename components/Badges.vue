@@ -39,10 +39,6 @@ defineProps(['frontmatter'])
 
 <style>
 
-.VPBadge .shieldButton {
-
-}
-
 .badge-bar {
   margin: 10pt 0 20pt 0;
 }
