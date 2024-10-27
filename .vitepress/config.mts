@@ -82,8 +82,6 @@ export default async () => {
                 light: '/images/logo.webp',
                 dark: '/images/logo_dark.webp',
                 alt: 'Logo',
-                width: 50,
-                height: 50
             },
             editLink: {
                 pattern: 'https://github.com/jonnyhoeven/justme.dev/edit/main/:path'
