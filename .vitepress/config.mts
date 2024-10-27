@@ -113,7 +113,7 @@ export default async () => {
                     '   <img alt="Github deploy workflow status badge" class="homeBadgeLeft" width="143px" height="20px" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml/badge.svg?branch=main">' +
                     '</a>' +
                     '<a href="https://github.com/jonnyhoeven/justme.dev/actions/workflows/github-code-scanning/codeql" target="_blank">' +
-                    '   <img alt="Github code scanning badge" class="homeBadgeRight" width="143px" height="20px" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/github-code-scanning/codeql/badge.svg">' +
+                    '   <img alt="Github code scanning badge" class="homeBadgeRight" width="120px" height="20px" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/github-code-scanning/codeql/badge.svg">' +
                     '</a>' +
                     `© ${new Date().getFullYear()} - <a href="https://raw.githubusercontent.com/jonnyhoeven/justme.dev/main/LICENSE">MIT</a>`
                 ,
