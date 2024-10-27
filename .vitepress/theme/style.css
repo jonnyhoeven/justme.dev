@@ -151,7 +151,6 @@
 }
 
 
-
 /**
  * Component: Custom Block
  * -------------------------------------------------------------------------- */
@@ -181,6 +180,11 @@
     top: 50%;
     transform: translate(-50%, -50%);
     animation: float 5.3s ease-out infinite;
+}
+
+.logo {
+    width: 18px;
+    height: 24px;
 }
 
 
