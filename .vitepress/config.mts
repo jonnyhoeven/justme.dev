@@ -102,7 +102,7 @@ export default async () => {
                 {icon: 'linkedin', link: 'https://www.linkedin.com/in/jonnyhoeven/'},
                 {
                     icon: {
-                        svg: '<img src="/images/google.webp" style="height:15pt;" alt="Google"/>',
+                        svg: '<img src="/images/google.webp" width="20" height="20" alt="Google"/>',
                     },
                     link: 'https://g.dev/jonnyvanderhoeven'
                 },
