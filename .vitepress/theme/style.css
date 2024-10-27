@@ -189,7 +189,12 @@
     }
 }
 
-.homeBadge {
+.homeBadgeLeft {
+    float: left;
+    margin-left: 10pt;
+}
+
+.homeBadgeRight {
     float: right;
-    padding-left: 10pt;
+    margin-right: 10pt;
 }

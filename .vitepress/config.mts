@@ -115,13 +115,15 @@ export default async () => {
                 },
             ],
             footer: {
-                message: '© 2024 - <a href="https://raw.githubusercontent.com/jonnyhoeven/justme.dev/main/LICENSE">MIT license</a>.',
-                copyright: '<a href="https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml" target="_blank">' +
-                    '   <img alt="Github deploy workflow status badge" class="homeBadge" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml/badge.svg?branch=main">' +
+                message:
+                    '<a href="https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml" target="_blank">' +
+                    '   <img alt="Github deploy workflow status badge" class="homeBadgeLeft" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml/badge.svg?branch=main">' +
                     '</a>' +
                     '<a href="https://github.com/jonnyhoeven/justme.dev/actions/workflows/github-code-scanning/codeql" target="_blank">' +
-                    '   <img alt="Github code scanning badge" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/github-code-scanning/codeql/badge.svg">' +
-                    '</a>'
+                    '   <img alt="Github code scanning badge" class="homeBadgeRight" src="https://github.com/jonnyhoeven/justme.dev/actions/workflows/github-code-scanning/codeql/badge.svg">' +
+                    '</a>' +
+                    `© ${new Date().getFullYear()} - <a href="https://raw.githubusercontent.com/jonnyhoeven/justme.dev/main/LICENSE">MIT</a>`
+                ,
             },
         },
         sitemap: {
