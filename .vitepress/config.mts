@@ -33,13 +33,6 @@ export default async () => {
             ['meta', {name: 'application-name', content: 'Justme.dev'}],
             ['meta', {name: 'msapplication-TileColor', content: '#603cba'}],
             ['meta', {name: 'theme-color', content: '#ffffff'}],
-            //Google Fonts
-            ['link', {rel: 'preconnect', href: 'https://fonts.googleapis.com'}],
-            ['link', {rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: ''}],
-            ['link', {
-                rel: 'stylesheet',
-                href: 'https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400&display=swap'
-            }],
             //Google Analytics
             ['script', {async: 'true', src: 'https://www.googletagmanager.com/gtag/js?id=G-KX1KJ3KEMB'}],
             ['script', {}, "window.dataLayer = window.dataLayer || [];\nfunction gtag(){dataLayer.push(arguments);}\ngtag('js', new Date());\ngtag('config', 'G-KX1KJ3KEMB');"],
