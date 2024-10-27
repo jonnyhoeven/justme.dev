@@ -36,12 +36,12 @@ defineProps(['page']);
   grid-column: var(--ls-listitem-image-col);
   grid-row: var(--ls-listitem-image-row);
   padding: var(--ls-listitem-image-padding);
+  margin-right: 15pt;
 }
 
 .layercontent {
   grid-column: var(--ls-listitem-content-col);
   grid-row: var(--ls-listitem-content-row);
-  margin: 10pt 0 20pt 22pt;
 }
 
 .listImage {
