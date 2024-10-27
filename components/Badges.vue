@@ -9,14 +9,20 @@ defineProps(['frontmatter'])
          :src=frontmatter.watchersUrl
          alt="Watchers"
          class="shieldButton"
+         width="82px"
+         height="20px"
     />
     <img v-if="frontmatter.starsUrl" :src="frontmatter.starsUrl"
          alt="Stars"
          class="shieldButton"
+         width="60px"
+         height="20px"
     />
     <img v-if="frontmatter.forksUrl" :src="frontmatter.forksUrl"
          alt="Forks"
          class="shieldButton"
+         width="60px"
+         height="20px"
     />
     <Badge v-if="frontmatter.langArr" v-for="lang of frontmatter.langArr" :text="lang"
            class="shieldButton"
