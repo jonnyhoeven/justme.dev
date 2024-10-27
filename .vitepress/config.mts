@@ -5,7 +5,8 @@ import transformPageData from './transformPageData';
 export default async () => {
     const author = 'Jonny van der Hoeven'
     const siteName = 'Justme.dev'
-    const lang= 'en-US'
+    const hostname = 'https://justme.dev'
+    const lang = 'en-US'
     return defineConfig({
         lang: lang,
         title: siteName,
@@ -57,13 +58,13 @@ export default async () => {
             const intro_plh = 'This is my developer blog, where I share insights, experiences, and tutorials related to software development. I cover a wide range of topics including JavaScript, Python, TypeScript, and more. I also discuss my projects, providing a behind-the-scenes look at my development process. Whether you\'re a seasoned developer or just starting out, I hope you find the content here informative and inspiring.'
             const image_plh = '/images/justme.dev.webp'
             const intro = (pf && pf.intro) ? pf.intro : intro_plh
-            const image = `https://justme.dev${(pf && pf.image) ? pf.image : image_plh}`
+            const image = `${hostname}${(pf && pf.image) ? pf.image : image_plh}`
 
             head.push(['meta', {property: 'og:title', content: pf.title ? pf.title : 'Just make it!'}])
             head.push(['meta', {
                 name: 'description', property: 'og:description', content: intro
             }])
-            head.push(['meta', {property: 'og:url', content: `https://justme.dev/${pageData.relativePath}`}])
+            head.push(['meta', {property: 'og:url', content: `${hostname}/${pageData.relativePath}`}])
             head.push(['meta', {
                 property: 'og:image',
                 content: image
@@ -71,7 +72,7 @@ export default async () => {
             head.push(['meta', {property: 'article:published_time', content: pf.date ? pf.date : '2024-01-01'}])
             head.push(['meta', {property: 'article:modified_time', content: pf.date ? pf.date : '2024-01-01'}])
             head.push(['meta', {name: 'twitter:image', content: image}])
-            head.push(['meta', {property: 'twitter:url', content: `https://justme.dev/${pageData.relativePath}`}])
+            head.push(['meta', {property: 'twitter:url', content: `${hostname}/${pageData.relativePath}`}])
             head.push(['meta', {property: 'twitter:description', content: intro}])
             return head
         },
@@ -124,7 +125,7 @@ export default async () => {
             },
         },
         sitemap: {
-            hostname: 'https://justme.dev/'
+            hostname: `${hostname}/`
         },
         transformPageData
     })
