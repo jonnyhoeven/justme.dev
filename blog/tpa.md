@@ -16,7 +16,7 @@ intro: |
     environments.
 fetchReadme: false
 editLink: true
-image: /images/edb.png
+image: /images/edb.webp
 languages: Python, Jinja, Shell, Dockerfile
 fetchML: false
 ---

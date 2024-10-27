@@ -9,7 +9,7 @@ intro: |
     under a proprietary software license, allowing the use of a single copy for free.
 fetchReadme: false
 editLink: true
-image: /images/yed.png
+image: /images/yed.webp
 languages: Go, Shell
 externalUrl: https://www.yworks.com/products/yed
 fetchML: false

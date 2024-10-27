@@ -9,7 +9,7 @@ intro: |
     enable Write-Ahead Logging (WAL) archiving to a self-hosted MinIO S3 bucket.
 fetchReadme: false
 editLink: true
-image: /images/minio.png
+image: /images/minio.webp
 languages: Kubernetes, PostgreSQL, MinIO
 fetchML: false
 ---

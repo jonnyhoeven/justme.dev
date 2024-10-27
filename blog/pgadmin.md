@@ -12,7 +12,7 @@ intro: |
     simplifies the creation, maintenance, and use of database objects.
 fetchReadme: false
 editLink: true
-image: /images/pgadmin.png
+image: /images/pgadmin.webp
 languages: Python, JavaScript, PLpgSQL, Shell, TypeScript, CSS, Other
 fetchML: false
 ---

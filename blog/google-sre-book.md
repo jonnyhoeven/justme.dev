@@ -9,7 +9,7 @@ intro: |
     This article offers an overview of the book and highlights some key takeaways.
 fetchReadme: false
 editLink: true
-image: /images/google-sre.jpg
+image: /images/google-sre.webp
 languages: Go, Shell
 fetchML: false
 ---
