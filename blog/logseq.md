@@ -1,7 +1,7 @@
 ---
 project: logseq
 user: logseq
-gitlink: https://github.com/cloudnative-pg/cloudnative-pg
+gitlink: https://github.com/logseq/logseq
 githost: https://github.com
 branch: master
 readmeFile: README.md

@@ -1,7 +1,7 @@
 ---
 project: qmk_firmware
 user: qmk
-gitlink: https://github.com/cloudnative-pg/cloudnative-pg
+gitlink: https://github.com/qmk/qmk_firmware
 githost: https://github.com
 branch: master
 readmeFile: README.md

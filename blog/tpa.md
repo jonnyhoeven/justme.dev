@@ -1,7 +1,7 @@
 ---
 project: tpa
 user: EnterpriseDB
-gitlink: https://github.com/cloudnative-pg/cloudnative-pg
+gitlink: https://www.enterprisedb.com/products/trusted-postgres-architect-tpa
 githost: https://raw.githubusercontent.com/
 branch: main
 readmeFile: README.md
