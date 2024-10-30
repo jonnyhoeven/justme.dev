@@ -73,8 +73,7 @@ trigger [deployment](https://github.com/jonnyhoeven/justme.dev/actions/workflows
 ## Notes
 
 - Create request files in the `requests` folder,
-  [open-ai-usage.yaml.example](https://github.com/jonnyhoeven/justme.dev/blob/main/openai/request/open-ai-usage.yaml.example)
-  .
+  [open-ai-usage.yaml.example](https://github.com/jonnyhoeven/justme.dev/blob/main/openai/request/open-ai-usage.yaml.example).
 - Run the `npm run docs:generate` command to generate the markdown files locally.
 - When pushing to `main` GitHub action does `generate`, `build` and `deploy`.
 - The OpenAI response will be saved in the response folder.
