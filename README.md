@@ -4,7 +4,7 @@ This VitePress site is hosted from GitHub.io pages at [justme.dev](https://justm
 
 ### OpenAI API key
 
-Only needed if generating content from OpenAI.
+Only needed if generating content from OpenAI or pulling contents.
 
 ```bash
 cp .env.example .env
