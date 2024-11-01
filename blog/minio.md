@@ -10,7 +10,8 @@ intro: |
 fetchReadme: false
 editLink: true
 image: /images/minio.webp
-languages: Kubernetes, PostgreSQL, MinIO
+languages: Kubernetes, PostgreSQL
+externalUrl: https://min.io/
 fetchML: false
 ---
 <script setup>

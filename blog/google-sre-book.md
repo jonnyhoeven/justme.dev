@@ -11,6 +11,7 @@ fetchReadme: false
 editLink: true
 image: /images/google-sre.webp
 languages: Go, Shell
+externalUrl: https://sre.google/books/
 fetchML: false
 ---
 <script setup>
