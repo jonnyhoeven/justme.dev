@@ -23,7 +23,7 @@ nvm use
 
 ### Python & pip
 
-*Only needed if generating content from OpenAI.*
+*Only needed if generating content from OpenAI or pulling contents.*
 
 ```bash
 sudo apt install python3
