@@ -23,14 +23,14 @@ Suno is an AI-powered music generator that allows you to create unique pieces of
 and instruments. It's an innovative tool that opens up a world of musical possibilities, enabling you to experiment with
 different sounds and styles at the click of a button.
 
-## How Does Suno Work?
+## How does Suno work?
 
 Suno uses advanced AI algorithms to generate music. When you input your preferences for genre, mood, and instruments,
 Suno's AI analyzes these parameters and creates a unique piece of music that aligns with your choices. The result is a
 tailor-made musical piece that you can use for various purposes, from background music for your videos to inspiration
 for your next musical project.
 
-## Why Use Suno?
+## Why use Suno?
 
 Suno is not just a music generator; it's a tool for exploration and inspiration. For musicians and composers, it can
 provide a fresh perspective and inspire new ideas. For music lovers, it's a fun way to experiment with different genres
