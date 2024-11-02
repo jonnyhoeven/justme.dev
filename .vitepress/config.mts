@@ -49,14 +49,16 @@ export default async () => {
             const head: HeadConfig[] = []
             const pf = pageData.frontmatter
             const intro_plh = 'This is my developer blog, where I share insights, experiences, and tutorials related to software development. I cover a wide range of topics including JavaScript, Python, TypeScript, and more. I also discuss my projects, providing a behind-the-scenes look at my development process. Whether you\'re a seasoned developer or just starting out, I hope you find the content here informative and inspiring.'
+            const keywords = 'jonnyhoeven, justme.dev, justmedev, ' + pf.keywords ? pf.keywords : 'DevOps, Software Development, kubernetes, rancher, suse, linux, SRE, portfolio, git, microservices'
             const image_plh = '/images/justme.dev.webp'
             const intro = (pf && pf.intro) ? pf.intro : intro_plh
             const image = `${hostname}${(pf && pf.image) ? pf.image : image_plh}`
 
-            head.push(['meta', {property: 'og:title', content: pf.title ? pf.title : 'Just make it!'}])
+            head.push(['meta', {name: 'title', property: 'og:title', content: pf.title ? pf.title : 'Just make it!'}])
             head.push(['meta', {
                 name: 'description', property: 'og:description', content: intro
             }])
+            head.push(['meta', {name: 'keywords', content: keywords}])
             head.push(['meta', {property: 'og:url', content: `${hostname}/${pageData.relativePath}`}])
             head.push(['meta', {
                 property: 'og:image',
