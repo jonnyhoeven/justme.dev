@@ -6,8 +6,8 @@
     "@vueuse/core": "^11.0.3"
   },
   "scripts": {
-    "docs:generate": "python3 openai/process.py",
-    "docs:models": "python3 openai/models.py > openai/models.json",
+    "docs:generate": "python3 generate/process.py",
+    "docs:models": "python3 generate/models.py > generate/models.json",
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview"

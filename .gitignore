@@ -4,6 +4,6 @@
 .vscode
 .idea
 /node_modules/
-/openai/models.json
+/generate/models.json
 /openai/response/*.bin
 /projects/*.md
