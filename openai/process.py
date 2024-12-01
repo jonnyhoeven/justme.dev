@@ -13,15 +13,11 @@ class MLResponseHandler:
         self.req_path = os.environ['REQUEST_PATH']
         self.api_key = os.environ['OPENAI_API_KEY']
         self.api_url = os.environ['API_URL']
-        self.client = OpenAI(api_key=self.api_key, base_url=self.api_url)
         self.max_width = 120
 
-    # @todo replace internal links in markdown with external git url
-    # We need to change the internal links to external links by prefixing the right git url for every non https link
-    # in the readme file. We can use the get_readme method to fetch the readme file from the git repository and then
-    # replace the internal links with the right git url.
-    # since links in markdown files are in the format [link text](link url), we can use regex to match the links and
-    # then replace the link url with the right git url.
+        if os.environ['API_URL']:
+            print(f'Enabling OpenAI client...')
+            self.client = OpenAI(api_key=self.api_key, base_url=self.api_url)
 
     def get_readme(self, user, project, branch, readme_file):
         if not all([user, project, readme_file]):
@@ -84,6 +80,7 @@ class MLResponseHandler:
         if request.get('fetchReadme', False):
             readme = self.get_readme(request['user'], request['project'], request['branch'], request['readmeFile'])
         if request.get('fetchML', False):
+
             if os.path.isfile(res_path):
                 res = self.load_ml_response(res_path)
             else:

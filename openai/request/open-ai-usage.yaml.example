@@ -2,7 +2,7 @@
 branch: master
 date: 2021-08-01
 editLink: false
-fetchML: true
+fetchML: false # change to true
 fetchReadme: false
 githost: https://github.com
 image: /images/logseq.png
