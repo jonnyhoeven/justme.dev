@@ -10,6 +10,14 @@ nvm install
 nvm use
 ```
 
+### Python & pip
+
+```bash
+sudo apt install python3
+python3 -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
 #### Install dependencies
 
 ```bash
@@ -56,5 +64,3 @@ trigger [deployment](https://github.com/jonnyhoeven/justme.dev/actions/workflows
 - When pushing to `main` GitHub action does `generate`, `build` and `deploy`.
 - The generated markdown will be saved in a sub folder defined by `request type` using the same name as the request file
   and the suffix `.md`.
-- Delete corresponding `response.bin` in `./openai/response` to force the script to retrieve data from `openai`
-  again.
