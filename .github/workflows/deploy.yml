@@ -55,7 +55,7 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Generate content
         run: |
-          python openai/process.py
+          python generate/process.py
       - name: Commit and push content changes
         uses: actions-js/push@master
         with:
