@@ -10,7 +10,7 @@ export default async () => {
         lang: lang,
         title: siteName,
         srcExclude: ['/README.md'],
-        description: `${siteName} - Developer blog by ${author}. Just me, making it.`,
+        description: `${siteName} - Developer blog by ${author}. Just make it!`,
         head: [
 
             // Static Opengraph stuff
