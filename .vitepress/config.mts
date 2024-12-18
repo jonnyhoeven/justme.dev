@@ -47,9 +47,9 @@ export default async () => {
         transformHead: ({pageData}) => {
             const head: HeadConfig[] = []
             const pf = pageData.frontmatter
-            const intro_plh = 'This is my developer blog, where I share insights, experiences, and tutorials related to software development. I cover a wide range of topics including JavaScript, Python, TypeScript, and more. I also discuss my projects, providing a behind-the-scenes look at my development process. Whether you\'re a seasoned developer or just starting out, I hope you find the content here informative and inspiring.'
+            const intro_plh = 'This is my developer blog, where I share insights, experiences, and tutorials related to software development. I cover a wide range of topics including JavaScript, Python, I hope you find the content here informative and inspiring.'
             const intro = (pf && pf.intro) ? pf.intro : intro_plh
-            const keywords = 'jonnyhoeven, justme.dev, justmedev, DevOps, Software Development, kubernetes, rancher, suse, linux, SRE, portfolio, git, microservices'
+            const keywords = 'Personal Portfolio, jonnyhoeven, justme.dev, devops, Infrastructure as Code'
             const image_plh = '/images/justme.dev.webp'
             const image = `${hostname}${(pf && pf.image) ? pf.image : image_plh}`
 
