@@ -1,5 +1,4 @@
 import {defineConfig, HeadConfig} from 'vitepress'
-//import {defineConfig} from 'vitepress'
 import transformPageData from './transformPageData';
 
 export default async () => {
