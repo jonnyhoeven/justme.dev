@@ -19,30 +19,15 @@ export default async () => {
             ['meta', {property: 'og:type', content: 'article'}],
             ['meta', {property: 'article:author', content: author}],
             ['meta', {name: 'author', content: author}],
-            ['meta', {property: 'article:publisher', content: 'JustMeDev'}],
-            ['meta', {property: 'twitter:domain', content: 'justme.dev'}],
-            ['meta', {property: 'twitter:card', content: 'summary_large_image'}],
-
             ['link', {rel: 'apple-touch-icon', sizes: '76x76', href: '/apple-touch-icon.png'}],
             ['link', {rel: 'image/png', sizes: '32x32', href: '/favicon-32x32.png'}],
             ['link', {rel: 'image/png', sizes: '16x16', href: '/favicon-16x16.png'}],
             ['link', {rel: 'manifest', href: '/site.webmanifest'}],
-            ['link', {rel: 'mask-icon', href: '/safari-pinned-tab.svg', color: '#5bbad5'}],
+            ['link', {rel: 'mask-icon', href: '/safari-pinned-tab.svg', color: '#16673c'}],
             ['meta', {name: 'apple-mobile-web-app-title', content: 'Justme.dev'}],
             ['meta', {name: 'application-name', content: 'Justme.dev'}],
-            ['meta', {name: 'msapplication-TileColor', content: '#603cba'}],
+            ['meta', {name: 'msapplication-TileColor', content: '#16673c'}],
             ['meta', {name: 'theme-color', content: '#ffffff'}],
-            //Google Analytics
-            // ['script', {async: 'true', src: 'https://www.googletagmanager.com/gtag/js?id=G-KX1KJ3KEMB'}],
-            // ['script', {}, "window.dataLayer = window.dataLayer || [];\nfunction gtag(){dataLayer.push(arguments);}\ngtag('js', new Date());\ngtag('config', 'G-KX1KJ3KEMB');"],
-            // ['script', {src: 'https://www.googletagmanager.com/gtag/js?id=G-KX1KJ3KEMB'}],
-            // ['script',
-            //     {},
-            //     `window.dataLayer = window.dataLayer || [];
-            //       function gtag(){dataLayer.push(arguments);}
-            //       gtag('js', new Date());
-            //       gtag('config', 'G-KX1KJ3KEMB');`
-            // ],
         ],
         transformHead: ({pageData}) => {
             const head: HeadConfig[] = []
