@@ -16,7 +16,7 @@ image: /images/pgadmin.webp
 languages: Python, JavaScript, PLpgSQL, Shell, TypeScript, CSS, Other
 fetchML: false
 ---
-<!--suppress CheckEmptyScriptTag, CheckEmptyScriptTag, HtmlUnknownAttribute -->
+<!--suppress CheckEmptyScriptTag, CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->6UnusedImports -->
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
  import ArticleFooter from '/components/ArticleFooter.vue';

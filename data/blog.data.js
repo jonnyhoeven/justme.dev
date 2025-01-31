@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 import {createContentLoader} from 'vitepress'
 import transformPage from '../lib/transformPage'
 

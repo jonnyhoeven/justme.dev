@@ -30,7 +30,7 @@ and features you need to create professional-quality diagrams.
 ## Cross-Platform Compatibility
 
 One of the standout features of yEd is its cross-platform compatibility. Written in Java, it runs on all Windows,
-Unix/Linux, and Mac OS versions. This means that regardless of your operating system, you can leverage the power of yEd
+Unix/Linux, and macOS versions. This means that regardless of your operating system, you can leverage the power of yEd
 to create and manage your diagrams.
 
 ## Integration with Confluence
