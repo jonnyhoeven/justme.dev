@@ -3,6 +3,5 @@ defineProps(['frontmatter'])
 </script>
 
 <template>
-  <small v-if="frontmatter && frontmatter.model && frontmatter.total_tokens"><i>Content created using: {{ frontmatter.model }}
-    costing {{ frontmatter.total_tokens }} tokens total.</i></small>
+  <small v-if="frontmatter && frontmatter.model"><i>Content created using: {{ frontmatter.model }}</i></small>
 </template>
