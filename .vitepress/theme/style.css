@@ -167,6 +167,7 @@
  * Component: Algolia
  * -------------------------------------------------------------------------- */
 
+/*noinspection CssUnusedSymbol*/
 .DocSearch {
     --docsearch-primary-color: var(--vp-c-brand-1) !important;
 }
@@ -175,6 +176,7 @@
  * Component: Hero floating avatar
  * -------------------------------------------------------------------------- */
 
+/*noinspection CssUnusedSymbol*/
 .VPImage.image-src {
     border-radius: 9999px;
     left: 50%;
@@ -183,6 +185,7 @@
     animation: float 5.3s ease-out infinite;
 }
 
+/*noinspection CssUnusedSymbol*/
 .logo {
     width: 18px;
     height: 24px;

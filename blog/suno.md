@@ -13,6 +13,8 @@ image: /images/suno.webp
 externalUrl: https://suno.com/
 fetchML: false
 ---
+<!--suppress ALL, CheckEmptyScriptTag, HtmlUnknownAttribute -->eckEmptyScriptTag -->
+
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
  import ArticleFooter from '/components/ArticleFooter.vue';

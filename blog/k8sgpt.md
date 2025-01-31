@@ -19,6 +19,7 @@ image: /images/k8sgpt.webp
 languages: Go, Other
 fetchML: false
 ---
+<!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute -->
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
  import ArticleFooter from '/components/ArticleFooter.vue';

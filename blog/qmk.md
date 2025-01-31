@@ -20,6 +20,7 @@ image: /images/qmk.webp
 languages: C, C++, Makefile, Python, Shell, Nix
 fetchML: false
 ---
+<!--suppress CheckEmptyScriptTag, CheckEmptyScriptTag, HtmlUnknownAttribute -->
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
  import ArticleFooter from '/components/ArticleFooter.vue';

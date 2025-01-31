@@ -14,6 +14,7 @@ languages: Kubernetes, PostgreSQL
 externalUrl: https://min.io/
 fetchML: false
 ---
+<!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute -->
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
  import ArticleFooter from '/components/ArticleFooter.vue';

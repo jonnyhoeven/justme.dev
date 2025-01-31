@@ -14,6 +14,7 @@ languages: Go, Shell
 externalUrl: https://sre.google/books/
 fetchML: false
 ---
+<!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute -->
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
  import ArticleFooter from '/components/ArticleFooter.vue';
