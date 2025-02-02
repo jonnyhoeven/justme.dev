@@ -28,15 +28,16 @@ fetchML: false
 <ArticleItem :frontmatter="$frontmatter"/>
 
 ## What is Ollama?
+
 Ollama is an open-source local AI model service that runs on your own computer.
 
 - Easily download and run Large Language Models
 - Usable on most hardware without dedicated graphics; albeit slower and less accurate
 - Repository with a large selection of specialized models
-- No need to share data with external services 
+- No need to share data with external services
 - Opensource
 
-When installed within IntelliJ Idea, it acts as a bridge between powerful AI models and the code editor. 
+When installed within IntelliJ Idea, it acts as a bridge between powerful AI models and the code editor.
 
 With Ollama, you can:
 
@@ -46,11 +47,14 @@ With Ollama, you can:
 - Automate repetitive tasks, like writing commit messages.
 
 Without dedicated hardware it's slightly unbearable running 1.5 billion parameters with `deepseek-r1`.
-Simple things like writing small git commit messages work fine, however once the context increases beyond a few 1000 lines 
+Simple things like writing small git commit messages work fine, however once the context increases beyond a few 1000
+lines
 of code your really notice the processing limits.
 
-Since it's a network service/api you can just install Ollama on any machine on your local network containing dedicated hardware 
-and host it on your local/vpn network. Check out the [Ollama Docker container](https://hub.docker.com/r/ollama/ollama) if you're into that.
+Since it's a network service/api you can just install Ollama on any machine on your local network containing dedicated
+hardware
+and host it on your local/vpn network. Check out the [Ollama Docker container](https://hub.docker.com/r/ollama/ollama)
+if you're into that.
 
 ## Install Ollama:
 
@@ -72,21 +76,26 @@ To stop output press `CTRL+C`, type`/bye` to exit.
 ## Connect your IDE to Ollama
 
 ### IntelliJ Idea
+
 Since we have our OpenAI api running with our working language model, lets set up our IDE and start using it.
 Go to `Settings` → `Tools` → `AI assistant` → `Third party AI providers` → `Enable Ollama`.
 
-[source](https://ollama.com/blog/continue-code-assistant)
-
-
-Set your connection to: `http://localhost:11434`  (Default)
+Set your connection to: `http://localhost:11434`  (Default) or any other server on your network running Ollama.
 
 Open the IntelliJ AI assistant and set the Model to `Ollama` - `Deepseek-r1:1.5b`.
 
-Depending on your device, you might want to download bigger models to improve performance and accuracy,
+### VSCode
+
+VSCode users should check out [Continue](https://ollama.com/blog/continue-code-assistant), not tested.
+
+Depending on your hardware, you might want to download bigger models to improve performance and accuracy,
 check out more [Ollama models](https://ollama.com/search).
 
+Another approach might be to try to get smaller specialized models switching overt to models that fit your specific use
+case.
 
 ## Manage models
+
 To install new models, e.g. `codellama:7b`
 
 ```bash
@@ -110,3 +119,9 @@ sudo rm -r /usr/share/ollama
 sudo userdel ollama 
 sudo groupdel ollama
 ```
+
+## Conclusion
+
+Ollama enhances your workflow in IntelliJ IDEA by providing AI-powered tools without the need for external services or
+high-end hardware. For deeper insights, consider exploring additional resources
+from the [Ollama's official API documentation](https://github.com/ollama/ollama/blob/main/docs/api.md).
