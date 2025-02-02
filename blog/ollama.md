@@ -6,7 +6,7 @@ githost: https://github.com
 branch: master
 readmeFile: README.md
 type: blog
-title: "Ollama: Revolutionizing AI in IntelliJ Idea"
+title: "Ollama local AI/LLM integration in IntelliJ Idea and VS-Code"
 date: 2025-02-02
 outline: deep
 intro: |
@@ -90,7 +90,7 @@ VSCode users should check out [Continue](https://ollama.com/blog/continue-code-a
 Depending on your hardware, you might want to download bigger models to improve performance and accuracy,
 check out more [Ollama models](https://ollama.com/search).
 
-Another approach might be to try to get smaller specialized models switching overt to models that fit your specific use
+Another approach might be to try to get smaller specialized models switching over to models that fit your specific use
 case.
 
 ## Manage models
