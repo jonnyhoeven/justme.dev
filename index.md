@@ -25,7 +25,7 @@ features:
              your first application from a Git-Ops perspective.</a>
   - title: <a href="/projects/cvti">Camera & Lighting Interface</a>
     details: <a href="/projects/cvti"">This software is designed to control camera and
-             lighting systems. The software is written in Visual Basic .NET and is designed to run on a Windows operating systems.</a>
+             lighting systems. The software is written in Visual Basic .NET and is designed to run on Windows operating systems.</a>
   - title: <a href="/projects/justme">Justme.dev</a>
     details: <a href="/projects/justme">This site's source code is available on GitHub. VitePress is specifically designed
              for static documentation websites. Built on top of Vue, a modern build tool for frontend development.</a>
