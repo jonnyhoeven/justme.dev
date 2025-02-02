@@ -52,13 +52,12 @@ lines
 of code your really notice the processing limits.
 
 Since it's a network service/api you can just install Ollama on any machine on your local network containing dedicated
-hardware
-and host it on your local/vpn network. Check out the [Ollama Docker container](https://hub.docker.com/r/ollama/ollama)
-if you're into that.
+hardware and host it on your local/vpn network. Check out
+the [Ollama Docker container](https://hub.docker.com/r/ollama/ollama) if you're into that.
 
 ## Install Ollama:
 
-(source)[https://ollama.com/]
+[source](https://ollama.com/)
 
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
