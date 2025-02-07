@@ -20,7 +20,7 @@ languages: Go
 fetchML: false
 ---
 
-<!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->6UnusedImports -->
+<!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
  import ArticleFooter from '/components/ArticleFooter.vue';
@@ -37,7 +37,7 @@ Ollama is an open-source local AI model service that runs on your own computer.
 - No need to share data with external services
 - Opensource
 
-When installed within IntelliJ Idea, it acts as a bridge between powerful AI models and the code editor.
+When installed within IntelliJ Idea, it acts as a bridge between AI models and the code editor.
 
 With Ollama, you can:
 
@@ -87,11 +87,13 @@ Open the IntelliJ AI assistant and set the Model to `Ollama` - `Deepseek-r1:1.5b
 
 VSCode users should check out [Continue](https://ollama.com/blog/continue-code-assistant), not tested.
 
-Depending on your hardware, you might want to download bigger models to improve performance and accuracy,
-check out more [Ollama models](https://ollama.com/search).
+### Hardware considerations
 
-Another approach might be to try to get smaller specialized models switching over to models that fit your specific use
-case.
+Depending on your hardware availability, you might want to download bigger models to improve performance and accuracy,
+check out more [Ollama models](https://ollama.com/search) with more parameters.
+
+Another approach might be to try to with smaller specialized models, switching over to models that fit your specific use
+case when needed.
 
 ## Manage models
 

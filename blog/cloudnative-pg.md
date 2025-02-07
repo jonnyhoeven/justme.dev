@@ -21,7 +21,7 @@ image: /images/pg.webp
 languages: Go, Shell
 fetchML: false
 ---
-<!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->6UnusedImports -->
+<!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
  import ArticleFooter from '/components/ArticleFooter.vue';
