@@ -1,7 +1,7 @@
 ---
 layout: home
 title: Justme.dev
-description: Justme.dev - Developer blog by Jonny van der Hoeven. Just me, making it.
+description: Justme.dev - Just make it.
 image: /images/ava.webp
 
 hero:
