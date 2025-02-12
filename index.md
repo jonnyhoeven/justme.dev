@@ -6,7 +6,6 @@ image: /images/ava.webp
 
 hero:
   name: "Justme.dev"
-  text: "Developer Blog"
   tagline: Just make it!
   image:
     src: /images/ava.webp
