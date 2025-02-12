@@ -36,7 +36,7 @@ export default async () => {
             const pf = pageData.frontmatter
             const intro_plh = 'Just me. Sharing insights, experiences, and tutorials related to software development and site reliability engineering.'
             const intro = (pf && pf.intro) ? pf.intro : intro_plh
-            const keywords = 'Personal Portfolio, jonnyhoeven, justme.dev, devops, Infrastructure as Code'
+            const keywords = 'Personal Portfolio, justme.dev, SRE, Kubernetes, Infrastructure as Code'
             const image_plh = '/images/justme.dev.webp'
             const image = `${hostname}${(pf && pf.image) ? pf.image : image_plh}`
 
