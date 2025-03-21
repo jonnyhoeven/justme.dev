@@ -14,7 +14,7 @@ languages: Go, Shell
 externalUrl: https://www.yworks.com/products/yed
 fetchML: false
 ---
-<!--suppress ALL, CheckEmptyScriptTag, HtmlUnknownAttribute -->eckEmptyScriptTag -->
+<!--suppress ALL, CheckEmptyScriptTag, HtmlUnknownAttribute -->
 
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';

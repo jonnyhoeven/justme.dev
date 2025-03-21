@@ -20,7 +20,7 @@ image: /images/edb.webp
 languages: Python, Jinja, Shell, Dockerfile
 fetchML: false
 ---
-<!--suppress ALL, CheckEmptyScriptTag, HtmlUnknownAttribute -->eckEmptyScriptTag -->
+<!--suppress ALL, CheckEmptyScriptTag, HtmlUnknownAttribute -->
 
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
