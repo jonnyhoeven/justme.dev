@@ -11,7 +11,7 @@ export default async () => {
     return defineConfig({
         lang: lang,
         title: siteName,
-        srcExclude: ['/README.md'],
+        srcExclude: ['**/README.md'],
         description: `${siteName} - ${author}. Just make it!`,
         head: [
 
