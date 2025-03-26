@@ -7,7 +7,6 @@
   },
   "scripts": {
     "docs:generate": "python3 generate/process.py",
-    "docs:models": "python3 generate/models.py > generate/models.json",
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview"
