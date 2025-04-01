@@ -50,8 +50,8 @@ export default async () => {
                 property: 'og:image',
                 content: image
             }])
-            head.push(['meta', {property: 'article:published_time', content: pf.date ? pf.date : '2024-01-01'}])
-            head.push(['meta', {property: 'article:modified_time', content: pf.date ? pf.date : '2024-01-01'}])
+            head.push(['meta', {property: 'article:published_time', content: pf.date ? pf.date : '2025-01-01'}])
+            head.push(['meta', {property: 'article:modified_time', content: pf.date ? pf.date : '2025-01-01'}])
             head.push(['meta', {name: 'twitter:image', content: image}])
             head.push(['meta', {property: 'twitter:url', content: `${hostname}/${pageData.relativePath}`}])
             head.push(['meta', {property: 'twitter:description', content: intro}])
