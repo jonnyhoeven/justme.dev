@@ -92,8 +92,8 @@ VSCode users should check out [Continue](https://ollama.com/blog/continue-code-a
 Depending on your hardware availability, you might want to download bigger models to improve performance and accuracy,
 check out more [Ollama models](https://ollama.com/search) with more parameters.
 
-Another approach might be to try to with smaller specialized models, switching over to models that fit your specific use
-case when needed.
+Another approach might be to try smaller specialized models while switching to fit your specific use
+case, by trying different smaller models.
 
 ## Manage models
 
