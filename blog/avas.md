@@ -43,15 +43,15 @@ The goal was simple, if a bit absurd:
 - Make the sound's pitch also go up when I speed up.
 - All in a single HTML file.
 
-This is a job for two of the web's coolest and most under-appreciated APIs: the Geolocation API and the Web Audio API.
+This is a job for two of the web's coolest and most underappreciated APIs: the Geolocation API and the Web Audio API.
 
 ## "Where am I? No... How fast am I?"
 
 Getting the speed is surprisingly easy. The Geolocation API has a magical function called
-navigator.geolocation.watchPosition(). It's like getCurrentPosition() but for people with commitment issues—it just
+navigator.geolocation.watchPosition(). It's like getCurrentPosition(), but for people with commitment issues—it just
 keeps telling you where you are, over and over.
 
-And the best part? The position object it gives you doesn't just have latitude and longitude. It has
+And the best part? The position object it gives you doesn't just have a latitude and longitude. It has
 position.coords.speed.
 
 ```js
@@ -165,7 +165,7 @@ Wrote a function to generate a 2-second buffer of pink noise.
 
 Played that buffer on a loop (BufferSourceNode).
 
-Fed that into a BiquadFilterNode set to 'bandpass'.
+Fed that into a BiquadFilterNode set to 'bandpass.'
 
 This filter is the magic. It only lets a "band" of frequencies through. By changing the filter's frequency value, I'm
 not changing the pitch of the noise itself, but which part of the noise I'm listening to.
@@ -214,7 +214,7 @@ With that one attribute, the final boss was defeated.
 
 <div align="right">View <a href="/html/avas.html" target="_blank">Page</a> or <a href="https://github.com/jonnyhoeven/justme.dev/blob/main/public/html/avas.html" target="_blank">Source</a></div>
 
-I now have a single HTML file that turns my phone into a fully-configurable, speed-sensitive, futuristic sound generator
-for my scooter. It's ridiculous, it's over-engineered, and it's exactly what I wanted.
+I now have a single HTML file that turns my phone into a fully configurable, speed-sensitive, futuristic sound generator
+for my scooter. It's ridiculous, it's overengineered, and it's exactly what I wanted.
 
 Now if you'll excuse me, I'm going to go ride around making "whoosh" noises at pedestrians. For safety.
