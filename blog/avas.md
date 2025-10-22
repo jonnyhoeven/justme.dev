@@ -45,7 +45,7 @@ The goal was simple, if a bit absurd:
 
 This is a job for two of the web's coolest and most under-appreciated APIs: the Geolocation API and the Web Audio API.
 
-## Step 1: "Where am I? No... How fast am I?"
+## "Where am I? No... How fast am I?"
 
 Getting the speed is surprisingly easy. The Geolocation API has a magical function called
 navigator.geolocation.watchPosition(). It's like getCurrentPosition() but for people with commitment issues—it just
@@ -67,14 +67,14 @@ navigator.geolocation.watchPosition(
         console.error("GPS machine broke.", error);
     },
     {
-        enableHighAccuracy: true
-    } // "Yes, please drain my battery."
+        enableHighAccuracy: true // "Yes, please drain my battery."
+    } 
 );
 ```
 
 With speedMs in hand, I had the core-driver for the whole project.
 
-## Step 2: Making the Bleeps and Bloops
+## Making the Bleeps and Bloops
 
 Now, for the sound. If you've never played with the Web Audio API, you're missing out. It's like a full-blown audio
 production studio, but in JavaScript.
@@ -113,7 +113,7 @@ oscillator.start();
 
 With this, I had a continuous, slightly annoying hum. Success!
 
-## Step 3: The Dynamic Duo (Speed to Sound)
+## The Dynamic Duo (Speed to Sound)
 
 Now, to wire the GPS up to the audio. Inside the watchPosition callback, I just needed to update the gain (volume) and
 frequency (pitch) based on the speed.
@@ -146,7 +146,7 @@ I pressed START, waved my phone around like a lunatic, and... nothing happened. 
 I ran outside, hopped on my scooter, and... it worked. A gentle brrrr at a standstill, which rose to a respectable
 brrrRRREEEEE as I accelerated. I was, officially, a sci-fi vehicle.
 
-## Step 4: Down the Rabbit Hole of Noise
+## Down the Rabbit Hole of Noise
 
 Then I got a brilliant piece of feedback: a pure sine wave is hard to locate. People can hear it, but they can't easily
 tell where it's coming from. Broadband noise (like a hiss) is much easier for the human ear to pinpoint.
@@ -172,7 +172,7 @@ not changing the pitch of the noise itself, but which part of the noise I'm list
 
 The result? A "whoosh" sound that rises in pitch. shhHHOOOOoooo... It was perfect.
 
-## Step 5: Giving Up Control (with Sliders)
+## Giving Up Control (with Sliders)
 
 At this point, my script was a mess of "magic numbers" (PITCH_SENSITIVITY = 20, BASE_FREQUENCY = 150, etc.). I was tired
 of editing the file to test new sounds.
