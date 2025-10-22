@@ -209,10 +209,8 @@ The magic line of code in the parent page's HTML:
 ```
 
 With that one attribute, the final boss was defeated.
-
-<iframe src="/html/avas.html" allow="geolocation" width="100%" height="1000pt" style="margin:3pt"></iframe>
-
-<div align="right">View <a href="/html/avas.html" target="_blank">Page</a> or <a href="https://github.com/jonnyhoeven/justme.dev/blob/main/public/html/avas.html" target="_blank">Source</a></div>
+<iframe src="/html/avas.html" allow="geolocation" width="100%" height="1100pt" style="margin:3pt"></iframe>
+<div style="text-align:right">View <a href="/html/avas.html" target="_blank">Page</a> or <a href="https://github.com/jonnyhoeven/justme.dev/blob/main/public/html/avas.html" target="_blank">Source</a></div>
 
 I now have a single HTML file that turns my phone into a fully configurable, speed-sensitive, futuristic sound generator
 for my scooter. It's ridiculous, it's overengineered, and it's exactly what I wanted.
