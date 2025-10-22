@@ -199,7 +199,7 @@ Two things tried to kill the project:
 HTTPS: Geolocation is a sensitive API. Browsers (rightfully) refuse to run it on insecure http:// pages. Easy fix:
 GitHub Pages provides https:// by default.
 
-Permissions Policy: Even on https://, the parent page (justme.dev) has to explicitly grant the `iframe` permission to
+Permissions Policy: Even on `https`, the parent page (justme.dev) has to explicitly grant the `iframe` permission to
 ask for location data.
 
 The magic line of code in the parent page's HTML:
