@@ -205,7 +205,7 @@ ask for location data.
 The magic line of code in the parent page's HTML:
 
 ```html
-<iframe src="/html/avas.html" allow="geolocation" width="100%" height="1000pt"></iframe>
+<iframe src="/html/avas.html" allow="geolocation" width="100%" height="1100pt"></iframe>
 ```
 
 With that one attribute, the final boss was defeated.
