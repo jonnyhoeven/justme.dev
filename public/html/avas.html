@@ -16,6 +16,7 @@
             color: #ffffff;
             text-align: center;
         }
+
         #container {
             display: flex;
             flex-direction: column;
@@ -24,6 +25,7 @@
             width: 90%;
             max-width: 400px;
         }
+
         button {
             font-size: 24px;
             padding: 20px 40px;
@@ -32,16 +34,32 @@
             cursor: pointer;
             transition: background-color 0.2s, transform 0.1s;
         }
+
         button:active {
             transform: scale(0.95);
         }
-        #startButton { background-color: #28a745; color: white; }
-        #stopButton { background-color: #dc3545; color: white; }
-        #startButton:hover { background-color: #218838; }
-        #stopButton:hover { background-color: #c82333; }
+
+        #startButton {
+            background-color: #28a745;
+            color: white;
+        }
+
+        #stopButton {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        #startButton:hover {
+            background-color: #218838;
+        }
+
+        #stopButton:hover {
+            background-color: #c82333;
+        }
+
         #status {
             font-size: 16px;
-            min-height: 70px;
+            min-height: 80px; /* Increased height for new lines */
             padding: 15px;
             background-color: #333;
             border-radius: 10px;
@@ -50,6 +68,7 @@
             justify-content: center;
             align-items: center;
         }
+
         #settings {
             margin-top: 10px;
             background-color: #2c2c2c;
@@ -59,24 +78,29 @@
             flex-direction: column;
             gap: 15px;
         }
+
         .slider-container {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
             gap: 8px;
         }
+
         .slider-container label {
             font-size: 14px;
             color: #ddd;
         }
+
         .slider-container input[type="range"] {
             width: 100%;
             cursor: pointer;
         }
+
         .slider-container input[type="range"]:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
+
         /* Style for the new dropdown */
         #settings select {
             width: 100%;
@@ -94,6 +118,7 @@
             background-position: right 10px center;
             background-size: 1.2em;
         }
+
         /* New styles for checkbox */
         .checkbox-container {
             display: flex;
@@ -103,10 +128,12 @@
             padding: 10px;
             border-radius: 8px;
         }
+
         .checkbox-container label {
             cursor: pointer;
             font-size: 16px;
         }
+
         .checkbox-container input[type="checkbox"] {
             width: 18px;
             height: 18px;
@@ -148,7 +175,8 @@
             <input type="range" id="minVolumeSlider" min="0" max="100" value="15">
         </div>
         <div class="slider-container">
-            <label for="volumeSensitivitySlider">Volume Sensitivity: <span id="volumeSensitivityValue">0.08</span></label>
+            <label for="volumeSensitivitySlider">Volume Sensitivity: <span
+                    id="volumeSensitivityValue">0.08</span></label>
             <input type="range" id="volumeSensitivitySlider" min="1" max="20" value="8">
         </div>
         <div class="slider-container">
@@ -192,8 +220,10 @@
 
     let audioContext;
     let gainNode;
-    let audioSource = null; // This will hold our oscillator OR noise source
+    let audioSource = null; // Our one true audio source (oscillator or noise)
     let watchId;
+
+    let wakeLock = null; // Holds the precious screen wake lock
 
     let lastKnownGpsSpeedMps = 0;
     let manualMode = false;
@@ -207,7 +237,7 @@
 
     // --- Noise Generation ---
     function createWhiteNoiseSource(audioCtx) {
-        const bufferSize = audioCtx.sampleRate * 2; // 2-second buffer
+        const bufferSize = audioCtx.sampleRate * 2; // 2 glorious seconds of static
         const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
         const output = buffer.getChannelData(0);
 
@@ -221,9 +251,9 @@
         return whiteNoise;
     }
 
-    // Paul Kellett's simple pink noise generator approximation
+    // Paul Kellett's wizardry for pink noise (approximated)
     function createPinkNoiseSource(audioCtx) {
-        const bufferSize = audioCtx.sampleRate * 2; // 2-second buffer
+        const bufferSize = audioCtx.sampleRate * 2; // 2 glorious seconds of deeper static
         const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
         const output = buffer.getChannelData(0);
 
@@ -240,7 +270,7 @@
             b5 = -0.7616 * b5 - white * 0.0168980;
 
             output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
-            output[i] *= 0.11; // Scale to prevent clipping
+            output[i] *= 0.11; // Scale it down so we don't blow the speakers
             b6 = white * 0.115926;
         }
 
@@ -266,9 +296,9 @@
             const noiseNode = (type === 'whitenoise') ? createWhiteNoiseSource(audioContext) : createPinkNoiseSource(audioContext);
             const filterNode = audioContext.createBiquadFilter();
 
-            filterNode.type = 'bandpass'; // This isolates a "pitched" part of the noise
+            filterNode.type = 'bandpass'; // The "pitch" of the noise is just a filtered band
             filterNode.frequency.setValueAtTime(BASE_FREQUENCY, audioContext.currentTime);
-            filterNode.Q.setValueAtTime(1, audioContext.currentTime); // Resonance
+            filterNode.Q.setValueAtTime(1, audioContext.currentTime); // How sharp the filter is (lower is broader)
 
             noiseNode.connect(filterNode);
             filterNode.connect(gainNode);
@@ -297,7 +327,8 @@
         }
     }
 
-    function startSound() {
+    // Make startSound async to use await for wakeLock
+    async function startSound() {
         if (audioContext) return;
 
         settingsDiv.style.display = 'flex';
@@ -306,17 +337,32 @@
         gainNode.connect(audioContext.destination);
         gainNode.gain.setValueAtTime(MIN_VOLUME, audioContext.currentTime);
 
-        setAudioSource(oscillatorTypeSelect.value); // Create the initial audio source
+        setAudioSource(oscillatorTypeSelect.value); // Fire up the sound machine!
+
+        // Request Wake Lock
+        if ('wakeLock' in navigator) {
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+                wakeLock.addEventListener('release', () => {
+                    console.log('Wake Lock was released');
+                });
+                console.log('Wake Lock is active');
+            } catch (err) {
+                console.error(`${err.name}: ${err.message}`);
+                statusDiv.innerHTML = "✅ Sound ON.<br>⚠️ Could not acquire screen lock.";
+            }
+        }
 
         if (navigator.geolocation) {
-            watchId = navigator.geolocation.watchPosition(updateFromGps, handleError, { enableHighAccuracy: true });
-            statusDiv.textContent = "✅ Sound ON. Waiting for GPS signal...";
+            watchId = navigator.geolocation.watchPosition(updateFromGps, handleError, {enableHighAccuracy: true});
+            statusDiv.innerHTML = "✅ Sound ON. Waiting for GPS signal...<br><small>(Screen lock active)</small>";
         } else {
-            handleError({ code: -1 }); // Custom code for no geolocation support
+            handleError({code: -1}); // Custom error for "browser is a potato"
         }
     }
 
-    function stopSound() {
+    // Make stopSound async to use await for wakeLock
+    async function stopSound() {
         if (!audioContext) return;
         settingsDiv.style.display = 'none';
 
@@ -324,11 +370,22 @@
             audioSource.stop();
         }
 
-        audioContext.close().then(() => {
+        await audioContext.close().then(() => {
             audioContext = null;
             audioSource = null;
             gainNode = null;
         });
+
+        // Release Wake Lock
+        if (wakeLock) {
+            try {
+                await wakeLock.release();
+                wakeLock = null;
+                console.log('Wake Lock released');
+            } catch (err) {
+                console.error(`${err.name}: ${err.message}`);
+            }
+        }
 
         if (watchId) {
             navigator.geolocation.clearWatch(watchId);
@@ -368,22 +425,41 @@
 
         statusDiv.innerHTML = `${manualMode ? '🕹️' : '🛰️'} Sound ON<br>
                                 Speed: ${speedKmh} km/h<br>
-                                Volume: ${Math.round(newVolume * 100)}% | Pitch: ${clampedFrequency.toFixed(0)} Hz`;
+                                Volume: ${Math.round(newVolume * 100)}% | Pitch: ${clampedFrequency.toFixed(0)} Hz
+                                <br><small>${wakeLock ? 'Screen lock is active' : '(No screen lock)'}</small>`;
     }
 
     function handleError(error) {
-        if (error.code === 1) { statusDiv.textContent = "❌ GPS denied."; }
-        else if (error.code === -1) { statusDiv.textContent = "⚠️ No GPS support."; }
-        else { statusDiv.textContent = "⚠️ GPS Error."; }
+        if (error.code === 1) {
+            statusDiv.textContent = "❌ GPS denied.";
+        } else if (error.code === -1) {
+            statusDiv.textContent = "⚠️ No GPS support.";
+        } else {
+            statusDiv.textContent = "⚠️ GPS Error.";
+        }
 
-        // Force manual mode on any error
+        // GPS is a no-show? Fine, we'll do it ourselves.
         manualMode = true;
         manualModeCheckbox.checked = true;
         manualSpeedSlider.disabled = false;
     }
 
+    // Handle visibility change to re-acquire lock
+    const handleVisibilityChange = async () => {
+        // Tab was hidden and came back? Re-acquire that precious lock!
+        if (wakeLock !== null && document.visibilityState === 'visible' && audioContext) {
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+                console.log('Wake Lock re-acquired');
+            } catch (err) {
+                console.error(`${err.name}: ${err.message}`);
+            }
+        }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+
     function initializeControls() {
-        // ... (slider value initializations remain the same) ...
         minVolumeSlider.value = MIN_VOLUME * 100;
         minVolumeValue.textContent = `${Math.round(MIN_VOLUME * 100)}%`;
         volumeSensitivitySlider.value = VOLUME_SENSITIVITY * 100;
@@ -405,7 +481,7 @@
         oscillatorTypeSelect.addEventListener('change', e => {
             if (audioContext) { // Only change if sound is already on
                 setAudioSource(e.target.value);
-                updateSoundFromActiveSpeed(); // Apply current speed to new sound
+                updateSoundFromActiveSpeed(); // Give the new sound its current speed stats
             }
         });
 
@@ -426,7 +502,7 @@
         baseFrequencySlider.addEventListener('input', e => {
             BASE_FREQUENCY = parseInt(e.target.value);
             baseFrequencyValue.textContent = `${BASE_FREQUENCY} Hz`;
-            // Also update the base frequency of the current source
+            // Instantly update the base pitch (no ramp needed here)
             if (audioSource) {
                 if (audioSource.isNoise) {
                     audioSource.filter.frequency.setValueAtTime(BASE_FREQUENCY, audioContext.currentTime);
@@ -472,6 +548,3 @@
 
 </body>
 </html>
-
-
-
