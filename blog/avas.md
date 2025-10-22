@@ -192,7 +192,7 @@ Now I have a full-blown AVAS dashboard. Is it overkill? Absolutely. Am I proud o
 
 ## The Final Boss: The `iframe`
 
-I wanted to host this on my blog, but that means putting it in an `iframe`. And `iframe`s are tiny security sandboxes.
+I wanted to host this on my blog, but that means putting it in an `iframe`. And `iframes` are tiny security sandboxes.
 
 Two things tried to kill the project:
 
