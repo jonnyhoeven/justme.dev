@@ -210,8 +210,6 @@ The magic line of code in the parent page's HTML:
 
 With that one attribute, the final boss was defeated.
 
-The Result:
-
 <iframe src="/html/avas.html" allow="geolocation" width="100%" height="1000pt"></iframe>
 
 Or use the direct <a href="/html/avas.html" target="_blank">link</a> instead of the iframe.
