@@ -7,7 +7,7 @@ intro: A slightly mad journey into using the Web Audio and Geolocation APIs to b
 fetchReadme: false
 editLink: true
 image: /images/avas.png
-languages: Python, Gemini
+languages: Javascript, HTML
 fetchML: false
 ---
 
