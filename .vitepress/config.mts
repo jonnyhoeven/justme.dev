@@ -12,7 +12,7 @@ export default async () => {
         lang: lang,
         title: siteName,
         srcExclude: ['**/README.md'],
-        description: `${siteName} - ${author}. Just make it!`,
+        description: `${siteName} - ${author}. Just make IT!`,
         head: [
 
             // Static Opengraph stuff
@@ -40,7 +40,7 @@ export default async () => {
             const image_plh = '/images/justme.dev.webp'
             const image = `${hostname}${(pf && pf.image) ? pf.image : image_plh}`
 
-            head.push(['meta', {name: 'title', property: 'og:title', content: pf.title ? pf.title : 'Just make it!'}])
+            head.push(['meta', {name: 'title', property: 'og:title', content: pf.title ? pf.title : 'Just make IT!'}])
             head.push(['meta', {
                 name: 'description', property: 'og:description', content: intro
             }])

@@ -1,12 +1,12 @@
 ---
 layout: home
 title: Justme.dev
-description: Justme.dev - Just make it.
+description: Justme.dev - Just make IT.
 image: /images/ava.webp
 
 hero:
   name: "Justme.dev"
-  tagline: Just make it!
+  tagline: Just make IT!
   image:
     src: /images/ava.webp
     alt: Justme.dev
