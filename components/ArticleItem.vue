@@ -14,7 +14,7 @@ defineProps(['frontmatter'])
       <Badges :frontmatter="frontmatter" />
     </div>
   </div>
-  <p v-if="frontmatter && frontmatter.intro" v-html="frontmatter.intro"></p>
+  <div v-if="frontmatter && frontmatter.intro" v-html="frontmatter.intro"></div>
 </template>
 
 

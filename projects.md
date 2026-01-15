@@ -9,9 +9,9 @@ image: /images/justme.dev.webp
 <!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute -->
 <script setup>// noinspection JSUnresolvedReference
 import { data as pages} from './data/project.data.js';
-import ArticleList from '/components/ArticleList.vue';
+import ArticleList from './components/ArticleList.vue';
 </script>
 
 # Projects
 
-<ArticleList v-for="page of pages" :page="page"/>
+<ArticleList v-for="page of pages" :key="page.url" :page="page"/>

@@ -4,7 +4,7 @@ defineProps(['frontmatter'])
 
 <template>
   <div v-if="frontmatter" class="badge-bar">
-    <img v-if="frontmatter.watchersUrl" :src=frontmatter.watchersUrl alt="Watchers" class="shieldButton" width="82px"
+    <img v-if="frontmatter.watchersUrl" :src="frontmatter.watchersUrl" alt="Watchers" class="shieldButton" width="82px"
       height="20px" />
     <img v-if="frontmatter.starsUrl" :src="frontmatter.starsUrl" alt="Stars" class="shieldButton" width="60px"
       height="20px" />

@@ -14,7 +14,7 @@ defineProps(['page']);
       </div>
       <div v-if="page.frontmatter.title" class="layercontent">
         <h3 style="margin:8pt 0 10pt;">{{ page.frontmatter.title }}</h3>
-        <span v-if="page.frontmatter.intro" v-html="page.frontmatter.intro"></span>
+        <div v-if="page.frontmatter.intro" v-html="page.frontmatter.intro"></div>
         <Badges :frontmatter="page.frontmatter" />
       </div>
     </div>

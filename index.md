@@ -31,7 +31,7 @@ features:
 ---
 <script setup>
 import { data as pages } from './data/blog.data.js';
-import ArticleList from '/components/ArticleList.vue';
+import ArticleList from './components/ArticleList.vue';
 </script>
 
 <div class="homepage-content">
