@@ -1,7 +1,13 @@
 {
   "type": "module",
   "devDependencies": {
+    "@eslint/compat": "^2.0.1",
+    "@rushstack/eslint-patch": "^1.15.0",
+    "@vue/eslint-config-typescript": "^14.6.0",
     "@vueuse/core": "^14.0.0",
+    "eslint": "^9.39.2",
+    "eslint-plugin-vue": "^10.6.2",
+    "prettier": "^3.8.0",
     "vitepress": "^1.6.4",
     "vue": "^3.5.22"
   },
@@ -9,6 +15,8 @@
     "docs:generate": "python3 generate/process.py",
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
-    "docs:preview": "vitepress preview"
+    "docs:preview": "vitepress preview",
+    "lint": "eslint . --fix",
+    "format": "prettier --write ."
   }
 }

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import Badges from './Badges.vue';
 
 defineProps(['page']);

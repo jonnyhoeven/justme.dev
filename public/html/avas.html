@@ -458,11 +458,78 @@
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
+    // --- Settings Persistence ---
+    const SETTINGS_KEY = 'avasSettingsV1';
+
+    function loadSettings() {
+        try {
+            const raw = localStorage.getItem(SETTINGS_KEY);
+            if (!raw) return null;
+            const obj = JSON.parse(raw);
+            return obj && typeof obj === 'object' ? obj : null;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    function saveSettings() {
+        try {
+            const settings = {
+                oscillatorType: oscillatorTypeSelect.value,
+                minVolume: MIN_VOLUME,
+                volumeSensitivity: VOLUME_SENSITIVITY,
+                baseFrequency: BASE_FREQUENCY,
+                pitchSensitivity: PITCH_SENSITIVITY,
+                maxFrequency: MAX_FREQUENCY,
+                manualMode: manualMode,
+                manualSpeed: parseInt(manualSpeedSlider.value)
+            };
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+        } catch (_) {
+            // ignore storage errors (e.g., private mode)
+        }
+    }
+
+    function clamp(num, min, max) { return Math.min(max, Math.max(min, num)); }
+
+    function applyLoadedSettings(loaded) {
+        if (!loaded) return;
+        if (loaded.oscillatorType && typeof loaded.oscillatorType === 'string') {
+            oscillatorTypeSelect.value = loaded.oscillatorType;
+        }
+        if (typeof loaded.minVolume === 'number') {
+            MIN_VOLUME = clamp(loaded.minVolume, 0, 1);
+        }
+        if (typeof loaded.volumeSensitivity === 'number') {
+            VOLUME_SENSITIVITY = clamp(loaded.volumeSensitivity, 0, 1);
+        }
+        if (typeof loaded.baseFrequency === 'number') {
+            BASE_FREQUENCY = clamp(loaded.baseFrequency, 50, 400);
+        }
+        if (typeof loaded.pitchSensitivity === 'number') {
+            PITCH_SENSITIVITY = clamp(loaded.pitchSensitivity, 1, 100);
+        }
+        if (typeof loaded.maxFrequency === 'number') {
+            MAX_FREQUENCY = clamp(loaded.maxFrequency, 200, 1200);
+        }
+        if (typeof loaded.manualMode === 'boolean') {
+            manualMode = loaded.manualMode;
+        }
+        if (typeof loaded.manualSpeed === 'number') {
+            manualSpeedSlider.value = clamp(Math.round(loaded.manualSpeed), 0, 50);
+        }
+    }
+
 
     function initializeControls() {
-        minVolumeSlider.value = MIN_VOLUME * 100;
+        // Load previously saved settings (if any) and apply to internal variables first
+        const loaded = loadSettings();
+        applyLoadedSettings(loaded);
+
+        // Reflect values in UI
+        minVolumeSlider.value = Math.round(MIN_VOLUME * 100);
         minVolumeValue.textContent = `${Math.round(MIN_VOLUME * 100)}%`;
-        volumeSensitivitySlider.value = VOLUME_SENSITIVITY * 100;
+        volumeSensitivitySlider.value = Math.round(VOLUME_SENSITIVITY * 100);
         volumeSensitivityValue.textContent = VOLUME_SENSITIVITY.toFixed(2);
         baseFrequencySlider.value = BASE_FREQUENCY;
         baseFrequencyValue.textContent = `${BASE_FREQUENCY} Hz`;
@@ -470,6 +537,9 @@
         pitchSensitivityValue.textContent = PITCH_SENSITIVITY;
         maxFrequencySlider.value = MAX_FREQUENCY;
         maxFrequencyValue.textContent = `${MAX_FREQUENCY} Hz`;
+        manualModeCheckbox.checked = !!manualMode;
+        manualSpeedValue.textContent = `${parseInt(manualSpeedSlider.value)} km/h`;
+        manualSpeedSlider.disabled = !manualMode;
 
         const updateSoundFromActiveSpeed = () => {
             if (!audioContext) return;
@@ -483,6 +553,7 @@
                 setAudioSource(e.target.value);
                 updateSoundFromActiveSpeed(); // Give the new sound its current speed stats
             }
+            saveSettings();
         });
 
         minVolumeSlider.addEventListener('input', e => {
@@ -490,6 +561,7 @@
             MIN_VOLUME = percentage / 100;
             minVolumeValue.textContent = `${percentage}%`;
             updateSoundFromActiveSpeed();
+            saveSettings();
         });
 
         volumeSensitivitySlider.addEventListener('input', e => {
@@ -497,6 +569,7 @@
             VOLUME_SENSITIVITY = val / 100;
             volumeSensitivityValue.textContent = VOLUME_SENSITIVITY.toFixed(2);
             updateSoundFromActiveSpeed();
+            saveSettings();
         });
 
         baseFrequencySlider.addEventListener('input', e => {
@@ -511,16 +584,19 @@
                 }
             }
             updateSoundFromActiveSpeed();
+            saveSettings();
         });
         pitchSensitivitySlider.addEventListener('input', e => {
             PITCH_SENSITIVITY = parseInt(e.target.value);
             pitchSensitivityValue.textContent = PITCH_SENSITIVITY;
             updateSoundFromActiveSpeed();
+            saveSettings();
         });
         maxFrequencySlider.addEventListener('input', e => {
             MAX_FREQUENCY = parseInt(e.target.value);
             maxFrequencyValue.textContent = `${MAX_FREQUENCY} Hz`;
             updateSoundFromActiveSpeed();
+            saveSettings();
         });
 
         manualModeCheckbox.addEventListener('change', e => {
@@ -529,6 +605,7 @@
             if (!manualMode) { // Switched back to GPS
                 updateSound(lastKnownGpsSpeedMps);
             }
+            saveSettings();
         });
 
         manualSpeedSlider.addEventListener('input', e => {
@@ -538,6 +615,7 @@
                 const speedMps = speedKmh / 3.6;
                 updateSound(speedMps);
             }
+            saveSettings();
         });
     }
 

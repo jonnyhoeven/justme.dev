@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 defineProps(['frontmatter'])
 </script>
 
@@ -24,11 +24,13 @@ defineProps(['frontmatter'])
          width="60px"
          height="20px"
     />
-    <Badge v-if="frontmatter.langArr" v-for="lang of frontmatter.langArr" :text="lang"
-           class="shieldButton"
-           type="info"
-           style="margin-right:5pt"
-    />
+    <template v-if="frontmatter.langArr">
+      <Badge v-for="lang of frontmatter.langArr" :key="lang" :text="lang"
+             class="shieldButton"
+             type="info"
+             style="margin-right:5pt"
+      />
+    </template>
     <a target="_blank"
        class="textButton"
        v-if="frontmatter.externalUrl"
