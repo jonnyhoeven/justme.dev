@@ -1,10 +1,4 @@
 ---
-project: ollama
-user: ollama
-gitlink: https://github.com/ollama/ollama
-githost: https://github.com
-branch: master
-readmeFile: README.md
 type: blog
 title: "Ollama local AI/LLM integration in IntelliJ Idea and VS-Code"
 date: 2025-02-02
@@ -15,9 +9,15 @@ intro: |
   a powerful AI assistant integrated into IntelliJ Idea, can transform your coding experience.
 fetchReadme: false
 editLink: true
-image: /images/ollama.webp
 languages: Go
 fetchML: false
+image: /images/ollama.webp
+project: ollama
+user: ollama
+gitlink: https://github.com/ollama/ollama
+githost: https://github.com
+branch: master
+readmeFile: README.md
 ---
 
 <!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->
