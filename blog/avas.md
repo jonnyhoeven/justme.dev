@@ -6,7 +6,7 @@ outline: deep
 intro: A slightly mad journey into using the Web Audio and Geolocation APIs to build a speed-sensitive Acoustic Vehicle Alerting System (AVAS) for my electric scooter.
 fetchReadme: false
 editLink: true
-image: /images/avas.png
+image: /images/avas.webp
 languages: Javascript, HTML
 fetchML: false
 ---
