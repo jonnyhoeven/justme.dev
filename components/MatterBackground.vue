@@ -105,7 +105,7 @@ onMounted(() => {
     })
   })
 
-  Events.on(engine, 'beforeUpdate', (event) => {
+  Events.on(engine, 'beforeUpdate', () => {
     const time = engine.timing.timestamp
     
     bodies.forEach(body => {
