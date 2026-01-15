@@ -10,19 +10,18 @@ defineProps(['page']);
       <div class="listImagebg layerbg"></div>
       <div class="layerimg">
         <div v-if="page.frontmatter.image" class="listImage"
-             :style="{backgroundImage: 'url('+ page.frontmatter.image +')'}"></div>
+          :style="{ backgroundImage: 'url(' + page.frontmatter.image + ')' }"></div>
       </div>
       <div v-if="page.frontmatter.title" class="layercontent">
         <h3 style="margin:8pt 0 10pt;">{{ page.frontmatter.title }}</h3>
         <span v-if="page.frontmatter.intro" v-html="page.frontmatter.intro"></span>
-        <Badges :frontmatter="page.frontmatter"/>
+        <Badges :frontmatter="page.frontmatter" />
       </div>
     </div>
   </a>
 </template>
 
 <style>
-
 .nolinkdecor {
   text-decoration: none !important;
   color: inherit !important;
@@ -32,7 +31,8 @@ defineProps(['page']);
   display: grid;
 }
 
-.layerbg, .layerimg {
+.layerbg,
+.layerimg {
   grid-column: var(--ls-listitem-image-col);
   grid-row: var(--ls-listitem-image-row);
   padding: var(--ls-listitem-image-padding);
@@ -74,5 +74,4 @@ defineProps(['page']);
   transform: skew(-1.5deg, -0.5deg) rotate(-0.4deg) scale(1.05);
   filter: blur(var(--ls-listitem-image-bg-blur-hover));
 }
-
 </style>

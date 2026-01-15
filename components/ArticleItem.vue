@@ -9,8 +9,9 @@ defineProps(['frontmatter'])
   <div v-if="frontmatter" class="container_row">
     <div class="articleImagebg layerbg"></div>
     <div class="layerimg">
-      <div v-if="frontmatter.image" class="articleImage" :style="{backgroundImage: 'url('+ frontmatter.image +')'}"></div>
-      <Badges :frontmatter="frontmatter"/>
+      <div v-if="frontmatter.image" class="articleImage" :style="{ backgroundImage: 'url(' + frontmatter.image + ')' }">
+      </div>
+      <Badges :frontmatter="frontmatter" />
     </div>
   </div>
   <p v-if="frontmatter && frontmatter.intro" v-html="frontmatter.intro"></p>
@@ -23,15 +24,16 @@ defineProps(['frontmatter'])
   padding: 10pt;
 }
 
-.layerbg, .layerimg {
+.layerbg,
+.layerimg {
   grid-column: 1;
   grid-row: 1;
   margin: 8pt 20pt 10pt 0;
 }
 
 .articleImage {
-  width: 100%; /*or 70%, or what you want*/
-  height: 270pt; /*or 70%, or what you want*/
+  width: 100%;
+  height: 270pt;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -45,8 +47,8 @@ defineProps(['frontmatter'])
 }
 
 .articleImagebg {
-  width: 100%; /*or 70%, or what you want*/
-  height: 250pt; /*or 70%, or what you want*/
+  width: 100%;
+  height: 250pt;
   z-index: -10;
   transition: all 1s ease-in-out;
   background: linear-gradient(45deg, #22bcee, #0fc45d, #99cde1, #0c5e83);
@@ -67,9 +69,11 @@ defineProps(['frontmatter'])
   0% {
     background-position: 4% 0
   }
+
   50% {
     background-position: 97% 100%
   }
+
   100% {
     background-position: 4% 0
   }
@@ -79,9 +83,11 @@ defineProps(['frontmatter'])
   0% {
     background-position: 4% 0
   }
+
   50% {
     background-position: 97% 100%
   }
+
   100% {
     background-position: 4% 0
   }
@@ -91,13 +97,13 @@ defineProps(['frontmatter'])
   0% {
     background-position: 4% 0
   }
+
   50% {
     background-position: 97% 100%
   }
+
   100% {
     background-position: 4% 0
   }
 }
-
-
 </style>

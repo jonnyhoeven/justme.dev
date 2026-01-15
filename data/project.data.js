@@ -1,6 +1,6 @@
 // noinspection JSUnusedGlobalSymbols
 
-import {createContentLoader} from 'vitepress'
+import { createContentLoader } from 'vitepress'
 import transformPage from '../lib/transformPage'
 
 export default () => createContentLoader('projects/*.md', {
