@@ -3,6 +3,7 @@
   "devDependencies": {
     "@eslint/compat": "^2.0.1",
     "@rushstack/eslint-patch": "^1.15.0",
+    "@types/matter-js": "^0.20.2",
     "@vue/eslint-config-typescript": "^14.6.0",
     "@vueuse/core": "^14.0.0",
     "eslint": "^9.39.2",
@@ -18,5 +19,8 @@
     "docs:preview": "vitepress preview",
     "lint": "eslint . --fix",
     "format": "prettier --write ."
+  },
+  "dependencies": {
+    "matter-js": "^0.20.0"
   }
 }

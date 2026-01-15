@@ -29,3 +29,32 @@ features:
     details: <a href="/projects/justme">This site's source code is available on GitHub. VitePress is specifically designed
              for static documentation websites. Built on top of Vue, a modern build tool for frontend development.</a>
 ---
+<script setup>
+import { data as pages } from './data/blog.data.js';
+import ArticleList from '/components/ArticleList.vue';
+</script>
+
+<div class="homepage-content">
+
+## Recent Posts
+
+<div class="recent-posts">
+  <ArticleList v-for="page of pages.slice(0, 3)" :key="page.url" :page="page"/>
+</div>
+
+<div class="action">
+  <a class="VPButton medium brand" href="/blog">View all posts</a>
+</div>
+
+</div>
+
+<style>
+.homepage-content {
+  margin-top: 4rem;
+}
+
+.action {
+  margin-top: 2rem;
+  text-align: center;
+}
+</style>
