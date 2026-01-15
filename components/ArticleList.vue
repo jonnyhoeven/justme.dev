@@ -13,7 +13,7 @@ defineProps(['page']);
              :style="{backgroundImage: 'url('+ page.frontmatter.image +')'}"></div>
       </div>
       <div v-if="page.frontmatter.title" class="layercontent">
-        <h3 style="margin:15pt 0 10pt;">{{ page.frontmatter.title }}</h3>
+        <h3 style="margin:8pt 0 10pt;">{{ page.frontmatter.title }}</h3>
         <span v-if="page.frontmatter.intro" v-html="page.frontmatter.intro"></span>
         <Badges :frontmatter="page.frontmatter"/>
       </div>
@@ -37,7 +37,6 @@ defineProps(['page']);
   grid-row: var(--ls-listitem-image-row);
   padding: var(--ls-listitem-image-padding);
   margin-right: 15pt;
-  padding-top: 10pt;
 }
 
 .layercontent {
