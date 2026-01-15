@@ -37,7 +37,7 @@ defineProps(['page']);
   grid-row: var(--ls-listitem-image-row);
   padding: var(--ls-listitem-image-padding);
   margin-right: 15pt;
-  padding-top: 18pt;
+  padding-top: 10pt;
 }
 
 .layercontent {
