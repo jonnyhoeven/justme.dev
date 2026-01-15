@@ -26,7 +26,7 @@ defineProps(['frontmatter'])
 .layerbg, .layerimg {
   grid-column: 1;
   grid-row: 1;
-  margin: 15pt 20pt 10pt 0;
+  margin: 8pt 20pt 10pt 0;
 }
 
 .articleImage {
