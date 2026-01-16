@@ -23,6 +23,8 @@ defineProps(['frontmatter'])
 <style>
 .badge-bar {
   margin: 10pt 0 20pt 0;
+  position: relative;
+  z-index: 2;
 }
 
 .shieldButton {
