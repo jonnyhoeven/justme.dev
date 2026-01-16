@@ -5,20 +5,20 @@ defineProps(['page']);
 </script>
 
 <template v-if="page">
-  <a :href="page.url" class="nolinkdecor">
-    <div v-if="page.frontmatter" class="container_row">
-      <div class="listImagebg layerbg"></div>
-      <div class="layerimg">
-        <div v-if="page.frontmatter.image" class="listImage"
-          :style="{ backgroundImage: 'url(' + page.frontmatter.image + ')' }"></div>
-      </div>
-      <div v-if="page.frontmatter.title" class="layercontent">
-        <h3 style="margin:8pt 0 10pt;">{{ page.frontmatter.title }}</h3>
-        <div v-if="page.frontmatter.intro" v-html="page.frontmatter.intro"></div>
-        <Badges :frontmatter="page.frontmatter" />
-      </div>
+  <div v-if="page.frontmatter" class="container_row">
+    <div class="listImagebg layerbg"></div>
+    <div class="layerimg">
+      <div v-if="page.frontmatter.image" class="listImage"
+        :style="{ backgroundImage: 'url(' + page.frontmatter.image + ')' }"></div>
     </div>
-  </a>
+    <div v-if="page.frontmatter.title" class="layercontent">
+      <h3 style="margin:8pt 0 10pt; position: static;">
+        <a :href="page.url" class="stretched-link nolinkdecor">{{ page.frontmatter.title }}</a>
+      </h3>
+      <div v-if="page.frontmatter.intro" v-html="page.frontmatter.intro"></div>
+      <Badges :frontmatter="page.frontmatter" />
+    </div>
+  </div>
 </template>
 
 <style>
@@ -29,6 +29,17 @@ defineProps(['page']);
 
 .container_row {
   display: grid;
+  position: relative;
+}
+
+.stretched-link::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  content: "";
 }
 
 .layerbg,
