@@ -48,8 +48,7 @@ With Ollama, you can:
 
 Without dedicated hardware it's slightly unbearable running 1.5 billion parameters with `deepseek-r1`.
 Simple things like writing small git commit messages work fine, however once the context increases beyond a few 1000
-lines
-of code your really notice the processing limits.
+lines of code you really notice the processing limits.
 
 Since it's a network service/api you can just install Ollama on any machine on your local network containing dedicated
 hardware and host it on your local/vpn network. Check out
