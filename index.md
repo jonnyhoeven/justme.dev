@@ -20,14 +20,14 @@ hero:
 
 features:
   - title: <a href="/projects/workshop">Kubernetes Git-Ops Workshop</a>
-    details: <a href="/projects/workshop">This Workshop will help create your own Kubernetes cluster using K3S while using ArgoCD to deploy 
-             your first application from a Git-Ops perspective.</a>
+    details: <a href="/projects/workshop">Build a custom Kubernetes cluster using K3s and ArgoCD. This workshop guides 
+        you through your first application deployment using a professional GitOps workflow.</a>
   - title: <a href="/projects/cvti">Camera & Lighting Interface</a>
-    details: <a href="/projects/cvti"">This software is designed to control camera and
-             lighting systems. The software is written in Visual Basic .NET and is designed to run on Windows operating systems.</a>
+    details: <a href="/projects/cvti"">High-performance Visual Basic .NET application for Windows. Control and automate 
+        professional lighting systems with high precision.</a>
   - title: <a href="/projects/justme">Justme.dev</a>
-    details: <a href="/projects/justme">This site's source code is available on GitHub. VitePress is specifically designed
-             for static documentation websites. Built on top of Vue, a modern build tool for frontend development.</a>
+    details: <a href="/projects/justme"> Open-source documentation powered by VitePress. This site leverages Vue.js and 
+        modern frontend build tools to deliver a high-performance, static web experience.</a>
 ---
 <script setup>
 import { data as pages } from './data/blog.data.js';

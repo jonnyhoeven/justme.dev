@@ -11,7 +11,9 @@ readmeFile: README.md
 languages: Visual Basic .NET
 fetchML: false
 outline: deep
-intro: Introducing Camera & Visual Touch Interface (CVTI). This Visual Basic .NET software is designed to control camera and
-  lighting & camera systems. Written in Visual Basic .NET and is designed to run
-  on Windows operating systems. The software provides a user-friendly interface for all kinds of users.
-  Allowing users to adjust camera settings, capture images, and control the lighting and corresponding mechanical hatches.
+intro: CVTI (Camera & Visual Touch Interface) is an enterprise-grade Facility Automation & IoT Orchestration Platform
+  designed for high-reliability environments. It functions as a centralized Edge Controller, unifying the management of
+  PTZ surveillance systems, DMX lighting protocols, and mechanical infrastructure (hatches) into a secure,
+  touch-optimized interface. Built on the .NET Framework for deep Windows OS integration,
+  it ensures operational continuity through robust error handling, self-healing network connectivity,
+  and strict access control policies.

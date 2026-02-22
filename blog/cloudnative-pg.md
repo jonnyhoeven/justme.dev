@@ -6,21 +6,20 @@ githost: https://raw.githubusercontent.com/
 branch: main
 readmeFile: README.md
 type: blog
-title: CloudNative Postgres Operator
+title: "Enterprise PostgreSQL on Kubernetes: High Availability and Disaster Recovery with CloudNativePG"
 date: 2024-04-15
 outline: deep
 intro: |
-    Cloud Native PostgreSQL is a Kubernetes operator that automates the management of PostgreSQL clusters. It's designed to
-    be a fully-featured PostgreSQL operator that can be used to deploy, manage, and scale PostgreSQL clusters in a
-    Kubernetes environment. The operator is built using the Operator Framework, which is a toolkit that provides a set of
-    tools and best practices for building Kubernetes operators. Cloud Native PostgreSQL is designed to be easy to use and to
-    provide a seamless experience for developers and operators who are familiar with PostgreSQL.
+  Running stateful workloads like PostgreSQL on Kubernetes requires a robust operator. CloudNativePG (CNPG) brings 
+  enterprise-grade features—automated failover, point-in-time recovery, and rolling updates—to your clusters, enabling 
+  you to run mission-critical databases with the same agility as stateless apps.
 fetchReadme: false
 editLink: true
 image: /images/pg.webp
 languages: Go, Shell
 fetchML: false
 ---
+
 <!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
@@ -28,35 +27,62 @@ fetchML: false
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
+## Why CloudNativePG?
 
-Cloud Native PostgreSQL provides a number of features that make it easy to deploy and manage PostgreSQL clusters in a
-Kubernetes environment. Some key features of Cloud Native PostgreSQL include:
+While managed services like AWS RDS are excellent, they can be costly and lock you into a specific cloud provider. *
+*CloudNativePG** offers a portable, open-source alternative that runs anywhere Kubernetes runs—AWS EKS, Azure AKS, or
+on-prem bare metal.
 
-- Automated deployment of PostgreSQL clusters
-- Automated scaling of PostgreSQL clusters
-- Automated failover and recovery of PostgreSQL clusters
-- Support for high availability and disaster recovery
-- Integration with Kubernetes RBAC for access control
-- Integration with Kubernetes monitoring and logging tools
-- Support for custom PostgreSQL configurations, extensions and backups/restores.
+It leverages the Kubernetes API to manage the entire lifecycle of a PostgreSQL cluster, from provisioning to day-2
+operations.
 
-## Documentation
+## Key Enterprise Features
 
-Check out the Cloud Native PostgreSQL documentation [here](https://cloudnative-pg.io/documentation/1.24/) for more
-information.
+1. **High Availability (HA)**: CNPG automatically manages primary/standby replication. If the primary pod fails, the
+   operator promotes a standby with zero data loss (RPO=0) in synchronous mode.
+2. **Self-Healing**: Failed nodes are automatically detected and replaced. The operator handles the complex logic of
+   rewinding the timeline and rejoining the cluster.
+3. **Rolling Updates**: Upgrade PostgreSQL versions or the underlying container image with zero downtime. The operator
+   updates replicas first, switches over, and then updates the former primary.
 
-## Run PostgreSQL on K3D locally
+## Disaster Recovery: Point-in-Time Recovery (PITR)
 
-If you followed the [workshop](/projects/workshop), you can try out Cloud Native PostgreSQL using K3D locally. After
-installing the operator using helm, you can deploy PostgreSQL by applying the following cluster definition:
+One of the most critical features for enterprise databases is the ability to restore to a specific moment in time (e.g.,
+right before a bad SQL query was executed).
+
+CNPG integrates with S3-compatible storage (AWS S3, MinIO, Azure Blob Storage) to continuously archive Write-Ahead
+Logs (WAL).
 
 ```yaml
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: cluster-example
+  name: production-db
 spec:
   instances: 3
-  storage:
-    size: 1Gi
+  backup:
+    barmanObjectStore:
+      destinationPath: s3://my-backup-bucket/
+      endpointURL: https://s3.amazonaws.com
+      s3Credentials:
+        accessKeyId:
+          name: s3-creds
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: s3-creds
+          key: SECRET_ACCESS_KEY
 ```
+
+## Monitoring & Observability
+
+CNPG exposes a rich set of Prometheus metrics out of the box. You can visualize query performance, replication lag, and
+resource usage in Grafana, giving you the same level of insight as a managed service.
+
+## Conclusion
+
+CloudNativePG empowers organizations to take control of their data infrastructure. By treating the database as a
+Kubernetes resource, you gain the benefits of GitOps, portability, and cost savings without sacrificing reliability or
+performance.
+
+Check out the [CloudNative PostgreSQL documentation](https://cloudnative-pg.io/documentation/1.24/) for more
+information.

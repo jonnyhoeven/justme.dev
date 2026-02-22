@@ -1,9 +1,12 @@
 ---
 type: blog
-title: My Scooter Was Too Quiet, So I Forced My Browser to Make 'Vroom' Noises
+title: "Building a Browser-Based Acoustic Vehicle Alerting System (AVAS) with Web Audio and Geolocation APIs"
 date: 2025-10-22
 outline: deep
-intro: A slightly mad journey into using the Web Audio and Geolocation APIs to build a speed-sensitive Acoustic Vehicle Alerting System (AVAS) for my electric scooter.
+intro: |
+  Electric vehicles are silent, which poses a safety risk. This article details the engineering journey of building a 
+  speed-sensitive Acoustic Vehicle Alerting System (AVAS) using standard web technologies, transforming a smartphone 
+  into a safety device without native app development.
 fetchReadme: false
 editLink: true
 image: /images/avas.webp
@@ -18,201 +21,108 @@ fetchML: false
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
-## The problem,
+## The Engineering Challenge: Silent Mobility
 
-My electric scooter is silent. Ghost-in-the-shell, ninja-on-wheels, "oh-god-where-did-you-come-from" silent. This is
-great for my own inner peace, but less great for the inner peace of pedestrians, dog walkers, and anyone else who relies
-on their ears to not get run over.
+Electric micro-mobility (scooters, e-bikes) suffers from a critical safety flaw: silence. Pedestrians rely on auditory
+cues to detect approaching vehicles. In the automotive industry, this is solved by an **Acoustic Vehicle Alerting
+System (AVAS)**—hardware that emits synthetic engine noise at low speeds.
 
-In the EV world, they solved this with an AVAS (Acoustic Vehicle Alerting System). A little speaker that goes "brrrrr"
-or "whoosh" at low speeds. I thought, "I want one of those."
+I sought to replicate this safety feature using only a smartphone and a web browser, avoiding the friction of app store
+approvals and proprietary hardware.
 
-But I didn't want to buy one. I wanted to build one. And I didn't want to build an app, wait for Apple and Google to
-approve it, and then... I don't know, pay developer fees?
+## Technical Implementation
 
-No. I have a phone. I have a browser. And I have a perfectly good (and questionably loud) Bluetooth speaker. I'm going
-to make the browser do it.
+The solution leverages two powerful browser APIs:
 
-## The (Half-Baked) Plan
+1. **Geolocation API**: To derive real-time velocity.
+2. **Web Audio API**: To synthesize dynamic audio based on that velocity.
 
-The goal was simple, if a bit absurd:
+### Real-Time Velocity Tracking
 
-- Get my phone's current speed using its GPS.
-- Generate a sound.
-- Make the sound's volume go up when I speed up.
-- Make the sound's pitch also go up when I speed up.
-- All in a single HTML file.
+The `navigator.geolocation.watchPosition()` method provides a continuous stream of location data. Crucially, the
+`position.coords.speed` attribute returns the device's speed in meters per second, which serves as the primary control
+signal for our audio synthesis.
 
-This is a job for two of the web's coolest and most underappreciated APIs: the Geolocation API and the Web Audio API.
-
-## "Where am I? No... How fast am I?"
-
-Getting the speed is surprisingly easy. The Geolocation API has a magical function called
-navigator.geolocation.watchPosition(). It's like getCurrentPosition(), but for people with commitment issues—it just
-keeps telling you where you are, over and over.
-
-And the best part? The position object it gives you doesn't just have a latitude and longitude. It has
-position.coords.speed.
-
-```js
-// This is the golden ticket.
-// It fires every time the GPS chip has new data.
+```javascript
 navigator.geolocation.watchPosition(
     (position) => {
-        // speed is in meters per second, bless its little heart.
         const speedMs = position.coords.speed || 0;
-        console.log(`I am speed: ${speedMs} m/s`);
+        updateAudioEngine(speedMs);
     },
-    (error) => {
-        console.error("GPS machine broke.", error);
-    },
-    {
-        enableHighAccuracy: true // "Yes, please drain my battery."
-    } 
+    (error) => console.error("Geolocation error:", error),
+    {enableHighAccuracy: true}
 );
 ```
 
-With speedMs in hand, I had the core-driver for the whole project.
+### Audio Synthesis Engine
 
-## Making the Bleeps and Bloops
+Instead of playing back a static audio file, we synthesize sound in real-time to create a dynamic, responsive
+experience. The Web Audio API allows us to build an audio graph where nodes (oscillators, gain, filters) are connected
+to shape the sound.
 
-Now, for the sound. If you've never played with the Web Audio API, you're missing out. It's like a full-blown audio
-production studio, but in JavaScript.
+#### The Signal Chain
 
-The setup is like plugging in guitar pedals:
+1. **Source**: An `OscillatorNode` (sine/square wave) or a generated noise buffer (pink noise).
+2. **Filter**: A `BiquadFilterNode` to sculpt the frequency content.
+3. **Gain**: A `GainNode` to control amplitude.
 
-AudioContext: This is the studio, the main power strip.
-
-OscillatorNode: This is our instrument. It can generate a sine wave (a pure hum), a square wave (a retro game buzz),
-sawtooth (a harsh synth), or triangle (a soft flute-like sound).
-
-GainNode: This is the volume knob.
-
-You create them, then connect() them in a chain, and finally connect them to the "speakers" (audioContext.destination).
-
-```js
-// 1. Create the studio
+```javascript
 const audioContext = new AudioContext();
-
-// 2. Create the volume knob
-const gainNode = audioContext.createGain();
-gainNode.gain.setValueAtTime(0.1, audioContext.currentTime); // Start quiet
-
-// 3. Create the instrument
 const oscillator = audioContext.createOscillator();
-oscillator.type = 'sine'; // "brrrrr"
-oscillator.frequency.setValueAtTime(200, audioContext.currentTime); // A low C
+const gainNode = audioContext.createGain();
 
-// 4. Plug 'em in
 oscillator.connect(gainNode);
 gainNode.connect(audioContext.destination);
-
-// 5. Hit the "on" switch
-oscillator.start();
 ```
 
-With this, I had a continuous, slightly annoying hum. Success!
+### Mapping Speed to Sound
 
-## The Dynamic Duo (Speed to Sound)
+To create a convincing engine sound, we map the input velocity to audio parameters. As speed increases, both pitch (
+frequency) and volume (gain) must rise.
 
-Now, to wire the GPS up to the audio. Inside the watchPosition callback, I just needed to update the gain (volume) and
-frequency (pitch) based on the speed.
+Crucially, we use `linearRampToValueAtTime` to smooth the transitions. Direct parameter updates cause audible clicking
+artifacts (zipper noise).
 
-But you don't just set the value. That causes horrible "clicks" in the audio. The Web Audio API is classy. It asks you
-to ramp to the new value.
+```javascript
+const updateAudioEngine = (speed) => {
+    const newVolume = Math.min(1.0, BASE_VOL + (speed * VOL_SENSITIVITY));
+    const newFreq = Math.min(MAX_FREQ, BASE_FREQ + (speed * PITCH_SENSITIVITY));
 
-```js
-// Inside the watchPosition callback...
-const speedMs = position.coords.speed || 0;
-
-// Configurable "magic numbers"
-const MIN_VOLUME = 0.15;
-const VOLUME_SENSITIVITY = 0.08;
-const BASE_FREQUENCY = 150;
-const PITCH_SENSITIVITY = 20;
-const MAX_FREQUENCY = 600;
-
-// Calculate new values
-const newVolume = Math.min(1.0, MIN_VOLUME + (speedMs * VOLUME_SENSITIVITY));
-const newFreq = Math.min(MAX_FREQUENCY, BASE_FREQUENCY + (speedMs * PITCH_SENSITIVITY));
-
-// "Please gracefully glide to these new values, thank you."
-gainNode.gain.linearRampToValueAtTime(newVolume, audioContext.currentTime + 0.1);
-oscillator.frequency.linearRampToValueAtTime(newFreq, audioContext.currentTime + 0.1);
+    // Smooth transition over 0.1 seconds
+    gainNode.gain.linearRampToValueAtTime(newVolume, audioContext.currentTime + 0.1);
+    oscillator.frequency.linearRampToValueAtTime(newFreq, audioContext.currentTime + 0.1);
+};
 ```
 
-I pressed START, waved my phone around like a lunatic, and... nothing happened. Right. GPS doesn't work well indoors.
+## Advanced Synthesis: Pink Noise & Filtering
 
-I ran outside, hopped on my scooter, and... it worked. A gentle brrrr at a standstill, which rose to a respectable
-brrrRRREEEEE as I accelerated. I was, officially, a sci-fi vehicle.
+Pure tones are difficult for the human ear to localize. To improve safety, I implemented a **Pink Noise** generator.
+Pink noise has equal energy per octave, making it sound more natural and "full" than white noise.
 
-## Down the Rabbit Hole of Noise
+By passing pink noise through a bandpass filter and modulating the filter's frequency based on speed, we achieve a "
+whooshing" effect similar to modern EVs (like the Porsche Taycan or Audi e-tron).
 
-Then I got a brilliant piece of feedback: a pure sine wave is hard to locate. People can hear it, but they can't easily
-tell where it's coming from. Broadband noise (like a hiss) is much easier for the human ear to pinpoint.
+## Deployment & Security
 
-The suggestion? "Can you add white noise?"
+Deploying this as a web app requires handling browser security policies:
 
-Can I add white noise? My friend, we can become the white noise.
-
-The Web Audio API doesn't have an "Oscillator" for noise. You have to generate it by creating a buffer of static. And
-while we're at it, why use white noise (equal energy at all frequencies, sounds like 'tsssss') when you can use pink
-noise (equal energy per octave, sounds like 'shhhhh')? It's deeper, richer, and just plain cooler.
-
-So I...
-
-Wrote a function to generate a 2-second buffer of pink noise.
-
-Played that buffer on a loop (BufferSourceNode).
-
-Fed that into a BiquadFilterNode set to 'bandpass.'
-
-This filter is the magic. It only lets a "band" of frequencies through. By changing the filter's frequency value, I'm
-not changing the pitch of the noise itself, but which part of the noise I'm listening to.
-
-The result? A "whoosh" sound that rises in pitch. shhHHOOOOoooo... It was perfect.
-
-## Giving Up Control (with Sliders)
-
-At this point, my script was a mess of "magic numbers" (PITCH_SENSITIVITY = 20, BASE_FREQUENCY = 150, etc.). I was tired
-of editing the file to test new sounds.
-
-The solution: make sliders for everything.
-
-- Min Volume
-- Volume Sensitivity
-- Base Pitch
-- Pitch Sensitivity
-- Max Pitch
-- A dropdown for the waveform (sine, square, whitenoise, pinknoise)
-
-And, crucially, a "Manual Speed Control" slider for indoor testing.
-
-Now I have a full-blown AVAS dashboard. Is it overkill? Absolutely. Am I proud of it? You bet I am.
-
-## The Final Boss: The `iframe`
-
-I wanted to host this on my blog, but that means putting it in an `iframe`. And `iframes` are tiny security sandboxes.
-
-Two things tried to kill the project:
-
-HTTPS: Geolocation is a sensitive API. Browsers (rightfully) refuse to run it on insecure http:// pages. Easy fix:
-GitHub Pages provides https:// by default.
-
-Permissions Policy: Even on `https`, the parent page (justme.dev) has to explicitly grant the `iframe` permission to
-ask for location data.
-
-The magic line of code in the parent page's HTML:
+1. **HTTPS**: The Geolocation API is restricted to secure contexts.
+2. **Permissions Policy**: When embedded in an `iframe`, the parent page must explicitly delegate permission.
 
 ```html
-<iframe src="/html/avas.html" allow="geolocation" width="100%" height="1100pt"></iframe>
+
+<iframe src="/html/avas.html" allow="geolocation" ...></iframe>
 ```
 
-With that one attribute, the final boss was defeated.
+## Live Demo
+
+You can test the AVAS system below. Use the "Manual Speed" slider to simulate movement if you are stationary.
+
 <iframe src="/html/avas.html" allow="geolocation" width="100%" height="1100pt" style="margin:3pt"></iframe>
 <div style="text-align:right">View <a href="/html/avas.html" target="_blank">Page</a> or <a href="https://github.com/jonnyhoeven/justme.dev/blob/main/public/html/avas.html" target="_blank">Source</a></div>
 
-I now have a single HTML file that turns my phone into a fully configurable, speed-sensitive, futuristic sound generator
-for my scooter. It's ridiculous, it's overengineered, and it's exactly what I wanted.
+## Conclusion
 
-Now if you'll excuse me, I'm going to go ride around making "whoosh" noises at pedestrians. For safety.
+This project demonstrates the maturity of modern web APIs. We successfully built a safety-critical, real-time
+application entirely within the browser, proving that web technologies can bridge the gap between software and the
+physical world.

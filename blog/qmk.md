@@ -6,20 +6,20 @@ githost: https://github.com
 branch: master
 readmeFile: README.md
 type: blog
-title: Quantum Mechanical Keyboard
+title: "Embedded Systems Engineering: Customizing HID Devices with QMK Firmware"
 date: 2023-04-14
 outline: deep
 intro: |
-    Quantum Mechanical Keyboard (QMK) is an open-source community that focuses on the development of computer input devices.
-    The community encompasses a wide range of input devices, including keyboards, mice, and MIDI devices. A dedicated group
-    of collaborators maintains various aspects of QMK, including QMK Firmware, QMK Configurator, QMK Toolbox, qmk.fm, and
-    its documentation.
+  QMK (Quantum Mechanical Keyboard) is an open-source firmware for AVR and ARM microcontrollers. This article explores 
+  how to leverage QMK to build programmable, highly customized Human Interface Devices (HIDs) that boost developer 
+  productivity through hardware-level macros and layers.
 fetchReadme: false
 editLink: true
 image: /images/qmk.webp
 languages: C, C++, Makefile, Python, Shell, Nix
 fetchML: false
 ---
+
 <!--suppress CheckEmptyScriptTag, CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->
 <script setup>
  import ArticleItem from '/components/ArticleItem.vue';
@@ -27,30 +27,58 @@ fetchML: false
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
-QMK is more than just a project; it's a vibrant community centered around developing computer input devices. The
-community is diverse, encompassing all sorts of input devices, from keyboards and mice to MIDI devices. This diversity
-is one of QMK's strengths, fostering a rich ecosystem of ideas and innovations.
+## Beyond Standard Peripherals
 
-## Core Collaborations
+Most keyboards are dumb terminals. They send a scancode, and the OS interprets it. **QMK Firmware** changes this
+paradigm by running logic directly on the microcontroller (MCU) inside the keyboard.
 
-A core group of collaborators maintains various aspects of QMK. These include the QMK Firmware, which is the software
-that runs on your keyboard; the QMK Configurator, a web-based interface for creating your custom keymaps; the QMK
-Toolbox, a utility for flashing firmware onto your keyboard; and qmk.fm, the community's online presence. This
-collaborative effort ensures that QMK remains up-to-date and relevant in the ever-evolving world of computer input
-devices.
+This allows for:
 
-## Exploring QMK Features
+1. **Hardware Macros**: Complex sequences of keystrokes executed by the keyboard itself, independent of the OS or
+   software installed on the host machine.
+2. **Layers**: A single physical key can perform multiple functions depending on the active layer (e.g., a numpad on the
+   home row).
+3. **Mouse Emulation**: Controlling the cursor with keys, eliminating the need to move your hand to a mouse.
 
-QMK boasts a plethora of features for users to explore. Most of these features are utilized by modifying your keymap and
-changing the keycodes. This allows for a high degree of customization, enabling users to tailor their input devices to
-their specific needs. Whether you're a programmer looking for a more efficient coding layout, a gamer needing that
-perfect key setup, or a creative professional wanting a more streamlined workflow, QMK has the features to make it
-possible.
+## Engineering a Custom Keymap
+
+QMK is written in C. To customize your device, you modify the `keymap.c` file.
+
+### Example: The "Leader Key" Pattern
+
+A powerful feature for developers is the Leader Key. It allows you to tap a sequence of keys to trigger a function.
+
+```c
+void matrix_scan_user(void) {
+  LEADER_DICTIONARY() {
+    leading = false;
+    seq_two_keys(KC_G, KC_A) {
+      // Type "git add ." when I type Leader -> g -> a
+      SEND_STRING("git add .");
+    }
+    seq_two_keys(KC_G, KC_C) {
+      // Type "git commit -m"
+      SEND_STRING("git commit -m \"\"");
+      // Move cursor back between the quotes
+      tap_code(KC_LEFT);
+    }
+  }
+}
+```
+
+This C code compiles into a `.hex` or `.bin` file that is flashed onto the keyboard's MCU (e.g., ATmega32U4 or STM32).
+
+## Advanced Features: Tap Dance & Combos
+
+* **Tap Dance**: Assign different actions to a key based on how many times it is tapped. (e.g., Tap once for `ESC`,
+  double tap for `CAPS LOCK`).
+* **Combos**: Pressing two keys simultaneously (like `J` and `K`) to send `ESC`. This keeps your fingers on the home
+  row, reducing RSI risk.
 
 ## Conclusion
 
-In conclusion, QMK is more than just an open-source project; it's a community of enthusiasts and professionals dedicated
-to improving the way we interact with our computers. With its wide range of supported devices, active collaborations,
-and customizable features, QMK is an invaluable resource for anyone looking to enhance their computer input experience.
+QMK transforms input devices from static hardware into programmable tools. For software engineers, it offers a unique
+opportunity to optimize the physical interface to their digital work, reducing repetitive strain and increasing coding
+velocity.
 
 <ArticleFooter :frontmatter="$frontmatter"/>

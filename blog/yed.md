@@ -1,12 +1,12 @@
 ---
 type: blog
-title: yEd
+title: "Visualizing Complex Systems: Why yEd Remains the Architect's Secret Weapon"
 date: 2021-08-01
 outline: deep
 intro: |
-    yEd is a general-purpose diagramming program with a multi-document interface. A cross-platform application written
-    in Java that runs on Windows, Linux, macOS, and other platforms that support the Java Virtual Machine. It's released
-    under a proprietary software license, allowing the use of a single copy for free.
+   In an era of browser-based diagramming tools, yEd stands out as a powerful desktop application for visualizing 
+   large-scale software architectures. Its automatic layout algorithms can transform a chaotic mess of nodes and edges 
+   into a clear, hierarchical map of your microservices or network topology.
 fetchReadme: false
 editLink: true
 image: /images/yed.webp
@@ -14,6 +14,7 @@ languages: Go, Shell
 externalUrl: https://www.yworks.com/products/yed
 fetchML: false
 ---
+
 <!--suppress ALL, CheckEmptyScriptTag, HtmlUnknownAttribute -->
 
 <script setup>
@@ -22,28 +23,31 @@ fetchML: false
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
-yEd is a powerful desktop application that can be used to quickly and effectively generate high-quality diagrams. It's
-a versatile tool that supports a wide range of diagram types, making it an ideal choice for structuring drawing
-infrastructure. Whether you're creating flowcharts, network diagrams, or organizational charts, yEd provides the tools
-and features you need to create professional-quality diagrams.
+## The Problem with Manual Diagramming
 
-## Cross-Platform Compatibility
+Most tools (Draw.io, Lucidchart) require you to manually position every box and arrow. For a simple flowchart, this is
+fine. But when you're mapping a Kubernetes cluster with 50 pods and 200 connections, manual layout is impossible.
 
-One of the standout features of yEd is its cross-platform compatibility. Written in Java, it runs on all Windows,
-Unix/Linux, and macOS versions. This means that regardless of your operating system, you can leverage the power of yEd
-to create and manage your diagrams.
+**yEd Graph Editor** solves this with **algorithmic layout**. You can import a CSV or Excel file of nodes and edges,
+click a button, and yEd will automatically arrange them into a readable diagram.
+
+## Key Features for Architects
+
+1. **Automatic Layouts**: Hierarchical, Organic, Orthogonal, and Circular layouts. The "Hierarchical" layout is perfect
+   for visualizing dependency trees or CI/CD pipelines.
+2. **Group Nodes**: Collapse complex sub-systems into a single node to simplify the view, then expand them when you need
+   detail.
+3. **Excel Import**: Export your AWS resource list or database schema to Excel, import it into yEd, and instantly
+   visualize the relationships.
 
 ## Integration with Confluence
 
-In addition to its standalone capabilities, yEd can also be used inside Confluence with a plugin. This integration
-allows you to create and edit diagrams directly within your Confluence pages, making it easier to incorporate visual
-elements into your documentation and collaborate with your team.
+For enterprise documentation, yEd integrates with Atlassian Confluence. You can embed live, editable diagrams directly
+into your wiki pages, ensuring that your architecture documentation never goes stale.
 
 ## Conclusion
 
-In conclusion, yEd is a powerful, versatile, and user-friendly diagramming tool. Its cross-platform compatibility and
-integration with Confluence make it an invaluable tool for anyone involved in structuring drawing infrastructure.
-Whether you're a project manager, a software developer, or a systems analyst, yEd can help you visualize and communicate
-complex ideas and processes with ease.
+While it may not have the flashiest UI, yEd is a powerhouse for technical visualization. For software architects and
+systems engineers who need to make sense of complexity, it is an indispensable tool.
 
 <ArticleFooter :frontmatter="$frontmatter"/>

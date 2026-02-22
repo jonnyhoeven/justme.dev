@@ -11,6 +11,6 @@ readmeFile: README.md
 fetchML: false
 outline: deep
 languages: CSS,Typescript,Vue
-intro: This site's source code is also available on GitHub. I needed a static site generator.
-  VitePress is specifically designed for static documentation websites. Built on top of Vue,
-  a modern build tool for frontend development.
+intro: A scalable, cloud-native architecture demonstrating automated content aggregation and static site generation.
+  Implements a custom Python ETL pipeline to centralize documentation from distributed repositories, leveraging VitePress
+  and Vue.js for high-performance, serverless delivery via GitHub Pages.

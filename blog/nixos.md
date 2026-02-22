@@ -1,12 +1,12 @@
 ---
 type: blog
-title: 'NixOS: My Declarative Homelab'
+title: "Declarative Infrastructure at Scale: Using NixOS on AWS EC2 via Custom AMIs for Immutable Production Environments"
 date: 2025-12-04
 outline: deep
 intro: |
-  NixOS is a unique Linux distribution that brings a functional approach to system configuration. It leverages the Nix 
-  package manager to build a system that is reproducible, declarative, and reliable. If you've ever spent hours 
-  debugging a misconfigured server or wished you could treat your infrastructure like code, NixOS might be the answer.
+  NixOS is more than just a Linux distribution; it's a paradigm shift for infrastructure management. By leveraging NixOS 
+  on AWS EC2, organizations can achieve truly immutable infrastructure, where every server is a reproducible artifact 
+  defined by code, eliminating configuration drift and simplifying compliance.
 fetchReadme: false
 editLink: true
 image: /images/nixos.webp
@@ -21,79 +21,85 @@ fetchML: false
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
-## The Declarative Dream
+## The Enterprise Case for NixOS
 
-In the world of DevOps, Infrastructure as Code (IaC) is the holy grail. Tools like Kubernetes have revolutionized how we
-manage applications by allowing us to define the desired state in declarative manifests. NixOS brings this same power to
-the operating system itself.
+In enterprise environments, configuration drift is a silent killer of reliability. Traditional configuration management
+tools (Ansible, Chef, Puppet) attempt to converge a system to a desired state, but they often leave behind artifacts or
+fail to account for manual changes.
 
-With NixOS, your entire system configuration—from the kernel version and installed packages to user accounts and running
-services—is defined in a single file: `/etc/nixos/configuration.nix`.
+**NixOS** solves this fundamentally. It treats the entire operating system configuration as a pure function:
+`f(configuration.nix) -> System`. This means:
 
-This approach has several profound advantages:
+1. **Reproducibility**: A server built today is identical to one built six months from now, given the same input.
+2. **Atomic Rollbacks**: Every change is a new generation. If a deployment fails, rolling back is instantaneous and
+   guaranteed to work.
+3. **Immutable Infrastructure**: Instead of patching running servers, you deploy new, immutable AMIs (Amazon Machine
+   Images) generated directly from your Nix configuration.
 
-- **Reproducibility**: You can take a `configuration.nix` file and build an identical system anywhere. This eliminates
-  the "it works on my machine" problem and ensures consistency across development, staging, and production environments.
-- **Atomic Upgrades**: When you change your configuration, NixOS builds the new system generation in the background. The
-  switch to the new configuration is atomic, meaning it either completes successfully or does nothing. If an upgrade
-  fails or introduces a bug, you can instantly roll back to the previous generation from the boot menu.
-- **Reliability**: Because packages and configurations are isolated from each other, you can install different versions
-  of the same software without conflicts. This makes the system incredibly stable and robust.
+## Building Custom AWS AMIs with Nix
 
-## My Homelab as Code
+One of the most powerful applications of NixOS in the cloud is the ability to build custom AMIs declaratively. Instead
+of maintaining "golden images" with Packer and shell scripts, you define your image in Nix.
 
-I run a homelab for media, game streaming, and experimentation. Previously, this involved managing multiple Proxmox vm's
-k3s clusters, containers, systemd services, and a web of configuration and manifest files. With NixOS, I've consolidated
-everything into a single `configuration.nix` file.
+### Example: Defining an AWS Image
 
-My setup includes:
+Using `nixos-generators`, you can output an AMI directly from your configuration.
 
-- **Media Stack**: Jellyfin for media streaming, along with the full *arr suite (Radarr, Sonarr, Prowlarr) for managing
-  content, and Jellyseerr for requests.
-- **Game Streaming**: Sunshine for headless, high-performance game streaming from my server's NVIDIA GPU.
-- **Networking**: Caddy as a reverse proxy to expose services, with automatic handling of subdomains.
+```nix
+{ pkgs, modulesPath, ... }: {
+  imports = [ "${modulesPath}/virtualisation/amazon-image.nix" ];
+  
+  # System Configuration
+  networking.hostName = "production-web-01";
+  services.openssh.enable = true;
 
-All of these services, their users, firewall rules, and even the NVIDIA driver setup are declared in one place.
+  # Application Stack
+  environment.systemPackages = with pkgs; [
+    nginx
+    postgresql
+    awscli2
+  ];
 
-## Headless Game Streaming with Sunshine
+  # Security Hardening
+  security.sudo.wheelNeedsPassword = false;
+  users.users.deploy = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" ];
+    openssh.authorizedKeys.keys = [ "ssh-ed25519 AAA..." ];
+  };
+}
+```
 
-One of the coolest parts of this setup is running Sunshine for game streaming without a physical monitor attached to the
-server. This required some specific Xorg configuration to create a virtual display. With NixOS, this is just another
-block of code in my main configuration file. I define a virtual monitor, autologin a dedicated `sunshine` user into a
-GNOME session, and ensure the NVIDIA drivers are loaded correctly. The result is a seamless game streaming experience to
-any device on my network.
+Running `nix build .#amazonImage` produces an AMI that can be directly uploaded to AWS.
 
-## Flakes and GitOps
+## Infrastructure as Code: Terraform & NixOS
 
-While `configuration.nix` provides a powerful way to define a single system, NixOS takes reproducibility and declarative
-management a step further with **Nix Flakes**. Flakes are a new, experimental feature that aims to standardize how Nix
-projects are structured, built, and consumed.
+Integrating NixOS into a Terraform workflow creates a powerful synergy. Terraform manages the cloud resources (VPC,
+Security Groups, EC2 Instances), while NixOS manages the instance internals.
 
-A Nix Flake essentially bundles all the necessary inputs (like Nixpkgs versions, other flakes, or local paths) and
-outputs (like system configurations, packages, or development environments) into a single, version-controlled unit. This
-means:
+By passing the NixOS configuration via **user_data** or using a custom AMI ID, you ensure that the instance boots into
+the exact state defined in your repository.
 
-- **Pinning Dependencies**: Flakes automatically pin all external dependencies to specific versions, ensuring that your
-  build is always reproducible, regardless of when or where it's built. This solves the "works on my machine" problem
-  even more rigorously.
-- **Standardized Structure**: Flakes enforce a consistent directory structure, making it easier to share and collaborate
-  on Nix projects.
-- **Simplified Development Environments**: You can define a `devShell` within your flake, providing a reproducible
-  development environment with all the necessary tools and dependencies for a project.
+```hcl
+resource "aws_instance" "web" {
+  ami           = var.nixos_ami_id
+  instance_type = "t3.medium"
+  
+  # NixOS configuration can also be injected here for runtime configuration
+  user_data = file("configuration.nix") 
+}
+```
 
-The combination of NixOS's declarative nature and Flakes makes it an excellent candidate for **GitOps**. GitOps is an
-operational framework that takes DevOps best practices like version control, collaboration, compliance, and CI/CD, and
-applies them to infrastructure automation.
+## Scaling with Auto Scaling Groups (ASG)
 
-Here's how NixOS and Flakes fit into a GitOps workflow:
+Because NixOS configurations are deterministic, scaling becomes trivial. An Auto Scaling Group can launch hundreds of
+instances, and each one will be an exact replica of the others. There is no "convergence time" or "provisioning scripts"
+that might fail on some nodes but not others. The instance boots, reads its configuration (or uses the pre-baked AMI),
+and is ready to serve traffic immediately.
 
-- **Source of Truth**: Your entire system configuration, including all services, users, and even hardware-specific
-  settings, is defined in a Git repository as a Nix Flake. This repository becomes the single source of truth for your
-  infrastructure.
-- **Automated Deployment**: Just like Kubernetes with tools like ArgoCD or FluxCD, changes pushed to your Git repository
-  can automatically trigger a rebuild and deployment of your NixOS system. This ensures that your running infrastructure
-  always matches the state defined in Git.
-- **Rollbacks**: If a deployment introduces an issue, you can simply revert the commit in Git, and your system will
-  automatically roll back to the previous, working configuration.
-- **Auditing and Collaboration**: Every change to your infrastructure is tracked in Git, providing a complete audit
-  trail and facilitating collaborative development.
+## Conclusion
+
+Adopting NixOS for AWS infrastructure moves beyond simple automation to **provable correctness**. It allows teams to
+treat servers like ephemeral containers, reducing maintenance overhead and increasing system reliability. For
+organizations looking to scale their operations while maintaining strict control over their environments, NixOS offers a
+compelling, modern solution.
