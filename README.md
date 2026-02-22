@@ -5,7 +5,7 @@ This VitePress site is hosted from GitHub.io pages at [justme.dev](https://justm
 ### Node version manager
 
 ```bash
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
@@ -19,8 +19,10 @@ nvm use
 ### Python & pip
 
 ```bash
-sudo apt install python3 python3-pip
-python3 -m pip install --upgrade pip
+sudo apt install python3-venv
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
