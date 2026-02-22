@@ -17,8 +17,8 @@ def get_wrapper_template(post_content: str, readme_content: str) -> str:
         f"<script setup>\n"
         f" import ArticleItem from '/components/ArticleItem.vue';\n"
         f" import ArticleFooter from '/components/ArticleFooter.vue';\n"
-        f"</script>\n"
-        f'<ArticleItem :frontmatter="$frontmatter"/>\n'
+        f"</script>\n\n"
+        f'<ArticleItem :frontmatter="$frontmatter"/>\n\n'
         f"{post_content}\n"
         f"{readme_content}\n\n"
         f'<ArticleFooter :frontmatter="$frontmatter"/>\n'
