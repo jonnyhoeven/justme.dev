@@ -1,0 +1,14 @@
+title: Top 40 Crawl
+type: project
+date: 2024-05-21
+image: /images/top-40-crawl.webp
+fetchReadme: true
+gitlink: https://github.com/jonnyhoeven/top-40-crawl
+user: jonnyhoeven
+project: top-40-crawl
+branch: main
+readmeFile: README.md
+languages: Python
+fetchML: false
+outline: deep
+intro: This project implements a scalable, cloud-native ETL (Extract, Transform, Load) pipeline designed to aggregate, enrich, and persist historical music chart data spanning over six decades (1965–Present). The architecture demonstrates a modern approach to data engineering by combining traditional web scraping with Generative AI (LLMs) and third-party APIs to build a comprehensive metadata repository. It emphasizes high availability, cost optimization through caching strategies, and the integration of unstructured data processing.
