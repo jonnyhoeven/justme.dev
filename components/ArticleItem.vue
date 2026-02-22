@@ -15,6 +15,7 @@ defineProps(['frontmatter'])
     </div>
   </div>
   <div v-if="frontmatter && frontmatter.intro" v-html="frontmatter.intro"></div>
+  <br/>
 </template>
 
 
