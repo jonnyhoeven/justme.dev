@@ -7,3 +7,5 @@
 /generate/models.json
 /openai/response/*.bin
 /projects/*.md
+/.venv
+/pyvenv.cfg
