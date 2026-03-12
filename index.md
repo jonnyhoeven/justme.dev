@@ -1,7 +1,7 @@
 ---
 layout: home
 title: Justme.dev
-description: Justme.dev - Just make IT.
+description: Justme.dev - Just make it!
 image: /images/ava.webp
 
 hero:
