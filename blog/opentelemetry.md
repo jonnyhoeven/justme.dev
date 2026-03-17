@@ -15,7 +15,7 @@ intro: |
   developers unparalleled visibility into their microservices architectures without being locked into a single provider.
 fetchReadme: false
 editLink: true
-image: /images/justme.dev.webp
+image: /images/opentelemetry.webp
 languages: Go, Java, Python, JavaScript, C++, Rust
 fetchML: false
 ---
