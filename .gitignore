@@ -9,3 +9,4 @@
 /projects/*.md
 /.venv
 /pyvenv.cfg
+/input_images/
