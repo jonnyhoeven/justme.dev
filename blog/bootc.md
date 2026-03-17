@@ -1,6 +1,6 @@
 ---
 type: blog
-title: "The Container-Native OS: Why Red Hat's bootc is a Game Changer for Platform Engineers"
+title: "The Container-Native OS: Why bootc is a Game Changer for Platform Engineers"
 date: 2026-03-17
 outline: deep
 intro: |
