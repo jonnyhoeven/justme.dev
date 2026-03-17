@@ -4,11 +4,13 @@ title: "ArgoCD: Declarative GitOps for Kubernetes"
 date: 2024-11-20
 outline: deep
 intro: |
-  ArgoCD is a declarative, GitOps continuous delivery tool for Kubernetes. It automates the deployment of the desired application states in the specified target environments, acting as a cornerstone for modern SRE and DevOps workflows.
+  ArgoCD is a declarative, GitOps continuous delivery tool for Kubernetes. It automates the deployment of the desired 
+  application states in the specified target environments, acting as a cornerstone for modern SRE and DevOps workflows.
 fetchReadme: false
 editLink: true
 image: /images/argocd.webp
 languages: Go, Other
+externalUrl: https://github.com/argoproj/argo-cd
 fetchML: false
 ---
 
@@ -21,8 +23,8 @@ fetchML: false
 
 ## The GitOps Revolution
 
-Managing Kubernetes manifests across multiple environments can quickly become a complex and error-prone process. *
-*ArgoCD** simplifies this by applying the GitOps pattern, using Git repositories as the single source of truth for
+Managing Kubernetes manifests across multiple environments can quickly become a complex and error-prone process.
+**ArgoCD** simplifies this by applying the GitOps pattern, using Git repositories as the single source of truth for
 declarative infrastructure and applications.
 
 ## How ArgoCD Works
