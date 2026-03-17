@@ -1,10 +1,4 @@
 ---
-project: victoriametrics
-user: VictoriaMetrics
-gitlink: https://github.com/VictoriaMetrics/VictoriaMetrics
-githost: https://github.com
-branch: master
-readmeFile: README.md
 type: blog
 title: "Scalable Monitoring: Why VictoriaMetrics is the Modern Alternative to Prometheus"
 date: 2026-03-17
@@ -15,7 +9,7 @@ intro: |
   lower resource usage, and simpler horizontal scaling.
 fetchReadme: false
 editLink: true
-image: /images/justme.dev.webp
+image: /images/victoria.webp
 languages: Go, TypeScript
 fetchML: false
 ---
