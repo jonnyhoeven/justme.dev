@@ -4,9 +4,9 @@ title: "Visualizing Complex Systems: Why yEd Remains the Architect's Secret Weap
 date: 2021-08-01
 outline: deep
 intro: |
-   In an era of browser-based diagramming tools, yEd stands out as a powerful desktop application for visualizing 
-   large-scale software architectures. Its automatic layout algorithms can transform a chaotic mess of nodes and edges 
-   into a clear, hierarchical map of your microservices or network topology.
+  In an era of browser-based diagramming tools, yEd stands out as a powerful desktop application for visualizing 
+  large-scale software architectures. Its automatic layout algorithms can transform a chaotic mess of nodes and edges 
+  into a clear, hierarchical map of your microservices or network topology.
 fetchReadme: false
 editLink: true
 image: /images/yed.webp

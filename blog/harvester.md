@@ -10,9 +10,9 @@ title: "Hybrid Cloud Strategies: Bridging Harvester HCI and AWS Outposts for Low
 date: 2023-04-13
 outline: deep
 intro: |
-  Harvester is a modern, open-source Hyperconverged Infrastructure (HCI) solution built on Kubernetes. This article 
-  explores how Harvester can serve as a cost-effective, on-premises foundation for hybrid cloud architectures, 
-  seamlessly integrating with AWS Outposts and EKS Anywhere to deliver low-latency workloads at the edge.
+   Harvester is a modern, open-source Hyperconverged Infrastructure (HCI) solution built on Kubernetes. This article 
+   explores how Harvester can serve as a cost-effective, on-premises foundation for hybrid cloud architectures, 
+   seamlessly integrating with AWS Outposts and EKS Anywhere to deliver low-latency workloads at the edge.
 fetchReadme: false
 editLink: true
 image: /images/harvester.webp
