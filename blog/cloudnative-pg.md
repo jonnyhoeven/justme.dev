@@ -17,6 +17,7 @@ fetchReadme: false
 editLink: true
 image: /images/pg.webp
 languages: Go, Shell
+externalUrl: https://cloudnative-pg.io/
 fetchML: false
 ---
 

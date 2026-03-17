@@ -11,6 +11,7 @@ fetchReadme: false
 editLink: true
 image: /images/bootc.webp
 languages: Go, Rust, Containerfile
+externalUrl: https://bootc-dev.github.io/
 fetchML: false
 ---
 

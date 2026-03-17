@@ -10,6 +10,7 @@ intro: |
 fetchReadme: false
 editLink: true
 image: /images/avas.webp
+externalUrl: https://github.com/jonnyhoeven/justme.dev/blob/main/public/html/avas.html
 languages: Javascript, HTML
 fetchML: false
 ---
