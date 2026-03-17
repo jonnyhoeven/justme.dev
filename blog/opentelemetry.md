@@ -1,10 +1,4 @@
 ---
-project: opentelemetry
-user: open-telemetry
-gitlink: https://github.com/open-telemetry/opentelemetry-specification
-githost: https://github.com
-branch: main
-readmeFile: README.md
 type: blog
 title: "The Future of Observability: Why OpenTelemetry is a Game Changer for SREs"
 date: 2026-03-17
