@@ -1,4 +1,10 @@
 ---
+project: argo-cd
+user: argoproj
+gitlink: https://github.com/argoproj/argo-cd
+githost: https://raw.githubusercontent.com/
+branch: main
+readmeFile: README.md
 type: blog
 title: "ArgoCD: Declarative GitOps for Kubernetes"
 date: 2024-11-20

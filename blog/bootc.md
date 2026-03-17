@@ -1,10 +1,16 @@
 ---
+project: bootc
+user: containers
+gitlink: https://github.com/containers/bootc
+githost: https://raw.githubusercontent.com/
+branch: main
+readmeFile: README.md
 type: blog
 title: "The Container-Native OS: Why bootc is a Game Changer for Platform Engineers"
 date: 2026-03-17
 outline: deep
 intro: |
-  Operating systems are finally becoming container-native. Withbootc (Bootable Containers), 
+  Operating systems are finally becoming container-native. With bootc (Bootable Containers), 
   platform engineers can now manage their entire OS lifecycle using the same OCI-compliant 
   workflows they already use for applications, bringing the power of GitOps to the base image itself.
 fetchReadme: false

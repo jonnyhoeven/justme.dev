@@ -1,4 +1,10 @@
 ---
+project: nixpkgs
+user: NixOS
+gitlink: https://github.com/NixOS/nixpkgs
+githost: https://raw.githubusercontent.com/
+branch: main
+readmeFile: README.md
 type: blog
 title: "Declarative Infrastructure at Scale: Using NixOS on AWS EC2 via Custom AMIs for Immutable Production Environments"
 date: 2025-12-04

@@ -10,7 +10,7 @@ intro: |
 fetchReadme: false
 editLink: true
 image: /images/yed.webp
-languages: Go, Shell
+languages: Web-based, Java
 externalUrl: https://www.yworks.com/products/yed
 fetchML: false
 ---

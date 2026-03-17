@@ -1,10 +1,4 @@
 ---
-project: tpa
-user: EnterpriseDB
-gitlink: https://www.enterprisedb.com/products/trusted-postgres-architect-tpa
-githost: https://raw.githubusercontent.com/
-branch: main
-readmeFile: README.md
 type: blog
 title: "Automating High-Availability PostgreSQL on AWS: A Deep Dive into Trusted Postgres Architect (TPA)"
 date: 2024-03-28

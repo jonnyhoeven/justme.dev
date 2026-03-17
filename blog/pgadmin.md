@@ -2,6 +2,9 @@
 project: pgadmin4
 user: pgadmin-org
 gitlink: https://github.com/pgadmin-org/pgadmin4
+githost: https://raw.githubusercontent.com/
+branch: main
+readmeFile: README.md
 type: blog
 title: "Secure Database Management on Kubernetes: Deploying pgAdmin 4 with OAuth2 and Ingress"
 date: 2024-04-18

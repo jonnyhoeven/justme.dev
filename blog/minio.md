@@ -1,4 +1,10 @@
 ---
+project: minio
+user: minio
+gitlink: https://github.com/minio/minio
+githost: https://raw.githubusercontent.com/
+branch: master
+readmeFile: README.md
 type: blog
 title: "Scaling Postgres on AWS: Implementing CloudNativePG with S3 Object Lock and Cross-Region Replication for Ransomware Protection"
 date: 2024-10-23

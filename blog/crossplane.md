@@ -1,4 +1,10 @@
 ---
+project: provider-aws
+user: crossplane-contrib
+gitlink: https://github.com/crossplane-contrib/provider-aws
+githost: https://raw.githubusercontent.com/
+branch: main
+readmeFile: README.md
 type: blog
 title: "Platform Engineering with Crossplane: Scaling Your Internal Developer Platform (IDP) on AWS"
 date: 2026-03-12

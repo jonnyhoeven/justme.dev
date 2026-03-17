@@ -1,4 +1,10 @@
 ---
+project: justme.dev
+user: jonnyhoeven
+gitlink: https://github.com/jonnyhoeven/justme.dev
+githost: https://raw.githubusercontent.com/
+branch: main
+readmeFile: README.md
 type: blog
 title: "Building a Browser-Based Acoustic Vehicle Alerting System (AVAS) with Web Audio and Geolocation APIs"
 date: 2025-10-22
