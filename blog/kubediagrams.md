@@ -7,13 +7,13 @@ branch: main
 readmeFile: README.md
 type: blog
 title: "Visualizing Kubernetes Architecture: A Guide to KubeDiagrams"
-date: 2024-05-20
+date: 2025-05-20
 outline: deep
 intro: |
   Understanding the complex relationships between Kubernetes resources can be challenging. KubeDiagrams provides a powerful way to visualize your cluster's architecture by generating clear, comprehensive diagrams from your manifests and running clusters.
 fetchReadme: false
 editLink: true
-image: /images/placeholder.webp
+image: /images/kubediagrams.webp
 languages: Python, PlantUML, Shell
 fetchML: false
 ---
