@@ -18,5 +18,8 @@
     "docs:preview": "vitepress preview",
     "lint": "eslint . --fix",
     "format": "prettier --write ."
+  },
+  "overrides": {
+    "esbuild": "0.25.0"
   }
 }
