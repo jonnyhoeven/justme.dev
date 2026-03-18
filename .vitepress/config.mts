@@ -36,7 +36,7 @@ export default async () => {
             const image_plh = SITE_CONSTANTS.IMAGES.DEFAULT
             const image = `${SITE_CONSTANTS.HOSTNAME}${(pf && pf.image) ? pf.image : image_plh}`
 
-            head.push(['meta', { name: 'title', property: 'og:title', content: pf.title ? pf.title : 'Just make IT!' }])
+            head.push(['meta', { name: 'title', property: 'og:title', content: pf.title ? pf.title : 'Just make it!' }])
             head.push(['meta', {
                 name: 'description', property: 'og:description', content: intro
             }])

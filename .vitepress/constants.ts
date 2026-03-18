@@ -3,7 +3,7 @@ export const SITE_CONSTANTS = {
     SITE_NAME: 'Justme.dev',
     HOSTNAME: 'https://justme.dev',
     LANG: 'en-US',
-    DESCRIPTION: 'Justme.dev - Jonny van der Hoeven. Just make IT!',
+    DESCRIPTION: 'Justme.dev - Jonny van der Hoeven. Just make it!',
     KEYWORDS: 'Personal Portfolio, justme.dev, SRE, Kubernetes, Infrastructure as Code',
     IMAGES: {
         DEFAULT: '/images/justme.dev.webp',
