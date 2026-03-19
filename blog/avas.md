@@ -106,8 +106,8 @@ const updateAudioEngine = (speed) => {
 Pure tones are difficult for the human ear to localize. To improve safety, I implemented a Pink Noise generator.
 Pink noise has equal energy per octave, making it sound more natural and "full" than white noise.
 
-By passing pink noise through a bandpass filter and modulating the filter's frequency based on speed, we achieve a "
-whooshing" effect similar to modern EVs (like the Porsche Taycan or Audi e-tron).
+By passing pink noise through a bandpass filter and modulating the filter's frequency based on speed, we achieve a
+"whooshing" effect similar to modern EVs (like the Porsche Taycan or Audi e-tron).
 
 ## Deployment & Security
 
