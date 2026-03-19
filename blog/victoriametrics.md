@@ -33,16 +33,16 @@ Prometheus is the gold standard for cloud-native monitoring, but it faces challe
 and long-term storage. Running a large-scale Prometheus setup often requires complex sidecars like Thanos or Cortex,
 which add operational overhead.
 
-**VictoriaMetrics** simplifies this by being a single-binary (in single-node mode) or a straightforward cluster
+VictoriaMetrics simplifies this by being a single-binary (in single-node mode) or a straightforward cluster
 architecture that handles millions of data points per second with significantly less RAM and CPU than its competitors.
 
 ## Key Advantages
 
-1. **High Performance & Efficiency**: VictoriaMetrics uses up to 10x less RAM than Prometheus when handling the same
+1. High Performance & Efficiency: VictoriaMetrics uses up to 10x less RAM than Prometheus when handling the same
    number of metrics. Its storage engine is highly optimized for time-series data, resulting in smaller disk footprints.
-2. **PromQL Compatibility**: It is fully compatible with the Prometheus Query Language (PromQL) and even extends it
+2. PromQL Compatibility: It is fully compatible with the Prometheus Query Language (PromQL) and even extends it
    with MetricsQL, which adds useful functions for more complex alerting and dashboarding.
-3. **Simplified Clustering**: Unlike other distributed monitoring systems, VictoriaMetrics clusters are composed of
+3. Simplified Clustering: Unlike other distributed monitoring systems, VictoriaMetrics clusters are composed of
    stateless components (`vmselect`, `vminsert`) and stateful storage nodes (`vmstorage`), making them easy to scale
    independently.
 

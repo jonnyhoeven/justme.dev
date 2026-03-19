@@ -33,13 +33,13 @@ In enterprise environments, configuration drift is a silent killer of reliabilit
 tools (Ansible, Chef, Puppet) attempt to converge a system to a desired state, but they often leave behind artifacts or
 fail to account for manual changes.
 
-**NixOS** solves this fundamentally. It treats the entire operating system configuration as a pure function:
+NixOS solves this fundamentally. It treats the entire operating system configuration as a pure function:
 `f(configuration.nix) -> System`. This means:
 
-1. **Reproducibility**: A server built today is identical to one built six months from now, given the same input.
-2. **Atomic Rollbacks**: Every change is a new generation. If a deployment fails, rolling back is instantaneous and
+1. Reproducibility: A server built today is identical to one built six months from now, given the same input.
+2. Atomic Rollbacks: Every change is a new generation. If a deployment fails, rolling back is instantaneous and
    guaranteed to work.
-3. **Immutable Infrastructure**: Instead of patching running servers, you deploy new, immutable AMIs (Amazon Machine
+3. Immutable Infrastructure: Instead of patching running servers, you deploy new, immutable AMIs (Amazon Machine
    Images) generated directly from your Nix configuration.
 
 ## Building Custom AWS AMIs with Nix
@@ -83,7 +83,7 @@ Running `nix build .#amazonImage` produces an AMI that can be directly uploaded 
 Integrating NixOS into a Terraform workflow creates a powerful synergy. Terraform manages the cloud resources (VPC,
 Security Groups, EC2 Instances), while NixOS manages the instance internals.
 
-By passing the NixOS configuration via **user_data** or using a custom AMI ID, you ensure that the instance boots into
+By passing the NixOS configuration via user_data or using a custom AMI ID, you ensure that the instance boots into
 the exact state defined in your repository.
 
 ```hcl
@@ -105,7 +105,7 @@ and is ready to serve traffic immediately.
 
 ## Conclusion
 
-Adopting NixOS for AWS infrastructure moves beyond simple automation to **provable correctness**. It allows teams to
+Adopting NixOS for AWS infrastructure moves beyond simple automation to provable correctness. It allows teams to
 treat servers like ephemeral containers, reducing maintenance overhead and increasing system reliability. For
 organizations looking to scale their operations while maintaining strict control over their environments, NixOS offers a
 compelling, modern solution.

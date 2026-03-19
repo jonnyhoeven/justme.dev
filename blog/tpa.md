@@ -28,7 +28,7 @@ In many organizations, database provisioning is a bottleneck. Developers spin up
 ops teams manually configure EC2 instances, leading to "snowflake" servers that are impossible to patch or upgrade
 consistently.
 
-**Trusted Postgres Architect (TPA)** solves this by treating the database cluster topology as code. It generates an
+Trusted Postgres Architect (TPA) solves this by treating the database cluster topology as code. It generates an
 inventory and configuration file (`config.yml`) that defines everything from the OS kernel parameters to the Postgres
 `postgresql.conf` settings.
 
@@ -36,10 +36,10 @@ inventory and configuration file (`config.yml`) that defines everything from the
 
 TPA supports multiple architectures, but a common high-availability pattern on AWS involves:
 
-1. **Primary Node**: Handles read/write traffic.
-2. **Standby Nodes**: Synchronous or asynchronous replicas across Availability Zones (AZs) for disaster recovery.
-3. **Barman**: For backup and recovery, storing WAL files in S3.
-4. **PgBouncer**: For connection pooling.
+1. Primary Node: Handles read/write traffic.
+2. Standby Nodes: Synchronous or asynchronous replicas across Availability Zones (AZs) for disaster recovery.
+3. Barman: For backup and recovery, storing WAL files in S3.
+4. PgBouncer: For connection pooling.
 
 ### Provisioning with TPA
 

@@ -30,18 +30,18 @@ fetchML: false
 
 ## Why Bootable Containers?
 
-The concept of a "Bootable Container" might sound like an oxymoron at first. After all, containers were designed to run *on top* of an operating system, not *as* the operating system. However, the industry's shift toward **immutable infrastructure** and **GitOps** has led to a natural evolution: why not manage our base operating systems the same way we manage our applications?
+The concept of a "Bootable Container" might sound like an oxymoron at first. After all, containers were designed to run on top of an operating system, not as the operating system. However, the industry's shift toward immutable infrastructure and GitOps has led to a natural evolution: why not manage our base operating systems the same way we manage our applications?
 
-**bootc** is an open-source project that allows you to build, deploy, and manage your entire OS image as a standard **OCI-compliant container image**. This means your CI/CD pipelines can now produce a bootable disk image or update a running fleet using the same tools you use for Kubernetes apps.
+bootc is an open-source project that allows you to build, deploy, and manage your entire OS image as a standard OCI-compliant container image. This means your CI/CD pipelines can now produce a bootable disk image or update a running fleet using the same tools you use for Kubernetes apps.
 
 ## The Core Principles of bootc
 
 By treating the OS as a container, bootc introduces several key advantages for platform engineers:
 
-1.  **OCI-Native Updates**: Forget about traditional package managers like `yum` or `apt` for OS updates. With bootc, you perform an `image pull` to update the OS. The update is transactional and can be easily rolled back.
-2.  **Infrastructure as Code (IaC)**: Your entire OS configuration, from kernel modules to user accounts, is defined in a `Containerfile`. This brings full version control and auditability to your base infrastructure.
-3.  **Cross-Platform Portability**: A single OCI image can be used to generate an AMI for AWS, a QCOW2 for KVM, or even a raw disk image for bare-metal servers using `bootc-image-builder`.
-4.  **Security & Immutability**: Because the OS is built as an image, you can enforce a read-only root filesystem and ensure that every server in your fleet is running the exact same bits.
+1.  OCI-Native Updates: Forget about traditional package managers like `yum` or `apt` for OS updates. With bootc, you perform an `image pull` to update the OS. The update is transactional and can be easily rolled back.
+2.  Infrastructure as Code (IaC): Your entire OS configuration, from kernel modules to user accounts, is defined in a `Containerfile`. This brings full version control and auditability to your base infrastructure.
+3.  Cross-Platform Portability: A single OCI image can be used to generate an AMI for AWS, a QCOW2 for KVM, or even a raw disk image for bare-metal servers using `bootc-image-builder`.
+4.  Security & Immutability: Because the OS is built as an image, you can enforce a read-only root filesystem and ensure that every server in your fleet is running the exact same bits.
 
 ## From Containerfile to Metal
 
@@ -62,11 +62,11 @@ RUN systemctl enable my-service.service
 RUN useradd -m admin && echo "admin:password" | chpasswd
 ```
 
-Once the image is built and pushed to a registry, you can use **`bootc-image-builder`** to transform it into various formats. For example, to create an AWS AMI, you would run the builder container, pointing it to your OCI image.
+Once the image is built and pushed to a registry, you can use `bootc-image-builder` to transform it into various formats. For example, to create an AWS AMI, you would run the builder container, pointing it to your OCI image.
 
 ## Bringing GitOps to the OS
 
-The real power of bootc is unlocked when combined with GitOps tools like **ArgoCD** or **Flux**. You can now have a "Golden Image" repository where every pull request triggers a build of a new OS container. 
+The real power of bootc is unlocked when combined with GitOps tools like ArgoCD or Flux. You can now have a "Golden Image" repository where every pull request triggers a build of a new OS container. 
 
 Once the image is pushed to your registry, your servers (or a management controller) can watch for new tags and automatically perform a `bootc switch` to the latest version. This drastically reduces the complexity of maintaining a fleet of servers and ensures that security patches are rolled out consistently across the entire environment.
 

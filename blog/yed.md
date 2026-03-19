@@ -28,16 +28,16 @@ fetchML: false
 Most tools (Draw.io, Lucidchart) require you to manually position every box and arrow. For a simple flowchart, this is
 fine. But when you're mapping a Kubernetes cluster with 50 pods and 200 connections, manual layout is impossible.
 
-**yEd Graph Editor** solves this with **algorithmic layout**. You can import a CSV or Excel file of nodes and edges,
+yEd Graph Editor solves this with algorithmic layout. You can import a CSV or Excel file of nodes and edges,
 click a button, and yEd will automatically arrange them into a readable diagram.
 
 ## Key Features for Architects
 
-1. **Automatic Layouts**: Hierarchical, Organic, Orthogonal, and Circular layouts. The "Hierarchical" layout is perfect
+1. Automatic Layouts: Hierarchical, Organic, Orthogonal, and Circular layouts. The "Hierarchical" layout is perfect
    for visualizing dependency trees or CI/CD pipelines.
-2. **Group Nodes**: Collapse complex sub-systems into a single node to simplify the view, then expand them when you need
+2. Group Nodes: Collapse complex sub-systems into a single node to simplify the view, then expand them when you need
    detail.
-3. **Excel Import**: Export your AWS resource list or database schema to Excel, import it into yEd, and instantly
+3. Excel Import: Export your AWS resource list or database schema to Excel, import it into yEd, and instantly
    visualize the relationships.
 
 ## Integration with Confluence

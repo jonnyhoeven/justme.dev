@@ -34,19 +34,19 @@ In the past, observability was fragmented. You had one agent for metrics (like P
 traces (like Jaeger or Zipkin), and a separate system for logs. Each had its own proprietary SDKs and agents, leading
 to "agent fatigue" and vendor lock-in.
 
-**OpenTelemetry (OTel)** is a CNCF incubating project that merges these signals into a single, standardized framework.
+OpenTelemetry (OTel) is a CNCF incubating project that merges these signals into a single, standardized framework.
 It provides a set of APIs, SDKs, and tools to collect and export telemetry data to any backend of your choice.
 
 ## The Core Pillars of OpenTelemetry
 
 OpenTelemetry is built on three main components that work together to provide end-to-end observability:
 
-1. **Specification**: A shared language and data model for all telemetry types (Traces, Metrics, Logs), ensuring
+1. Specification: A shared language and data model for all telemetry types (Traces, Metrics, Logs), ensuring
    interoperability across different programming languages and backends.
-2. **Collector**: A vendor-agnostic proxy that can receive, process, and export telemetry data. It acts as a data
+2. Collector: A vendor-agnostic proxy that can receive, process, and export telemetry data. It acts as a data
    pipeline, allowing you to transform or filter data before sending it to multiple backends.
-3. **SDKs & Instrumentation**: Language-specific libraries that allow developers to instrument their code. OTel supports
-   both manual instrumentation and **Auto-Instrumentation**, which can capture telemetry without changing a single line
+3. SDKs & Instrumentation: Language-specific libraries that allow developers to instrument their code. OTel supports
+   both manual instrumentation and Auto-Instrumentation, which can capture telemetry without changing a single line
    of code in many popular frameworks.
 
 ## Why SREs Love the OTel Collector
@@ -83,13 +83,13 @@ service:
 
 This architecture allows SREs to:
 
-* **Reduce Overhead**: Batch and compress data before exporting.
-* **Enhance Metadata**: Automatically add infrastructure context (e.g., Kubernetes pod name, cloud region).
-* **Dual-Write**: Send the same telemetry to multiple backends for testing or migration purposes.
+ Reduce Overhead: Batch and compress data before exporting.
+ Enhance Metadata: Automatically add infrastructure context (e.g., Kubernetes pod name, cloud region).
+ Dual-Write: Send the same telemetry to multiple backends for testing or migration purposes.
 
 ## The Power of Context Propagation
 
-The true magic of OTel lies in **distributed tracing**. By propagating a `trace_id` across service boundaries (via HTTP
+The true magic of OTel lies in distributed tracing. By propagating a `trace_id` across service boundaries (via HTTP
 headers or gRPC metadata), OTel allows you to reconstruct the entire lifecycle of a request as it travels through dozens
 of microservices.
 

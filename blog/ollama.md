@@ -33,17 +33,17 @@ Developers want the productivity boost of AI coding assistants, but security tea
 leakage. Tools like GitHub Copilot or ChatGPT send code snippets to external servers for processing. For regulated
 industries or companies with strict IP policies, this is a non-starter.
 
-**Ollama** solves this by running open-source LLMs (like Llama 3, CodeLlama, or DeepSeek) entirely on your local machine
+Ollama solves this by running open-source LLMs (like Llama 3, CodeLlama, or DeepSeek) entirely on your local machine
 or a private on-prem server.
 
 ## Architecture: Local Inference
 
 By running the inference engine locally, you gain:
 
-1. **Data Sovereignty**: Code snippets, prompts, and completions are processed in RAM and never transmitted over the
+1. Data Sovereignty: Code snippets, prompts, and completions are processed in RAM and never transmitted over the
    internet.
-2. **Cost Control**: No per-seat subscription fees or token usage costs.
-3. **Customization**: The ability to fine-tune models on your internal codebase (RAG - Retrieval-Augmented Generation)
+2. Cost Control: No per-seat subscription fees or token usage costs.
+3. Customization: The ability to fine-tune models on your internal codebase (RAG - Retrieval-Augmented Generation)
    without exposing that data.
 
 ## Setting Up the Secure Environment
@@ -65,17 +65,17 @@ ollama pull codellama:7b
 
 Modern IDEs can be configured to point to a local AI backend instead of a cloud API.
 
-* **IntelliJ IDEA**: Use the "AI Assistant" settings to point to `http://localhost:11434`.
-* **VS Code**: Extensions like **Continue** allow you to select Ollama as the provider, enabling autocomplete and chat
+ IntelliJ IDEA: Use the "AI Assistant" settings to point to `http://localhost:11434`.
+ VS Code: Extensions like Continue allow you to select Ollama as the provider, enabling autocomplete and chat
   functionality powered by your local model.
 
 ## Performance vs. Privacy
 
 Running LLMs locally requires hardware resources.
 
-* **Apple Silicon (M1/M2/M3)**: Excellent performance due to unified memory architecture.
-* **NVIDIA GPUs**: The gold standard for speed.
-* **CPU Only**: Viable for smaller models (7B parameters) but with higher latency.
+ Apple Silicon (M1/M2/M3): Excellent performance due to unified memory architecture.
+ NVIDIA GPUs: The gold standard for speed.
+ CPU Only: Viable for smaller models (7B parameters) but with higher latency.
 
 For teams without high-end laptops, hosting a centralized Ollama instance on a secure internal server allows developers
 to connect via the internal network, offloading the compute while keeping data within the corporate perimeter.

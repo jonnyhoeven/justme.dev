@@ -32,16 +32,16 @@ fetchML: false
 Developers and DBAs need a GUI to inspect data, run ad-hoc queries, and manage schemas. However, exposing database
 ports (5432) to the internet is a security risk. Port-forwarding is tedious.
 
-**pgAdmin 4** in "Server Mode" solves this. By deploying it as a web application within your Kubernetes cluster, you
+pgAdmin 4 in "Server Mode" solves this. By deploying it as a web application within your Kubernetes cluster, you
 provide a centralized interface for all your databases without exposing them directly.
 
 ## Architecture: pgAdmin on Kubernetes
 
 We will deploy pgAdmin 4 using the official Helm chart, but with critical security enhancements:
 
-1. **Stateful Storage**: Persisting user sessions and server definitions using a PersistentVolumeClaim (PVC).
-2. **Ingress**: Exposing the UI via an Ingress Controller (e.g., NGINX or ALB).
-3. **OAuth2 / OIDC**: Integrating with your identity provider (Google, GitHub, Okta) so users don't need separate
+1. Stateful Storage: Persisting user sessions and server definitions using a PersistentVolumeClaim (PVC).
+2. Ingress: Exposing the UI via an Ingress Controller (e.g., NGINX or ALB).
+3. OAuth2 / OIDC: Integrating with your identity provider (Google, GitHub, Okta) so users don't need separate
    credentials for the tool itself.
 
 ### Helm Configuration

@@ -31,8 +31,8 @@ fetchML: false
 ## The Engineering Challenge: Silent Mobility
 
 Electric micro-mobility (scooters, e-bikes) suffers from a critical safety flaw: silence. Pedestrians rely on auditory
-cues to detect approaching vehicles. In the automotive industry, this is solved by an **Acoustic Vehicle Alerting
-System (AVAS)**—hardware that emits synthetic engine noise at low speeds.
+cues to detect approaching vehicles. In the automotive industry, this is solved by an Acoustic Vehicle Alerting
+System (AVAS)—hardware that emits synthetic engine noise at low speeds.
 
 I sought to replicate this safety feature using only a smartphone and a web browser, avoiding the friction of app store
 approvals and proprietary hardware.
@@ -41,8 +41,8 @@ approvals and proprietary hardware.
 
 The solution leverages two powerful browser APIs:
 
-1. **Geolocation API**: To derive real-time velocity.
-2. **Web Audio API**: To synthesize dynamic audio based on that velocity.
+1. Geolocation API: To derive real-time velocity.
+2. Web Audio API: To synthesize dynamic audio based on that velocity.
 
 ### Real-Time Velocity Tracking
 
@@ -69,9 +69,9 @@ to shape the sound.
 
 #### The Signal Chain
 
-1. **Source**: An `OscillatorNode` (sine/square wave) or a generated noise buffer (pink noise).
-2. **Filter**: A `BiquadFilterNode` to sculpt the frequency content.
-3. **Gain**: A `GainNode` to control amplitude.
+1. Source: An `OscillatorNode` (sine/square wave) or a generated noise buffer (pink noise).
+2. Filter: A `BiquadFilterNode` to sculpt the frequency content.
+3. Gain: A `GainNode` to control amplitude.
 
 ```javascript
 const audioContext = new AudioContext();
@@ -92,8 +92,8 @@ artifacts (zipper noise).
 
 ```javascript
 const updateAudioEngine = (speed) => {
-    const newVolume = Math.min(1.0, BASE_VOL + (speed * VOL_SENSITIVITY));
-    const newFreq = Math.min(MAX_FREQ, BASE_FREQ + (speed * PITCH_SENSITIVITY));
+    const newVolume = Math.min(1.0, BASE_VOL + (speed  VOL_SENSITIVITY));
+    const newFreq = Math.min(MAX_FREQ, BASE_FREQ + (speed  PITCH_SENSITIVITY));
 
     // Smooth transition over 0.1 seconds
     gainNode.gain.linearRampToValueAtTime(newVolume, audioContext.currentTime + 0.1);
@@ -103,7 +103,7 @@ const updateAudioEngine = (speed) => {
 
 ## Advanced Synthesis: Pink Noise & Filtering
 
-Pure tones are difficult for the human ear to localize. To improve safety, I implemented a **Pink Noise** generator.
+Pure tones are difficult for the human ear to localize. To improve safety, I implemented a Pink Noise generator.
 Pink noise has equal energy per octave, making it sound more natural and "full" than white noise.
 
 By passing pink noise through a bandpass filter and modulating the filter's frequency based on speed, we achieve a "
@@ -113,8 +113,8 @@ whooshing" effect similar to modern EVs (like the Porsche Taycan or Audi e-tron)
 
 Deploying this as a web app requires handling browser security policies:
 
-1. **HTTPS**: The Geolocation API is restricted to secure contexts.
-2. **Permissions Policy**: When embedded in an `iframe`, the parent page must explicitly delegate permission.
+1. HTTPS: The Geolocation API is restricted to secure contexts.
+2. Permissions Policy: When embedded in an `iframe`, the parent page must explicitly delegate permission.
 
 ```html
 

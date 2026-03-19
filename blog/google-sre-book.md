@@ -59,11 +59,11 @@ This approach makes reliability a tangible, measurable engineering constraint.
 
 ## Error Budgets: The Bridge Between Dev and Ops
 
-The concept of an **Error Budget** transforms the relationship between developers and operators. It quantifies the
+The concept of an Error Budget transforms the relationship between developers and operators. It quantifies the
 acceptable level of unreliability.
 
-* **Scenario**: If a service has 99.9% availability target, it has a monthly error budget of ~43 minutes.
-* **Policy**: If the budget is exhausted, feature releases are frozen. The team pivots to reliability engineering until
+ Scenario: If a service has 99.9% availability target, it has a monthly error budget of ~43 minutes.
+ Policy: If the budget is exhausted, feature releases are frozen. The team pivots to reliability engineering until
   the budget recovers.
 
 This aligns incentives: developers are empowered to push fast as long as they stay within the budget, and ops have a
@@ -71,11 +71,11 @@ clear mandate to halt changes when stability is threatened.
 
 ## Blameless Postmortems
 
-When incidents occur, the goal is learning, not punishment. A blameless postmortem focuses on the *process* and
-*technology* failures, not human error.
+When incidents occur, the goal is learning, not punishment. A blameless postmortem focuses on the process and
+technology failures, not human error.
 
-* **Root Cause Analysis**: Use the "5 Whys" technique to dig deep.
-* **Action Items**: Every postmortem must result in Jira tickets or GitHub issues to prevent recurrence (e.g., "Add
+ Root Cause Analysis: Use the "5 Whys" technique to dig deep.
+ Action Items: Every postmortem must result in Jira tickets or GitHub issues to prevent recurrence (e.g., "Add
   liveness probe," "Increase connection timeout").
 
 ## Conclusion

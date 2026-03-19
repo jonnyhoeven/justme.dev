@@ -30,8 +30,8 @@ fetchML: false
 
 ## Why CloudNativePG?
 
-While managed services like AWS RDS are excellent, they can be costly and lock you into a specific cloud provider. *
-*CloudNativePG** offers a portable, open-source alternative that runs anywhere Kubernetes runs—AWS EKS, Azure AKS, or
+While managed services like AWS RDS are excellent, they can be costly and lock you into a specific cloud provider. 
+CloudNativePG offers a portable, open-source alternative that runs anywhere Kubernetes runs—AWS EKS, Azure AKS, or
 on-prem bare metal.
 
 It leverages the Kubernetes API to manage the entire lifecycle of a PostgreSQL cluster, from provisioning to day-2
@@ -39,11 +39,11 @@ operations.
 
 ## Key Enterprise Features
 
-1. **High Availability (HA)**: CNPG automatically manages primary/standby replication. If the primary pod fails, the
+1. High Availability (HA): CNPG automatically manages primary/standby replication. If the primary pod fails, the
    operator promotes a standby with zero data loss (RPO=0) in synchronous mode.
-2. **Self-Healing**: Failed nodes are automatically detected and replaced. The operator handles the complex logic of
+2. Self-Healing: Failed nodes are automatically detected and replaced. The operator handles the complex logic of
    rewinding the timeline and rejoining the cluster.
-3. **Rolling Updates**: Upgrade PostgreSQL versions or the underlying container image with zero downtime. The operator
+3. Rolling Updates: Upgrade PostgreSQL versions or the underlying container image with zero downtime. The operator
    updates replicas first, switches over, and then updates the former primary.
 
 ## Disaster Recovery: Point-in-Time Recovery (PITR)

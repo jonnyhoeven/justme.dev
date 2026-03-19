@@ -32,7 +32,7 @@ As organizations scale their cloud-native infrastructure, keeping track of Kuber
 difficult. With hundreds of Deployments, Services, Ingresses, and ConfigMaps interacting with each other, relying solely
 on `kubectl` outputs and YAML manifests often fails to provide a clear overview of the system's architecture.
 
-**KubeDiagrams** addresses this by automatically translating your Kubernetes configurations into visual diagrams,
+KubeDiagrams addresses this by automatically translating your Kubernetes configurations into visual diagrams,
 allowing developers and operations teams to easily comprehend and document their infrastructure.
 
 ## What is KubeDiagrams?
@@ -43,11 +43,11 @@ are deployed and interconnected.
 
 ### Key Features
 
-1. **Manifest Visualization**: Generate diagrams directly from static YAML files.
-2. **Cluster Visualization**: Connect to a running cluster and visualize its current state.
-3. **PlantUML Integration**: Uses the popular PlantUML syntax, making it easy to integrate into existing documentation
+1. Manifest Visualization: Generate diagrams directly from static YAML files.
+2. Cluster Visualization: Connect to a running cluster and visualize its current state.
+3. PlantUML Integration: Uses the popular PlantUML syntax, making it easy to integrate into existing documentation
    workflows.
-4. **Customizable**: Allows tweaking and extending the generated diagrams for specific needs.
+4. Customizable: Allows tweaking and extending the generated diagrams for specific needs.
 
 ## How It Works
 

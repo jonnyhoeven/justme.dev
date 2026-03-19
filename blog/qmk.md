@@ -29,16 +29,16 @@ fetchML: false
 
 ## Beyond Standard Peripherals
 
-Most keyboards are dumb terminals. They send a scancode, and the OS interprets it. **QMK Firmware** changes this
+Most keyboards are dumb terminals. They send a scancode, and the OS interprets it. QMK Firmware changes this
 paradigm by running logic directly on the microcontroller (MCU) inside the keyboard.
 
 This allows for:
 
-1. **Hardware Macros**: Complex sequences of keystrokes executed by the keyboard itself, independent of the OS or
+1. Hardware Macros: Complex sequences of keystrokes executed by the keyboard itself, independent of the OS or
    software installed on the host machine.
-2. **Layers**: A single physical key can perform multiple functions depending on the active layer (e.g., a numpad on the
+2. Layers: A single physical key can perform multiple functions depending on the active layer (e.g., a numpad on the
    home row).
-3. **Mouse Emulation**: Controlling the cursor with keys, eliminating the need to move your hand to a mouse.
+3. Mouse Emulation: Controlling the cursor with keys, eliminating the need to move your hand to a mouse.
 
 ## Engineering a Custom Keymap
 
@@ -70,9 +70,9 @@ This C code compiles into a `.hex` or `.bin` file that is flashed onto the keybo
 
 ## Advanced Features: Tap Dance & Combos
 
-* **Tap Dance**: Assign different actions to a key based on how many times it is tapped. (e.g., Tap once for `ESC`,
+ Tap Dance: Assign different actions to a key based on how many times it is tapped. (e.g., Tap once for `ESC`,
   double tap for `CAPS LOCK`).
-* **Combos**: Pressing two keys simultaneously (like `J` and `K`) to send `ESC`. This keeps your fingers on the home
+ Combos: Pressing two keys simultaneously (like `J` and `K`) to send `ESC`. This keeps your fingers on the home
   row, reducing RSI risk.
 
 ## Conclusion

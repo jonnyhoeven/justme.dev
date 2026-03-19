@@ -30,29 +30,29 @@ fetchML: false
 
 ## From Infrastructure as Code to Infrastructure as Data
 
-We've already seen how **NixOS** provides deterministic, immutable operating systems and how **ArgoCD** brings GitOps to
+We've already seen how NixOS provides deterministic, immutable operating systems and how ArgoCD brings GitOps to
 application deployments. However, many organizations still manage their cloud resources (like RDS databases, S3 buckets,
 and IAM roles) using separate Terraform or Pulumi workflows.
 
-This "context switching" between Kubernetes manifests and HCL/TypeScript creates friction for platform teams. *
-*Crossplane** solves this by extending the Kubernetes API to manage external cloud resources. In this model, your
+This "context switching" between Kubernetes manifests and HCL/TypeScript creates friction for platform teams. 
+Crossplane solves this by extending the Kubernetes API to manage external cloud resources. In this model, your
 infrastructure becomes "data" (YAML) that lives alongside your applications.
 
 ## Why Crossplane for Platform Engineering?
 
-By using Crossplane as the engine for your **Internal Developer Platform**, you gain several key advantages:
+By using Crossplane as the engine for your Internal Developer Platform, you gain several key advantages:
 
-1. **Unified API**: Developers only need to interact with Kubernetes APIs to provision both their applications and the
+1. Unified API: Developers only need to interact with Kubernetes APIs to provision both their applications and the
    databases they depend on.
-2. **Continuous Reconciliation**: Unlike Terraform, which only checks state during a `plan/apply` run, Crossplane is a
+2. Continuous Reconciliation: Unlike Terraform, which only checks state during a `plan/apply` run, Crossplane is a
    controller that continuously monitors your cloud resources for drift and automatically fixes them.
-3. **Composite Resources (XRDs)**: You can define your own "opinionated" abstractions. Instead of letting developers
+3. Composite Resources (XRDs): You can define your own "opinionated" abstractions. Instead of letting developers
    configure every detail of an RDS instance, you can provide a `PostgresInstance` resource that automatically includes
    your company's required security groups, backup policies, and monitoring tags.
 
 ## Managing AWS Resources via Manifests
 
-To manage AWS, you install the **Crossplane AWS Provider**. Once configured with the necessary IAM permissions, you can
+To manage AWS, you install the Crossplane AWS Provider. Once configured with the necessary IAM permissions, you can
 define resources like an S3 bucket directly in YAML:
 
 ```yaml
@@ -74,18 +74,18 @@ your YAML.
 
 The true power of this stack is realized when these tools work together:
 
-1. **NixOS**: Provides a stable, immutable base for your EKS (Elastic Kubernetes Service) nodes.
-2. **Crossplane**: Resides within the cluster, managing the "off-cluster" resources like RDS and S3.
-3. **ArgoCD**: Acts as the orchestrator, watching your Git repository and syncing both your application manifests AND
+1. NixOS: Provides a stable, immutable base for your EKS (Elastic Kubernetes Service) nodes.
+2. Crossplane: Resides within the cluster, managing the "off-cluster" resources like RDS and S3.
+3. ArgoCD: Acts as the orchestrator, watching your Git repository and syncing both your application manifests AND
    your Crossplane infrastructure manifests to the cluster.
 
-This creates a **single source of truth** for your entire environment. A single Git commit can now deploy a new version
+This creates a single source of truth for your entire environment. A single Git commit can now deploy a new version
 of your microservice, create the database it needs, and configure the S3 bucket for its assets—all while maintaining the
 security and consistency guarantees of the GitOps model.
 
 ## Building Your IDP
 
-As you build out your Internal Developer Platform, consider Crossplane's **Composition** feature. Compositions allow you
+As you build out your Internal Developer Platform, consider Crossplane's Composition feature. Compositions allow you
 to bundle multiple cloud resources into a single, high-level API for your developers. This "paves the way" for
 developers, allowing them to focus on code while the platform team maintains the underlying infrastructure standards.
 

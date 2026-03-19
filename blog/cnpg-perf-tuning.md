@@ -23,11 +23,11 @@ fetchML: false
 
 ## Performance in the Cloud-Native Era
 
-After establishing High Availability (HA) and Disaster Recovery (DR) with **CloudNativePG**, the next logical step is 
+After establishing High Availability (HA) and Disaster Recovery (DR) with CloudNativePG, the next logical step is 
 squeezing the most performance out of your PostgreSQL clusters. Running database workloads in Kubernetes introduces 
 unique challenges, particularly around disk I/O and connection overhead.
 
-In this guide, we focus on two critical areas: **WAL optimization** and **Connection Pooling with PgBouncer**.
+In this guide, we focus on two critical areas: WAL optimization and Connection Pooling with PgBouncer.
 
 ## 1. Optimizing Write Ahead Log (WAL)
 
@@ -39,10 +39,10 @@ storage, WAL writes can become a bottleneck.
 CloudNativePG allows you to configure PostgreSQL parameters directly in the `Cluster` manifest. Key settings to 
 consider:
 
-*   **`max_wal_size`**: Increasing this (e.g., to `4GB` or higher) reduces the frequency of checkpoints, which are 
+   `max_wal_size`: Increasing this (e.g., to `4GB` or higher) reduces the frequency of checkpoints, which are 
     resource-intensive.
-*   **`min_wal_size`**: Helps avoid the overhead of allocating new WAL files by keeping a minimum number around.
-*   **`checkpoint_timeout`**: In write-heavy environments, increasing this to `15min` or `30min` can significantly 
+   `min_wal_size`: Helps avoid the overhead of allocating new WAL files by keeping a minimum number around.
+   `checkpoint_timeout`: In write-heavy environments, increasing this to `15min` or `30min` can significantly 
     reduce the I/O spikes caused by frequent checkpoints.
 
 ### Example Cluster Configuration
@@ -72,7 +72,7 @@ where microservices might spin up hundreds of transient connections, a pooler is
 
 ### Why PgBouncer?
 
-**PgBouncer** is a lightweight connection pooler that maintains a pool of persistent connections to the database 
+PgBouncer is a lightweight connection pooler that maintains a pool of persistent connections to the database 
 and multiplexes incoming client connections. This dramatically reduces the overhead on the primary PostgreSQL 
 process.
 
@@ -100,11 +100,11 @@ spec:
 
 ### Choosing the Right Pool Mode
 
-*   **Session**: The connection is assigned to the client for the duration of the session. (Least efficient for 
+   Session: The connection is assigned to the client for the duration of the session. (Least efficient for 
     microservices).
-*   **Transaction**: The connection is returned to the pool after each transaction. (Highly recommended for 
+   Transaction: The connection is returned to the pool after each transaction. (Highly recommended for 
     most web applications).
-*   **Statement**: The connection is returned after each statement. (Strict, does not support multi-statement 
+   Statement: The connection is returned after each statement. (Strict, does not support multi-statement 
     transactions).
 
 ## Monitoring and Iteration
@@ -112,9 +112,9 @@ spec:
 Performance tuning is not a "set and forget" task. Monitor your metrics using the built-in Prometheus exporter in 
 CloudNativePG. Look for:
 
-1.  **Checkpoint spikes**: If I/O latency jumps during checkpoints, increase `checkpoint_timeout`.
-2.  **Connection saturation**: If clients are waiting for connections from PgBouncer, increase `default_pool_size`.
-3.  **WAL throughput**: Ensure your underlying storage (PVC) can handle the IOPS required by your WAL writes.
+1.  Checkpoint spikes: If I/O latency jumps during checkpoints, increase `checkpoint_timeout`.
+2.  Connection saturation: If clients are waiting for connections from PgBouncer, increase `default_pool_size`.
+3.  WAL throughput: Ensure your underlying storage (PVC) can handle the IOPS required by your WAL writes.
 
 ## Conclusion
 

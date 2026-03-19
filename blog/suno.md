@@ -24,18 +24,18 @@ fetchML: false
 ## The Rise of Generative Audio
 
 Just as LLMs (Large Language Models) have transformed coding, generative audio models are revolutionizing sound design.
-**Suno** is at the forefront of this, offering a web-based interface to complex diffusion models capable of
+Suno is at the forefront of this, offering a web-based interface to complex diffusion models capable of
 understanding musical structure, instrumentation, and even lyrics.
 
 ## Use Cases for Developers
 
 Why should a software engineer care about AI music?
 
-1. **Royalty-Free Assets**: Indie game developers and app creators often struggle with licensing music. Suno allows for
+1. Royalty-Free Assets: Indie game developers and app creators often struggle with licensing music. Suno allows for
    the rapid generation of background tracks, soundscapes, and loops without copyright headaches.
-2. **Dynamic Content**: Imagine a game where the soundtrack evolves in real-time based on the player's actions,
+2. Dynamic Content: Imagine a game where the soundtrack evolves in real-time based on the player's actions,
    generated on the fly by an API.
-3. **Personalized Workflows**: Creating custom "lo-fi beats to code to" that perfectly match your current focus level.
+3. Personalized Workflows: Creating custom "lo-fi beats to code to" that perfectly match your current focus level.
 
 ## Experimentation: The "Developer Playlist"
 

@@ -30,7 +30,7 @@ fetchML: false
 ## The SRE Challenge: Noise vs. Signal
 
 Site Reliability Engineers (SREs) are often overwhelmed by alerts, logs, and complex failure modes in distributed
-systems. **K8sGPT** addresses this by applying Generative AI to Kubernetes observability data, filtering noise and
+systems. K8sGPT addresses this by applying Generative AI to Kubernetes observability data, filtering noise and
 providing actionable, human-readable explanations for cluster issues.
 
 ## How K8sGPT Works
@@ -41,24 +41,24 @@ remediation steps.
 
 ### Key Capabilities for Enterprise
 
-1. **Automated Root Cause Analysis (RCA)**: Instead of digging through `kubectl describe` and logs, K8sGPT instantly
+1. Automated Root Cause Analysis (RCA): Instead of digging through `kubectl describe` and logs, K8sGPT instantly
    identifies why a pod is crashing (e.g., OOMKilled, CrashLoopBackOff due to missing config).
-2. **Security Auditing**: It can identify potential security misconfigurations, such as privileged containers or missing
+2. Security Auditing: It can identify potential security misconfigurations, such as privileged containers or missing
    resource limits, aligning with best practices.
-3. **Integration with Prometheus**: By connecting to Prometheus, K8sGPT can analyze metrics to detect anomalies that
+3. Integration with Prometheus: By connecting to Prometheus, K8sGPT can analyze metrics to detect anomalies that
    might not yet be causing failures but indicate degrading performance.
 
 ## Integrating K8sGPT into CI/CD
 
 To make this truly "DevOps," K8sGPT can be integrated into your CI/CD pipelines or GitOps workflows.
 
-* **Pre-Deployment Checks**: Run K8sGPT scans in your staging environment before promoting to production.
-* **Slack Integration**: Pipe K8sGPT analysis directly into your team's Slack channel for immediate visibility during
+ Pre-Deployment Checks: Run K8sGPT scans in your staging environment before promoting to production.
+ Slack Integration: Pipe K8sGPT analysis directly into your team's Slack channel for immediate visibility during
   incidents.
 
 ## Security & Privacy Considerations
 
-For enterprises concerned about sending data to public AI APIs, K8sGPT supports **local backends** (like LocalAI) or
+For enterprises concerned about sending data to public AI APIs, K8sGPT supports local backends (like LocalAI) or
 private Azure OpenAI instances. This ensures that sensitive cluster data remains within your control while still
 benefiting from AI analysis.
 

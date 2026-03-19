@@ -30,7 +30,7 @@ fetchML: false
 ## The GitOps Revolution
 
 Managing Kubernetes manifests across multiple environments can quickly become a complex and error-prone process.
-**ArgoCD** simplifies this by applying the GitOps pattern, using Git repositories as the single source of truth for
+ArgoCD simplifies this by applying the GitOps pattern, using Git repositories as the single source of truth for
 declarative infrastructure and applications.
 
 ## How ArgoCD Works
@@ -42,19 +42,19 @@ while providing facilities to automatically or manually sync the live state back
 
 ### Key Capabilities
 
-1. **Automated Deployment**: Automatically deploy applications to specified target environments.
-2. **SSO Integration**: Out-of-the-box integration with OIDC, OAuth2, LDAP, SAML 2.0, GitHub, GitLab, Microsoft, and
+1. Automated Deployment: Automatically deploy applications to specified target environments.
+2. SSO Integration: Out-of-the-box integration with OIDC, OAuth2, LDAP, SAML 2.0, GitHub, GitLab, Microsoft, and
    LinkedIn.
-3. **Multi-Cluster Management**: Manage and deploy to multiple Kubernetes clusters from a single ArgoCD instance.
-4. **Health Status & Sync**: Real-time visualization of application activity, health status, and synchronization state.
+3. Multi-Cluster Management: Manage and deploy to multiple Kubernetes clusters from a single ArgoCD instance.
+4. Health Status & Sync: Real-time visualization of application activity, health status, and synchronization state.
 
 ## Integrating ArgoCD into Your Workflow
 
 ArgoCD integrates naturally into existing CI/CD pipelines:
 
-* **CI Pipeline**: Your CI tool (like GitHub Actions or Jenkins) runs tests and builds the container image, then updates
+ CI Pipeline: Your CI tool (like GitHub Actions or Jenkins) runs tests and builds the container image, then updates
   the Kubernetes manifests in the Git repository.
-* **CD Pipeline**: ArgoCD detects the change in the Git repository and automatically synchronizes the cluster state with
+ CD Pipeline: ArgoCD detects the change in the Git repository and automatically synchronizes the cluster state with
   the new manifests.
 
 ## Conclusion

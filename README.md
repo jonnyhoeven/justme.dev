@@ -1,28 +1,28 @@
 # Justme.dev - Cloud-Native Documentation Architecture
 
-A scalable, serverless documentation platform demonstrating modern **Static Site Generation (SSG)** and **Automated
-Content Aggregation**. This project serves as a reference architecture for centralized knowledge management, leveraging
-**VitePress** (Vue.js) for high-performance frontend delivery and a custom **Python ETL pipeline** for dynamic content
+A scalable, serverless documentation platform demonstrating modern Static Site Generation (SSG) and Automated
+Content Aggregation. This project serves as a reference architecture for centralized knowledge management, leveraging
+VitePress (Vue.js) for high-performance frontend delivery and a custom Python ETL pipeline for dynamic content
 ingestion from distributed repositories.
 
-Hosted on **GitHub Pages** with fully automated CI/CD pipelines, ensuring high availability, zero-maintenance
+Hosted on GitHub Pages with fully automated CI/CD pipelines, ensuring high availability, zero-maintenance
 infrastructure, and rapid content delivery.
 
 ## Architecture Overview
 
-* **Frontend**: VitePress (Vue 3 + Vite) for lightning-fast static site generation and SEO optimization.
-* **Content Pipeline**: Custom Python-based ETL (Extract, Transform, Load) system that aggregates READMEs and metadata
+ Frontend: VitePress (Vue 3 + Vite) for lightning-fast static site generation and SEO optimization.
+ Content Pipeline: Custom Python-based ETL (Extract, Transform, Load) system that aggregates READMEs and metadata
   from multiple GitHub repositories into a unified portal.
-* **Infrastructure**: Serverless deployment via GitHub Pages.
-* **CI/CD**: GitHub Actions for automated build, test, and deployment workflows.
+ Infrastructure: Serverless deployment via GitHub Pages.
+ CI/CD: GitHub Actions for automated build, test, and deployment workflows.
 
 ## Key Features
 
-* **Automated Content Aggregation**: Centralizes documentation from disparate microservices/projects into a single
+ Automated Content Aggregation: Centralizes documentation from disparate microservices/projects into a single
   source of truth.
-* **High Performance**: Pre-rendered static HTML with client-side hydration for SPA-like navigation.
-* **Developer Experience (DX)**: Markdown-centric workflow with hot module replacement (HMR) for rapid iteration.
-* **Scalability**: Stateless architecture capable of handling high traffic loads via CDN distribution.
+ High Performance: Pre-rendered static HTML with client-side hydration for SPA-like navigation.
+ Developer Experience (DX): Markdown-centric workflow with hot module replacement (HMR) for rapid iteration.
+ Scalability: Stateless architecture capable of handling high traffic loads via CDN distribution.
 
 ## Prerequisites
 
@@ -101,16 +101,16 @@ npm run docs:preview
 
 ### Deployment Strategy
 
-Continuous Deployment is managed via **GitHub Actions**. Commits to the `main` branch trigger
+Continuous Deployment is managed via GitHub Actions. Commits to the `main` branch trigger
 the [deploy workflow](https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml), which executes the
 following pipeline:
 
-1. **Generate**: Aggregates latest content from source repositories.
-2. **Build**: Compiles static assets.
-3. **Deploy**: Publishes artifacts to GitHub Pages.
+1. Generate: Aggregates latest content from source repositories.
+2. Build: Compiles static assets.
+3. Deploy: Publishes artifacts to GitHub Pages.
 
 ## Configuration & Extensibility
 
-* **Request Manifests**: Content sources are defined in `generate/requests/*.yaml`.
+ Request Manifests*: Content sources are defined in `generate/requests/*.yaml`.
 * **Output Structure**: Generated Markdown files are organized by `request type` (e.g., `projects/`) to maintain a clean
   information architecture.

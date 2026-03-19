@@ -31,27 +31,27 @@ fetchML: false
 ## Overview
 
 In the modern threat landscape, ransomware is a top concern for data-intensive applications. Merely having backups is no
-longer sufficient; those backups must be immutable. By combining **CloudNativePG** with **Amazon S3 Object Lock** (or
+longer sufficient; those backups must be immutable. By combining CloudNativePG with Amazon S3 Object Lock (or
 S3-compatible stores like MinIO for hybrid setups), organizations can guarantee that Write-Ahead Logs (WAL) and base
 backups cannot be deleted or overwritten for a fixed retention period.
 
-This architecture not only secures data against malicious deletion but also enables **Cross-Region Replication (CRR)**
+This architecture not only secures data against malicious deletion but also enables Cross-Region Replication (CRR)
 for disaster recovery, ensuring business continuity even in the event of a total region failure.
 
 ## Architecture: Immutable Infrastructure for Data
 
 The core of this solution relies on the separation of compute (PostgreSQL on Kubernetes) and storage (S3).
 
-1. **CloudNativePG Operator**: Manages the PostgreSQL cluster lifecycle, handling automated failover and streaming WAL
+1. CloudNativePG Operator: Manages the PostgreSQL cluster lifecycle, handling automated failover and streaming WAL
    files to object storage.
-2. **S3 Object Lock (WORM)**: Enforces a "Write Once, Read Many" policy. Once a WAL file is pushed to S3, it is locked
+2. S3 Object Lock (WORM): Enforces a "Write Once, Read Many" policy. Once a WAL file is pushed to S3, it is locked
    for a specified duration (e.g., 30 days), making it immune to ransomware encryption or accidental deletion.
-3. **Cross-Region Replication**: AWS S3 automatically replicates these locked objects to a secondary region, providing a
+3. Cross-Region Replication: AWS S3 automatically replicates these locked objects to a secondary region, providing a
    geographically separated recovery point.
 
 ## Implementing WAL Archiving with S3
 
-While this pattern is cloud-native, it can be simulated or implemented on-prem using **MinIO**, which provides full S3
+While this pattern is cloud-native, it can be simulated or implemented on-prem using MinIO, which provides full S3
 API compatibility including Object Lock support.
 
 ### Cluster Configuration
@@ -94,10 +94,10 @@ environment before deploying to AWS.
 
 This setup directly addresses key compliance requirements:
 
-* **RPO (Recovery Point Objective)**: Near-zero, as WAL files are continuously streamed to S3.
-* **RTO (Recovery Time Objective)**: Minimized by using CloudNativePG's bootstrap-from-backup capabilities to spin up a
+ RPO (Recovery Point Objective): Near-zero, as WAL files are continuously streamed to S3.
+ RTO (Recovery Time Objective): Minimized by using CloudNativePG's bootstrap-from-backup capabilities to spin up a
   new cluster in a DR region.
-* **Data Sovereignty & Security**: Using S3 policies and KMS encryption ensures data is encrypted at rest and in
+ Data Sovereignty & Security: Using S3 policies and KMS encryption ensures data is encrypted at rest and in
   transit, while Object Lock provides the final layer of defense against data loss.
 
 ## Conclusion

@@ -30,18 +30,18 @@ fetchML: false
 ## The Hybrid Cloud Challenge
 
 Enterprises are increasingly adopting hybrid cloud strategies to balance the scalability of public clouds like AWS with
-the data sovereignty and latency requirements of on-premises infrastructure. **Harvester** provides a compelling
+the data sovereignty and latency requirements of on-premises infrastructure. Harvester provides a compelling
 solution by offering a cloud-native HCI platform that runs on bare metal, effectively turning your datacenter into a
 private cloud region.
 
 ## Harvester: Kubernetes-Native HCI
 
-Unlike traditional virtualization platforms (VMware, Nutanix), Harvester is built *on top of* Kubernetes. This means:
+Unlike traditional virtualization platforms (VMware, Nutanix), Harvester is built on top of Kubernetes. This means:
 
-1. **Unified Management**: VMs and Containers are managed side-by-side using the same Kubernetes API.
-2. **Rancher Integration**: Seamlessly deploy Kubernetes clusters on top of Harvester VMs, managed centrally via
+1. Unified Management: VMs and Containers are managed side-by-side using the same Kubernetes API.
+2. Rancher Integration: Seamlessly deploy Kubernetes clusters on top of Harvester VMs, managed centrally via
    Rancher.
-3. **Cost Efficiency**: Open-source and hardware-agnostic, reducing licensing costs compared to proprietary HCI
+3. Cost Efficiency: Open-source and hardware-agnostic, reducing licensing costs compared to proprietary HCI
    solutions.
 
 ## Integrating with AWS Hybrid Services
@@ -51,12 +51,12 @@ For organizations leveraging AWS, Harvester acts as the perfect on-premises coun
 ### AWS Outposts & EKS Anywhere
 
 While AWS Outposts extends AWS infrastructure to your datacenter, it can be cost-prohibitive for smaller edge locations.
-Harvester can fill this gap by running **EKS Anywhere** clusters on bare metal or VMs. This allows you to maintain a
+Harvester can fill this gap by running EKS Anywhere clusters on bare metal or VMs. This allows you to maintain a
 consistent Kubernetes operational model across:
 
-* **AWS Region**: EKS (Elastic Kubernetes Service)
-* **On-Premises Core**: AWS Outposts
-* **Edge Locations**: Harvester running EKS Anywhere
+ AWS Region: EKS (Elastic Kubernetes Service)
+ On-Premises Core: AWS Outposts
+ Edge Locations: Harvester running EKS Anywhere
 
 ### Data Gravity and Latency
 
@@ -65,9 +65,9 @@ DynamoDB. This architecture minimizes latency for real-time applications (IoT, m
 
 ## Architecture: The Edge-to-Cloud Continuum
 
-1. **Edge**: Harvester clusters running on commodity hardware, hosting local applications and data ingestion services.
-2. **Core**: A central Rancher management plane (potentially on AWS) orchestrating these edge clusters.
-3. **Cloud**: AWS services for long-term storage, analytics, and global distribution.
+1. Edge: Harvester clusters running on commodity hardware, hosting local applications and data ingestion services.
+2. Core: A central Rancher management plane (potentially on AWS) orchestrating these edge clusters.
+3. Cloud: AWS services for long-term storage, analytics, and global distribution.
 
 ## Conclusion
 
