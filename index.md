@@ -19,7 +19,7 @@ hero:
       link: /blog
 
 features:
-  - title: <a href="/projects/workshop">Kubernetes Git-Ops Workshop</a>
+  - title: <a href="https://github.com/jonnyhoeven/datadex-wireframe">Kubernetes Git-Ops Workshop</a>
     details: <a href="/projects/workshop">Build a custom Kubernetes cluster using K3s and ArgoCD. This workshop guides
       you through your first application deployment using a professional GitOps workflow.</a>
   - title: <a href="/projects/top-40-crawl">AI-Driven Metadata Enrichment Pipeline</a>
