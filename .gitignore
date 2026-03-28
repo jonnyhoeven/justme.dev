@@ -10,3 +10,4 @@
 /.venv
 /pyvenv.cfg
 /input_images/
+/bin/
