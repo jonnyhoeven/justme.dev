@@ -6,7 +6,7 @@ githost: https://raw.githubusercontent.com/
 branch: main
 readmeFile: README.md
 type: blog
-title: "The Container-Native OS: Why bootc is a Game Changer for Platform Engineers"
+title: "Cilium: The eBPF-based Networking, Security, and Observability for Kubernetes"
 date: 2026-04-28
 outline: deep
 intro: |
