@@ -1,11 +1,22 @@
 ---
+project: cilium
+user: cilium
+gitlink: https://github.com/cilium/cilium
+githost: https://raw.githubusercontent.com/
+branch: main
+readmeFile: README.md
 type: blog
-title: "Cilium: Unlocking the Power of eBPF for Kubernetes Networking and Security"
-date: 2024-05-15
+title: "The Container-Native OS: Why bootc is a Game Changer for Platform Engineers"
+date: 2026-04-28
 outline: deep
 intro: |
-  As Kubernetes environments scale, traditional networking components like kube-proxy can become bottlenecks. Cilium, leveraging the revolutionary eBPF technology, provides a high-performance, secure, and observable Container Network Interface (CNI) that redefines cloud-native networking.
+  In a standard Kubernetes cluster, `kube-proxy` relies on `iptables` to route traffic to services. While effective for small clusters, `iptables` was never designed for the dynamic, high-churn environments of modern cloud-native applications. As the number of services and endpoints grows, the sequential rule evaluation of `iptables` introduces significant latency and CPU overhead.
+fetchReadme: false
+editLink: true
 image: /images/cilium.webp
+languages: Go, Shell, C, Python
+externalUrl: https://cilium.io/
+fetchML: false
 ---
 
 <!--suppress CheckEmptyScriptTag, CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->
@@ -15,9 +26,6 @@ image: /images/cilium.webp
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
-## The Limits of Traditional Kubernetes Networking
-
-In a standard Kubernetes cluster, `kube-proxy` relies on `iptables` to route traffic to services. While effective for small clusters, `iptables` was never designed for the dynamic, high-churn environments of modern cloud-native applications. As the number of services and endpoints grows, the sequential rule evaluation of `iptables` introduces significant latency and CPU overhead.
 
 ## Enter eBPF and Cilium
 
