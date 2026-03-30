@@ -1,7 +1,7 @@
 ---
 title: Data4OOV
 type: project
-date: 2024-04-30
+date: 2026-04-30
 image: /images/data4oov.webp
 fetchReadme: true
 gitlink: https://github.com/jonnyhoeven/datadex-wireframe
@@ -12,5 +12,5 @@ readmeFile: README.md
 fetchML: false
 outline: deep
 languages: CSS,Typescript,NextJS,Python,Tensorflow
-intro: This project is a Dockerized CKAN 2.10+ instance with a custom Next.js frontend designed for repository-based configuration. 
-  It follows Infrastructure as Code principles, where the entire portal state is defined by the files in this repository.
+intro: A Dockerized CKAN 2.10+ instance with a modern Next.js frontend. This project treats the entire portal as code; 
+  every configuration and state detail is managed directly through this repository for seamless, reproducible deployments.
