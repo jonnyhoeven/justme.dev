@@ -8,10 +8,10 @@ export default async () => {
     return defineConfig({
         lang: SITE_CONSTANTS.LANG,
         title: SITE_CONSTANTS.SITE_NAME,
+        ignoreDeadLinks: 'localhostLinks',
         srcExclude: ['**/README.md'],
         description: SITE_CONSTANTS.DESCRIPTION,
         head: [
-
             // Static Opengraph stuff
             ['meta', { property: 'og:sitename', content: SITE_CONSTANTS.SITE_NAME }],
             ['meta', { property: 'og:locale', content: SITE_CONSTANTS.LANG }],
