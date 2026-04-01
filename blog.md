@@ -1,6 +1,6 @@
 ---
-layout: home
-title: Projects
+layout: doc
+title: Blog
 intro: |
     A collection of blog posts for dev ops developers, system administrators and software developers. 
 image: /images/justme.dev.webp
@@ -13,4 +13,7 @@ import ArticleList from './components/ArticleList.vue';
 </script>
 
 # Blog
-<ArticleList v-for="page of pages" :key="page.url" :page="page"/>
+
+<div class="recent-posts">
+  <ArticleList v-for="page of pages" :key="page.url" :page="page"/>
+</div>

@@ -14,4 +14,6 @@ import ArticleList from './components/ArticleList.vue';
 
 # Projects
 
-<ArticleList v-for="page of pages" :key="page.url" :page="page"/>
+<div class="recent-posts">
+  <ArticleList v-for="page of pages" :key="page.url" :page="page"/>
+</div>
