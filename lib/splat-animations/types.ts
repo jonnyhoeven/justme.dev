@@ -1,0 +1,85 @@
+/**
+ * Shared types for the splat animation system.
+ *
+ * Each animation module implements `SplatAnimation` and returns
+ * per-particle `AnimationEffect`s that layer on top of the existing
+ * spring-physics + mouse-repulsion engine in HeroSplat.vue.
+ */
+
+export interface SplatParticle {
+  ox: number
+  oy: number
+  x: number
+  y: number
+  vx: number
+  vy: number
+  color: string
+  mass: number
+
+  /* ---- animation-assigned (set during init) ---- */
+  depth?: number
+  isOutlier?: boolean
+  assemblyDelay?: number
+
+  /* ---- orbital-drift assigned ---- */
+  orbitCx?: number
+  orbitCy?: number
+  orbitSpeed?: number
+
+  /* ---- breathing assigned ---- */
+  breathPhaseOffset?: number
+  breathSpeedMult?: number
+  breathAmpMult?: number
+
+  /* ---- floating-outliers assigned ---- */
+  outlierPhase?: number
+  wanderFreq?: number
+  wanderAmp?: number
+  coreWobblePhase?: number
+  wavePhaseOffset?: number
+}
+
+export interface AnimationEffect {
+  /** Screen-space offset added to the spring target X */
+  dx: number
+  /** Screen-space offset added to the spring target Y */
+  dy: number
+  /** Multiplier for the spring constant (default 1) */
+  springScale?: number
+  /** Replacement colour string "r, g, b" for the brush cache */
+  colorOverride?: string
+  /** One-shot velocity nudge X (added directly to vx) */
+  nudgeVx?: number
+  /** One-shot velocity nudge Y (added directly to vy) */
+  nudgeVy?: number
+}
+
+export interface AnimationContext {
+  width: number
+  height: number
+  /** Display scale factor (viewport / 320) */
+  scale: number
+  /** X offset to center the 320-unit space in the viewport */
+  offsetX: number
+  /** Y offset to center the 320-unit space in the viewport */
+  offsetY: number
+  mouseX: number
+  mouseY: number
+}
+
+export interface SplatAnimation {
+  name: string
+  /** One-time setup — tag particles, assign depths, etc. */
+  init(particles: SplatParticle[]): void
+  /**
+   * Per-particle, per-frame effect.
+   * @param particle  The particle to animate
+   * @param elapsed   Milliseconds since the animation started
+   * @param ctx       Current viewport / mouse state
+   */
+  apply(
+    particle: SplatParticle,
+    elapsed: number,
+    ctx: AnimationContext,
+  ): AnimationEffect
+}

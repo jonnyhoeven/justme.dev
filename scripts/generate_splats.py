@@ -32,8 +32,13 @@ def generate_splats():
     
     splats = []
     
-    offset_x = (320 - width * scale) / 2
-    offset_y = (320 - height * scale) / 2
+    # Pre-calculate centering and clipping constants
+    cx_img, cy_img = width / 2, height / 2
+    r_limit_sq = (min(width, height) / 2) ** 2
+    
+    # Values to track the actual bounding box in one pass
+    min_x, max_x = float('inf'), float('-inf')
+    min_y, max_y = float('inf'), float('-inf')
 
     for y in range(height):
         for x in range(width):
@@ -43,43 +48,39 @@ def generate_splats():
             if a < 50:
                 continue
                 
-            # Optional: clip to circle so it forms a nice round splat face
-            cx = width / 2
-            cy = height / 2
-            dist = math.sqrt((x - cx)**2 + (y - cy)**2)
-            if dist > min(width, height) / 2:
+            # Optimized circle clipping (dist squared avoids sqrt)
+            dx = x - cx_img
+            dy = y - cy_img
+            if (dx*dx + dy*dy) > r_limit_sq:
                 continue
 
-            ox = x * scale + offset_x
-            oy = y * scale + offset_y
+            # Start with raw scaled coords; final centering pass below handles alignment
+            ox = x * scale
+            oy = y * scale
             
-            # Brighter pixels have slightly lower mass so they jiggle more easily? Or higher mass so they are stabler?
-            # Let's make mass random-ish but anchored to brightness for a textured feel
+            # Bounding box tracking
+            if ox < min_x: min_x = ox
+            if ox > max_x: max_x = ox
+            if oy < min_y: min_y = oy
+            if oy > max_y: max_y = oy
+            
             luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255.0
             mass = 0.5 + (max(0, 1 - luminance) * 1.5)
-            
-            color = f"{r}, {g}, {b}"
             
             splats.append({
                 "ox": ox,
                 "oy": oy,
-                "color": color,
+                "color": f"{r}, {g}, {b}",
                 "mass": mass
             })
             
-    # Calculate bounding box of the actual visible points
-    min_x = min(s["ox"] for s in splats)
-    max_x = max(s["ox"] for s in splats)
-    min_y = min(s["oy"] for s in splats)
-    max_y = max(s["oy"] for s in splats)
-    
-    cx = (min_x + max_x) / 2
-    cy = (min_y + max_y) / 2
-    
-    # Shift all particles so their center exactly matches 160, 160 (the center of our 320x320 Vitepress container)
-    for s in splats:
-        s["ox"] = s["ox"] - cx + 160
-        s["oy"] = s["oy"] - cy + 160
+    # Precision re-centering to exact 160, 160
+    if splats:
+        offset_cx = (min_x + max_x) / 2 - 160
+        offset_cy = (min_y + max_y) / 2 - 160
+        for s in splats:
+            s["ox"] -= offset_cx
+            s["oy"] -= offset_cy
             
     out_path.parent.mkdir(parents=True, exist_ok=True)
     
