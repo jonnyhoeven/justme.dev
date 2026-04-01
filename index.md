@@ -44,7 +44,7 @@ import ArticleList from './components/ArticleList.vue';
 </div>
 
 <div class="action">
-  <a class="VPButton medium brand" href="/blog">View all posts</a>
+  <a class="view-all-button" href="/blog">View all posts</a>
 </div>
 
 </div>
@@ -57,5 +57,27 @@ import ArticleList from './components/ArticleList.vue';
 .action {
   margin-top: 4rem;
   text-align: center;
+}
+
+.view-all-button {
+  display: inline-block;
+  padding: 0.8rem 2rem;
+  background-color: var(--vp-c-brand-1);
+  color: #ffffff !important;
+  border-radius: 9999px;
+  font-weight: 600;
+  text-decoration: none;
+  font-family: var(--vp-font-family-base);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.view-all-button:hover {
+  background-color: var(--vp-c-brand-2);
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 8px 18px rgba(99, 102, 241, 0.4);
+}
+
+.view-all-button:active {
+  transform: translateY(0) scale(0.98);
 }
 </style>
