@@ -43,21 +43,20 @@ onMounted(async () => {
   const getBrush = (color: string) => {
     if (brushCache.has(color)) return brushCache.get(color)!
     
-    // Splat diameter is 40 for a soft large appearance
-    const size = 40 
+    // Splat diameter matches the particle grid density
+    const size = 16
     const c = document.createElement('canvas')
     c.width = size
     c.height = size
     const ctxC = c.getContext('2d')!
     
     const grad = ctxC.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2)
-    const colorAlpha = color.replace('hsl', 'hsla').replace(')', ', OPACITY)')
     
-    // Soft core to transparent edge
-    grad.addColorStop(0, colorAlpha.replace('OPACITY', '0.7'))
-    grad.addColorStop(0.2, colorAlpha.replace('OPACITY', '0.5'))
-    grad.addColorStop(0.5, colorAlpha.replace('OPACITY', '0.1'))
-    grad.addColorStop(1, colorAlpha.replace('OPACITY', '0.0'))
+    // Harder core to retain true colors, fading at edges for splat blend
+    grad.addColorStop(0, `rgba(${color}, 1.0)`)
+    grad.addColorStop(0.4, `rgba(${color}, 0.8)`)
+    grad.addColorStop(0.8, `rgba(${color}, 0.2)`)
+    grad.addColorStop(1, `rgba(${color}, 0.0)`)
     
     ctxC.fillStyle = grad
     ctxC.fillRect(0,0,size,size)
@@ -85,8 +84,9 @@ onMounted(async () => {
   const initialOffsetY = (height - 320 * initialScale) / 2
   
   particles.forEach(p => {
-      p.x = Math.floor(p.ox * initialScale + initialOffsetX)
-      p.y = Math.floor(p.oy * initialScale + initialOffsetY)
+      // Scramble them completely randomly within the 320x320 box boundaries
+      p.x = (Math.random() * 320) * initialScale + initialOffsetX
+      p.y = (Math.random() * 320) * initialScale + initialOffsetY
   })
 
   const render = () => {
@@ -130,8 +130,7 @@ onMounted(async () => {
       // Draw Splat
       const brush = getBrush(p.color)
       const r = (brush.width / 2) * scale
-      // Using global alpha or lighter composite generally looks cooler for splats
-      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalCompositeOperation = 'source-over'; // standard stacking prevents white blow-out
       ctx.drawImage(brush, p.x - r, p.y - r, r * 2, r * 2)
     })
     
@@ -169,7 +168,7 @@ const onMouseLeave = () => {
 .HeroSplat {
   width: 100%;
   height: 100%;
-  position: relative;
+  position: absolute;
   /* Allow canvas interactions */
   pointer-events: auto;
 }
