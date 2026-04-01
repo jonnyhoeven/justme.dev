@@ -1,4 +1,4 @@
-import type { SplatAnimation, SplatParticle, AnimationEffect, AnimationContext } from './types'
+import type { SplatAnimation, SplatParticle, AnimationEffect } from './types'
 
 /**
  * Staggered Radial Assembly
