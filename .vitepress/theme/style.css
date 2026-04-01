@@ -301,6 +301,13 @@ h6,
   -webkit-backdrop-filter: blur(10px) !important;
   border: 1px solid rgba(0, 0, 0, 0.05) !important;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+.VPFeature .title,
+.VPFeature .details {
+  color: inherit !important;
 }
 
 .dark .VPFeature {
@@ -537,7 +544,7 @@ h6,
 .badge-bar {
   margin: 10pt 0 20pt 0;
   position: relative;
-  z-index: 2;
+  z-index: 20;
 }
 
 .shieldButton {
@@ -567,14 +574,18 @@ h6,
   position: relative;
 }
 
-.stretched-link::after {
+.clickable-card {
+  cursor: pointer;
+}
+
+.stretched-link {
+  display: block;
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: 1;
-  content: "";
+  z-index: 10;
 }
 
 /* ArticleList: grid layers use CSS-variable positioning */
