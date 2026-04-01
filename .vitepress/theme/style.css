@@ -132,6 +132,10 @@
         radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.3) 0%, transparent 80%);
     --vp-home-hero-image-filter: blur(120px);
 
+    /* Reduce Hero Top Whitespace */
+    --vp-home-hero-padding-top: 96px;
+    --vp-home-hero-padding-top-mobile: 64px;
+
     --ls-listitem-image-col: 1;
     --ls-listitem-image-row: 1;
     --ls-listitem-image-width: 100%;
@@ -194,7 +198,7 @@
 .VPImage.image-src {
     border-radius: 9999px;
     left: 50%;
-    top: 50%;
+    top: 58%;
     transform: translate(-50%, -50%);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 
@@ -236,6 +240,16 @@
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(99, 102, 241, 0.2);
         transform: translate(-50%, -50%) translateY(0) rotate(0deg);
     }
+}
+
+.VPHero {
+  padding-top: var(--vp-home-hero-padding-top-mobile) !important;
+}
+
+@media (min-width: 960px) {
+  .VPHero {
+    padding-top: var(--vp-home-hero-padding-top) !important;
+  }
 }
 
 .homeBadgeLeft {
@@ -360,12 +374,12 @@ h1, h2, h3, h4, h5, h6, .VPHero .name, .VPHero .text {
   border-radius: 9999px !important;
 }
 
-.VPButton.brand {
+.VPButton.brand, .flourish {
   position: relative;
   overflow: hidden;
 }
 
-.VPButton.brand::after {
+.VPButton.brand::after, .flourish::after {
   content: "";
   position: absolute;
   top: 0;
@@ -381,7 +395,7 @@ h1, h2, h3, h4, h5, h6, .VPHero .name, .VPHero .text {
   transition: none;
 }
 
-.VPButton.brand:hover::after {
+.VPButton.brand:hover::after, .flourish:hover::after {
   left: 100%;
   transition: left 0.7s ease-in-out;
 }
@@ -446,4 +460,41 @@ h1, h2, h3, h4, h5, h6, .VPHero .name, .VPHero .text {
 
 .VPFooter .message {
     opacity: 0.7;
+}
+
+/**
+ * Homepage-specific layout and components
+ * -------------------------------------------------------------------------- */
+
+.homepage-content {
+  margin-top: 8rem;
+}
+
+.action {
+  margin-top: 4rem;
+  text-align: center;
+}
+
+.view-all-button {
+  display: inline-block;
+  padding: 0.8rem 2.2rem;
+  background-color: var(--vp-c-brand-3);
+  color: #ffffff !important;
+  border-radius: 9999px;
+  font-weight: 600;
+  text-decoration: none !important;
+  font-family: var(--vp-font-family-heading);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.view-all-button:hover {
+  background-color: var(--vp-c-brand-2);
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+  text-decoration: none !important;
+}
+
+.view-all-button:active {
+  transform: translateY(0) scale(0.98);
 }
