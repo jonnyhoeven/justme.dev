@@ -125,8 +125,8 @@ Deploying this as a web app requires handling browser security policies:
 
 You can test the AVAS system below. Use the "Manual Speed" slider to simulate movement if you are stationary.
 
-<iframe src="/html/avas.html" allow="geolocation" width="100%" height="1100pt" style="margin:3pt"></iframe>
-<div style="text-align:right">View <a href="/html/avas.html" target="_blank">Page</a> or <a href="https://github.com/jonnyhoeven/justme.dev/blob/main/public/html/avas.html" target="_blank">Source</a></div>
+<iframe src="/html/avas.html" allow="geolocation" width="100%" height="1100pt" class="embed-frame"></iframe>
+<div class="embed-caption">View <a href="/html/avas.html" target="_blank">Page</a> or <a href="https://github.com/jonnyhoeven/justme.dev/blob/main/public/html/avas.html" target="_blank">Source</a></div>
 
 ## Conclusion
 

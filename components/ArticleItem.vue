@@ -5,106 +5,17 @@ defineProps(['frontmatter'])
 </script>
 
 <template>
-  <h1 v-if="frontmatter && frontmatter.title">{{ frontmatter.title }}</h1>
-  <div v-if="frontmatter" class="container_row">
-    <div class="articleImagebg layerbg"></div>
-    <div class="layerimg">
-      <div v-if="frontmatter.image" class="articleImage" :style="{ backgroundImage: 'url(' + frontmatter.image + ')' }">
+  <div class="article-detail">
+    <h1 v-if="frontmatter && frontmatter.title">{{ frontmatter.title }}</h1>
+    <div v-if="frontmatter" class="container_row">
+      <div class="articleImagebg layerbg"></div>
+      <div class="layerimg">
+        <div v-if="frontmatter.image" class="articleImage" :style="{ backgroundImage: 'url(' + frontmatter.image + ')' }">
+        </div>
+        <Badges :frontmatter="frontmatter" />
       </div>
-      <Badges :frontmatter="frontmatter" />
     </div>
+    <div v-if="frontmatter && frontmatter.intro" v-html="frontmatter.intro"></div>
+    <br/>
   </div>
-  <div v-if="frontmatter && frontmatter.intro" v-html="frontmatter.intro"></div>
-  <br/>
 </template>
-
-
-<style>
-.container_row {
-  display: grid;
-  padding: 10pt;
-}
-
-.layerbg,
-.layerimg {
-  grid-column: 1;
-  grid-row: 1;
-  margin: 8pt 20pt 10pt 0;
-}
-
-.articleImage {
-  width: 100%;
-  height: 270pt;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border: 1px solid var(--vp-c-brand-soft);
-  transition: all 1.5s ease-out;
-  border-radius: 6pt;
-}
-
-.container_row:hover .articleImage {
-  transform: skew(-0.5deg, -0.5deg) rotate(-0.4deg) scale(1.04);
-}
-
-.articleImagebg {
-  width: 100%;
-  height: 250pt;
-  z-index: -10;
-  transition: all 1s ease-in-out;
-  background: linear-gradient(45deg, #3b82f6, #6366f1, #8b5cf6, #4338ca);
-  background-size: 800% 800%;
-  filter: blur(var(--ls-listitem-image-bg-blur));
-
-  -webkit-animation: glow 20s ease infinite;
-  -moz-animation: glow 20s ease infinite;
-  animation: glow 20s ease infinite;
-}
-
-.container_row:hover .articleImagebg {
-  transform: skew(-1.5deg, -0.5deg) rotate(-0.5deg) scale(1.04);
-  filter: blur(var(--ls-listitem-image-bg-blur-hover));
-}
-
-@-webkit-keyframes glow {
-  0% {
-    background-position: 4% 0
-  }
-
-  50% {
-    background-position: 97% 100%
-  }
-
-  100% {
-    background-position: 4% 0
-  }
-}
-
-@-moz-keyframes glow {
-  0% {
-    background-position: 4% 0
-  }
-
-  50% {
-    background-position: 97% 100%
-  }
-
-  100% {
-    background-position: 4% 0
-  }
-}
-
-@keyframes glow {
-  0% {
-    background-position: 4% 0
-  }
-
-  50% {
-    background-position: 97% 100%
-  }
-
-  100% {
-    background-position: 4% 0
-  }
-}
-</style>

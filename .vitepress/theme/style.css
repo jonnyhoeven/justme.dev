@@ -458,26 +458,12 @@ h6,
 
 /* --- Layout Touches --- */
 
-/* Break the grid for code blocks and callouts (bleed right effect) */
-@media (min-width: 960px) {
-
-  .vp-doc div[class*="language-"],
-  .vp-doc .custom-block {
-    margin-left: 0 !important;
-    margin-right: -64px !important;
-    width: calc(100% + 64px) !important;
-    border-radius: 12px !important;
-  }
-}
-
-@media (min-width: 1280px) {
-
-  .vp-doc div[class*="language-"],
-  .vp-doc .custom-block {
-    margin-left: 0 !important;
-    margin-right: -128px !important;
-    width: calc(100% + 128px) !important;
-  }
+/* Refined code blocks and callouts */
+.vp-doc div[class*="language-"],
+.vp-doc .custom-block {
+  border-radius: 12px !important;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 /* Stylize Feature Card Icons on the Home Page */
@@ -542,4 +528,199 @@ h6,
 
 .view-all-button:active {
   transform: translateY(0) scale(0.98);
+}
+
+/**
+ * Component: Badge Bar (from Badges.vue)
+ * -------------------------------------------------------------------------- */
+
+.badge-bar {
+  margin: 10pt 0 20pt 0;
+  position: relative;
+  z-index: 2;
+}
+
+.shieldButton {
+  margin-top: 12pt;
+  margin-right: 3pt;
+  float: right;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.shieldButton:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 12px rgba(99, 102, 241, 0.2);
+  border-radius: 4px;
+}
+
+/**
+ * Component: Article List & Article Item — shared grid layout
+ * -------------------------------------------------------------------------- */
+
+.nolinkdecor {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+.container_row {
+  display: grid;
+  position: relative;
+}
+
+.stretched-link::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  content: "";
+}
+
+/* ArticleList: grid layers use CSS-variable positioning */
+.layerbg,
+.layerimg {
+  grid-column: var(--ls-listitem-image-col);
+  grid-row: var(--ls-listitem-image-row);
+  padding: var(--ls-listitem-image-padding);
+  margin-right: 32pt;
+}
+
+.layercontent {
+  grid-column: var(--ls-listitem-content-col);
+  grid-row: var(--ls-listitem-content-row);
+  display: flex;
+  flex-direction: column;
+}
+
+.post-title {
+  margin: 0 0 0.8rem 0 !important;
+  padding-top: 0 !important;
+  border-top: none !important;
+  position: relative;
+  font-family: var(--vp-font-family-heading);
+  font-weight: 600;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.post-intro {
+  font-size: 1rem;
+  line-height: 1.6;
+  opacity: 0.85;
+  margin-bottom: 1.2rem;
+  max-width: 65ch;
+}
+
+/* ArticleList: list-item image */
+.listImage {
+  width: var(--ls-listitem-image-width);
+  height: var(--ls-listitem-image-height);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 6pt;
+  border: 1px solid var(--vp-c-brand-soft);
+  transition: all 1s ease-in-out;
+  padding: var(--ls-listitem-image-padding);
+}
+
+.container_row:hover .listImage {
+  transform: skew(-0deg, -4deg) rotate(2deg) scale(1.08);
+}
+
+/* ArticleList: background glow behind list-item image */
+.listImagebg {
+  width: var(--ls-listitem-image-width);
+  height: var(--ls-listitem-image-height);
+  background-image: radial-gradient(circle at 50% 50%, #3b82f6 0%, #8b5cf6 100%);
+  opacity: 0.25;
+  filter: blur(var(--ls-listitem-image-bg-blur));
+  z-index: -10;
+  transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+  padding: var(--ls-listitem-image-padding);
+}
+
+.container_row:hover .listImagebg {
+  transform: skew(-1.5deg, -0.5deg) rotate(-0.4deg) scale(1.05);
+  filter: blur(var(--ls-listitem-image-bg-blur-hover));
+}
+
+/**
+ * Component: Article Detail — overrides for single article page
+ * -------------------------------------------------------------------------- */
+
+.article-detail .container_row {
+  padding: 10pt;
+}
+
+.article-detail .layerbg,
+.article-detail .layerimg {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 8pt 20pt 10pt 0;
+  padding: 0;
+}
+
+.articleImage {
+  width: 100%;
+  height: 270pt;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 1px solid var(--vp-c-brand-soft);
+  transition: all 1.5s ease-out;
+  border-radius: 6pt;
+}
+
+.container_row:hover .articleImage {
+  transform: skew(-0.5deg, -0.5deg) rotate(-0.4deg) scale(1.04);
+}
+
+.articleImagebg {
+  width: 100%;
+  height: 250pt;
+  z-index: -10;
+  transition: all 1s ease-in-out;
+  background: linear-gradient(45deg, #3b82f6, #6366f1, #8b5cf6, #4338ca);
+  background-size: 800% 800%;
+  filter: blur(var(--ls-listitem-image-bg-blur));
+  animation: glow 20s ease infinite;
+}
+
+.container_row:hover .articleImagebg {
+  transform: skew(-1.5deg, -0.5deg) rotate(-0.5deg) scale(1.04);
+  filter: blur(var(--ls-listitem-image-bg-blur-hover));
+}
+
+@keyframes glow {
+  0% {
+    background-position: 4% 0;
+  }
+
+  50% {
+    background-position: 97% 100%;
+  }
+
+  100% {
+    background-position: 4% 0;
+  }
+}
+
+/**
+ * Utility: Embed frames (iframes in blog posts)
+ * -------------------------------------------------------------------------- */
+
+.embed-frame {
+  margin: 3pt;
+}
+
+.embed-caption {
+  text-align: right;
+}
+
+.embed-video {
+  margin: 0;
+  padding-top: 15pt;
+  display: block;
 }

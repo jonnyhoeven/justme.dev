@@ -19,24 +19,3 @@ defineProps(['frontmatter'])
     </a>
   </div>
 </template>
-
-<style>
-.badge-bar {
-  margin: 10pt 0 20pt 0;
-  position: relative;
-  z-index: 2;
-}
-
-.shieldButton {
-  margin-top: 12pt;
-  margin-right: 3pt;
-  float: right;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.shieldButton:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 6px 12px rgba(99, 102, 241, 0.2);
-  border-radius: 4px; /* Ensure uniform shadow wrap */
-}
-</style>

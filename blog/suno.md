@@ -42,7 +42,7 @@ Why should a software engineer care about AI music?
 I spent some time stress-testing the model with technical prompts. The results were surprisingly coherent, blending
 genres like synthwave and math rock with lyrics about debugging and deployment.
 
-<iframe width="100%" height="400" style="margin: 0; padding-top:15pt; auto; display: block;"
+<iframe width="100%" height="400" class="embed-video"
 src="https://www.youtube.com/embed/videoseries?list=PLSERDVdeUnOO8trXobBjzU3i9vKr3hlRa"
 title="YouTube video player" frameborder="0"
 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
