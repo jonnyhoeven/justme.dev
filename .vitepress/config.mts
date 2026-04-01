@@ -12,6 +12,9 @@ export default async () => {
         srcExclude: ['**/README.md'],
         description: SITE_CONSTANTS.DESCRIPTION,
         head: [
+            ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
+            ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }],
+            ['link', { href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap', rel: 'stylesheet' }],
             // Static Opengraph stuff
             ['meta', { property: 'og:sitename', content: SITE_CONSTANTS.SITE_NAME }],
             ['meta', { property: 'og:locale', content: SITE_CONSTANTS.LANG }],
@@ -97,7 +100,7 @@ export default async () => {
                     `<a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/github-code-scanning/codeql" target="_blank">` +
                     `   <img alt="Github code scanning badge" class="homeBadgeRight" width="120px" height="20px" src="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/github-code-scanning/codeql/badge.svg">` +
                     '</a>' +
-                    `© ${new Date().getFullYear()} - <a href="https://raw.githubusercontent.com/jonnyhoeven/justme.dev/main/LICENSE">MIT</a>`
+                    `&copy; ${new Date().getFullYear()} Justme.dev &bull; <a href="https://raw.githubusercontent.com/jonnyhoeven/justme.dev/main/LICENSE" target="_blank">MIT Licensed</a>`
                 ,
             },
         },

@@ -1,5 +1,5 @@
 ---
-layout: home
+layout: doc
 title: Projects
 intro: |
   A collection of projects over the years, that might be interesting.

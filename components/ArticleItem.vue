@@ -52,7 +52,7 @@ defineProps(['frontmatter'])
   height: 250pt;
   z-index: -10;
   transition: all 1s ease-in-out;
-  background: linear-gradient(45deg, #22bcee, #0fc45d, #99cde1, #0c5e83);
+  background: linear-gradient(45deg, #3b82f6, #6366f1, #8b5cf6, #4338ca);
   background-size: 800% 800%;
   filter: blur(var(--ls-listitem-image-bg-blur));
 

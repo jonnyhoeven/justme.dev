@@ -51,11 +51,11 @@ import ArticleList from './components/ArticleList.vue';
 
 <style>
 .homepage-content {
-  margin-top: 4rem;
+  margin-top: 8rem;
 }
 
 .action {
-  margin-top: 2rem;
+  margin-top: 4rem;
   text-align: center;
 }
 </style>

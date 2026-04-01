@@ -74,7 +74,7 @@ defineProps(['page']);
 .listImagebg {
   width: var(--ls-listitem-image-width);
   height: var(--ls-listitem-image-height);
-  background-image: linear-gradient(-28deg, rgb(15, 196, 93) 50%, rgb(34, 188, 238) 50%);
+  background-image: linear-gradient(-28deg, #3b82f6 50%, #8b5cf6 50%);
   filter: blur(var(--ls-listitem-image-bg-blur));
   z-index: -10;
   transition: all 0.5s ease-in-out;
