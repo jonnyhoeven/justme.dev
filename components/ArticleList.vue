@@ -12,10 +12,10 @@ defineProps(['page']);
         :style="{ backgroundImage: 'url(' + page.frontmatter.image + ')' }"></div>
     </div>
     <div v-if="page.frontmatter.title" class="layercontent">
-      <h3 style="margin:8pt 0 10pt; position: static;">
+      <h3 class="post-title">
         <a :href="page.url" class="stretched-link nolinkdecor">{{ page.frontmatter.title }}</a>
       </h3>
-      <div v-if="page.frontmatter.intro" v-html="page.frontmatter.intro"></div>
+      <div v-if="page.frontmatter.intro" class="post-intro" v-html="page.frontmatter.intro"></div>
       <Badges :frontmatter="page.frontmatter" />
     </div>
   </div>
@@ -47,12 +47,33 @@ defineProps(['page']);
   grid-column: var(--ls-listitem-image-col);
   grid-row: var(--ls-listitem-image-row);
   padding: var(--ls-listitem-image-padding);
-  margin-right: 15pt;
+  margin-right: 32pt;
 }
 
 .layercontent {
   grid-column: var(--ls-listitem-content-col);
   grid-row: var(--ls-listitem-content-row);
+  display: flex;
+  flex-direction: column;
+}
+
+.post-title {
+  margin: 0 0 0.8rem 0 !important;
+  padding-top: 0 !important;
+  border-top: none !important;
+  position: relative;
+  font-family: var(--vp-font-family-heading);
+  font-weight: 600;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.post-intro {
+  font-size: 1rem;
+  line-height: 1.6;
+  opacity: 0.85;
+  margin-bottom: 1.2rem;
+  max-width: 65ch;
 }
 
 .listImage {
@@ -74,10 +95,11 @@ defineProps(['page']);
 .listImagebg {
   width: var(--ls-listitem-image-width);
   height: var(--ls-listitem-image-height);
-  background-image: linear-gradient(-28deg, #3b82f6 50%, #8b5cf6 50%);
+  background-image: radial-gradient(circle at 50% 50%, #3b82f6 0%, #8b5cf6 100%);
+  opacity: 0.25;
   filter: blur(var(--ls-listitem-image-bg-blur));
   z-index: -10;
-  transition: all 0.5s ease-in-out;
+  transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
   padding: var(--ls-listitem-image-padding);
 }
 
