@@ -1,5 +1,4 @@
 import json
-import math
 import sys
 from pathlib import Path
 
@@ -59,10 +58,14 @@ def generate_splats():
             oy = y * scale
             
             # Bounding box tracking
-            if ox < min_x: min_x = ox
-            if ox > max_x: max_x = ox
-            if oy < min_y: min_y = oy
-            if oy > max_y: max_y = oy
+            if ox < min_x:
+                min_x = ox
+            if ox > max_x:
+                max_x = ox
+            if oy < min_y:
+                min_y = oy
+            if oy > max_y:
+                max_y = oy
             
             luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255.0
             mass = 0.5 + (max(0, 1 - luminance) * 1.5)
