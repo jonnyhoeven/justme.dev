@@ -39,7 +39,7 @@ export const floatingOutliers: SplatAnimation = {
     }
   },
 
-  apply(p: SplatParticle, elapsed: number, _ctx: AnimationContext): AnimationEffect {
+  apply(p: SplatParticle, elapsed: number): AnimationEffect {
     // ---- Outlier behavior: Active Wandering Satellite ----
     if (p.isOutlier) {
       const phase = p.outlierPhase ?? 0

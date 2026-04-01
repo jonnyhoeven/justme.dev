@@ -19,7 +19,7 @@ export const windWaves: SplatAnimation = {
     }
   },
 
-  apply(p: SplatParticle, elapsed: number, _ctx: AnimationContext): AnimationEffect {
+  apply(p: SplatParticle, elapsed: number): AnimationEffect {
     const phase = p.wavePhaseOffset ?? 0
     const ampMult = p.breathAmpMult ?? 1 // Reuse breathAmpMult or just use a local random
 

@@ -23,7 +23,7 @@ export const staggeredAssembly: SplatAnimation = {
     }
   },
 
-  apply(p: SplatParticle, elapsed: number, _ctx: AnimationContext): AnimationEffect {
+  apply(p: SplatParticle, elapsed: number): AnimationEffect {
     const delay = p.assemblyDelay ?? 0
 
     if (elapsed < delay) {

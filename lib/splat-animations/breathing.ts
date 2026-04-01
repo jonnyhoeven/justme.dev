@@ -18,7 +18,7 @@ export const breathing: SplatAnimation = {
     }
   },
 
-  apply(p: SplatParticle, elapsed: number, _ctx: AnimationContext): AnimationEffect {
+  apply(p: SplatParticle, elapsed: number): AnimationEffect {
     const phase = p.breathPhaseOffset ?? 0
     const speed = p.breathSpeedMult ?? 1
     const amp = p.breathAmpMult ?? 1

@@ -5,6 +5,7 @@ import {
   getAnimation,
   type SplatParticle,
   type AnimationContext,
+  type SplatAnimation,
 } from '../../../lib/splat-animations'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
@@ -17,11 +18,11 @@ const damp = 0.8
 const repulsionRange = 120
 const hoverForce = 5
 
-let mouse = { x: -9999, y: -9999 }
+const mouse = { x: -9999, y: -9999 }
 let width = 320
 let height = 320
 let currentAnimationIndex = 0
-const currentAnimation = ref<any>(null)
+const currentAnimation = ref<SplatAnimation | null>(null)
 let startTime = performance.now()
 
 onMounted(async () => {
@@ -34,7 +35,7 @@ onMounted(async () => {
     const res = await fetch('/data/splats.json')
     if (res.ok) {
         const data = await res.json()
-        particles.push(...data.map((p: any) => ({
+        particles.push(...data.map((p: SplatParticle) => ({
           ...p,
           x: p.ox,
           y: p.oy,
@@ -123,14 +124,15 @@ onMounted(async () => {
     }
 
     if (!currentAnimation.value) return
+    const anim = currentAnimation.value
 
-    particles.forEach(p => {
+    for (const p of particles) {
       // Base spring target in screen space
       const baseTargetOx = p.ox * scale + offsetX
       const baseTargetOy = p.oy * scale + offsetY
 
       // Apply the chosen animation effect
-      const effect = currentAnimation.value.apply(p, elapsed, animCtx)
+      const effect = anim.apply(p, elapsed, animCtx)
 
       const targetOx = baseTargetOx + effect.dx
       const targetOy = baseTargetOy + effect.dy
@@ -171,7 +173,7 @@ onMounted(async () => {
       const r = (brush.width / 2) * scale
       ctx.globalCompositeOperation = 'source-over'
       ctx.drawImage(brush, p.x - r, p.y - r, r * 2, r * 2)
-    })
+    }
     
     animationId = requestAnimationFrame(render)
   }
