@@ -6,13 +6,16 @@ githost: https://github.com
 branch: master
 readmeFile: README.md
 type: blog
-title: "Hybrid Cloud Strategies: Bridging Harvester HCI and AWS Outposts for Low-Latency Workloads"
+title: "Converged Reliability: Strategic Hybrid Cloud with Harvester and Rancher"
 date: 2023-04-13
+year: 2023
+month: Apr
 outline: deep
 intro: |
-   Harvester is a modern, open-source Hyperconverged Infrastructure (HCI) solution built on Kubernetes. This article 
-   explores how Harvester can serve as a cost-effective, on-premises foundation for hybrid cloud architectures, 
-   seamlessly integrating with AWS Outposts and EKS Anywhere to deliver low-latency workloads at the edge.
+  Cloud-Native doesn't always mean "In the Cloud." During recent 
+  infrastructure projects, Harvester was used to transform bare-metal 
+  hardware into a private cloud, bridging the gap between legacy VMs 
+  and modern Kubernetes workloads with a single, unified control plane.
 fetchReadme: false
 editLink: true
 image: /images/harvester.webp
@@ -27,53 +30,61 @@ fetchML: false
 </script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
-## The Hybrid Cloud Challenge
+## The Challenge: The "Legacy Island" Problem
 
-Enterprises are increasingly adopting hybrid cloud strategies to balance the scalability of public clouds like AWS with
-the data sovereignty and latency requirements of on-premises infrastructure. Harvester provides a compelling
-solution by offering a cloud-native HCI platform that runs on bare metal, effectively turning your datacenter into a
-private cloud region.
+Throughout a career in infrastructure, environments have been managed where modern Kubernetes clusters lived alongside "Legacy Islands". This created a dual-ops burden: one team for VMware/Nutanix and another for Kubernetes.
 
-## Harvester: Kubernetes-Native HCI
+For mission-critical infrastructure, this operational fragmentation was a risk. A method was needed to manage VMs with the same GitOps and SRE principles used for containers.
 
-Unlike traditional virtualization platforms (VMware, Nutanix), Harvester is built on top of Kubernetes. This means:
+## The Strategy: Unified Hyperconverged Infrastructure (HCI)
 
-1. Unified Management: VMs and Containers are managed side-by-side using the same Kubernetes API.
-2. Rancher Integration: Seamlessly deploy Kubernetes clusters on top of Harvester VMs, managed centrally via
-   Rancher.
-3. Cost Efficiency: Open-source and hardware-agnostic, reducing licensing costs compared to proprietary HCI
-   solutions.
+Early experience in **Integrating Physical Systems (AV, DMX, Camera systems)** taught that every endpoint—no matter its age—should be addressable via a central API. **Harvester** was selected as the HCI foundation because it is built on Kubernetes, allowing for:
 
-## Integrating with AWS Hybrid Services
+1. **Unified Control Plane:** Manage both VMs and Containers side-by-side using **Rancher**.
+2. **Kubernetes-Native Storage:** Leveraging Longhorn for distributed, block-level storage across bare-metal nodes.
+3. **Hardware Efficiency:** Reclaiming underutilized resources by consolidating legacy VM workloads onto the same hardware as high-performance K8s clusters.
 
-For organizations leveraging AWS, Harvester acts as the perfect on-premises counterpart.
+## Implementation: Turning Bare Metal into a Cloud API
 
-### AWS Outposts & EKS Anywhere
+Harvester was deployed on commodity hardware, effectively building a private cloud region. This allowed the SRE team to use **Terraform** and **Crossplane** to provision VMs just as easily as provisioning S3 buckets in AWS.
 
-While AWS Outposts extends AWS infrastructure to your datacenter, it can be cost-prohibitive for smaller edge locations.
-Harvester can fill this gap by running EKS Anywhere clusters on bare metal or VMs. This allows you to maintain a
-consistent Kubernetes operational model across:
+```yaml
+# A strategic Harvester VM definition managed via Kubernetes APIs
+apiVersion: devices.harvesterhci.io/v1beta1
+kind: VirtualMachine
+metadata:
+  name: legacy-windows-service
+spec:
+  runStrategy: RerunOnFailure
+  template:
+    spec:
+      domain:
+        cpu: { cores: 4 }
+        memory: { guest: 8Gi }
+        devices:
+          disks:
+            - name: rootdisk
+              bootOrder: 1
+      volumes:
+        - name: rootdisk
+          containerDisk:
+            image: harvester/os-images:windows-2022
+```
 
- AWS Region: EKS (Elastic Kubernetes Service)
- On-Premises Core: AWS Outposts
- Edge Locations: Harvester running EKS Anywhere
+By bringing the VM into the Kubernetes namespace, the same **Cilium** network policies and **OpenTelemetry** monitoring could be applied to legacy services as to microservices.
 
-### Data Gravity and Latency
+## Impact: Operational Simplicity and 30% Better Utilization
 
-By deploying Harvester at the edge, you can process data locally before sending aggregated insights to AWS S3 or
-DynamoDB. This architecture minimizes latency for real-time applications (IoT, manufacturing) and reduces egress costs.
+The move to Harvester fundamentally changed the approach to hybrid-cloud:
 
-## Architecture: The Edge-to-Cloud Continuum
-
-1. Edge: Harvester clusters running on commodity hardware, hosting local applications and data ingestion services.
-2. Core: A central Rancher management plane (potentially on AWS) orchestrating these edge clusters.
-3. Cloud: AWS services for long-term storage, analytics, and global distribution.
+*   **Unified Operations:** The SRE team now manages the entire lifecycle of both VMs and Containers through a single GitOps pipeline (ArgoCD + Rancher).
+*   **Hardware Rightsizing:** Bare-metal hardware utilization was improved by 30% by eliminating the overhead of proprietary virtualization licenses and separate management stacks.
+*   **Edge Resilience:** Harvester enables the operation of a "Cloud-in-a-Box" at remote edge locations, ensuring that critical crisis management tools remain available even if the connection to the central AWS region is severed.
 
 ## Conclusion
 
-Harvester bridges the gap between traditional virtualization and modern cloud-native infrastructure. By adopting
-Harvester as part of a broader hybrid cloud strategy involving AWS, organizations can achieve the flexibility of the
-cloud with the performance and control of on-premises hardware. It empowers teams to build resilient, low-latency
-architectures that span from the edge to the cloud.
+Harvester represents the logical conclusion of the "Everything as Code" movement. Treating virtualization as just another Kubernetes workload removes the silos that slow down enterprise innovation.
+
+Whether integrating **DMX lighting** or **Enterprise SQL databases**, the goal remains the same: to build a system that is unified, auditable, and resilient. Harvester is the foundation that makes this possible in a hybrid-cloud world.
 
 <ArticleFooter :frontmatter="$frontmatter"/>
