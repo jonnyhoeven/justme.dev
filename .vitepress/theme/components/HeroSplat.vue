@@ -47,13 +47,6 @@ onMounted(async () => {
     console.error("Failed to load splats data", e)
   }
 
-  // ---- Animation system: pick one at random ----
-  const { animation, index } = pickRandomAnimation()
-  currentAnimationIndex = index
-  currentAnimation.value = animation
-  currentAnimation.value.init(particles)
-  startTime = performance.now()
-
   // Pre-cache brushes for each unique color
   const brushCache = new Map<string, HTMLCanvasElement>()
 
@@ -92,8 +85,8 @@ onMounted(async () => {
 
   window.addEventListener('resize', resize)
   resize()
-  
-  // Set initial positions — scrambled randomly for the entrance
+
+  // Set initial SCRIMBLED positions — can be overridden by specific animations
   const initialScale = Math.min(width, height) / 320
   const initialOffsetX = (width - 320 * initialScale) / 2
   const initialOffsetY = (height - 320 * initialScale) / 2
@@ -103,6 +96,14 @@ onMounted(async () => {
       p.y = (Math.random() * 320) * initialScale + initialOffsetY
   })
 
+  // ---- Animation system: pick one at random ----
+  // We do this AFTER the initial scramble so the chosen animation can override positions
+  const { animation, index } = pickRandomAnimation()
+  currentAnimationIndex = index
+  currentAnimation.value = animation
+  currentAnimation.value.init(particles, width, height)
+  startTime = performance.now()
+  
   const render = () => {
     if (!ctx) return
     ctx.clearRect(0, 0, width, height)
@@ -200,7 +201,7 @@ const onMouseLeave = () => {
 const onClick = () => {
   currentAnimationIndex++
   const animation = getAnimation(currentAnimationIndex)
-  animation.init(particles)
+  animation.init(particles, width, height)
   currentAnimation.value = animation
   startTime = performance.now()
   console.log(`🎨 Switched animation: ${animation.name}`)

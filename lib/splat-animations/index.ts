@@ -8,9 +8,9 @@
 import { breathing } from './breathing'
 import { orbitalDrift } from './orbital-drift'
 import { windWaves } from './wind-waves'
-import { staggeredAssembly } from './staggered-assembly'
 import { floatingOutliers } from './floating-outliers'
-import { depthParallax } from './depth-parallax'
+import { flubberMotion } from './flubber-motion'
+import { ferrofluid } from './ferrofluid'
 import type { SplatAnimation } from './types'
 
 export type {
@@ -24,9 +24,9 @@ const animations: SplatAnimation[] = [
   breathing,
   orbitalDrift,
   windWaves,
-  staggeredAssembly,
   floatingOutliers,
-  depthParallax,
+  flubberMotion,
+  ferrofluid,
 ]
 
 /** Total number of available animations */

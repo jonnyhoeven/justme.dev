@@ -13,7 +13,7 @@ import type { SplatAnimation, SplatParticle, AnimationEffect } from './types'
 export const floatingOutliers: SplatAnimation = {
   name: 'Floating Outliers',
 
-  init(particles: SplatParticle[]) {
+  init(particles: SplatParticle[], _width: number, _height: number) {
     const cx = 160
     const cy = 160
 

@@ -17,9 +17,7 @@ export interface SplatParticle {
   mass: number
 
   /* ---- animation-assigned (set during init) ---- */
-  depth?: number
   isOutlier?: boolean
-  assemblyDelay?: number
 
   /* ---- orbital-drift assigned ---- */
   orbitCx?: number
@@ -70,7 +68,7 @@ export interface AnimationContext {
 export interface SplatAnimation {
   name: string
   /** One-time setup — tag particles, assign depths, etc. */
-  init(particles: SplatParticle[]): void
+  init(particles: SplatParticle[], width: number, height: number): void
   /**
    * Per-particle, per-frame effect.
    * @param particle  The particle to animate

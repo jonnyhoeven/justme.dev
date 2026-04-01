@@ -10,7 +10,7 @@ import type { SplatAnimation, SplatParticle, AnimationEffect } from './types'
 export const windWaves: SplatAnimation = {
   name: 'Wind Waves',
 
-  init(particles: SplatParticle[]) {
+  init(particles: SplatParticle[], _width: number, _height: number) {
     for (const p of particles) {
       // Individualize the wave phase and amplitude
       p.wavePhaseOffset = Math.random() * Math.PI * 2
@@ -23,18 +23,24 @@ export const windWaves: SplatAnimation = {
     const phase = p.wavePhaseOffset ?? 0
     const ampMult = p.breathAmpMult ?? 1 // Reuse breathAmpMult or just use a local random
 
-    const amplitude = 3.5 * ampMult
-    const frequency = 0.04 // spatial frequency across 320-unit width
-    const speed = 0.0008 // temporal speed — ~8s full cycle
+    const amplitude = 6.0 * ampMult
+    const frequency = 0.05 // spatial frequency
+    const speed = 0.0015 // temporal speed — ~4s cycle
 
-    // Add phase to the wave for organic turbulence
+    // Primary ripple wave
     const waveY = Math.sin(p.ox * frequency + elapsed * speed + phase) * amplitude
-    // Gentler secondary wave on X 
-    const waveX = Math.sin(p.oy * frequency * 0.7 + elapsed * speed * 0.6 + phase) * amplitude * 0.4
+    
+    // Pronounced wind gust on X
+    const windGust = Math.sin(p.ox * frequency * 0.5 + elapsed * speed * 0.8 + phase) * (amplitude * 0.8)
+    
+    // High-frequency interference layer for turbulence
+    const interference = Math.sin(p.oy * 0.1 + elapsed * 0.005) * 1.5
+
+    const waveX = windGust + interference
 
     return {
       dx: waveX,
-      dy: waveY,
+      dy: waveY + (interference * 0.5),
     }
   },
 }

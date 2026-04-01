@@ -10,7 +10,7 @@ import type { SplatAnimation, SplatParticle, AnimationEffect, AnimationContext }
 export const orbitalDrift: SplatAnimation = {
   name: 'Orbital Drift',
 
-  init(particles: SplatParticle[]) {
+  init(particles: SplatParticle[], _width: number, _height: number) {
     for (const p of particles) {
       // Each particle gets a unique center point ±20px from true 160, 160
       p.orbitCx = 160 + (Math.random() - 0.5) * 40
