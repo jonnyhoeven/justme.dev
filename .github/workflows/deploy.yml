@@ -49,7 +49,7 @@ jobs:
 
       - name: Generate content
         run: |
-          python generate/process.py
+          python scripts/process_requests.py
 
       - name: Commit and push content changes
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

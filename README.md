@@ -111,6 +111,5 @@ following pipeline:
 
 ## Configuration & Extensibility
 
- Request Manifests*: Content sources are defined in `generate/requests/*.yaml`.
-* **Output Structure**: Generated Markdown files are organized by `request type` (e.g., `projects/`) to maintain a clean
-  information architecture.
+* **Request Manifests**: Content sources are defined in `requests/*.yaml`.
+* **Output Structure**: Generated Markdown files are organized into the `projects/` folder

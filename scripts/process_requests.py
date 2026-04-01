@@ -28,7 +28,8 @@ def get_wrapper_template(post_content: str, readme_content: str) -> str:
 class GenerateFiles:
     def __init__(self) -> None:
         self.max_width = 120
-        self.req_path = Path("generate/requests")
+        self.req_path = Path("requests")
+        self.dst_dir = Path("projects")
 
     def get_readme(self, user: str, project: str, branch: str, readme_file: str) -> str:
         """Fetch README content from GitHub."""
@@ -40,7 +41,7 @@ class GenerateFiles:
         try:
             response = requests.get(url, timeout=10)
             if response.status_code != 200:
-                logger.error(f"Error: No 200 response {url}")
+                logger.error(f"Error: No 200 response {url} (Status: {response.status_code})")
                 return ""
             return response.text
         except requests.RequestException as e:
@@ -77,9 +78,7 @@ class GenerateFiles:
         """Process a single request and generate the markdown file."""
         my_wrap = textwrap.TextWrapper(width=self.max_width)
         basename = req_file.stem
-        request_type = request["type"]
-        dst_dir = Path(f"{request_type}s")
-        dst_path = dst_dir / f"{basename}.md"
+        dst_path = self.dst_dir / f"{basename}.md"
 
         readme = ""
         post = ""
@@ -113,7 +112,7 @@ class GenerateFiles:
         try:
             with dst_path.open("w") as pst_file:
                 pst_file.write("---\n")
-                yaml.safe_dump(request, pst_file, width=120)
+                yaml.safe_dump(request, pst_file, width=120, sort_keys=False)
                 pst_file.write("---\n")
                 pst_file.write(content_template)
         except IOError as e:

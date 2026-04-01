@@ -12,7 +12,7 @@
     "vue": "^3.5.22"
   },
   "scripts": {
-    "docs:generate": "python3 generate/process.py",
+    "docs:generate": "python3 scripts/process_requests.py",
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview",
