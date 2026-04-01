@@ -217,9 +217,19 @@ const onClick = () => {
   width: 100%;
   height: 100%;
   position: absolute;
+  /* Move down slightly from header on normal browsers */
+  margin-top: 5pt;
   /* Allow canvas interactions */
   pointer-events: auto;
 }
+
+@media (max-width: 959px) {
+  .HeroSplat {
+    /* Significantly more padding/margin on mobile */
+    margin-top: 24px;
+  }
+}
+
 
 canvas {
   width: 100%;
