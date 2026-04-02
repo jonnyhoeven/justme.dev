@@ -58,11 +58,20 @@ onMounted(async () => {
   const ctx = canvasRef.value.getContext('2d', { alpha: true })
   if (!ctx) return
 
-  // 1. Data Ingestion
+  // 1. Data Ingestion & Mobile Detection
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
   try {
     const res = await fetch('/data/splats.json')
     if (res.ok) {
-        const data = await res.json()
+        let data = await res.json()
+        
+        // --- Mobile Optimization: Downsampling ---
+        // On mobile, we reduce the amount of points to save on physics and draw calls.
+        if (isMobile) {
+          // Taking roughly 60% of points - enough to keep the shape but much faster.
+          data = data.filter((_: any, i: number) => i % 3 !== 0)
+        }
+
         particles.push(...data.map((p: SplatParticle) => ({
           ...p,
           x: p.ox,
@@ -115,20 +124,22 @@ onMounted(async () => {
 
   // 5. Animation Setups
   const { animation: firstAnim, index: firstIndex } = pickRandomAnimation()
-  currentAnimationIndex.value = firstIndex
-  currentAnimation.value = firstAnim
-  currentAnimation.value.init(particles, width, height)
-  startTime = performance.now()
+  if (firstAnim) {
+    currentAnimationIndex.value = firstIndex
+    currentAnimation.value = firstAnim
+    currentAnimation.value.init(particles, width, height)
+    startTime = performance.now()
+  }
   
   // 6. Physics Render Loop
-  const render = () => {
+  const render = (time: number) => {
     if (!ctx) return
     ctx.clearRect(0, 0, width, height)
     
     const scale = Math.min(width, height) / 320
     const offsetX = (width - 320 * scale) / 2
     const offsetY = (height - 320 * scale) / 2
-    const elapsed = performance.now() - startTime
+    const elapsed = time - startTime
 
     const animCtx: AnimationContext = {
       width, height, scale, offsetX, offsetY,
@@ -138,26 +149,43 @@ onMounted(async () => {
     if (!currentAnimation.value) return
     const anim = currentAnimation.value
 
-    for (const p of particles) {
+    // Cache some values outside the particle loop for performance
+    const isPoppingVal = isPopping.value
+    const isCollapsingVal = isCollapsing.value
+    const shiverInt = shiverIntensity.value
+    const hasShiver = shiverInt > 0.05
+    const vT = time * 0.1 // for shiver
+    const collapseT = isCollapsingVal ? time - boomStartTime : 0
+    const collapseSpiralT = collapseT - 1000
+    const collapseSpinFactor = 0.06 * Math.exp(-collapseSpiralT * 0.004)
+    const releaseFactor = Math.min(collapseSpiralT / 800, 1.0)
+    
+    // Repulsion params
+    const rRange = isMobile ? repulsionRange * 0.7 : repulsionRange
+    const hForce = isMobile ? hoverForce * 0.8 : hoverForce
+    
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i]
       const baseTargetOx = p.ox * scale + offsetX
       const baseTargetOy = p.oy * scale + offsetY
-      const effect = isPopping.value ? { dx: 0, dy: 0 } : anim.apply(p, elapsed, animCtx, particles)
+      const effect = isPoppingVal ? { dx: 0, dy: 0 } : anim.apply(p, elapsed, animCtx, particles)
       const targetOx = baseTargetOx + effect.dx
       const targetOy = baseTargetOy + effect.dy
-      const effectiveSpring = (isPopping.value ? 0.2 : spring) * (effect.springScale ?? 1)
+      const effectiveSpring = (isPoppingVal ? 0.2 : spring) * (effect.springScale ?? 1)
       
-      const dx = p.x - mouse.x
-      const dy = p.y - mouse.y
-      const dist = Math.sqrt(dx*dx + dy*dy)
+      const dxm = p.x - mouse.x
+      const dym = p.y - mouse.y
+      const distSq = dxm*dxm + dym*dym
       
       let fx = 0
       let fy = 0
       
-      // Repulsion
-      if (!isPopping.value && dist < repulsionRange && dist > 0.1) {
-        const force = (repulsionRange - dist) / repulsionRange
-        fx += (dx / dist) * force * hoverForce / p.mass
-        fy += (dy / dist) * force * hoverForce / p.mass
+      // Optimized Repulsion (avoiding Sqrt if not needed)
+      if (!isPoppingVal && distSq < rRange * rRange && distSq > 0.01) {
+        const dist = Math.sqrt(distSq)
+        const force = (rRange - dist) / rRange
+        fx += (dxm / dist) * force * hForce / p.mass
+        fy += (dym / dist) * force * hForce / p.mass
       }
       
       // Spring
@@ -165,33 +193,27 @@ onMounted(async () => {
       fy += -effectiveSpring * (p.y - targetOy)
       
       // --- Shiver Effect (Easter Egg) ---
-      if (shiverIntensity.value > 0.05) {
-        // High-frequency "vibration" wave for more cinematic feedback
-        const vT = performance.now() * 0.1 // speed
+      if (hasShiver) {
         const vPhase = p.ox * 0.5 + p.oy * 0.5
-        const vibe = Math.sin(vT + vPhase) * shiverIntensity.value * 25
+        const vibe = Math.sin(vT + vPhase) * shiverInt * 25
         fx += vibe
         fy += vibe
       }
       
       // --- Singularity ---
-      if (isCollapsing.value) {
-        const t = performance.now() - boomStartTime
+      if (isCollapsingVal) {
         const bdx = p.x - boomOrigin.x
         const bdy = p.y - boomOrigin.y
-        if (t < 1000) {
+        if (collapseT < 1000) {
           const pStart = (p.glitchSeed ?? 0) * 300
-          if (t > pStart) {
-            const pull = Math.min((t - pStart) / 400, 1.0)
+          if (collapseT > pStart) {
+            const pull = Math.min((collapseT - pStart) / 400, 1.0)
             fx += -bdx * 0.2 * pull
             fy += -bdy * 0.2 * pull
           }
         } else {
-          const spiralT = (t - 1000)
-          const spinFactor = 0.06 * Math.exp(-spiralT * 0.004)
-          fx += -bdy * spinFactor
-          fy += bdx * spinFactor
-          const releaseFactor = Math.min(spiralT / 800, 1.0)
+          fx += -bdy * collapseSpinFactor
+          fy += bdx * collapseSpinFactor
           fx += (-effectiveSpring * (p.x - targetOx)) * (releaseFactor - 1)
           fy += (-effectiveSpring * (p.y - targetOy)) * (releaseFactor - 1)
         }
@@ -264,7 +286,7 @@ onMounted(async () => {
   setTimeout(hookTagline, 1000)
 
   cycleInterval = setInterval(nextAnimation, 10000)
-  render()
+  requestAnimationFrame(render)
 })
 
 onBeforeUnmount(() => {
