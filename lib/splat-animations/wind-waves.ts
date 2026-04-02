@@ -1,4 +1,4 @@
-import type { SplatAnimation, SplatParticle, AnimationEffect, AnimationContext } from './types'
+import type { SplatAnimation, SplatParticle, AnimationEffect } from './types'
 
 /**
  * Ambient Wind Waves
@@ -10,7 +10,7 @@ import type { SplatAnimation, SplatParticle, AnimationEffect, AnimationContext }
 export const windWaves: SplatAnimation = {
   name: 'Wind Waves',
 
-  init(particles: SplatParticle[], _width: number, _height: number) {
+  init(particles: SplatParticle[]) {
     for (const p of particles) {
       // Individualize the wave phase and amplitude
       p.wavePhaseOffset = Math.random() * Math.PI * 2
@@ -19,7 +19,7 @@ export const windWaves: SplatAnimation = {
     }
   },
 
-  apply(p: SplatParticle, elapsed: number, _ctx: AnimationContext, _particles: SplatParticle[]): AnimationEffect {
+  apply(p: SplatParticle, elapsed: number): AnimationEffect {
     const phase = p.wavePhaseOffset ?? 0
     const ampMult = p.breathAmpMult ?? 1 // Reuse breathAmpMult or just use a local random
 

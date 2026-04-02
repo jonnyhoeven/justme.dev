@@ -1,4 +1,4 @@
-import type { SplatAnimation, SplatParticle, AnimationEffect, AnimationContext } from './types'
+import type { SplatAnimation, SplatParticle, AnimationEffect } from './types'
 
 /**
  * Floating Outliers
@@ -13,7 +13,7 @@ import type { SplatAnimation, SplatParticle, AnimationEffect, AnimationContext }
 export const floatingOutliers: SplatAnimation = {
   name: 'Floating Outliers',
 
-  init(particles: SplatParticle[], _width: number, _height: number) {
+  init(particles: SplatParticle[]) {
     const cx = 160
     const cy = 160
 
@@ -39,7 +39,7 @@ export const floatingOutliers: SplatAnimation = {
     }
   },
 
-  apply(p: SplatParticle, elapsed: number, _ctx: AnimationContext, _particles: SplatParticle[]): AnimationEffect {
+  apply(p: SplatParticle, elapsed: number): AnimationEffect {
     // ---- Outlier behavior: Active Wandering Satellite ----
     if (p.isOutlier) {
       const phase = p.outlierPhase ?? 0

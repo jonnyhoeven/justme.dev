@@ -15,14 +15,14 @@ import type {
 export const digitalGlitch: SplatAnimation = {
   name: 'Digital Glitch',
 
-  init(particles: SplatParticle[], _width: number, _height: number) {
+  init(particles: SplatParticle[]) {
     for (const p of particles) {
         p.glitchSeed = Math.random()
         p.glitchSensitivity = 0.5 + Math.random() * 0.5
     }
   },
 
-  apply(p: SplatParticle, elapsed: number, ctx: AnimationContext, _particles: SplatParticle[]): AnimationEffect {
+  apply(p: SplatParticle, elapsed: number, ctx: AnimationContext): AnimationEffect {
     const seed = p.glitchSeed ?? 0.5
     const sensitivity = p.glitchSensitivity ?? 0.8
     

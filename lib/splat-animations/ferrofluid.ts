@@ -12,7 +12,7 @@ import type { SplatAnimation, SplatParticle, AnimationEffect, AnimationContext }
 export const ferrofluid: SplatAnimation = {
   name: 'Ferrofluid',
 
-  init(particles: SplatParticle[], _width: number, _height: number) {
+  init(particles: SplatParticle[]) {
     for (const p of particles) {
       // Each particle has a unique harmonic phase and frequency
       p.breathPhaseOffset = Math.random() * Math.PI * 2
@@ -21,7 +21,7 @@ export const ferrofluid: SplatAnimation = {
     }
   },
 
-  apply(p: SplatParticle, elapsed: number, ctx: AnimationContext, particles: SplatParticle[]): AnimationEffect {
+  apply(p: SplatParticle, elapsed: number, ctx: AnimationContext): AnimationEffect {
     const phase = p.breathPhaseOffset ?? 0
     
     // --- Magnet: Mouse (Primary) ---

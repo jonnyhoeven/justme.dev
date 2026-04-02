@@ -1,4 +1,4 @@
-import type { SplatAnimation, SplatParticle, AnimationEffect, AnimationContext } from './types'
+import type { SplatAnimation, SplatParticle, AnimationEffect } from './types'
 
 /**
  * Flubber Motion
@@ -12,7 +12,7 @@ import type { SplatAnimation, SplatParticle, AnimationEffect, AnimationContext }
 export const flubberMotion: SplatAnimation = {
   name: 'Flubber Motion',
 
-  init(particles: SplatParticle[], _width: number, _height: number) {
+  init(particles: SplatParticle[]) {
     for (const p of particles) {
       // Individual phase offsets to break up uniformity
       p.breathPhaseOffset = Math.random() * Math.PI * 2
@@ -21,7 +21,7 @@ export const flubberMotion: SplatAnimation = {
     }
   },
 
-  apply(p: SplatParticle, elapsed: number, _ctx: AnimationContext, _particles: SplatParticle[]): AnimationEffect {
+  apply(p: SplatParticle, elapsed: number): AnimationEffect {
     const phase = p.breathPhaseOffset ?? 0
     const ampMult = p.breathAmpMult ?? 1
     

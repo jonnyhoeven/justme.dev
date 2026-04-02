@@ -15,11 +15,11 @@ import type {
 export const eventHorizon: SplatAnimation = {
   name: 'Event Horizon',
 
-  init(_particles: SplatParticle[], _width: number, _height: number) {
+  init() {
     // No per-particle setup needed for now
   },
 
-  apply(p: SplatParticle, elapsed: number, ctx: AnimationContext, _particles: SplatParticle[]): AnimationEffect {
+  apply(p: SplatParticle, elapsed: number, ctx: AnimationContext): AnimationEffect {
     // SINGULARITY point (320x320 space)
     const cx = 160
     const cy = 160

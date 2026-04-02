@@ -15,11 +15,11 @@ import type {
 export const solarFlare: SplatAnimation = {
   name: 'Solar Flare',
 
-  init(_particles: SplatParticle[], _width: number, _height: number) {
+  init() {
     // No specific per-particle setup needed
   },
 
-  apply(p: SplatParticle, elapsed: number, ctx: AnimationContext, particles: SplatParticle[]): AnimationEffect {
+  apply(p: SplatParticle, elapsed: number, ctx: AnimationContext): AnimationEffect {
     const cyclePeriod = 6000 // Total cycle length (ms)
     const cycle = Math.floor(elapsed / cyclePeriod)
     const timeInCycle = elapsed % cyclePeriod

@@ -1,4 +1,4 @@
-import type { SplatAnimation, SplatParticle, AnimationEffect, AnimationContext } from './types'
+import type { SplatAnimation, SplatParticle, AnimationEffect } from './types'
 
 /**
  * Breathing / Pulse
@@ -9,7 +9,7 @@ import type { SplatAnimation, SplatParticle, AnimationEffect, AnimationContext }
 export const breathing: SplatAnimation = {
   name: 'Breathing',
 
-  init(particles: SplatParticle[], _width: number, _height: number) {
+  init(particles: SplatParticle[]) {
     for (const p of particles) {
       // Individualize the pulse
       p.breathPhaseOffset = Math.random() * Math.PI * 2
@@ -18,7 +18,7 @@ export const breathing: SplatAnimation = {
     }
   },
 
-  apply(p: SplatParticle, elapsed: number, ctx: AnimationContext, _particles: SplatParticle[]): AnimationEffect {
+  apply(p: SplatParticle, elapsed: number): AnimationEffect {
     const phase = p.breathPhaseOffset ?? 0
     const speed = p.breathSpeedMult ?? 1
     const amp = p.breathAmpMult ?? 1

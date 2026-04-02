@@ -15,7 +15,7 @@ import type {
 export const quantumEntanglement: SplatAnimation = {
   name: 'Quantum Entanglement',
 
-  init(particles: SplatParticle[], _width: number, _height: number) {
+  init(particles: SplatParticle[]) {
     // Find closest mirror-point partner for each particle (O(N^2) but small N)
     for (let i = 0; i < particles.length; i++) {
         const p = particles[i]
