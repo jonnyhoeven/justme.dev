@@ -20,7 +20,7 @@ export type {
   AnimationContext,
 } from './types'
 
-const animations: SplatAnimation[] = [
+export const animations: SplatAnimation[] = [
   breathing,
   orbitalDrift,
   windWaves,

@@ -3,6 +3,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import {
   pickRandomAnimation,
   getAnimation,
+  animations,
   type SplatParticle,
   type AnimationContext,
   type SplatAnimation,
@@ -21,7 +22,7 @@ const hoverForce = 5
 const mouse = { x: -9999, y: -9999 }
 let width = 320
 let height = 320
-let currentAnimationIndex = 0
+const currentAnimationIndex = ref(0)
 const currentAnimation = ref<SplatAnimation | null>(null)
 let startTime = performance.now()
 
@@ -99,7 +100,7 @@ onMounted(async () => {
   // ---- Animation system: pick one at random ----
   // We do this AFTER the initial scramble so the chosen animation can override positions
   const { animation, index } = pickRandomAnimation()
-  currentAnimationIndex = index
+  currentAnimationIndex.value = index
   currentAnimation.value = animation
   currentAnimation.value.init(particles, width, height)
   startTime = performance.now()
@@ -198,9 +199,10 @@ const onMouseLeave = () => {
   mouse.y = -9999
 }
 
-const onClick = () => {
-  currentAnimationIndex++
-  const animation = getAnimation(currentAnimationIndex)
+const selectAnimation = (index: number) => {
+  if (currentAnimationIndex.value === index) return
+  currentAnimationIndex.value = index
+  const animation = getAnimation(index)
   animation.init(particles, width, height)
   currentAnimation.value = animation
   startTime = performance.now()
@@ -210,8 +212,9 @@ const onClick = () => {
 </script>
 
 <template>
-  <div class="HeroSplat image-src" @mousemove="onMouseMove" @mouseleave="onMouseLeave" @click="onClick">
+  <div class="HeroSplat image-src" @mousemove="onMouseMove" @mouseleave="onMouseLeave">
     <canvas ref="canvasRef"></canvas>
+
   </div>
 </template>
 
@@ -239,4 +242,5 @@ canvas {
   height: 100%;
   display: block;
 }
+
 </style>
