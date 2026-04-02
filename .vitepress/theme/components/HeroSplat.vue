@@ -65,10 +65,13 @@ onMounted(async () => {
     if (res.ok) {
         let data = await res.json()
         
-        // --- Mobile Optimization: Downsampling ---
-        // On mobile, we reduce the amount of points to save on physics and draw calls.
+        // --- Performance Scaling: Halving overall particle count ---
+        // Taking every 2nd point reduces physics and draw calls by 50% for everyone.
+        data = data.filter((_: unknown, i: number) => i % 2 === 0)
+        
+        // --- Further Mobile Optimization ---
+        // On mobile, we skip every 3rd remaining point to keep it at ~33% total.
         if (isMobile) {
-          // Taking roughly 60% of points - enough to keep the shape but much faster.
           data = data.filter((_: unknown, i: number) => i % 3 !== 0)
         }
 
