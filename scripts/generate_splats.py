@@ -21,7 +21,7 @@ def generate_splats():
     print(f"Loading {image_path}...")
     img = Image.open(image_path).convert("RGBA")
 
-    TARGET_SIZE = 55
+    TARGET_SIZE = 27
     img.thumbnail((TARGET_SIZE, TARGET_SIZE), Image.Resampling.LANCZOS)
 
     width, height = img.size
