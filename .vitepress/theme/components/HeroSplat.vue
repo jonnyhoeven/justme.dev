@@ -83,13 +83,9 @@ onMounted(async () => {
     const c = document.createElement('canvas')
     c.width = size; c.height = size
     const ctxC = c.getContext('2d')!
-    const grad = ctxC.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2)
-    grad.addColorStop(0, `rgba(${color}, 1.0)`)
-    grad.addColorStop(0.4, `rgba(${color}, 0.8)`)
-    grad.addColorStop(0.8, `rgba(${color}, 0.2)`)
-    grad.addColorStop(1, `rgba(${color}, 0.0)`)
-    ctxC.fillStyle = grad
-    ctxC.fillRect(0,0,size,size)
+    // Solid color fill (No feather/blur)
+    ctxC.fillStyle = `rgb(${color})`
+    ctxC.fillRect(0, 0, size, size)
     brushCache.set(color, c)
     return c
   }
