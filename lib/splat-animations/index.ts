@@ -11,6 +11,10 @@ import { windWaves } from './wind-waves'
 import { floatingOutliers } from './floating-outliers'
 import { flubberMotion } from './flubber-motion'
 import { ferrofluid } from './ferrofluid'
+import { solarFlare } from './solar-flare'
+import { quantumEntanglement } from './quantum-entanglement'
+import { eventHorizon } from './event-horizon'
+import { digitalGlitch } from './digital-glitch'
 import type { SplatAnimation } from './types'
 
 export type {
@@ -27,6 +31,10 @@ export const animations: SplatAnimation[] = [
   floatingOutliers,
   flubberMotion,
   ferrofluid,
+  solarFlare,
+  quantumEntanglement,
+  eventHorizon,
+  digitalGlitch,
 ]
 
 /** Total number of available animations */

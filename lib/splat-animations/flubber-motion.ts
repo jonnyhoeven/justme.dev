@@ -1,4 +1,4 @@
-import type { SplatAnimation, SplatParticle, AnimationEffect } from './types'
+import type { SplatAnimation, SplatParticle, AnimationEffect, AnimationContext } from './types'
 
 /**
  * Flubber Motion
@@ -21,7 +21,7 @@ export const flubberMotion: SplatAnimation = {
     }
   },
 
-  apply(p: SplatParticle, elapsed: number): AnimationEffect {
+  apply(p: SplatParticle, elapsed: number, _ctx: AnimationContext, _particles: SplatParticle[]): AnimationEffect {
     const phase = p.breathPhaseOffset ?? 0
     const ampMult = p.breathAmpMult ?? 1
     

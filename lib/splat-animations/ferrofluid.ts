@@ -21,7 +21,7 @@ export const ferrofluid: SplatAnimation = {
     }
   },
 
-  apply(p: SplatParticle, elapsed: number, ctx: AnimationContext): AnimationEffect {
+  apply(p: SplatParticle, elapsed: number, ctx: AnimationContext, particles: SplatParticle[]): AnimationEffect {
     const phase = p.breathPhaseOffset ?? 0
     
     // --- Magnet: Mouse (Primary) ---

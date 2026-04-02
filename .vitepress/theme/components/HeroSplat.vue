@@ -2,7 +2,6 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import {
   pickRandomAnimation,
-  getAnimation,
   animations,
   type SplatParticle,
   type AnimationContext,
@@ -24,14 +23,42 @@ let width = 320
 let height = 320
 const currentAnimationIndex = ref(0)
 const currentAnimation = ref<SplatAnimation | null>(null)
+const isPopping = ref(false)
+const isCollapsing = ref(false)
+const isManualMode = ref(false)
+const shiverIntensity = ref(0)
+const boomOrigin = { x: 0, y: 0 }
+let boomStartTime = 0
 let startTime = performance.now()
+let cycleInterval: ReturnType<typeof setInterval>
+
+/**
+ * Cycle to the next animation.
+ * Accessible to both the auto-timer and the manual 'Next' button.
+ */
+const nextAnimation = () => {
+  if (isPopping.value) return
+  
+  currentAnimationIndex.value = (currentAnimationIndex.value + 1) % animations.length
+  const animation = animations[currentAnimationIndex.value]
+  
+  // Use a technical but friendly log
+  console.log(`🎨 Animation: ${animation.name} ${isManualMode.value ? '[MANUAL]' : '[AUTO]'}`)
+  
+  const w = canvasRef.value?.width || 320
+  const h = canvasRef.value?.height || 320
+  
+  animation.init(particles, w, h)
+  currentAnimation.value = animation
+  startTime = performance.now()
+}
 
 onMounted(async () => {
   if (!canvasRef.value) return
   const ctx = canvasRef.value.getContext('2d', { alpha: true })
   if (!ctx) return
 
-  // Load data
+  // 1. Data Ingestion
   try {
     const res = await fetch('/data/splats.json')
     if (res.ok) {
@@ -45,34 +72,29 @@ onMounted(async () => {
         })))
     }
   } catch (e) {
-    console.error("Failed to load splats data", e)
+    console.error("Failed to load splat data", e)
   }
 
-  // Pre-cache brushes for each unique color
+  // 2. Optimized Brush Caching
   const brushCache = new Map<string, HTMLCanvasElement>()
-
   const getBrush = (color: string) => {
     if (brushCache.has(color)) return brushCache.get(color)!
-    
     const size = 16
     const c = document.createElement('canvas')
-    c.width = size
-    c.height = size
+    c.width = size; c.height = size
     const ctxC = c.getContext('2d')!
-    
     const grad = ctxC.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2)
-    
     grad.addColorStop(0, `rgba(${color}, 1.0)`)
     grad.addColorStop(0.4, `rgba(${color}, 0.8)`)
     grad.addColorStop(0.8, `rgba(${color}, 0.2)`)
     grad.addColorStop(1, `rgba(${color}, 0.0)`)
-    
     ctxC.fillStyle = grad
     ctxC.fillRect(0,0,size,size)
     brushCache.set(color, c)
     return c
   }
 
+  // 3. Layout Handlers
   const resize = () => {
     if (!canvasRef.value) return
     const rect = canvasRef.value.parentElement?.getBoundingClientRect()
@@ -83,28 +105,26 @@ onMounted(async () => {
       canvasRef.value.height = height
     }
   }
-
   window.addEventListener('resize', resize)
   resize()
 
-  // Set initial SCRIMBLED positions — can be overridden by specific animations
+  // 4. Initial Position Scramble
   const initialScale = Math.min(width, height) / 320
   const initialOffsetX = (width - 320 * initialScale) / 2
   const initialOffsetY = (height - 320 * initialScale) / 2
-  
   particles.forEach(p => {
-      p.x = (Math.random() * 320) * initialScale + initialOffsetX
-      p.y = (Math.random() * 320) * initialScale + initialOffsetY
+    p.x = (Math.random() * 320) * initialScale + initialOffsetX
+    p.y = (Math.random() * 320) * initialScale + initialOffsetY
   })
 
-  // ---- Animation system: pick one at random ----
-  // We do this AFTER the initial scramble so the chosen animation can override positions
-  const { animation, index } = pickRandomAnimation()
-  currentAnimationIndex.value = index
-  currentAnimation.value = animation
+  // 5. Animation Setups
+  const { animation: firstAnim, index: firstIndex } = pickRandomAnimation()
+  currentAnimationIndex.value = firstIndex
+  currentAnimation.value = firstAnim
   currentAnimation.value.init(particles, width, height)
   startTime = performance.now()
   
+  // 6. Physics Render Loop
   const render = () => {
     if (!ctx) return
     ctx.clearRect(0, 0, width, height)
@@ -112,33 +132,23 @@ onMounted(async () => {
     const scale = Math.min(width, height) / 320
     const offsetX = (width - 320 * scale) / 2
     const offsetY = (height - 320 * scale) / 2
-
     const elapsed = performance.now() - startTime
 
     const animCtx: AnimationContext = {
-      width,
-      height,
-      scale,
-      offsetX,
-      offsetY,
-      mouseX: mouse.x,
-      mouseY: mouse.y,
+      width, height, scale, offsetX, offsetY,
+      mouseX: mouse.x, mouseY: mouse.y,
     }
 
     if (!currentAnimation.value) return
     const anim = currentAnimation.value
 
     for (const p of particles) {
-      // Base spring target in screen space
       const baseTargetOx = p.ox * scale + offsetX
       const baseTargetOy = p.oy * scale + offsetY
-
-      // Apply the chosen animation effect
-      const effect = anim.apply(p, elapsed, animCtx)
-
+      const effect = isPopping.value ? { dx: 0, dy: 0 } : anim.apply(p, elapsed, animCtx, particles)
       const targetOx = baseTargetOx + effect.dx
       const targetOy = baseTargetOy + effect.dy
-      const effectiveSpring = spring * (effect.springScale ?? 1)
+      const effectiveSpring = (isPopping.value ? 0.2 : spring) * (effect.springScale ?? 1)
       
       const dx = p.x - mouse.x
       const dy = p.y - mouse.y
@@ -147,75 +157,167 @@ onMounted(async () => {
       let fx = 0
       let fy = 0
       
-      // Repulsion Force
-      if (dist < repulsionRange && dist > 0.1) {
+      // Repulsion
+      if (!isPopping.value && dist < repulsionRange && dist > 0.1) {
         const force = (repulsionRange - dist) / repulsionRange
         fx += (dx / dist) * force * hoverForce / p.mass
         fy += (dy / dist) * force * hoverForce / p.mass
       }
       
-      // Spring force (Hooke's law) with animation-modulated constant
+      // Spring
       fx += -effectiveSpring * (p.x - targetOx)
       fy += -effectiveSpring * (p.y - targetOy)
+      
+      // --- Shiver Effect (Easter Egg) ---
+      if (shiverIntensity.value > 0.05) {
+        // High-frequency "vibration" wave for more cinematic feedback
+        const vT = performance.now() * 0.1 // speed
+        const vPhase = p.ox * 0.5 + p.oy * 0.5
+        const vibe = Math.sin(vT + vPhase) * shiverIntensity.value * 25
+        fx += vibe
+        fy += vibe
+      }
+      
+      // --- Singularity ---
+      if (isCollapsing.value) {
+        const t = performance.now() - boomStartTime
+        const bdx = p.x - boomOrigin.x
+        const bdy = p.y - boomOrigin.y
+        if (t < 1000) {
+          const pStart = (p.glitchSeed ?? 0) * 300
+          if (t > pStart) {
+            const pull = Math.min((t - pStart) / 400, 1.0)
+            fx += -bdx * 0.2 * pull
+            fy += -bdy * 0.2 * pull
+          }
+        } else {
+          const spiralT = (t - 1000)
+          const spinFactor = 0.06 * Math.exp(-spiralT * 0.004)
+          fx += -bdy * spinFactor
+          fy += bdx * spinFactor
+          const releaseFactor = Math.min(spiralT / 800, 1.0)
+          fx += (-effectiveSpring * (p.x - targetOx)) * (releaseFactor - 1)
+          fy += (-effectiveSpring * (p.y - targetOy)) * (releaseFactor - 1)
+        }
+      }
 
-      // Apply velocity nudges from animation (e.g. floating outliers)
       if (effect.nudgeVx) fx += effect.nudgeVx
       if (effect.nudgeVy) fy += effect.nudgeVy
       
-      // Integrate
       p.vx = (p.vx + fx) * damp
       p.vy = (p.vy + fy) * damp
-      
       p.x += p.vx
       p.y += p.vy
       
-      // Draw Splat — use colour override if the animation provides one
       const brushColor = effect.colorOverride ?? p.color
       const brush = getBrush(brushColor)
       const r = (brush.width / 2) * scale
-      ctx.globalCompositeOperation = 'source-over'
       ctx.drawImage(brush, p.x - r, p.y - r, r * 2, r * 2)
     }
-    
     animationId = requestAnimationFrame(render)
   }
-  
+
+  // 7. Easter Egg Hook: "Just make it!" -> "Just make IT!"
+  const hookTagline = () => {
+    const tagline = document.querySelector('.tagline')
+    if (!tagline || tagline.querySelector('.it-btn')) return
+    const text = tagline.textContent || ""
+    if (text.includes('it!')) {
+      tagline.innerHTML = text.replace('it!', '<span class="it-btn" style="cursor: pointer; transition: all 0.2s ease; font-weight: bold;">it!</span>')
+      const btn = tagline.querySelector('.it-btn') as HTMLElement
+      if (btn) {
+        // --- Proximity Shiver (Hot/Cold) ---
+        window.addEventListener('mousemove', (e) => {
+          const rect = btn.getBoundingClientRect()
+          const bx = rect.left + rect.width / 2
+          const by = rect.top + rect.height / 2
+          const dx = e.clientX - bx
+          const dy = e.clientY - by
+          const dist = Math.sqrt(dx*dx + dy*dy)
+          
+          // Shiver starts at 150px away
+          const maxDist = 150
+          if (dist < maxDist) {
+            shiverIntensity.value = 0.85 * (1 - dist / maxDist)
+          } else {
+            shiverIntensity.value = 0
+          }
+        })
+
+        btn.onclick = () => {
+          if (isManualMode.value) {
+            btn.innerText = 'it!'
+            btn.style.color = ''
+            btn.style.textDecorationColor = 'transparent'
+            isManualMode.value = false
+            cycleInterval = setInterval(nextAnimation, 10000)
+            console.log("▶️ Auto-rotation re-enabled")
+          } else {
+            btn.innerText = 'IT!'
+            btn.style.color = 'var(--vp-c-brand)'
+            btn.style.textDecorationColor = 'var(--vp-c-brand)'
+            isManualMode.value = true
+            if (cycleInterval) clearInterval(cycleInterval)
+            console.log("⏹️ Auto-rotation disabled (Manual Mode ACTIVE)")
+          }
+        }
+      }
+    }
+  }
+  hookTagline()
+  setTimeout(hookTagline, 1000)
+
+  cycleInterval = setInterval(nextAnimation, 10000)
   render()
 })
 
 onBeforeUnmount(() => {
   cancelAnimationFrame(animationId)
+  if (cycleInterval) clearInterval(cycleInterval)
 })
 
+// Input Handlers
 const onMouseMove = (e: MouseEvent) => {
   if (!canvasRef.value) return
   const rect = canvasRef.value.getBoundingClientRect()
   mouse.x = e.clientX - rect.left
   mouse.y = e.clientY - rect.top
 }
-
-const onMouseLeave = () => {
-  mouse.x = -9999
-  mouse.y = -9999
+const onMouseDown = () => { isPopping.value = true }
+const onMouseUp = () => { isPopping.value = false }
+const onMouseLeave = () => { mouse.x = -9999; mouse.y = -9999; isPopping.value = false }
+const onDoubleClick = (e: MouseEvent) => {
+  if (!canvasRef.value) return
+  const rect = canvasRef.value.getBoundingClientRect()
+  boomOrigin.x = e.clientX - rect.left
+  boomOrigin.y = e.clientY - rect.top
+  boomStartTime = performance.now()
+  isCollapsing.value = true
+  setTimeout(() => { isCollapsing.value = false }, 2200)
 }
-
-const selectAnimation = (index: number) => {
-  if (currentAnimationIndex.value === index) return
-  currentAnimationIndex.value = index
-  const animation = getAnimation(index)
-  animation.init(particles, width, height)
-  currentAnimation.value = animation
-  startTime = performance.now()
-  console.log(`🎨 Switched animation: ${animation.name}`)
-}
-
 </script>
 
 <template>
-  <div class="HeroSplat image-src" @mousemove="onMouseMove" @mouseleave="onMouseLeave">
+  <div 
+    class="HeroSplat image-src" 
+    @mousemove="onMouseMove" 
+    @mouseleave="onMouseLeave" 
+    @mousedown="onMouseDown" 
+    @mouseup="onMouseUp"
+    @dblclick="onDoubleClick"
+  >
     <canvas ref="canvasRef"></canvas>
-
   </div>
+  
+  <!-- Manual Next Button (Easter Egg) -->
+  <button 
+    v-if="isManualMode" 
+    class="next-btn" 
+    @click="nextAnimation"
+    title="Next Animation"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+  </button>
 </template>
 
 <style scoped>
@@ -223,19 +325,13 @@ const selectAnimation = (index: number) => {
   width: 100%;
   height: 100%;
   position: absolute;
-  /* Move down slightly from header on normal browsers */
   margin-top: 5pt;
-  /* Allow canvas interactions */
   pointer-events: auto;
 }
 
 @media (max-width: 959px) {
-  .HeroSplat {
-    /* Significantly more padding/margin on mobile */
-    margin-top: 24px;
-  }
+  .HeroSplat { margin-top: 24px; }
 }
-
 
 canvas {
   width: 100%;
@@ -243,4 +339,45 @@ canvas {
   display: block;
 }
 
+.next-btn {
+  position: absolute;
+  /* Position relative to the parent .image-container */
+  bottom: 0;
+  right: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(20, 20, 20, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.next-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--vp-c-brand);
+  transform: scale(1.15) rotate(5deg);
+  color: var(--vp-c-brand);
+  box-shadow: 0 0 20px var(--vp-c-brand-soft);
+}
+
+.next-btn:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 959px) {
+  .next-btn {
+    bottom: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
+  }
+}
 </style>

@@ -11,16 +11,17 @@ export const orbitalDrift: SplatAnimation = {
   name: 'Orbital Drift',
 
   init(particles: SplatParticle[], _width: number, _height: number) {
+    const globalDir = Math.random() > 0.5 ? 1 : -1
     for (const p of particles) {
       // Each particle gets a unique center point ±20px from true 160, 160
       p.orbitCx = 160 + (Math.random() - 0.5) * 40
       p.orbitCy = 160 + (Math.random() - 0.5) * 40
-      // Varied speeds mean particles drift past each other slowly
-      p.orbitSpeed = 0.00003 + Math.random() * 0.00004
+      // Random direction (global for this session) + variation
+      p.orbitSpeed = globalDir * (0.00003 + Math.random() * 0.00004)
     }
   },
 
-  apply(p: SplatParticle, elapsed: number, ctx: AnimationContext): AnimationEffect {
+  apply(p: SplatParticle, elapsed: number, ctx: AnimationContext, _particles: SplatParticle[]): AnimationEffect {
     const cx = p.orbitCx ?? 160
     const cy = p.orbitCy ?? 160
     const speed = p.orbitSpeed ?? 0.00005

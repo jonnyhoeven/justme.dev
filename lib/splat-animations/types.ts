@@ -35,6 +35,9 @@ export interface SplatParticle {
   wanderAmp?: number
   coreWobblePhase?: number
   wavePhaseOffset?: number
+  partnerIdx?: number
+  glitchSeed?: number
+  glitchSensitivity?: number
 }
 
 export interface AnimationEffect {
@@ -79,5 +82,6 @@ export interface SplatAnimation {
     particle: SplatParticle,
     elapsed: number,
     ctx: AnimationContext,
+    particles: SplatParticle[]
   ): AnimationEffect
 }
