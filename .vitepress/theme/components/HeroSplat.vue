@@ -69,7 +69,7 @@ onMounted(async () => {
         // On mobile, we reduce the amount of points to save on physics and draw calls.
         if (isMobile) {
           // Taking roughly 60% of points - enough to keep the shape but much faster.
-          data = data.filter((_: any, i: number) => i % 3 !== 0)
+          data = data.filter((_: unknown, i: number) => i % 3 !== 0)
         }
 
         particles.push(...data.map((p: SplatParticle) => ({
