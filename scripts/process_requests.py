@@ -3,8 +3,9 @@ import textwrap
 from pathlib import Path
 from typing import Any, Dict
 
-import requests
 import yaml
+
+import requests
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
