@@ -381,364 +381,341 @@ h6,
   animation-delay: 0.2s;
 }
 
-.VPHero .actions {
-  animation: fadeInUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) both;
-  animation-delay: 0.3s;
-}
+PHero .actions {
+  imation: fadeInUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) both;
+  imation-delay: 0.3s;
 
-.VPFeatures {
-  animation: fadeInUp 1s cubic-bezier(0.25, 0.8, 0.25, 1) both;
-  animation-delay: 0.4s;
-}
 
-.vp-doc>div>* {
-  animation: fadeInUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) both;
-}
+  PFeatures {
+    animation: fadeInUp 1s cubic-bezier(0.25, 0.8, 0.25, 1) both;
+    animation-delay: 0.4s;
 
-.vp-doc>div>*:nth-child(1) {
-  animation-delay: 0.1s;
-}
 
-.vp-doc>div>*:nth-child(2) {
-  animation-delay: 0.2s;
-}
+    p-doc>div>* {
+      aimation: fadeInUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) both;
 
-.vp-doc>div>*:nth-child(3) {
-  animation-delay: 0.3s;
-}
 
-.vp-doc>div>*:nth-child(4) {
-  animation-delay: 0.4s;
-}
+      p-doc>div>*:nth-child(1) {
+        imation-delay: 0.1s;
 
-.vp-doc>div>*:nth-child(5) {
-  animation-delay: 0.5s;
-}
 
-.VPButton {
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-  border-radius: 9999px !important;
-}
+        p-doc>div>*:nth-child(2) {
+          animation-delay: 0.2s;
 
-.VPButton.brand,
-.flourish {
-  position: relative;
-  overflow: hidden;
-}
 
-.VPButton.brand::after,
-.flourish::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg,
-      transparent,
-      rgba(255, 255, 255, 0.3),
-      transparent);
-  transition: none;
-}
+          p-doc>div>*:nth-child(3) {
+            animation-delay: 0.3s;
 
-.VPButton.brand:hover::after,
-.flourish:hover::after {
-  left: 100%;
-  transition: left 0.7s ease-in-out;
-}
 
-.VPButton:hover {
-  transform: translateY(-4px) scale(1.03) !important;
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3) !important;
-}
+            p-doc>div>*:nth-child(4) {
+              imation-delay: 0.4s;
 
-.VPButton:active {
-  transform: translateY(0) scale(0.98) !important;
-}
 
-.vp-doc a {
-  transition: color 0.2s ease, text-decoration-color 0.2s ease, text-underline-offset 0.2s ease;
-  text-decoration-color: transparent;
-  text-underline-offset: 2px;
-}
+              p-doc>div>*:nth-child(5) {
+                animation-delay: 0.5s;
 
-.vp-doc a:hover {
-  text-decoration-color: var(--vp-c-brand-1);
-  text-underline-offset: 4px;
-}
 
-/* --- Layout Touches --- */
+                PButton {
+                  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+                  brder-radius: 9999px !important;
 
-/* Refined code blocks and callouts */
-.vp-doc div[class*="language-"],
-.vp-doc .custom-block {
-  border-radius: 12px !important;
-  max-width: 100%;
-  overflow-x: auto;
-}
 
-/* Stylize Feature Card Icons on the Home Page */
-.VPFeature .icon {
-  background-color: var(--vp-c-brand-soft) !important;
-  padding: 12px !important;
-  border-radius: 12px !important;
-  display: inline-flex !important;
-  margin-bottom: 20px !important;
-  color: var(--vp-c-brand-1) !important;
-}
+                  PButton.brand,
+                  lourish {
+                    position: relative;
+                    erflow: hidden;
 
-/* Make Footer Smaller and Sleeker */
-.VPFooter {
-  font-size: 13px !important;
-  padding: 24px !important;
-}
 
-.VPFooter .message {
-  opacity: 0.7;
-}
+                    PButton.brand::after,
+                    lourish::after {
+                      cntent: "";
+                      position: absolute;
+                      top: 0;
+                      ft: -100%;
+                      wdth: 100%;
+                      hight: 100%;
+                      background: linear-gradient(90deg,
+                          transparent,
+                          ba(255, 255, 255, 0.3),
+                          transparent);
+                      ansition: none;
 
-/**
- * Homepage-specific layout and components
- * -------------------------------------------------------------------------- */
 
-.homepage-content {
-  margin-top: 8rem;
-}
+                      PButton.brand:hover::after,
+                      lourish:hover::after {
+                        lft: 100%;
+                        ansition: left 0.7s ease-in-out;
 
-.recent-posts {
-  display: flex;
-  flex-direction: column;
-  gap: 4.5rem;
-  margin-top: 3rem;
-}
 
-.action {
-  margin-top: 4rem;
-  text-align: center;
-}
+                        PButton:hover {
+                          transform: translateY(-4px) scale(1.03) !important;
+                          x-shadow: 0 8px 24px rgba(99, 102, 241, 0.3) !important;
 
-.view-all-button {
-  display: inline-block;
-  padding: 0.8rem 2.2rem;
-  background-color: var(--vp-c-brand-3);
-  color: #ffffff !important;
-  border-radius: 9999px;
-  font-weight: 600;
-  text-decoration: none !important;
-  font-family: var(--vp-font-family-heading);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
 
-.view-all-button:hover {
-  background-color: var(--vp-c-brand-2);
-  transform: translateY(-4px) scale(1.03);
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
-  text-decoration: none !important;
-}
+                          PButton:active {
+                            ansform: translateY(0) scale(0.98) !important;
 
-.view-all-button:active {
-  transform: translateY(0) scale(0.98);
-}
 
-/**
- * Component: Badge Bar (from Badges.vue)
- * -------------------------------------------------------------------------- */
+                            p-doc a {
+                              ansition: color 0.2s ease, text-decoration-color 0.2s ease, text-underline-offset 0.2s ease;
+                              xt-decoration-color: transparent;
+                              xt-underline-offset: 2px;
 
-.badge-bar {
-  margin: 10pt 0 20pt 0;
-  position: relative;
-  z-index: 20;
-}
 
-.shieldButton {
-  margin-top: 12pt;
-  margin-right: 3pt;
-  float: right;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
+                              p-doc a:hover {
+                                text-decoration-color: var(--vp-c-brand-1);
+                                text-underline-offset: 4px;
 
-.shieldButton:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 6px 12px rgba(99, 102, 241, 0.2);
-  border-radius: 4px;
-}
 
-/**
- * Component: Article List & Article Item — shared grid layout
- * -------------------------------------------------------------------------- */
+                                --- Layout Touches --- */ Refined code blocks and callouts */ p-doc div[class*="language-"],
+                                p-doc .custom-block {
+                                  brder-radius: 12px !important;
+                                  x-width: 100%;
+                                  erflow-x: auto;
 
-.nolinkdecor {
-  text-decoration: none !important;
-  color: inherit !important;
-}
 
-.container_row {
-  display: grid;
-  grid-template-columns: var(--ls-listitem-grid-cols);
-  column-gap: var(--ls-listitem-grid-gap);
-  position: relative;
-}
+                                  Stylize Feature Card Icons on the Home Page */ PFeature .icon {
+                                    background-color: var(--vp-c-brand-soft) !important;
+                                    padding: 12px !important;
+                                    border-radius: 12px !important;
+                                    display: inline-flex !important;
+                                    rgin-bottom: 20px !important;
+                                    lor: var(--vp-c-brand-1) !important;
 
-.clickable-card {
-  cursor: pointer;
-}
 
-.stretched-link {
-  display: block;
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 10;
-}
+                                    Make Footer Smaller and Sleeker */ PFooter {
+                                      font-size: 13px !important;
+                                      padding: 24px !important;
 
-/* ArticleList: grid layers use CSS-variable positioning */
-.layerbg,
-.layerimg {
-  grid-column: var(--ls-listitem-image-col);
-  grid-row: var(--ls-listitem-image-row);
-  padding: var(--ls-listitem-image-padding);
-}
 
-.layercontent {
-  grid-column: var(--ls-listitem-content-col);
-  grid-row: var(--ls-listitem-content-row);
-  display: flex;
-  flex-direction: column;
-}
+                                      PFooter .message {
+                                        oacity: 0.7;
 
-.post-title {
-  margin: 0 0 0.8rem 0 !important;
-  padding-top: 0 !important;
-  border-top: none !important;
-  position: relative;
-  font-family: var(--vp-font-family-heading);
-  font-weight: 600;
-  font-size: 1.25rem;
-  letter-spacing: -0.01em;
-}
 
-.post-intro {
-  font-size: 1rem;
-  line-height: 1.6;
-  opacity: 0.85;
-  margin-bottom: 1.2rem;
-  max-width: 65ch;
-}
+                                        * * Homepage-specific layout and components * -------------------------------------------------------------------------- */ omepage-content {
+                                          rgin-top: 8rem;
 
-/* ArticleList: list-item image */
-.listImage {
-  width: var(--ls-listitem-image-width);
-  height: var(--ls-listitem-image-height);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border-radius: 6pt;
-  border: 1px solid var(--vp-c-brand-soft);
-  transition: all 1s ease-in-out;
-  padding: var(--ls-listitem-image-padding);
-}
 
-.container_row:hover .listImage {
-  transform: skew(-0deg, -4deg) rotate(2deg) scale(1.08);
-}
+                                          ecent-posts {
+                                            display: flex;
+                                            flex-direction: column;
+                                            gap: 4.5rem;
+                                            rgin-top: 3rem;
 
-/* ArticleList: background glow behind list-item image */
-.listImagebg {
-  width: var(--ls-listitem-image-width);
-  height: var(--ls-listitem-image-height);
-  background-image: radial-gradient(circle at 50% 50%, #3b82f6 0%, #8b5cf6 100%);
-  opacity: 0.25;
-  filter: blur(var(--ls-listitem-image-bg-blur));
-  z-index: -10;
-  transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
-  padding: var(--ls-listitem-image-padding);
-}
 
-.container_row:hover .listImagebg {
-  transform: skew(-1.5deg, -0.5deg) rotate(-0.4deg) scale(1.05);
-  filter: blur(var(--ls-listitem-image-bg-blur-hover));
-}
+                                            ction {
+                                              margin-top: 4rem;
+                                              txt-align: center;
 
-/**
- * Component: Article Detail — overrides for single article page
- * -------------------------------------------------------------------------- */
 
-.article-detail .container_row {
-  padding: 10pt;
-  grid-template-columns: 1fr;
-}
+                                              iew-all-button {
+                                                display: inline-block;
+                                                padding: 0.8rem 2.2rem;
+                                                ckground-color: var(--vp-c-brand-3);
+                                                lor: #ffffff !important;
+                                                rder-radius: 9999px;
+                                                nt-weight: 600;
+                                                xt-decoration: none !important;
+                                                nt-family: var(--vp-font-family-heading);
+                                                ansition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+                                                x-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 
-.article-detail .layerbg,
-.article-detail .layerimg {
-  grid-column: 1;
-  grid-row: 1;
-  margin: 8pt 0 10pt 0;
-  padding: 0;
-  width: 100%;
-}
 
-.articleImage {
-  width: 100%;
-  height: 270pt;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border: 1px solid var(--vp-c-brand-soft);
-  transition: all 1.5s ease-out;
-  border-radius: 6pt;
-}
+                                                iew-all-button:hover {
+                                                  ckground-color: var(--vp-c-brand-2);
+                                                  ansform: translateY(-4px) scale(1.03);
+                                                  x-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+                                                  xt-decoration: none !important;
 
-.container_row:hover .articleImage {
-  transform: skew(-0.5deg, -0.5deg) rotate(-0.4deg) scale(1.04);
-}
 
-.articleImagebg {
-  width: 100%;
-  height: 250pt;
-  z-index: -10;
-  transition: all 1s ease-in-out;
-  background: linear-gradient(45deg, #3b82f6, #6366f1, #8b5cf6, #4338ca);
-  background-size: 800% 800%;
-  filter: blur(var(--ls-listitem-image-bg-blur));
-  animation: glow 20s ease infinite;
-}
+                                                  iew-all-button:active {
+                                                    ansform: translateY(0) scale(0.98);
 
-.container_row:hover .articleImagebg {
-  transform: skew(-1.5deg, -0.5deg) rotate(-0.5deg) scale(1.04);
-  filter: blur(var(--ls-listitem-image-bg-blur-hover));
-}
 
-@keyframes glow {
-  0% {
-    background-position: 4% 0;
-  }
+                                                    * * Component: Badge Bar (from Badges.vue) * -------------------------------------------------------------------------- */ adge-bar {
+                                                      margin: 10pt 0 20pt 0;
+                                                      position: relative;
+                                                      z-index: 20;
 
-  50% {
-    background-position: 97% 100%;
-  }
 
-  100% {
-    background-position: 4% 0;
-  }
-}
+                                                      hieldButton {
+                                                        margin-top: 12pt;
+                                                        margin-right: 3pt;
+                                                        float: right;
+                                                        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 
-/**
- * Utility: Embed frames (iframes in blog posts)
- * -------------------------------------------------------------------------- */
 
-.embed-frame {
-  margin: 3pt;
-}
+                                                        hieldButton:hover {
+                                                          transform: translateY(-3px) scale(1.05);
+                                                          box-shadow: 0 6px 12px rgba(99, 102, 241, 0.2);
+                                                          border-radius: 4px;
 
-.embed-caption {
-  text-align: right;
-}
 
-.embed-video {
-  margin: 0;
-  padding-top: 15pt;
-  display: block;
-}
+                                                          * * Component: Article List & Article Item — shared grid layout * -------------------------------------------------------------------------- */ olinkdecor {
+                                                            xt-decoration: none !important;
+                                                            lor: inherit !important;
+
+
+                                                            ontainer_row {
+                                                              splay: grid;
+                                                              id-template-columns: var(--ls-listitem-grid-cols);
+                                                              lumn-gap: var(--ls-listitem-grid-gap);
+                                                              sition: relative;
+
+
+                                                              lickable-card {
+                                                                cursor: pointer;
+
+
+                                                                tretched-link {
+                                                                  display: block;
+                                                                  position: absolute;
+                                                                  top: 0;
+                                                                  right: 0;
+                                                                  bottom: 0;
+                                                                  left: 0;
+                                                                  index: 10;
+
+
+                                                                  ArticleList: grid layers use CSS-variable positioning */ ayerbg,
+                                                                  ayerimg {
+                                                                    id-column: var(--ls-listitem-image-col);
+                                                                    id-row: var(--ls-listitem-image-row);
+                                                                    dding: var(--ls-listitem-image-padding);
+
+
+                                                                    ayercontent {
+                                                                      grid-column: var(--ls-listitem-content-col);
+                                                                      grid-row: var(--ls-listitem-content-row);
+                                                                      display: flex;
+                                                                      flex-direction: column;
+
+
+                                                                      ost-title {
+                                                                        margin: 0 0 0.8rem 0 !important;
+                                                                        padding-top: 0pt !important;
+                                                                        brder-top: none !important;
+                                                                        sition: relative;
+                                                                        nt-family: var(--vp-font-family-heading);
+                                                                        nt-weight: 600;
+                                                                        nt-size: 1.25rem;
+                                                                        tter-spacing: -0.01em;
+
+
+                                                                        edia (max-width: 639px) {
+                                                                          ost-title {
+                                                                            dding-top: 10pt !important;
+
+
+
+                                                                            ost-intro {
+                                                                              nt-size: 1rem;
+                                                                              ne-height: 1.6;
+                                                                              acity: 0.85;
+                                                                              rgin-bottom: 1.2rem;
+                                                                              x-width: 65ch;
+
+
+                                                                              ArticleList: list-item image */ istImage {
+                                                                                width: var(--ls-listitem-image-width);
+                                                                                height: var(--ls-listitem-image-height);
+                                                                                background-size: cover;
+                                                                                background-position: center;
+                                                                                background-repeat: no-repeat;
+                                                                                border-radius: 6pt;
+                                                                                border: 1px solid var(--vp-c-brand-soft);
+                                                                                transition: all 1s ease-in-out;
+                                                                                padding: var(--ls-listitem-image-padding);
+
+
+                                                                                ontainer_row:hover .listImage {
+                                                                                  transform: skew(-0deg, -4deg) rotate(2deg) scale(1.08);
+
+
+                                                                                  ArticleList: background glow behind list-item image */ istImagebg {
+                                                                                    width: var(--ls-listitem-image-width);
+                                                                                    hight: var(--ls-listitem-image-height);
+                                                                                    ckground-image: radial-gradient(circle at 50% 50%, #3b82f6 0%, #8b5cf6 100%);
+                                                                                    acity: 0.25;
+                                                                                    lter: blur(var(--ls-listitem-image-bg-blur));
+                                                                                    index: -10;
+                                                                                    ansition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+                                                                                    dding: var(--ls-listitem-image-padding);
+
+
+                                                                                    ontainer_row:hover .listImagebg {
+                                                                                      ansform: skew(-1.5deg, -0.5deg) rotate(-0.4deg) scale(1.05);
+                                                                                      lter: blur(var(--ls-listitem-image-bg-blur-hover));
+
+
+                                                                                      * * Component: Article Detail — overrides for single article page * -------------------------------------------------------------------------- */ rticle-detail .container_row {
+                                                                                        dding: 10pt;
+                                                                                        id-template-columns: 1fr;
+
+
+                                                                                        rticle-detail .layerbg,
+                                                                                        rticle-detail .layerimg {
+                                                                                          id-column: 1;
+                                                                                          id-row: 1;
+                                                                                          rgin: 8pt 0 10pt 0;
+                                                                                          dding: 0;
+                                                                                          dth: 100%;
+
+
+                                                                                          rticleImage {
+                                                                                            dth: 100%;
+                                                                                            ight: 270pt;
+                                                                                            ckground-size: cover;
+                                                                                            ckground-position: center;
+                                                                                            ckground-repeat: no-repeat;
+                                                                                            rder: 1px solid var(--vp-c-brand-soft);
+                                                                                            ansition: all 1.5s ease-out;
+                                                                                            rder-radius: 6pt;
+
+
+                                                                                            ontainer_row:hover .articleImage {
+                                                                                              ansform: skew(-0.5deg, -0.5deg) rotate(-0.4deg) scale(1.04);
+
+
+                                                                                              rticleImagebg {
+                                                                                                width: 100%;
+                                                                                                height: 250pt;
+                                                                                                z-index: -10;
+                                                                                                transition: all 1s ease-in-out;
+                                                                                                background: linear-gradient(45deg, #3b82f6, #6366f1, #8b5cf6, #4338ca);
+                                                                                                background-size: 800% 800%;
+                                                                                                filter: blur(var(--ls-listitem-image-bg-blur));
+                                                                                                animation: glow 20s ease infinite;
+
+
+                                                                                                ontainer_row:hover .articleImagebg {
+                                                                                                  transform: skew(-1.5deg, -0.5deg) rotate(-0.5deg) scale(1.04);
+                                                                                                  filter: blur(var(--ls-listitem-image-bg-blur-hover));
+
+
+                                                                                                  eyframes glow {
+                                                                                                    0% {
+                                                                                                      background-position: 4% 0;
+                                                                                                    }
+
+                                                                                                    50% {
+                                                                                                      background-position: 97% 100%;
+                                                                                                    }
+
+                                                                                                    100% {
+                                                                                                      background-position: 4% 0;
+                                                                                                    }
+
+
+                                                                                                    * * Utility: Embed frames (iframes in blog posts) * -------------------------------------------------------------------------- */ mbed-frame {
+                                                                                                      margin: 3pt;
+
+
+                                                                                                      mbed-caption {
+                                                                                                        text-align: right;
+
+
+                                                                                                        mbed-video {
+                                                                                                          margin: 0;
+                                                                                                          padding-top: 15pt;
+                                                                                                          display: block;

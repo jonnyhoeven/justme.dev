@@ -24,7 +24,6 @@ export const digitalGlitch: SplatAnimation = {
 
   apply(p: SplatParticle, elapsed: number, ctx: AnimationContext): AnimationEffect {
     const seed = p.glitchSeed ?? 0.5
-    const sensitivity = p.glitchSensitivity ?? 0.8
 
     // 1. Chaotic Signal Noise base
     const baseT = elapsed * 0.003
@@ -36,8 +35,8 @@ export const digitalGlitch: SplatAnimation = {
     const isGlitching = pattern > 1.7
 
     let gdx = 0
-    let gdy = 0
-    let color: string | undefined = undefined
+    const gdy = 0
+    const color: string | undefined = undefined
     let springScale = 1.0
 
     if (isGlitching) {
