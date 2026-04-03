@@ -1,4 +1,4 @@
-wimport type {
+import type {
   SplatAnimation,
   SplatParticle,
   AnimationEffect,
