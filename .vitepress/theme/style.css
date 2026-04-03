@@ -668,6 +668,7 @@ h6,
 
 .article-detail .container_row {
   padding: 10pt;
+  grid-template-columns: 1fr;
 }
 
 .article-detail .layerbg,
@@ -676,6 +677,7 @@ h6,
   grid-row: 1;
   margin: 8pt 0 10pt 0;
   padding: 0;
+  width: 100%;
 }
 
 .articleImage {
