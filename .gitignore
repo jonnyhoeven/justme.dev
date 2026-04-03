@@ -11,3 +11,4 @@
 /pyvenv.cfg
 /input_images/
 /bin/
+/.ruff_cache
