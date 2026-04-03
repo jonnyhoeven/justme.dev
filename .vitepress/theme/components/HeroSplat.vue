@@ -192,7 +192,7 @@ onMounted(async () => {
       // --- Shiver Effect (Easter Egg) ---
       if (hasShiver) {
         const vPhase = p.ox * 0.5 + p.oy * 0.5
-        const vibe = Math.sin(vT + vPhase) * shiverInt * 25
+        const vibe = Math.sin(vT + vPhase) * shiverInt * 10
         fx += vibe
         fy += vibe
       }
@@ -253,7 +253,7 @@ onMounted(async () => {
           // Shiver starts at 150px away
           const maxDist = 150
           if (dist < maxDist) {
-            shiverIntensity.value = 0.85 * (1 - dist / maxDist)
+            shiverIntensity.value = 0.5 * (1 - dist / maxDist)
           } else {
             shiverIntensity.value = 0
           }

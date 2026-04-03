@@ -10,8 +10,7 @@ title: "Scaling GitOps: Automating Mission-Critical Deployments with ArgoCD"
 date: 2024-11-20
 year: 2024
 month: Nov
-outline: deep
-intro: |
+outline: de
   In the high-stakes world of public safety, deployment speed must be balanced with absolute auditability. 
   By implementing ArgoCD, manual, error-prone manifest management transitioned to a fully declarative 
   GitOps engine, ensuring that crisis management systems are always in their desired state.

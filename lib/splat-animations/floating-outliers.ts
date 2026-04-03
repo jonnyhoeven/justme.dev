@@ -24,12 +24,9 @@ export const floatingOutliers: SplatAnimation = {
       if (d > maxDist) maxDist = d
     }
 
-    const ringThreshold = maxDist * 0.7
-
     for (const p of particles) {
-      const d = Math.sqrt((p.ox - cx) ** 2 + (p.oy - cy) ** 2)
-      // Only particles in the outer ring, and only ~15% of those
-      p.isOutlier = d > ringThreshold && Math.random() < 0.15
+      // User requested 20% of total points to be tagged as outliers.
+      p.isOutlier = Math.random() < 0.20
       
       // Each particle gets a unique animation phase for its drift/wobble
       p.outlierPhase = Math.random() * Math.PI * 2

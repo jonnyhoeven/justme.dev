@@ -41,21 +41,20 @@ export const digitalGlitch: SplatAnimation = {
     let springScale = 1.0
 
     if (isGlitching) {
-        // --- The "Lightning Spike" ---
+        // --- The "Lightning Spike" (Brightness Edition) ---
         // Massive random displacement for ALL particles
-        // Use pseudo-randomness derived from seed + high-freq time
-        const spikeTime = Math.floor(elapsed / 20) // Change spike every 20ms
+        const spikeTime = Math.floor(elapsed / 20)
         const spikeX = Math.sin(seed * 100 + spikeTime) * 80 * sensitivity
         const spikeY = Math.cos(seed * 100 + spikeTime) * 40 * sensitivity
         
         gdx = spikeX
         gdy = spikeY
         
-        // Lightning colors (White / Electric Blue / Magenta)
-        const rand = Math.random()
-        if (rand < 0.3) color = "255, 255, 255"
-        else if (rand < 0.6) color = "186, 230, 253" // Sky-200 (Electric Blue)
-        else color = "232, 121, 249" // Fuchsia-400 (Magenta)
+        // Use brightness instead of fixed colors:
+        // We boost the original RGB values to create a "bloom" flash.
+        const [r, g, b] = p.color.split(',').map(v => parseInt(v.trim()))
+        const boost = 120 * sensitivity
+        color = `${Math.min(255, r + boost)}, ${Math.min(255, g + boost)}, ${Math.min(255, b + boost)}`
         
         // Very loose spring during the actual spike to allow the jump
         springScale = 0.01 
