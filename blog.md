@@ -2,7 +2,7 @@
 layout: doc
 title: Blog
 intro: |
-    A collection of blog posts for dev ops developers, system administrators and software developers. 
+  A collection of blog posts for dev ops developers, system administrators and software developers.
 image: /images/justme.dev.webp
 ---
 

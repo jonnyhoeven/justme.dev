@@ -12,7 +12,8 @@ readmeFile: README.md
 fetchML: false
 outline: deep
 languages: Java, C#
-intro: This Augmented Reality (AR) Mobile Application delivers an immersive experience for the Android ecosystem by leveraging
+intro:
+  This Augmented Reality (AR) Mobile Application delivers an immersive experience for the Android ecosystem by leveraging
   Vuforia’s advanced computer vision capabilities. Developed within the Unity engine, the project demonstrates high-fidelity
   image tracking and the seamless integration of dynamic 3D assets into physical environments,
   bridging the gap between digital content and the real world.

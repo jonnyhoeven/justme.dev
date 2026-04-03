@@ -12,7 +12,8 @@ readmeFile: README.md
 languages: Kubernetes
 fetchML: false
 outline: deep
-intro: This workshop provides a comprehensive, hands-on guide to architecting a robust Kubernetes environment utilizing
+intro:
+  This workshop provides a comprehensive, hands-on guide to architecting a robust Kubernetes environment utilizing
   K3s for lightweight orchestration and ArgoCD for continuous delivery. Participants will learn to implement industry-standard
   GitOps workflows, transitioning from manual configurations to a fully automated, declarative "Source of Truth" model.
   By the conclusion of the workshop, you will have successfully deployed a live application managed entirely through

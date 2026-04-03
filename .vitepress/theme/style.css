@@ -3,8 +3,6 @@
  * https://github.com/vuejs/vitepress/blob/main/src/client/theme-default/styles/vars.css
  */
 
-
-
 /**
  * Colors
  *
@@ -72,10 +70,10 @@
   --vp-c-danger-3: var(--vp-c-red-3);
   --vp-c-danger-soft: var(--vp-c-red-soft);
 
-  --vp-font-family-base: "Inter", sans-serif;
+  --vp-font-family-base: 'Inter', sans-serif;
 
   /* Modern typography headings */
-  --vp-font-family-heading: "Outfit", sans-serif;
+  --vp-font-family-heading: 'Outfit', sans-serif;
 
   /* Light mode custom backgrounds */
   --vp-c-bg: #ffffff;
@@ -96,7 +94,6 @@
   --vp-c-text-1: rgba(255, 255, 255, 0.9);
   --vp-c-text-2: rgba(255, 255, 255, 0.65);
 }
-
 
 /**
  * Component: Button
@@ -120,14 +117,28 @@
 
 :root {
   --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: -webkit-linear-gradient(120deg,
-      #3b82f6 30%,
-      #8b5cf6);
+  --vp-home-hero-name-background: -webkit-linear-gradient(
+    120deg,
+    #3b82f6 30%,
+    #8b5cf6
+  );
 
   --vp-home-hero-image-background-image:
-    radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.4) 0%, transparent 60%),
-    radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.4) 0%, transparent 60%),
-    radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.3) 0%, transparent 80%);
+    radial-gradient(
+      circle at 20% 30%,
+      rgba(99, 102, 241, 0.4) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 80% 70%,
+      rgba(139, 92, 246, 0.4) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(59, 130, 246, 0.3) 0%,
+      transparent 80%
+    );
   --vp-home-hero-image-filter: blur(120px);
 
   /* Reduce Hero Top Whitespace */
@@ -170,7 +181,6 @@
     --vp-home-hero-image-filter: blur(100px);
   }
 }
-
 
 /**
  * Component: Custom Block
@@ -225,10 +235,11 @@
   height: 24px;
 }
 
-
 @keyframes antigravity-float {
   0% {
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(99, 102, 241, 0.2);
+    box-shadow:
+      0 5px 15px rgba(0, 0, 0, 0.3),
+      0 0 20px rgba(99, 102, 241, 0.2);
     transform: translate(-50%, -50%) translateY(0) rotate(0deg);
   }
 
@@ -238,11 +249,15 @@
 
   66% {
     transform: translate(-50%, -50%) translateY(5px) rotate(-1deg);
-    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2), 0 0 40px rgba(99, 102, 241, 0.4);
+    box-shadow:
+      0 20px 30px rgba(0, 0, 0, 0.2),
+      0 0 40px rgba(99, 102, 241, 0.4);
   }
 
   100% {
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(99, 102, 241, 0.2);
+    box-shadow:
+      0 5px 15px rgba(0, 0, 0, 0.3),
+      0 0 20px rgba(99, 102, 241, 0.2);
     transform: translate(-50%, -50%) translateY(0) rotate(0deg);
   }
 }
@@ -362,7 +377,12 @@ h6,
 }
 
 .VPHero .tagline {
-  background: linear-gradient(135deg, var(--vp-c-text-1) 0%, #cbd5e1 50%, var(--vp-c-brand-1) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--vp-c-text-1) 0%,
+    #cbd5e1 50%,
+    var(--vp-c-brand-1) 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -391,27 +411,27 @@ h6,
   animation-delay: 0.4s;
 }
 
-.vp-doc>div>* {
+.vp-doc > div > * {
   animation: fadeInUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) both;
 }
 
-.vp-doc>div>*:nth-child(1) {
+.vp-doc > div > *:nth-child(1) {
   animation-delay: 0.1s;
 }
 
-.vp-doc>div>*:nth-child(2) {
+.vp-doc > div > *:nth-child(2) {
   animation-delay: 0.2s;
 }
 
-.vp-doc>div>*:nth-child(3) {
+.vp-doc > div > *:nth-child(3) {
   animation-delay: 0.3s;
 }
 
-.vp-doc>div>*:nth-child(4) {
+.vp-doc > div > *:nth-child(4) {
   animation-delay: 0.4s;
 }
 
-.vp-doc>div>*:nth-child(5) {
+.vp-doc > div > *:nth-child(5) {
   animation-delay: 0.5s;
 }
 
@@ -428,16 +448,18 @@ h6,
 
 .VPButton.brand::after,
 .flourish::after {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg,
-      transparent,
-      rgba(255, 255, 255, 0.3),
-      transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
   transition: none;
 }
 
@@ -457,7 +479,10 @@ h6,
 }
 
 .vp-doc a {
-  transition: color 0.2s ease, text-decoration-color 0.2s ease, text-underline-offset 0.2s ease;
+  transition:
+    color 0.2s ease,
+    text-decoration-color 0.2s ease,
+    text-underline-offset 0.2s ease;
   text-decoration-color: transparent;
   text-underline-offset: 2px;
 }
@@ -470,7 +495,7 @@ h6,
 /* --- Layout Touches --- */
 
 /* Refined code blocks and callouts */
-.vp-doc div[class*="language-"],
+.vp-doc div[class*='language-'],
 .vp-doc .custom-block {
   border-radius: 12px !important;
   max-width: 100%;
@@ -649,7 +674,11 @@ h6,
 .listImagebg {
   width: var(--ls-listitem-image-width);
   height: var(--ls-listitem-image-height);
-  background-image: radial-gradient(circle at 50% 50%, #3b82f6 0%, #8b5cf6 100%);
+  background-image: radial-gradient(
+    circle at 50% 50%,
+    #3b82f6 0%,
+    #8b5cf6 100%
+  );
   opacity: 0.25;
   filter: blur(var(--ls-listitem-image-bg-blur));
   z-index: -10;

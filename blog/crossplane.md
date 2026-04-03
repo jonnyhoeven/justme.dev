@@ -6,7 +6,7 @@ githost: https://raw.githubusercontent.com/
 branch: main
 readmeFile: README.md
 type: blog
-title: "Infrastructure as Data: Building a Self-Service Platform with Crossplane"
+title: 'Infrastructure as Data: Building a Self-Service Platform with Crossplane'
 date: 2026-03-12
 year: 2026
 month: Mar
@@ -69,9 +69,9 @@ When this is applied, Crossplane's AWS provider handles the underlying API calls
 
 By leading the Crossplane initiative, a platform is built that provides:
 
-*   **Self-Service Provisioning:** Eliminating the need for manual infrastructure tickets.
-*   **Reduced Friction:** Developers interact with the same Kubernetes APIs they are already learning for the application migration.
-*   **Global Reliability:** Entire environments can be replicated across cloud regions by syncing declarative manifests.
+- **Self-Service Provisioning:** Eliminating the need for manual infrastructure tickets.
+- **Reduced Friction:** Developers interact with the same Kubernetes APIs they are already learning for the application migration.
+- **Global Reliability:** Entire environments can be replicated across cloud regions by syncing declarative manifests.
 
 ## Conclusion
 

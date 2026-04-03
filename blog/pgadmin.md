@@ -6,7 +6,7 @@ githost: https://raw.githubusercontent.com/
 branch: main
 readmeFile: README.md
 type: blog
-title: "Secure Data Governance: Scalable Database Management with pgAdmin and OAuth2"
+title: 'Secure Data Governance: Scalable Database Management with pgAdmin and OAuth2'
 date: 2024-04-18
 year: 2024
 month: Apr
@@ -68,7 +68,7 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     # Restricting access to internal VPN/Office ranges
-    nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8, 192.168.1.0/24"
+    nginx.ingress.kubernetes.io/whitelist-source-range: '10.0.0.0/8, 192.168.1.0/24'
   hosts:
     - host: db-portal.internal-sre.cloud
 ```
@@ -77,9 +77,9 @@ ingress:
 
 The transition from individual `kubectl` proxies to a centralized portal transformed the developer experience:
 
-*   **Security Compliance:** Every database query is now associated with a specific user identity via SSO logs, fulfilling internal audit requirements.
-*   **Onboarding Speed:** New developers gain instant access to all relevant database schemas on day one, without needing to configure complex local tools.
-*   **Infrastructure Consistency:** By managing pgAdmin servers via GitOps, it was ensured that every developer was always looking at the most up-to-date cluster topology (Primary vs. Replicas).
+- **Security Compliance:** Every database query is now associated with a specific user identity via SSO logs, fulfilling internal audit requirements.
+- **Onboarding Speed:** New developers gain instant access to all relevant database schemas on day one, without needing to configure complex local tools.
+- **Infrastructure Consistency:** By managing pgAdmin servers via GitOps, it was ensured that every developer was always looking at the most up-to-date cluster topology (Primary vs. Replicas).
 
 ## Conclusion
 

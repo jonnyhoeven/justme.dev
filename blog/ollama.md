@@ -1,6 +1,6 @@
 ---
 type: blog
-title: "Secure AI Adoption: Local LLMs with Ollama for Enterprise Privacy"
+title: 'Secure AI Adoption: Local LLMs with Ollama for Enterprise Privacy'
 date: 2025-02-02
 year: 2025
 month: Feb
@@ -41,6 +41,7 @@ For organizations where security is paramount, a simple ban on AI is often ineff
 Experience shows that the value of AI is only as good as the privacy of the data it processes.
 
 The strategy involved deploying **Ollama** as a centralized, GPU-accelerated inference server. This allowed for:
+
 1. **Enforce Data Sovereignty:** Using models like **Llama 3** and **CodeLlama**, all inference stays in local RAM.
 2. **Zero-Cost Scaling:** No per-seat license fees. Infrastructure costs are limited to the compute (already utilized for **BigQuery ML** and data pipelines).
 3. **Internal RAG:** Experiments with **Retrieval-Augmented Generation (RAG)** began, allowing AI to "read" internal documentation and standard operating procedures (SOPs) for crisis response.
@@ -64,9 +65,9 @@ By pointing "Continue" or "AI Assistant" plugins to this internal endpoint, the 
 
 The adoption of local LLMs has been a positive development for engineering culture:
 
-*   **100% Privacy:** Every line of code for the core platform remains within encrypted volumes.
-*   **Developer Productivity:** Significant reduction in "Google search fatigue" for boilerplate code and complex Kubernetes manifests.
-*   **Learning Acceleration:** Junior developers can use the local AI to explain complex architectural decisions (e.g., "Why use eBPF for networking?") using the internal context.
+- **100% Privacy:** Every line of code for the core platform remains within encrypted volumes.
+- **Developer Productivity:** Significant reduction in "Google search fatigue" for boilerplate code and complex Kubernetes manifests.
+- **Learning Acceleration:** Junior developers can use the local AI to explain complex architectural decisions (e.g., "Why use eBPF for networking?") using the internal context.
 
 ## Conclusion
 

@@ -12,6 +12,7 @@ readmeFile: README.md
 fetchML: false
 outline: deep
 languages: CSS,Typescript,Vue
-intro: A scalable, cloud-native architecture demonstrating automated content aggregation and static site generation.
+intro:
+  A scalable, cloud-native architecture demonstrating automated content aggregation and static site generation.
   Implements a custom Python ETL pipeline to centralize documentation from distributed repositories, leveraging VitePress
   and Vue.js for high-performance, serverless delivery via GitHub Pages.

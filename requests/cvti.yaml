@@ -12,7 +12,8 @@ readmeFile: README.md
 languages: Visual Basic .NET
 fetchML: false
 outline: deep
-intro: CVTI (Camera & Visual Touch Interface) is an enterprise-grade Facility Automation & IoT Orchestration Platform
+intro:
+  CVTI (Camera & Visual Touch Interface) is an enterprise-grade Facility Automation & IoT Orchestration Platform
   designed for high-reliability environments. It functions as a centralized Edge Controller, unifying the management of
   PTZ surveillance systems, DMX lighting protocols, and mechanical infrastructure (hatches) into a secure,
   touch-optimized interface. Built on the .NET Framework for deep Windows OS integration,

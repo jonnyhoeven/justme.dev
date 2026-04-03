@@ -1,6 +1,6 @@
 ---
 type: blog
-title: "Mapping the Monolith: Visualizing 26 Years of Systems Integration with yEd"
+title: 'Mapping the Monolith: Visualizing 26 Years of Systems Integration with yEd'
 date: 2021-08-01
 year: 2021
 month: Aug
@@ -38,6 +38,7 @@ The data needed to speak for itself. A tool was required that could take a raw l
 Early experience with **Data Engineering and Crystal Reports** taught that the best visualization is the one that reflects the underlying data structure perfectly. **yEd Graph Editor** was chosen for its powerful algorithmic layout engines.
 
 The strategy was simple but effective:
+
 1. **Extract Relationships:** Export database foreign keys or service-to-service calls to a simple Excel or CSV format.
 2. **Algorithmic Layout:** Use yEd's "Hierarchical" or "Organic" algorithms to auto-arrange the nodes.
 3. **Collapse Complexity:** Use yEd's "Group Nodes" feature to hide low-level details and focus on high-level system boundaries.
@@ -48,8 +49,8 @@ yEd was used to map out the entire **Laravel and Vue.js** back-end architecture.
 
 ```bash
 # Automating the extraction of table relationships
-mysql -u root -p -e "SELECT table_name, column_name, referenced_table_name, referenced_column_name 
-                      FROM information_schema.key_column_usage 
+mysql -u root -p -e "SELECT table_name, column_name, referenced_table_name, referenced_column_name
+                      FROM information_schema.key_column_usage
                       WHERE table_schema = 'cruise_prod';" > relations.csv
 ```
 
@@ -59,9 +60,9 @@ Once imported into yEd, a single click on "Hierarchical Layout" transformed a ch
 
 The results of this data-driven visualization approach were felt across the entire engineering department:
 
-*   **Identified Technical Debt:** Hidden circular dependencies previously only known to the "oldest" developers on the team were surfaced.
-*   **Accelerated Refactoring:** By seeing the "True Shape" of the monolith, the decoupling of the data layer was strategically planned, which was a crucial step for future Cloud-Native journeys.
-*   **Shared Technical Language:** The diagrams provided a common language for both developers and management to discuss large-scale architectural changes.
+- **Identified Technical Debt:** Hidden circular dependencies previously only known to the "oldest" developers on the team were surfaced.
+- **Accelerated Refactoring:** By seeing the "True Shape" of the monolith, the decoupling of the data layer was strategically planned, which was a crucial step for future Cloud-Native journeys.
+- **Shared Technical Language:** The diagrams provided a common language for both developers and management to discuss large-scale architectural changes.
 
 ## Conclusion
 

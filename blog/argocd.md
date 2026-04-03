@@ -6,13 +6,13 @@ githost: https://raw.githubusercontent.com/
 branch: main
 readmeFile: README.md
 type: blog
-title: "Scaling GitOps: Automating Mission-Critical Deployments with ArgoCD"
+title: 'Scaling GitOps: Automating Mission-Critical Deployments with ArgoCD'
 date: 2024-11-20
 year: 2024
 month: Nov
 outline: de
-  In the high-stakes world of public safety, deployment speed must be balanced with absolute auditability. 
-  By implementing ArgoCD, manual, error-prone manifest management transitioned to a fully declarative 
+  In the high-stakes world of public safety, deployment speed must be balanced with absolute auditability.
+  By implementing ArgoCD, manual, error-prone manifest management transitioned to a fully declarative
   GitOps engine, ensuring that crisis management systems are always in their desired state.
 fetchReadme: false
 editLink: true
@@ -55,9 +55,9 @@ ArgoCD’s real-time visualization of application health and sync status became 
 
 The transition to ArgoCD was a cornerstone of the successful migration to Kubernetes. The results were measurable:
 
-*   **Reliability:** Eliminated configuration drift across all clusters.
-*   **Compliance:** Every infrastructure change is now backed by a Git commit ID, fulfilling strict audit requirements for public safety systems.
-*   **Recovery:** Reduced Mean Time to Recovery (MTTR) by allowing instantaneous rollbacks to any previous known-good Git state.
+- **Reliability:** Eliminated configuration drift across all clusters.
+- **Compliance:** Every infrastructure change is now backed by a Git commit ID, fulfilling strict audit requirements for public safety systems.
+- **Recovery:** Reduced Mean Time to Recovery (MTTR) by allowing instantaneous rollbacks to any previous known-good Git state.
 
 ## Conclusion
 

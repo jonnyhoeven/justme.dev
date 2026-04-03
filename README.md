@@ -10,19 +10,19 @@ infrastructure, and rapid content delivery.
 
 ## Architecture Overview
 
- Frontend: VitePress (Vue 3 + Vite) for lightning-fast static site generation and SEO optimization.
- Content Pipeline: Custom Python-based ETL (Extract, Transform, Load) system that aggregates READMEs and metadata
-  from multiple GitHub repositories into a unified portal.
- Infrastructure: Serverless deployment via GitHub Pages.
- CI/CD: GitHub Actions for automated build, test, and deployment workflows.
+Frontend: VitePress (Vue 3 + Vite) for lightning-fast static site generation and SEO optimization.
+Content Pipeline: Custom Python-based ETL (Extract, Transform, Load) system that aggregates READMEs and metadata
+from multiple GitHub repositories into a unified portal.
+Infrastructure: Serverless deployment via GitHub Pages.
+CI/CD: GitHub Actions for automated build, test, and deployment workflows.
 
 ## Key Features
 
- Automated Content Aggregation: Centralizes documentation from disparate microservices/projects into a single
-  source of truth.
- High Performance: Pre-rendered static HTML with client-side hydration for SPA-like navigation.
- Developer Experience (DX): Markdown-centric workflow with hot module replacement (HMR) for rapid iteration.
- Scalability: Stateless architecture capable of handling high traffic loads via CDN distribution.
+Automated Content Aggregation: Centralizes documentation from disparate microservices/projects into a single
+source of truth.
+High Performance: Pre-rendered static HTML with client-side hydration for SPA-like navigation.
+Developer Experience (DX): Markdown-centric workflow with hot module replacement (HMR) for rapid iteration.
+Scalability: Stateless architecture capable of handling high traffic loads via CDN distribution.
 
 ## Prerequisites
 
@@ -111,5 +111,5 @@ following pipeline:
 
 ## Configuration & Extensibility
 
-* **Request Manifests**: Content sources are defined in `requests/*.yaml`.
-* **Output Structure**: Generated Markdown files are organized into the `projects/` folder
+- **Request Manifests**: Content sources are defined in `requests/*.yaml`.
+- **Output Structure**: Generated Markdown files are organized into the `projects/` folder

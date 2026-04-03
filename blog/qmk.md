@@ -6,7 +6,7 @@ githost: https://github.com
 branch: master
 readmeFile: README.md
 type: blog
-title: "The Developer Interface: Optimizing the Physical-to-Digital Bridge with QMK"
+title: 'The Developer Interface: Optimizing the Physical-to-Digital Bridge with QMK'
 date: 2023-04-14
 year: 2023
 month: Apr
@@ -38,9 +38,10 @@ The constant reaching for "Escape," the complex "Control-Shift-K" combinations, 
 
 ## The Strategy: Hardware-Level Workflow Automation
 
-Experience integrating complex physical systems has taught that the *interface* is the system. **QMK (Quantum Mechanical Keyboard)** firmware was chosen to build a truly customized Human Interface Device (HID).
+Experience integrating complex physical systems has taught that the _interface_ is the system. **QMK (Quantum Mechanical Keyboard)** firmware was chosen to build a truly customized Human Interface Device (HID).
 
 The strategy wasn't just about "pretty lights"; it was about "Ergonomic Efficiency":
+
 1. **The Leader Key:** Using a custom C-based dictionary to trigger complex Git and Kubernetes commands with a few simple taps.
 2. **The Home-Row Layer:** Moving the arrow keys, brackets, and numbers to a secondary layer reachable without moving hands from the home row.
 3. **OS-Agnostic Macros:** Since the logic runs on the keyboard's internal microcontroller (**ATmega32U4**), specialized workflows work perfectly across **macOS**, **NixOS**, or remote **SSH** sessions.
@@ -73,8 +74,8 @@ By compiling this into a `.hex` file and flashing it to the device, the keyboard
 
 Optimizing the physical-to-digital bridge has had a profound impact on daily productivity:
 
-*   **Reduced RSI Risk:** By bringing all essential symbols and navigation keys to the home row, repetitive strain on wrists during 12-hour on-call shifts has been significantly reduced.
-*   **Workflow Acceleration:** Common "boilerplate" commands that used to take 20+ keystrokes are now executed with 3, maintaining momentum during complex architectural refactors.
+- **Reduced RSI Risk:** By bringing all essential symbols and navigation keys to the home row, repetitive strain on wrists during 12-hour on-call shifts has been significantly reduced.
+- **Workflow Acceleration:** Common "boilerplate" commands that used to take 20+ keystrokes are now executed with 3, maintaining momentum during complex architectural refactors.
 
 ## Conclusion
 

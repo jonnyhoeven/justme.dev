@@ -6,7 +6,7 @@ githost: https://raw.githubusercontent.com/
 branch: main
 readmeFile: README.md
 type: blog
-title: "The Image is the OS: Scaling Immutable Infrastructure with Bootable Containers (bootc)"
+title: 'The Image is the OS: Scaling Immutable Infrastructure with Bootable Containers (bootc)'
 date: 2026-03-17
 year: 2026
 month: Mar
@@ -43,6 +43,7 @@ In mission-critical public safety environments, this drift is a liability. Factu
 Building on the production success with **NixOS**, the next evolution in image management involves **bootc** (Bootable Containers). This approach allows the entire OS to be treated as a standard OCI image.
 
 The vision for this "Container-Native OS" strategy focuses on three key shifts:
+
 1. **Unified Tooling:** Using `Containerfiles` to define the OS, allowing the use of the same security scanners and registries for the OS as for the applications.
 2. **Transactional Updates:** OS updates would become a simple `image pull`. If an update fails, the system automatically rolls back to the previous known-good state.
 3. **Paved Path for Hardware:** Using `bootc-image-builder` to generate AMIs for AWS, QCOW2 for **Harvester** private cloud, and ISOs for bare-metal edge devices from a single source of truth.
@@ -73,9 +74,9 @@ The vision is that once the OCI image is pushed, the **ArgoCD** pipeline trigger
 
 The evaluation of bootable containers points toward a new paradigm for infrastructure operations:
 
-*   **Elimination of Drift:** The objective is 0% configuration drift across the distributed fleet. Changes are applied by updating the `Containerfile` and pushing the image.
-*   **Rapid Patching:** Security vulnerabilities in the kernel or base libraries could be patched via the same CI/CD flow as application bugs, reducing the "Time to Patch" (TTP) significantly.
-*   **High-Confidence Rollbacks:** An entire OS update can be rolled back in seconds, providing a level of confidence not typically available with traditional package-based updates.
+- **Elimination of Drift:** The objective is 0% configuration drift across the distributed fleet. Changes are applied by updating the `Containerfile` and pushing the image.
+- **Rapid Patching:** Security vulnerabilities in the kernel or base libraries could be patched via the same CI/CD flow as application bugs, reducing the "Time to Patch" (TTP) significantly.
+- **High-Confidence Rollbacks:** An entire OS update can be rolled back in seconds, providing a level of confidence not typically available with traditional package-based updates.
 
 ## Conclusion
 

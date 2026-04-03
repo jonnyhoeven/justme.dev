@@ -1,11 +1,11 @@
 // https://vitepress.dev/guide/custom-theme
 // noinspection JSUnusedGlobalSymbols
 
-import { h } from 'vue'
-import type { Theme } from 'vitepress'
-import DefaultTheme from 'vitepress/theme-without-fonts'
-import './style.css'
-import HeroSplat from './components/HeroSplat.vue'
+import { h } from 'vue';
+import type { Theme } from 'vitepress';
+import DefaultTheme from 'vitepress/theme-without-fonts';
+import './style.css';
+import HeroSplat from './components/HeroSplat.vue';
 
 // noinspection JSUnusedLocalSymbols
 export default {
@@ -13,9 +13,9 @@ export default {
   Layout: () => {
     return h(DefaultTheme.Layout, null, {
       'home-hero-image': () => h(HeroSplat)
-    })
+    });
   },
-  enhanceApp({ }) {
+  enhanceApp({}) {
     // ...
   }
-} satisfies Theme
+} satisfies Theme;

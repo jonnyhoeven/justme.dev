@@ -6,14 +6,14 @@ githost: https://raw.githubusercontent.com/
 branch: main
 readmeFile: README.md
 type: blog
-title: "Immutable Foundations: Hardening Critical Infrastructure with NixOS"
+title: 'Immutable Foundations: Hardening Critical Infrastructure with NixOS'
 date: 2025-12-04
 year: 2025
 month: Dec
 outline: deep
-  In mission-critical environments like Public Safety and Crisis Management, "Configuration Drift" isn't 
-  just a nuisance—it's a system-level risk. NixOS has been implemented as a 
-  production-ready, deterministic foundation, providing the immutable launchpad 
+  In mission-critical environments like Public Safety and Crisis Management, "Configuration Drift" isn't
+  just a nuisance—it's a system-level risk. NixOS has been implemented as a
+  production-ready, deterministic foundation, providing the immutable launchpad
   required to migrate legacy VM workloads to modern Kubernetes clusters.
 fetchReadme: false
 editLink: true
@@ -31,7 +31,7 @@ fetchML: false
 
 ## The Challenge: The Cost of "Snowflake" Servers
 
-In high-stakes environments—such as national crisis management platforms—reliability is the primary metric. Traditional configuration management (Ansible, Chef, Puppet) is *imperative*; it attempts to change a system's state piece by piece. Over time, this leads to "Snowflake Servers"—unique, inconsistent machines that are impossible to replicate exactly.
+In high-stakes environments—such as national crisis management platforms—reliability is the primary metric. Traditional configuration management (Ansible, Chef, Puppet) is _imperative_; it attempts to change a system's state piece by piece. Over time, this leads to "Snowflake Servers"—unique, inconsistent machines that are impossible to replicate exactly.
 
 When the migration from VM-based deployments to Kubernetes was spearheaded, a base operating system was required that guaranteed consistency. A server in a disaster recovery site must be identical to the one in production, down to the last byte.
 
@@ -41,6 +41,7 @@ NixOS solves the "Snowflake" problem by treating the entire operating system as 
 `f(configuration.nix) -> System`.
 
 By defining infrastructure declaratively, several goals were achieved:
+
 1. **Total Reproducibility:** A build today is bit-for-bit identical to a build three months from now.
 2. **Zero-Touch Provisioning:** Provisioning scripts that often fail halfway through are eliminated.
 3. **Atomic Rollbacks:** If an OS-level change caused an issue, rolling back was instantaneous—an essential feature for 24/7 public safety services.
@@ -56,7 +57,7 @@ This snippet defines a base image that integrates security hardening with the ne
 ```nix
 { pkgs, modulesPath, ... }: {
   imports = [ "${modulesPath}/virtualisation/amazon-image.nix" ];
-  
+
   # Strategic Networking & Identity
   networking.hostName = "sre-prod-base";
   services.openssh.enable = true;
@@ -71,7 +72,7 @@ This snippet defines a base image that integrates security hardening with the ne
   # Security Hardening (SOC2/NIS2 Compliance Ready)
   security.sudo.wheelNeedsPassword = false;
   security.protectKernelImage = true;
-  
+
   users.users.sre-deploy = {
     isNormalUser = true;
     extraGroups = [ "wheel" ];
@@ -92,9 +93,9 @@ Because every dependency is explicitly declared, the entire system's supply chai
 
 The real business value of NixOS was realized during the **Kubernetes migration**. By having a predictable, immutable base OS for nodes (whether on AWS EC2 or Rancher-managed clusters), the "incubation period" of new clusters was reduced from days to minutes.
 
-*   **Reliability:** 0% failure rate during OS-level upgrades.
-*   **Operational Efficiency:** Manual intervention was reduced by 40% across the VM-to-K8s fleet.
-*   **Disaster Recovery:** The entire fleet can now be rebuilt from a single Nix flake in any cloud region.
+- **Reliability:** 0% failure rate during OS-level upgrades.
+- **Operational Efficiency:** Manual intervention was reduced by 40% across the VM-to-K8s fleet.
+- **Disaster Recovery:** The entire fleet can now be rebuilt from a single Nix flake in any cloud region.
 
 ## Conclusion
 
