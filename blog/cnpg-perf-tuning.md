@@ -6,7 +6,7 @@ githost: https://raw.githubusercontent.com/
 branch: main
 readmeFile: README.md
 type: blog
-title: "Database Performance at Scale: Tuning CloudNativePG for High-Throughput Workloads"
+title: 'Database Performance at Scale: Tuning CloudNativePG for High-Throughput Workloads'
 date: 2024-12-28
 year: 2024
 month: Dec
@@ -59,11 +59,11 @@ spec:
   postgresql:
     parameters:
       # Reducing checkpoint frequency for high-write stability
-      max_wal_size: "4GB"
-      min_wal_size: "1GB"
-      checkpoint_timeout: "15min"
-      shared_buffers: "2GB"
-      work_mem: "32MB"
+      max_wal_size: '4GB'
+      min_wal_size: '1GB'
+      checkpoint_timeout: '15min'
+      shared_buffers: '2GB'
+      work_mem: '32MB'
 ```
 
 ### 2. Scaling with the PgBouncer Pooler
@@ -82,17 +82,17 @@ spec:
   pgbouncer:
     poolMode: transaction
     parameters:
-      max_client_conn: "2000"
-      default_pool_size: "50"
+      max_client_conn: '2000'
+      default_pool_size: '50'
 ```
 
 ## Results: Stabilized Latency and 50% Fewer OOMs
 
 The impact of these optimizations was measurable during peak load periods:
 
-*   **Connection Stability:** Scaling from 100 to 1,000+ client connections was achieved without increasing the database's memory footprint.
-*   **Reduced I/O Wait:** Increasing `max_wal_size` reduced storage I/O wait by 25% during heavy data ingest periods.
-*   **Operational Peace:** The "Out Of Memory" (OOM) kills previously caused by backend process spawning during traffic spikes were eliminated.
+- **Connection Stability:** Scaling from 100 to 1,000+ client connections was achieved without increasing the database's memory footprint.
+- **Reduced I/O Wait:** Increasing `max_wal_size` reduced storage I/O wait by 25% during heavy data ingest periods.
+- **Operational Peace:** The "Out Of Memory" (OOM) kills previously caused by backend process spawning during traffic spikes were eliminated.
 
 ## Conclusion
 

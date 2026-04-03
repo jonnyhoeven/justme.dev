@@ -12,5 +12,6 @@ readmeFile: README.md
 fetchML: false
 outline: deep
 languages: CSS,Typescript,NextJS,Python,Tensorflow
-intro: A Dockerized CKAN 2.10+ instance with a modern Next.js frontend. This project treats the entire portal as code; 
+intro:
+  A Dockerized CKAN 2.10+ instance with a modern Next.js frontend. This project treats the entire portal as code;
   every configuration and state detail is managed directly through this repository for seamless, reproducible deployments.

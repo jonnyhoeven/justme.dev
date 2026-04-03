@@ -6,7 +6,7 @@ githost: https://raw.githubusercontent.com/
 branch: main
 readmeFile: README.md
 type: blog
-title: "Modernizing Public Safety Networking: Spearheading eBPF with Cilium"
+title: 'Modernizing Public Safety Networking: Spearheading eBPF with Cilium'
 date: 2026-04-28
 year: 2026
 month: Apr
@@ -63,9 +63,9 @@ With Hubble, the focus shifts from "guessing" at firewall drops to "observing" t
 
 By spearheading the adoption of Cilium during this migration, a foundation is built that provides:
 
-*   **Predictable Performance:** Constant-time routing that scales with cluster size.
-*   **Deep Observability:** Bit-level insights into service dependencies and network health.
-*   **Hardened Security:** Identity-based policies that decouple security from the underlying network topology.
+- **Predictable Performance:** Constant-time routing that scales with cluster size.
+- **Deep Observability:** Bit-level insights into service dependencies and network health.
+- **Hardened Security:** Identity-based policies that decouple security from the underlying network topology.
 
 ## Conclusion
 

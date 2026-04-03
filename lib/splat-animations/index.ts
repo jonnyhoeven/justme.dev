@@ -5,23 +5,23 @@
  * applied to the HeroSplat canvas particles.
  */
 
-import { breathing } from './breathing'
-import { orbitalDrift } from './orbital-drift'
-import { windWaves } from './wind-waves'
-import { floatingOutliers } from './floating-outliers'
-import { flubberMotion } from './flubber-motion'
-import { ferrofluid } from './ferrofluid'
-import { solarFlare } from './solar-flare'
-import { quantumEntanglement } from './quantum-entanglement'
-import { digitalGlitch } from './digital-glitch'
-import type { SplatAnimation } from './types'
+import { breathing } from './breathing';
+import { orbitalDrift } from './orbital-drift';
+import { windWaves } from './wind-waves';
+import { floatingOutliers } from './floating-outliers';
+import { flubberMotion } from './flubber-motion';
+import { ferrofluid } from './ferrofluid';
+import { solarFlare } from './solar-flare';
+import { quantumEntanglement } from './quantum-entanglement';
+import { digitalGlitch } from './digital-glitch';
+import type { SplatAnimation } from './types';
 
 export type {
   SplatAnimation,
   SplatParticle,
   AnimationEffect,
-  AnimationContext,
-} from './types'
+  AnimationContext
+} from './types';
 
 export const animations: SplatAnimation[] = [
   breathing,
@@ -32,24 +32,29 @@ export const animations: SplatAnimation[] = [
   ferrofluid,
   solarFlare,
   quantumEntanglement,
-  digitalGlitch,
-]
+  digitalGlitch
+];
 
 /** Total number of available animations */
-export const animationCount = animations.length
+export const animationCount = animations.length;
 
 /** Get an animation by index (wraps around) */
 export function getAnimation(index: number): SplatAnimation {
-  return animations[((index % animations.length) + animations.length) % animations.length]
+  return animations[
+    ((index % animations.length) + animations.length) % animations.length
+  ];
 }
 
 /**
  * Pick a uniformly random animation from the registry.
  * Returns the animation and its index so clicking can cycle from there.
  */
-export function pickRandomAnimation(): { animation: SplatAnimation; index: number } {
-  const idx = Math.floor(Math.random() * animations.length)
-  const anim = animations[idx]
-  console.log(`🎨 Splat animation: ${anim.name}`)
-  return { animation: anim, index: idx }
+export function pickRandomAnimation(): {
+  animation: SplatAnimation;
+  index: number;
+} {
+  const idx = Math.floor(Math.random() * animations.length);
+  const anim = animations[idx];
+  console.log(`🎨 Splat animation: ${anim.name}`);
+  return { animation: anim, index: idx };
 }

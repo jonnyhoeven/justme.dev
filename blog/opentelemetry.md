@@ -6,7 +6,7 @@ githost: https://raw.githubusercontent.com/
 branch: main
 readmeFile: README.md
 type: blog
-title: "Unifying Observability: Eliminating Monitoring Silos with OpenTelemetry"
+title: 'Unifying Observability: Eliminating Monitoring Silos with OpenTelemetry'
 date: 2026-03-17
 year: 2026
 month: Mar
@@ -43,6 +43,7 @@ In a public safety context, where mission-critical systems must respond in real-
 Experience indicates that for any diagnostic tool to be effective, it must be standardized and intuitive. **OpenTelemetry (OTel)** was selected to future-proof the stack and avoid vendor lock-in.
 
 By adopting OTel, three strategic goals were achieved:
+
 1. **Unified Data Model:** Traces, metrics, and logs share a common schema, allowing for pivots between signals without losing context.
 2. **Standardized Instrumentation:** Services now use a single SDK for instrumentation, rather than multiple proprietary libraries.
 3. **The Collector Pattern:** An **OTel Collector** was deployed as a centralized data pipeline to process, filter, and route telemetry to multiple backends simultaneously.
@@ -62,26 +63,26 @@ receivers:
 processors:
   batch:
   resourcedetection:
-    detectors: [ "env", "gcp", "k8snode" ]
+    detectors: ['env', 'gcp', 'k8snode']
 
 exporters:
   prometheus:
-    endpoint: "0.0.0.0:8889"
+    endpoint: '0.0.0.0:8889'
   otlp/jaeger:
-    endpoint: "jaeger-collector:4317"
+    endpoint: 'jaeger-collector:4317'
   logging:
     loglevel: info
 
 service:
   pipelines:
     metrics:
-      receivers: [ otlp ]
-      processors: [ batch, resourcedetection ]
-      exporters: [ prometheus, logging ]
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [prometheus, logging]
     traces:
-      receivers: [ otlp ]
-      processors: [ batch, resourcedetection ]
-      exporters: [ otlp/jaeger ]
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp/jaeger]
 ```
 
 This configuration ensures that every trace and metric automatically includes critical metadata like the pod name and node ID—essential for troubleshooting distributed systems in a large-scale Kubernetes environment.
@@ -90,9 +91,9 @@ This configuration ensures that every trace and metric automatically includes cr
 
 The transition to a unified observability stack driven by OpenTelemetry had a profound impact on operations:
 
-*   **Faster Troubleshooting:** By propagating a `trace_id` across service boundaries, the entire lifecycle of a request can be visualized as it travels through multiple microservices.
-*   **Reduced Overhead:** The OTel Collector allows for filtering out "noisy" data before it hits expensive storage backends, saving costs without losing critical insights.
-*   **Operational Clarity:** Mean Time to Resolution (MTTR) was significantly reduced because SREs no longer have to "hop" between different tools to correlate an error with a spiked metric.
+- **Faster Troubleshooting:** By propagating a `trace_id` across service boundaries, the entire lifecycle of a request can be visualized as it travels through multiple microservices.
+- **Reduced Overhead:** The OTel Collector allows for filtering out "noisy" data before it hits expensive storage backends, saving costs without losing critical insights.
+- **Operational Clarity:** Mean Time to Resolution (MTTR) was significantly reduced because SREs no longer have to "hop" between different tools to correlate an error with a spiked metric.
 
 ## Conclusion
 

@@ -1,6 +1,6 @@
 ---
 type: blog
-title: "Automating High-Availability PostgreSQL on AWS: A Deep Dive into Trusted Postgres Architect (TPA)"
+title: 'Automating High-Availability PostgreSQL on AWS: A Deep Dive into Trusted Postgres Architect (TPA)'
 date: 2024-03-28
 outline: deep
 intro: |

@@ -6,7 +6,7 @@ githost: https://raw.githubusercontent.com/
 branch: main
 readmeFile: README.md
 type: blog
-title: "Enterprise PostgreSQL on Kubernetes: Achieving High Availability with CloudNativePG"
+title: 'Enterprise PostgreSQL on Kubernetes: Achieving High Availability with CloudNativePG'
 date: 2024-04-15
 year: 2024
 month: Apr
@@ -75,13 +75,13 @@ This configuration ensures that three replicas are maintained across different f
 
 The adoption of CloudNativePG has been a significant milestone in building cost-effective, high-leverage infrastructure:
 
-*   **Cost Efficiency:** Database spend was reduced by approximately 40% by eliminating the "Managed Service Tax."
-*   **Absolute Portability:** Because CNPG is cloud-agnostic, the entire data layer can be moved between AWS, GCP, or on-prem without changing operational workflows.
-*   **Operational Confidence:** Zero-downtime PostgreSQL version upgrades are performed across the entire fleet using the operator's rolling-update capability.
+- **Cost Efficiency:** Database spend was reduced by approximately 40% by eliminating the "Managed Service Tax."
+- **Absolute Portability:** Because CNPG is cloud-agnostic, the entire data layer can be moved between AWS, GCP, or on-prem without changing operational workflows.
+- **Operational Confidence:** Zero-downtime PostgreSQL version upgrades are performed across the entire fleet using the operator's rolling-update capability.
 
 ## Conclusion
 
-Running enterprise PostgreSQL on Kubernetes is no longer a trade-off. By leveraging CloudNativePG, a platform has been built that matches the features of AWS RDS while providing the flexibility that a mission-critical SRE team needs. 
+Running enterprise PostgreSQL on Kubernetes is no longer a trade-off. By leveraging CloudNativePG, a platform has been built that matches the features of AWS RDS while providing the flexibility that a mission-critical SRE team needs.
 
 As migration efforts continue, the automated, self-healing nature of CNPG remains the bedrock of the stateful resilience strategy.
 

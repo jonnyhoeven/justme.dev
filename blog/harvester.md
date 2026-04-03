@@ -6,7 +6,7 @@ githost: https://github.com
 branch: master
 readmeFile: README.md
 type: blog
-title: "Converged Reliability: Strategic Hybrid Cloud with Harvester and Rancher"
+title: 'Converged Reliability: Strategic Hybrid Cloud with Harvester and Rancher'
 date: 2023-04-13
 year: 2023
 month: Apr
@@ -77,9 +77,9 @@ By bringing the VM into the Kubernetes namespace, the same **Cilium** network po
 
 The move to Harvester fundamentally changed the approach to hybrid-cloud:
 
-*   **Unified Operations:** The SRE team now manages the entire lifecycle of both VMs and Containers through a single GitOps pipeline (ArgoCD + Rancher).
-*   **Hardware Rightsizing:** Bare-metal hardware utilization was improved by 30% by eliminating the overhead of proprietary virtualization licenses and separate management stacks.
-*   **Edge Resilience:** Harvester enables the operation of a "Cloud-in-a-Box" at remote edge locations, ensuring that critical crisis management tools remain available even if the connection to the central AWS region is severed.
+- **Unified Operations:** The SRE team now manages the entire lifecycle of both VMs and Containers through a single GitOps pipeline (ArgoCD + Rancher).
+- **Hardware Rightsizing:** Bare-metal hardware utilization was improved by 30% by eliminating the overhead of proprietary virtualization licenses and separate management stacks.
+- **Edge Resilience:** Harvester enables the operation of a "Cloud-in-a-Box" at remote edge locations, ensuring that critical crisis management tools remain available even if the connection to the central AWS region is severed.
 
 ## Conclusion
 

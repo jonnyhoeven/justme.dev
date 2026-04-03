@@ -1,7 +1,9 @@
 <script setup lang="ts">
-defineProps(['frontmatter'])
+defineProps(['frontmatter']);
 </script>
 
 <template>
-  <small v-if="frontmatter && frontmatter.model"><i>Content created using: {{ frontmatter.model }}</i></small>
+  <small v-if="frontmatter && frontmatter.model"
+    ><i>Content created using: {{ frontmatter.model }}</i></small
+  >
 </template>

@@ -7,71 +7,71 @@
  */
 
 export interface SplatParticle {
-  ox: number
-  oy: number
-  x: number
-  y: number
-  vx: number
-  vy: number
-  color: string
-  mass: number
+  ox: number;
+  oy: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  color: string;
+  mass: number;
 
   /* ---- animation-assigned (set during init) ---- */
-  isOutlier?: boolean
+  isOutlier?: boolean;
 
   /* ---- orbital-drift assigned ---- */
-  orbitCx?: number
-  orbitCy?: number
-  orbitSpeed?: number
+  orbitCx?: number;
+  orbitCy?: number;
+  orbitSpeed?: number;
 
   /* ---- breathing assigned ---- */
-  breathPhaseOffset?: number
-  breathSpeedMult?: number
-  breathAmpMult?: number
+  breathPhaseOffset?: number;
+  breathSpeedMult?: number;
+  breathAmpMult?: number;
 
   /* ---- floating-outliers assigned ---- */
-  outlierPhase?: number
-  wanderFreq?: number
-  wanderAmp?: number
-  coreWobblePhase?: number
-  wavePhaseOffset?: number
-  partnerIdx?: number
-  glitchSeed?: number
-  glitchSensitivity?: number
+  outlierPhase?: number;
+  wanderFreq?: number;
+  wanderAmp?: number;
+  coreWobblePhase?: number;
+  wavePhaseOffset?: number;
+  partnerIdx?: number;
+  glitchSeed?: number;
+  glitchSensitivity?: number;
 }
 
 export interface AnimationEffect {
   /** Screen-space offset added to the spring target X */
-  dx: number
+  dx: number;
   /** Screen-space offset added to the spring target Y */
-  dy: number
+  dy: number;
   /** Multiplier for the spring constant (default 1) */
-  springScale?: number
+  springScale?: number;
   /** Replacement colour string "r, g, b" for the brush cache */
-  colorOverride?: string
+  colorOverride?: string;
   /** One-shot velocity nudge X (added directly to vx) */
-  nudgeVx?: number
+  nudgeVx?: number;
   /** One-shot velocity nudge Y (added directly to vy) */
-  nudgeVy?: number
+  nudgeVy?: number;
 }
 
 export interface AnimationContext {
-  width: number
-  height: number
+  width: number;
+  height: number;
   /** Display scale factor (viewport / 320) */
-  scale: number
+  scale: number;
   /** X offset to center the 320-unit space in the viewport */
-  offsetX: number
+  offsetX: number;
   /** Y offset to center the 320-unit space in the viewport */
-  offsetY: number
-  mouseX: number
-  mouseY: number
+  offsetY: number;
+  mouseX: number;
+  mouseY: number;
 }
 
 export interface SplatAnimation {
-  name: string
+  name: string;
   /** One-time setup — tag particles, assign depths, etc. */
-  init(particles: SplatParticle[], width: number, height: number): void
+  init(particles: SplatParticle[], width: number, height: number): void;
   /**
    * Per-particle, per-frame effect.
    * @param particle  The particle to animate
@@ -83,5 +83,5 @@ export interface SplatAnimation {
     elapsed: number,
     ctx: AnimationContext,
     particles: SplatParticle[]
-  ): AnimationEffect
+  ): AnimationEffect;
 }

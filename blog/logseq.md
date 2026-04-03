@@ -6,7 +6,7 @@ githost: https://github.com
 branch: master
 readmeFile: README.md
 type: blog
-title: "The SRE Knowledge Graph: Building a Second Brain for Mission-Critical Operations"
+title: 'The SRE Knowledge Graph: Building a Second Brain for Mission-Critical Operations'
 date: 2021-08-01
 year: 2021
 month: Aug
@@ -50,20 +50,23 @@ Early work involved creating an **Intranet application with OCR-searchable PDF k
 Logseq is used as the "Mission Control" for daily SRE operations. Every incident, meeting, and technical experiment starts in the Daily Journal.
 
 ### 1. Incident Logging (The "Black Box" Recorder)
-During an incident, every `kubectl` command and its output is logged. 
+
+During an incident, every `kubectl` command and its output is logged.
+
 - `[[Incident-2024-03-12]]`: Investigating [[Cilium]] packet drops in [[Namespace-A]].
 - `FIXED`: Added `[[NetworkPolicy]]` bypass for health-checks. See [[RFC-104]] for long-term fix.
 
 ### 2. Knowledge Refactoring
+
 At the end of the week, these fleeting notes are refactored into "Atomic Pages." A note about a specific SQL error becomes a permanent resource linked to `[[Database-Tuning]]` and `[[PostgreSQL]]`.
 
 ## Impact: Transformed Cognitive Capacity and Continuity
 
 Building a private knowledge graph has fundamentally changed operations for a **Senior SRE**:
 
-*   **Pattern Recognition:** By looking at the `[[PostgreSQL]]` graph, it is possible to quickly see if a current performance issue shares characteristics with a past migration.
-*   **Zero Knowledge Loss:** When transitioning between roles, the knowledge graph remains, allowing architectural lessons from high-traffic systems to be applied to critical infrastructure instantly.
-*   **Reduced Cognitive Load:** Information is no longer held in memory but placed in the graph. This frees up mental capacity to focus on high-level troubleshooting and strategic platform building.
+- **Pattern Recognition:** By looking at the `[[PostgreSQL]]` graph, it is possible to quickly see if a current performance issue shares characteristics with a past migration.
+- **Zero Knowledge Loss:** When transitioning between roles, the knowledge graph remains, allowing architectural lessons from high-traffic systems to be applied to critical infrastructure instantly.
+- **Reduced Cognitive Load:** Information is no longer held in memory but placed in the graph. This frees up mental capacity to focus on high-level troubleshooting and strategic platform building.
 
 ## Conclusion
 

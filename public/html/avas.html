@@ -1,334 +1,423 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
     <title>Acoustic Vehicle Alerting System</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #1a1a1a;
-            color: #ffffff;
-            text-align: center;
-        }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+          Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #1a1a1a;
+        color: #ffffff;
+        text-align: center;
+      }
 
-        #container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            padding: 20px;
-            width: 90%;
-            max-width: 400px;
-        }
+      #container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px;
+        width: 90%;
+        max-width: 400px;
+      }
 
-        button {
-            font-size: 24px;
-            padding: 20px 40px;
-            border-radius: 15px;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-        }
+      button {
+        font-size: 24px;
+        padding: 20px 40px;
+        border-radius: 15px;
+        border: none;
+        cursor: pointer;
+        transition:
+          background-color 0.2s,
+          transform 0.1s;
+      }
 
-        button:active {
-            transform: scale(0.95);
-        }
+      button:active {
+        transform: scale(0.95);
+      }
 
-        #startButton {
-            background-color: #28a745;
-            color: white;
-        }
+      #startButton {
+        background-color: #28a745;
+        color: white;
+      }
 
-        #stopButton {
-            background-color: #dc3545;
-            color: white;
-        }
+      #stopButton {
+        background-color: #dc3545;
+        color: white;
+      }
 
-        #startButton:hover {
-            background-color: #218838;
-        }
+      #startButton:hover {
+        background-color: #218838;
+      }
 
-        #stopButton:hover {
-            background-color: #c82333;
-        }
+      #stopButton:hover {
+        background-color: #c82333;
+      }
 
-        #status {
-            font-size: 16px;
-            min-height: 80px; /* Increased height for new lines */
-            padding: 15px;
-            background-color: #333;
-            border-radius: 10px;
-            line-height: 1.5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+      #status {
+        font-size: 16px;
+        min-height: 80px; /* Increased height for new lines */
+        padding: 15px;
+        background-color: #333;
+        border-radius: 10px;
+        line-height: 1.5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
 
-        #settings {
-            margin-top: 10px;
-            background-color: #2c2c2c;
-            padding: 20px;
-            border-radius: 10px;
-            display: none; /* Initially hidden */
-            flex-direction: column;
-            gap: 15px;
-        }
+      #settings {
+        margin-top: 10px;
+        background-color: #2c2c2c;
+        padding: 20px;
+        border-radius: 10px;
+        display: none; /* Initially hidden */
+        flex-direction: column;
+        gap: 15px;
+      }
 
-        .slider-container {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 8px;
-        }
+      .slider-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
 
-        .slider-container label {
-            font-size: 14px;
-            color: #ddd;
-        }
+      .slider-container label {
+        font-size: 14px;
+        color: #ddd;
+      }
 
-        .slider-container input[type="range"] {
-            width: 100%;
-            cursor: pointer;
-        }
+      .slider-container input[type='range'] {
+        width: 100%;
+        cursor: pointer;
+      }
 
-        .slider-container input[type="range"]:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+      .slider-container input[type='range']:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
 
-        /* Style for the new dropdown */
-        #settings select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            background-color: #555;
-            color: white;
-            border: none;
-            font-size: 14px;
-            cursor: pointer;
-            -webkit-appearance: none;
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            background-size: 1.2em;
-        }
+      /* Style for the new dropdown */
+      #settings select {
+        width: 100%;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #555;
+        color: white;
+        border: none;
+        font-size: 14px;
+        cursor: pointer;
+        -webkit-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 1.2em;
+      }
 
-        /* New styles for checkbox */
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #444;
-            padding: 10px;
-            border-radius: 8px;
-        }
+      /* New styles for checkbox */
+      .checkbox-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #444;
+        padding: 10px;
+        border-radius: 8px;
+      }
 
-        .checkbox-container label {
-            cursor: pointer;
-            font-size: 16px;
-        }
+      .checkbox-container label {
+        cursor: pointer;
+        font-size: 16px;
+      }
 
-        .checkbox-container input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
+      .checkbox-container input[type='checkbox'] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
+    <div id="container">
+      <h1>Acoustic Vehicle Alerting System</h1>
+      <div id="status">Press START to activate the sound.</div>
+      <button id="startButton">START</button>
+      <button id="stopButton">STOP</button>
 
-<div id="container">
-    <h1>Acoustic Vehicle Alerting System</h1>
-    <div id="status">Press START to activate the sound.</div>
-    <button id="startButton">START</button>
-    <button id="stopButton">STOP</button>
-
-    <div id="settings">
+      <div id="settings">
         <div class="checkbox-container">
-            <input type="checkbox" id="manualModeCheckbox">
-            <label for="manualModeCheckbox">Manual Speed Control</label>
+          <input type="checkbox" id="manualModeCheckbox" />
+          <label for="manualModeCheckbox">Manual Speed Control</label>
         </div>
         <div class="slider-container" id="manualSpeedContainer">
-            <label for="manualSpeedSlider">Manual Speed: <span id="manualSpeedValue">0 km/h</span></label>
-            <input type="range" id="manualSpeedSlider" min="0" max="50" value="0" disabled>
+          <label for="manualSpeedSlider"
+            >Manual Speed: <span id="manualSpeedValue">0 km/h</span></label
+          >
+          <input
+            type="range"
+            id="manualSpeedSlider"
+            min="0"
+            max="50"
+            value="0"
+            disabled
+          />
         </div>
-        <hr style="border-color: #444; width: 100%;">
+        <hr style="border-color: #444; width: 100%" />
         <div class="slider-container">
-            <label for="oscillatorType">Waveform</label>
-            <select id="oscillatorType">
-                <option value="sine">Sine (Hum)</option>
-                <option value="square">Square (Digital)</option>
-                <option value="sawtooth">Sawtooth (Buzzy)</option>
-                <option value="triangle">Triangle (Soft)</option>
-                <option value="whitenoise">White Noise (Filtered)</option>
-                <option value="pinknoise">Pink Noise (Filtered)</option>
-            </select>
-        </div>
-        <div class="slider-container">
-            <label for="minVolumeSlider">Min Volume: <span id="minVolumeValue">15%</span></label>
-            <input type="range" id="minVolumeSlider" min="0" max="100" value="15">
-        </div>
-        <div class="slider-container">
-            <label for="volumeSensitivitySlider">Volume Sensitivity: <span
-                    id="volumeSensitivityValue">0.08</span></label>
-            <input type="range" id="volumeSensitivitySlider" min="1" max="20" value="8">
-        </div>
-        <div class="slider-container">
-            <label for="baseFrequencySlider">Base Pitch: <span id="baseFrequencyValue">150 Hz</span></label>
-            <input type="range" id="baseFrequencySlider" min="50" max="400" value="150">
+          <label for="oscillatorType">Waveform</label>
+          <select id="oscillatorType">
+            <option value="sine">Sine (Hum)</option>
+            <option value="square">Square (Digital)</option>
+            <option value="sawtooth">Sawtooth (Buzzy)</option>
+            <option value="triangle">Triangle (Soft)</option>
+            <option value="whitenoise">White Noise (Filtered)</option>
+            <option value="pinknoise">Pink Noise (Filtered)</option>
+          </select>
         </div>
         <div class="slider-container">
-            <label for="pitchSensitivitySlider">Pitch Sensitivity: <span id="pitchSensitivityValue">20</span></label>
-            <input type="range" id="pitchSensitivitySlider" min="1" max="100" value="20">
+          <label for="minVolumeSlider"
+            >Min Volume: <span id="minVolumeValue">15%</span></label
+          >
+          <input
+            type="range"
+            id="minVolumeSlider"
+            min="0"
+            max="100"
+            value="15"
+          />
         </div>
         <div class="slider-container">
-            <label for="maxFrequencySlider">Max Pitch: <span id="maxFrequencyValue">600 Hz</span></label>
-            <input type="range" id="maxFrequencySlider" min="200" max="1200" value="600">
+          <label for="volumeSensitivitySlider"
+            >Volume Sensitivity:
+            <span id="volumeSensitivityValue">0.08</span></label
+          >
+          <input
+            type="range"
+            id="volumeSensitivitySlider"
+            min="1"
+            max="20"
+            value="8"
+          />
         </div>
+        <div class="slider-container">
+          <label for="baseFrequencySlider"
+            >Base Pitch: <span id="baseFrequencyValue">150 Hz</span></label
+          >
+          <input
+            type="range"
+            id="baseFrequencySlider"
+            min="50"
+            max="400"
+            value="150"
+          />
+        </div>
+        <div class="slider-container">
+          <label for="pitchSensitivitySlider"
+            >Pitch Sensitivity:
+            <span id="pitchSensitivityValue">20</span></label
+          >
+          <input
+            type="range"
+            id="pitchSensitivitySlider"
+            min="1"
+            max="100"
+            value="20"
+          />
+        </div>
+        <div class="slider-container">
+          <label for="maxFrequencySlider"
+            >Max Pitch: <span id="maxFrequencyValue">600 Hz</span></label
+          >
+          <input
+            type="range"
+            id="maxFrequencySlider"
+            min="200"
+            max="1200"
+            value="600"
+          />
+        </div>
+      </div>
     </div>
-</div>
 
-<script>
-    const startButton = document.getElementById('startButton');
-    const stopButton = document.getElementById('stopButton');
-    const statusDiv = document.getElementById('status');
-    const settingsDiv = document.getElementById('settings');
+    <script>
+      const startButton = document.getElementById('startButton');
+      const stopButton = document.getElementById('stopButton');
+      const statusDiv = document.getElementById('status');
+      const settingsDiv = document.getElementById('settings');
 
-    // Control elements
-    const manualModeCheckbox = document.getElementById('manualModeCheckbox');
-    const oscillatorTypeSelect = document.getElementById('oscillatorType');
-    const minVolumeSlider = document.getElementById('minVolumeSlider');
-    const volumeSensitivitySlider = document.getElementById('volumeSensitivitySlider');
-    const baseFrequencySlider = document.getElementById('baseFrequencySlider');
-    const pitchSensitivitySlider = document.getElementById('pitchSensitivitySlider');
-    const maxFrequencySlider = document.getElementById('maxFrequencySlider');
-    const manualSpeedSlider = document.getElementById('manualSpeedSlider');
+      // Control elements
+      const manualModeCheckbox = document.getElementById('manualModeCheckbox');
+      const oscillatorTypeSelect = document.getElementById('oscillatorType');
+      const minVolumeSlider = document.getElementById('minVolumeSlider');
+      const volumeSensitivitySlider = document.getElementById(
+        'volumeSensitivitySlider'
+      );
+      const baseFrequencySlider = document.getElementById(
+        'baseFrequencySlider'
+      );
+      const pitchSensitivitySlider = document.getElementById(
+        'pitchSensitivitySlider'
+      );
+      const maxFrequencySlider = document.getElementById('maxFrequencySlider');
+      const manualSpeedSlider = document.getElementById('manualSpeedSlider');
 
-    // Value display elements
-    const minVolumeValue = document.getElementById('minVolumeValue');
-    const volumeSensitivityValue = document.getElementById('volumeSensitivityValue');
-    const baseFrequencyValue = document.getElementById('baseFrequencyValue');
-    const pitchSensitivityValue = document.getElementById('pitchSensitivityValue');
-    const maxFrequencyValue = document.getElementById('maxFrequencyValue');
-    const manualSpeedValue = document.getElementById('manualSpeedValue');
+      // Value display elements
+      const minVolumeValue = document.getElementById('minVolumeValue');
+      const volumeSensitivityValue = document.getElementById(
+        'volumeSensitivityValue'
+      );
+      const baseFrequencyValue = document.getElementById('baseFrequencyValue');
+      const pitchSensitivityValue = document.getElementById(
+        'pitchSensitivityValue'
+      );
+      const maxFrequencyValue = document.getElementById('maxFrequencyValue');
+      const manualSpeedValue = document.getElementById('manualSpeedValue');
 
-    let audioContext;
-    let gainNode;
-    let audioSource = null; // Our one true audio source (oscillator or noise)
-    let watchId;
+      let audioContext;
+      let gainNode;
+      let audioSource = null; // Our one true audio source (oscillator or noise)
+      let watchId;
 
-    let wakeLock = null; // Holds the precious screen wake lock
+      let wakeLock = null; // Holds the precious screen wake lock
 
-    let lastKnownGpsSpeedMps = 0;
-    let manualMode = false;
+      let lastKnownGpsSpeedMps = 0;
+      let manualMode = false;
 
-    // --- Sound Parameters ---
-    let MIN_VOLUME = 0.15;
-    let VOLUME_SENSITIVITY = 0.08;
-    let BASE_FREQUENCY = 150;
-    let PITCH_SENSITIVITY = 20;
-    let MAX_FREQUENCY = 600;
+      // --- Sound Parameters ---
+      let MIN_VOLUME = 0.15;
+      let VOLUME_SENSITIVITY = 0.08;
+      let BASE_FREQUENCY = 150;
+      let PITCH_SENSITIVITY = 20;
+      let MAX_FREQUENCY = 600;
 
-    // --- Noise Generation ---
-    function createWhiteNoiseSource(audioCtx) {
+      // --- Noise Generation ---
+      function createWhiteNoiseSource(audioCtx) {
         const bufferSize = audioCtx.sampleRate * 2; // 2 glorious seconds of static
-        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const buffer = audioCtx.createBuffer(
+          1,
+          bufferSize,
+          audioCtx.sampleRate
+        );
         const output = buffer.getChannelData(0);
 
         for (let i = 0; i < bufferSize; i++) {
-            output[i] = Math.random() * 2 - 1; // Generate random values between -1 and 1
+          output[i] = Math.random() * 2 - 1; // Generate random values between -1 and 1
         }
 
         const whiteNoise = audioCtx.createBufferSource();
         whiteNoise.buffer = buffer;
         whiteNoise.loop = true;
         return whiteNoise;
-    }
+      }
 
-    // Paul Kellett's wizardry for pink noise (approximated)
-    function createPinkNoiseSource(audioCtx) {
+      // Paul Kellett's wizardry for pink noise (approximated)
+      function createPinkNoiseSource(audioCtx) {
         const bufferSize = audioCtx.sampleRate * 2; // 2 glorious seconds of deeper static
-        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const buffer = audioCtx.createBuffer(
+          1,
+          bufferSize,
+          audioCtx.sampleRate
+        );
         const output = buffer.getChannelData(0);
 
-        let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+        let b0 = 0,
+          b1 = 0,
+          b2 = 0,
+          b3 = 0,
+          b4 = 0,
+          b5 = 0,
+          b6 = 0;
 
         for (let i = 0; i < bufferSize; i++) {
-            const white = Math.random() * 2 - 1;
+          const white = Math.random() * 2 - 1;
 
-            b0 = 0.99886 * b0 + white * 0.0555179;
-            b1 = 0.99332 * b1 + white * 0.0750759;
-            b2 = 0.96900 * b2 + white * 0.1538520;
-            b3 = 0.86650 * b3 + white * 0.3104856;
-            b4 = 0.55000 * b4 + white * 0.5329522;
-            b5 = -0.7616 * b5 - white * 0.0168980;
+          b0 = 0.99886 * b0 + white * 0.0555179;
+          b1 = 0.99332 * b1 + white * 0.0750759;
+          b2 = 0.969 * b2 + white * 0.153852;
+          b3 = 0.8665 * b3 + white * 0.3104856;
+          b4 = 0.55 * b4 + white * 0.5329522;
+          b5 = -0.7616 * b5 - white * 0.016898;
 
-            output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
-            output[i] *= 0.11; // Scale it down so we don't blow the speakers
-            b6 = white * 0.115926;
+          output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+          output[i] *= 0.11; // Scale it down so we don't blow the speakers
+          b6 = white * 0.115926;
         }
 
         const pinkNoise = audioCtx.createBufferSource();
         pinkNoise.buffer = buffer;
         pinkNoise.loop = true;
         return pinkNoise;
-    }
+      }
 
-    // --- Audio Source Management ---
-    function setAudioSource(type) {
+      // --- Audio Source Management ---
+      function setAudioSource(type) {
         if (!audioContext) return;
 
         // If a source already exists, stop and disconnect it
         if (audioSource) {
-            audioSource.stop();
-            // Disconnect nodes manually if they exist
-            if (audioSource.source) audioSource.source.disconnect();
-            if (audioSource.filter) audioSource.filter.disconnect();
+          audioSource.stop();
+          // Disconnect nodes manually if they exist
+          if (audioSource.source) audioSource.source.disconnect();
+          if (audioSource.filter) audioSource.filter.disconnect();
         }
 
         if (type === 'whitenoise' || type === 'pinknoise') {
-            const noiseNode = (type === 'whitenoise') ? createWhiteNoiseSource(audioContext) : createPinkNoiseSource(audioContext);
-            const filterNode = audioContext.createBiquadFilter();
+          const noiseNode =
+            type === 'whitenoise'
+              ? createWhiteNoiseSource(audioContext)
+              : createPinkNoiseSource(audioContext);
+          const filterNode = audioContext.createBiquadFilter();
 
-            filterNode.type = 'bandpass'; // The "pitch" of the noise is just a filtered band
-            filterNode.frequency.setValueAtTime(BASE_FREQUENCY, audioContext.currentTime);
-            filterNode.Q.setValueAtTime(1, audioContext.currentTime); // How sharp the filter is (lower is broader)
+          filterNode.type = 'bandpass'; // The "pitch" of the noise is just a filtered band
+          filterNode.frequency.setValueAtTime(
+            BASE_FREQUENCY,
+            audioContext.currentTime
+          );
+          filterNode.Q.setValueAtTime(1, audioContext.currentTime); // How sharp the filter is (lower is broader)
 
-            noiseNode.connect(filterNode);
-            filterNode.connect(gainNode);
-            noiseNode.start();
+          noiseNode.connect(filterNode);
+          filterNode.connect(gainNode);
+          noiseNode.start();
 
-            audioSource = {
-                source: noiseNode,
-                filter: filterNode,
-                isNoise: true,
-                stop: () => noiseNode.stop()
-            };
+          audioSource = {
+            source: noiseNode,
+            filter: filterNode,
+            isNoise: true,
+            stop: () => noiseNode.stop()
+          };
         } else {
-            const oscillatorNode = audioContext.createOscillator();
-            oscillatorNode.type = type;
-            oscillatorNode.frequency.setValueAtTime(BASE_FREQUENCY, audioContext.currentTime);
+          const oscillatorNode = audioContext.createOscillator();
+          oscillatorNode.type = type;
+          oscillatorNode.frequency.setValueAtTime(
+            BASE_FREQUENCY,
+            audioContext.currentTime
+          );
 
-            oscillatorNode.connect(gainNode);
-            oscillatorNode.start();
+          oscillatorNode.connect(gainNode);
+          oscillatorNode.start();
 
-            audioSource = {
-                source: oscillatorNode,
-                filter: null,
-                isNoise: false,
-                stop: () => oscillatorNode.stop()
-            };
+          audioSource = {
+            source: oscillatorNode,
+            filter: null,
+            isNoise: false,
+            stop: () => oscillatorNode.stop()
+          };
         }
-    }
+      }
 
-    // Make startSound async to use await for wakeLock
-    async function startSound() {
+      // Make startSound async to use await for wakeLock
+      async function startSound() {
         if (audioContext) return;
 
         settingsDiv.style.display = 'flex';
@@ -341,187 +430,217 @@
 
         // Request Wake Lock
         if ('wakeLock' in navigator) {
-            try {
-                wakeLock = await navigator.wakeLock.request('screen');
-                wakeLock.addEventListener('release', () => {
-                    console.log('Wake Lock was released');
-                });
-                console.log('Wake Lock is active');
-            } catch (err) {
-                console.error(`${err.name}: ${err.message}`);
-                statusDiv.innerHTML = "✅ Sound ON.<br>⚠️ Could not acquire screen lock.";
-            }
+          try {
+            wakeLock = await navigator.wakeLock.request('screen');
+            wakeLock.addEventListener('release', () => {
+              console.log('Wake Lock was released');
+            });
+            console.log('Wake Lock is active');
+          } catch (err) {
+            console.error(`${err.name}: ${err.message}`);
+            statusDiv.innerHTML =
+              '✅ Sound ON.<br>⚠️ Could not acquire screen lock.';
+          }
         }
 
         if (navigator.geolocation) {
-            watchId = navigator.geolocation.watchPosition(updateFromGps, handleError, {enableHighAccuracy: true});
-            statusDiv.innerHTML = "✅ Sound ON. Waiting for GPS signal...<br><small>(Screen lock active)</small>";
+          watchId = navigator.geolocation.watchPosition(
+            updateFromGps,
+            handleError,
+            { enableHighAccuracy: true }
+          );
+          statusDiv.innerHTML =
+            '✅ Sound ON. Waiting for GPS signal...<br><small>(Screen lock active)</small>';
         } else {
-            handleError({code: -1}); // Custom error for "browser is a potato"
+          handleError({ code: -1 }); // Custom error for "browser is a potato"
         }
-    }
+      }
 
-    // Make stopSound async to use await for wakeLock
-    async function stopSound() {
+      // Make stopSound async to use await for wakeLock
+      async function stopSound() {
         if (!audioContext) return;
         settingsDiv.style.display = 'none';
 
         if (audioSource) {
-            audioSource.stop();
+          audioSource.stop();
         }
 
         await audioContext.close().then(() => {
-            audioContext = null;
-            audioSource = null;
-            gainNode = null;
+          audioContext = null;
+          audioSource = null;
+          gainNode = null;
         });
 
         // Release Wake Lock
         if (wakeLock) {
-            try {
-                await wakeLock.release();
-                wakeLock = null;
-                console.log('Wake Lock released');
-            } catch (err) {
-                console.error(`${err.name}: ${err.message}`);
-            }
+          try {
+            await wakeLock.release();
+            wakeLock = null;
+            console.log('Wake Lock released');
+          } catch (err) {
+            console.error(`${err.name}: ${err.message}`);
+          }
         }
 
         if (watchId) {
-            navigator.geolocation.clearWatch(watchId);
-            watchId = null;
+          navigator.geolocation.clearWatch(watchId);
+          watchId = null;
         }
-        statusDiv.textContent = "🛑 Sound OFF. Press START to reactivate.";
-    }
+        statusDiv.textContent = '🛑 Sound OFF. Press START to reactivate.';
+      }
 
-    function updateFromGps(position) {
+      function updateFromGps(position) {
         if (manualMode) return; // Ignore GPS when manual mode is active
         const speedMps = position.coords.speed || 0;
         lastKnownGpsSpeedMps = speedMps;
         updateSound(speedMps);
-    }
+      }
 
-    function updateSound(speedMps) {
+      function updateSound(speedMps) {
         if (!audioContext) return;
         const speedKmh = (speedMps * 3.6).toFixed(1);
 
-        const newVolume = Math.min(1.0, MIN_VOLUME + (speedMps * VOLUME_SENSITIVITY));
-        const newFrequency = BASE_FREQUENCY + (speedMps * PITCH_SENSITIVITY);
+        const newVolume = Math.min(
+          1.0,
+          MIN_VOLUME + speedMps * VOLUME_SENSITIVITY
+        );
+        const newFrequency = BASE_FREQUENCY + speedMps * PITCH_SENSITIVITY;
         const clampedFrequency = Math.min(MAX_FREQUENCY, newFrequency);
 
         if (gainNode && audioSource && audioContext.state === 'running') {
-            // Update volume
-            gainNode.gain.linearRampToValueAtTime(newVolume, audioContext.currentTime + 0.1);
+          // Update volume
+          gainNode.gain.linearRampToValueAtTime(
+            newVolume,
+            audioContext.currentTime + 0.1
+          );
 
-            // Update frequency based on source type
-            if (audioSource.isNoise) {
-                // For white noise, we control the filter's frequency
-                audioSource.filter.frequency.linearRampToValueAtTime(clampedFrequency, audioContext.currentTime + 0.1);
-            } else {
-                // For oscillators, we control their frequency
-                audioSource.source.frequency.linearRampToValueAtTime(clampedFrequency, audioContext.currentTime + 0.1);
-            }
+          // Update frequency based on source type
+          if (audioSource.isNoise) {
+            // For white noise, we control the filter's frequency
+            audioSource.filter.frequency.linearRampToValueAtTime(
+              clampedFrequency,
+              audioContext.currentTime + 0.1
+            );
+          } else {
+            // For oscillators, we control their frequency
+            audioSource.source.frequency.linearRampToValueAtTime(
+              clampedFrequency,
+              audioContext.currentTime + 0.1
+            );
+          }
         }
 
         statusDiv.innerHTML = `${manualMode ? '🕹️' : '🛰️'} Sound ON<br>
                                 Speed: ${speedKmh} km/h<br>
                                 Volume: ${Math.round(newVolume * 100)}% | Pitch: ${clampedFrequency.toFixed(0)} Hz
                                 <br><small>${wakeLock ? 'Screen lock is active' : '(No screen lock)'}</small>`;
-    }
+      }
 
-    function handleError(error) {
+      function handleError(error) {
         if (error.code === 1) {
-            statusDiv.textContent = "❌ GPS denied.";
+          statusDiv.textContent = '❌ GPS denied.';
         } else if (error.code === -1) {
-            statusDiv.textContent = "⚠️ No GPS support.";
+          statusDiv.textContent = '⚠️ No GPS support.';
         } else {
-            statusDiv.textContent = "⚠️ GPS Error.";
+          statusDiv.textContent = '⚠️ GPS Error.';
         }
 
         // GPS is a no-show? Fine, we'll do it ourselves.
         manualMode = true;
         manualModeCheckbox.checked = true;
         manualSpeedSlider.disabled = false;
-    }
+      }
 
-    // Handle visibility change to re-acquire lock
-    const handleVisibilityChange = async () => {
+      // Handle visibility change to re-acquire lock
+      const handleVisibilityChange = async () => {
         // Tab was hidden and came back? Re-acquire that precious lock!
-        if (wakeLock !== null && document.visibilityState === 'visible' && audioContext) {
-            try {
-                wakeLock = await navigator.wakeLock.request('screen');
-                console.log('Wake Lock re-acquired');
-            } catch (err) {
-                console.error(`${err.name}: ${err.message}`);
-            }
+        if (
+          wakeLock !== null &&
+          document.visibilityState === 'visible' &&
+          audioContext
+        ) {
+          try {
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log('Wake Lock re-acquired');
+          } catch (err) {
+            console.error(`${err.name}: ${err.message}`);
+          }
         }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+      };
+      document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // --- Settings Persistence ---
-    const SETTINGS_KEY = 'avasSettingsV1';
+      // --- Settings Persistence ---
+      const SETTINGS_KEY = 'avasSettingsV1';
 
-    function loadSettings() {
+      function loadSettings() {
         try {
-            const raw = localStorage.getItem(SETTINGS_KEY);
-            if (!raw) return null;
-            const obj = JSON.parse(raw);
-            return obj && typeof obj === 'object' ? obj : null;
+          const raw = localStorage.getItem(SETTINGS_KEY);
+          if (!raw) return null;
+          const obj = JSON.parse(raw);
+          return obj && typeof obj === 'object' ? obj : null;
         } catch (_) {
-            return null;
+          return null;
         }
-    }
+      }
 
-    function saveSettings() {
+      function saveSettings() {
         try {
-            const settings = {
-                oscillatorType: oscillatorTypeSelect.value,
-                minVolume: MIN_VOLUME,
-                volumeSensitivity: VOLUME_SENSITIVITY,
-                baseFrequency: BASE_FREQUENCY,
-                pitchSensitivity: PITCH_SENSITIVITY,
-                maxFrequency: MAX_FREQUENCY,
-                manualMode: manualMode,
-                manualSpeed: parseInt(manualSpeedSlider.value)
-            };
-            localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+          const settings = {
+            oscillatorType: oscillatorTypeSelect.value,
+            minVolume: MIN_VOLUME,
+            volumeSensitivity: VOLUME_SENSITIVITY,
+            baseFrequency: BASE_FREQUENCY,
+            pitchSensitivity: PITCH_SENSITIVITY,
+            maxFrequency: MAX_FREQUENCY,
+            manualMode: manualMode,
+            manualSpeed: parseInt(manualSpeedSlider.value)
+          };
+          localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
         } catch (_) {
-            // ignore storage errors (e.g., private mode)
+          // ignore storage errors (e.g., private mode)
         }
-    }
+      }
 
-    function clamp(num, min, max) { return Math.min(max, Math.max(min, num)); }
+      function clamp(num, min, max) {
+        return Math.min(max, Math.max(min, num));
+      }
 
-    function applyLoadedSettings(loaded) {
+      function applyLoadedSettings(loaded) {
         if (!loaded) return;
-        if (loaded.oscillatorType && typeof loaded.oscillatorType === 'string') {
-            oscillatorTypeSelect.value = loaded.oscillatorType;
+        if (
+          loaded.oscillatorType &&
+          typeof loaded.oscillatorType === 'string'
+        ) {
+          oscillatorTypeSelect.value = loaded.oscillatorType;
         }
         if (typeof loaded.minVolume === 'number') {
-            MIN_VOLUME = clamp(loaded.minVolume, 0, 1);
+          MIN_VOLUME = clamp(loaded.minVolume, 0, 1);
         }
         if (typeof loaded.volumeSensitivity === 'number') {
-            VOLUME_SENSITIVITY = clamp(loaded.volumeSensitivity, 0, 1);
+          VOLUME_SENSITIVITY = clamp(loaded.volumeSensitivity, 0, 1);
         }
         if (typeof loaded.baseFrequency === 'number') {
-            BASE_FREQUENCY = clamp(loaded.baseFrequency, 50, 400);
+          BASE_FREQUENCY = clamp(loaded.baseFrequency, 50, 400);
         }
         if (typeof loaded.pitchSensitivity === 'number') {
-            PITCH_SENSITIVITY = clamp(loaded.pitchSensitivity, 1, 100);
+          PITCH_SENSITIVITY = clamp(loaded.pitchSensitivity, 1, 100);
         }
         if (typeof loaded.maxFrequency === 'number') {
-            MAX_FREQUENCY = clamp(loaded.maxFrequency, 200, 1200);
+          MAX_FREQUENCY = clamp(loaded.maxFrequency, 200, 1200);
         }
         if (typeof loaded.manualMode === 'boolean') {
-            manualMode = loaded.manualMode;
+          manualMode = loaded.manualMode;
         }
         if (typeof loaded.manualSpeed === 'number') {
-            manualSpeedSlider.value = clamp(Math.round(loaded.manualSpeed), 0, 50);
+          manualSpeedSlider.value = clamp(
+            Math.round(loaded.manualSpeed),
+            0,
+            50
+          );
         }
-    }
+      }
 
-
-    function initializeControls() {
+      function initializeControls() {
         // Load previously saved settings (if any) and apply to internal variables first
         const loaded = loadSettings();
         applyLoadedSettings(loaded);
@@ -542,87 +661,96 @@
         manualSpeedSlider.disabled = !manualMode;
 
         const updateSoundFromActiveSpeed = () => {
-            if (!audioContext) return;
-            const speedMps = manualMode ? (parseInt(manualSpeedSlider.value) / 3.6) : lastKnownGpsSpeedMps;
-            updateSound(speedMps);
+          if (!audioContext) return;
+          const speedMps = manualMode
+            ? parseInt(manualSpeedSlider.value) / 3.6
+            : lastKnownGpsSpeedMps;
+          updateSound(speedMps);
         };
 
         // Listener for the new dropdown
-        oscillatorTypeSelect.addEventListener('change', e => {
-            if (audioContext) { // Only change if sound is already on
-                setAudioSource(e.target.value);
-                updateSoundFromActiveSpeed(); // Give the new sound its current speed stats
+        oscillatorTypeSelect.addEventListener('change', (e) => {
+          if (audioContext) {
+            // Only change if sound is already on
+            setAudioSource(e.target.value);
+            updateSoundFromActiveSpeed(); // Give the new sound its current speed stats
+          }
+          saveSettings();
+        });
+
+        minVolumeSlider.addEventListener('input', (e) => {
+          const percentage = parseInt(e.target.value);
+          MIN_VOLUME = percentage / 100;
+          minVolumeValue.textContent = `${percentage}%`;
+          updateSoundFromActiveSpeed();
+          saveSettings();
+        });
+
+        volumeSensitivitySlider.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value);
+          VOLUME_SENSITIVITY = val / 100;
+          volumeSensitivityValue.textContent = VOLUME_SENSITIVITY.toFixed(2);
+          updateSoundFromActiveSpeed();
+          saveSettings();
+        });
+
+        baseFrequencySlider.addEventListener('input', (e) => {
+          BASE_FREQUENCY = parseInt(e.target.value);
+          baseFrequencyValue.textContent = `${BASE_FREQUENCY} Hz`;
+          // Instantly update the base pitch (no ramp needed here)
+          if (audioSource) {
+            if (audioSource.isNoise) {
+              audioSource.filter.frequency.setValueAtTime(
+                BASE_FREQUENCY,
+                audioContext.currentTime
+              );
+            } else {
+              audioSource.source.frequency.setValueAtTime(
+                BASE_FREQUENCY,
+                audioContext.currentTime
+              );
             }
-            saveSettings();
+          }
+          updateSoundFromActiveSpeed();
+          saveSettings();
+        });
+        pitchSensitivitySlider.addEventListener('input', (e) => {
+          PITCH_SENSITIVITY = parseInt(e.target.value);
+          pitchSensitivityValue.textContent = PITCH_SENSITIVITY;
+          updateSoundFromActiveSpeed();
+          saveSettings();
+        });
+        maxFrequencySlider.addEventListener('input', (e) => {
+          MAX_FREQUENCY = parseInt(e.target.value);
+          maxFrequencyValue.textContent = `${MAX_FREQUENCY} Hz`;
+          updateSoundFromActiveSpeed();
+          saveSettings();
         });
 
-        minVolumeSlider.addEventListener('input', e => {
-            const percentage = parseInt(e.target.value);
-            MIN_VOLUME = percentage / 100;
-            minVolumeValue.textContent = `${percentage}%`;
-            updateSoundFromActiveSpeed();
-            saveSettings();
+        manualModeCheckbox.addEventListener('change', (e) => {
+          manualMode = e.target.checked;
+          manualSpeedSlider.disabled = !manualMode;
+          if (!manualMode) {
+            // Switched back to GPS
+            updateSound(lastKnownGpsSpeedMps);
+          }
+          saveSettings();
         });
 
-        volumeSensitivitySlider.addEventListener('input', e => {
-            const val = parseInt(e.target.value);
-            VOLUME_SENSITIVITY = val / 100;
-            volumeSensitivityValue.textContent = VOLUME_SENSITIVITY.toFixed(2);
-            updateSoundFromActiveSpeed();
-            saveSettings();
+        manualSpeedSlider.addEventListener('input', (e) => {
+          const speedKmh = parseInt(e.target.value);
+          manualSpeedValue.textContent = `${speedKmh} km/h`;
+          if (manualMode) {
+            const speedMps = speedKmh / 3.6;
+            updateSound(speedMps);
+          }
+          saveSettings();
         });
+      }
 
-        baseFrequencySlider.addEventListener('input', e => {
-            BASE_FREQUENCY = parseInt(e.target.value);
-            baseFrequencyValue.textContent = `${BASE_FREQUENCY} Hz`;
-            // Instantly update the base pitch (no ramp needed here)
-            if (audioSource) {
-                if (audioSource.isNoise) {
-                    audioSource.filter.frequency.setValueAtTime(BASE_FREQUENCY, audioContext.currentTime);
-                } else {
-                    audioSource.source.frequency.setValueAtTime(BASE_FREQUENCY, audioContext.currentTime);
-                }
-            }
-            updateSoundFromActiveSpeed();
-            saveSettings();
-        });
-        pitchSensitivitySlider.addEventListener('input', e => {
-            PITCH_SENSITIVITY = parseInt(e.target.value);
-            pitchSensitivityValue.textContent = PITCH_SENSITIVITY;
-            updateSoundFromActiveSpeed();
-            saveSettings();
-        });
-        maxFrequencySlider.addEventListener('input', e => {
-            MAX_FREQUENCY = parseInt(e.target.value);
-            maxFrequencyValue.textContent = `${MAX_FREQUENCY} Hz`;
-            updateSoundFromActiveSpeed();
-            saveSettings();
-        });
-
-        manualModeCheckbox.addEventListener('change', e => {
-            manualMode = e.target.checked;
-            manualSpeedSlider.disabled = !manualMode;
-            if (!manualMode) { // Switched back to GPS
-                updateSound(lastKnownGpsSpeedMps);
-            }
-            saveSettings();
-        });
-
-        manualSpeedSlider.addEventListener('input', e => {
-            const speedKmh = parseInt(e.target.value);
-            manualSpeedValue.textContent = `${speedKmh} km/h`;
-            if (manualMode) {
-                const speedMps = speedKmh / 3.6;
-                updateSound(speedMps);
-            }
-            saveSettings();
-        });
-    }
-
-    initializeControls();
-    startButton.addEventListener('click', startSound);
-    stopButton.addEventListener('click', stopSound);
-</script>
-
-</body>
+      initializeControls();
+      startButton.addEventListener('click', startSound);
+      stopButton.addEventListener('click', stopSound);
+    </script>
+  </body>
 </html>

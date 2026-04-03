@@ -6,7 +6,7 @@ githost: https://raw.githubusercontent.com/
 branch: main
 readmeFile: README.md
 type: blog
-title: "Visual Systems Thinking: Mapping Complex Kubernetes Architectures"
+title: 'Visual Systems Thinking: Mapping Complex Kubernetes Architectures'
 date: 2025-05-20
 year: 2025
 month: May
@@ -42,9 +42,10 @@ Relying solely on `kubectl` outputs and raw YAML manifests is insufficient durin
 A background in **Electrical Engineering and DMX Integration** taught that a clear "Wiring Diagram" is a critical tool. This "Systems Thinking" was applied to the cloud-native infrastructure.
 
 **KubeDiagrams** was chosen to automate the generation of architectural maps. This strategy allowed for:
+
 1. **Bridge the Gap:** Translate abstract YAML definitions into intuitive visual diagrams that even non-technical stakeholders could understand.
 2. **Standardize Documentation:** Use **PlantUML** as a universal language for system architecture, ensuring that diagrams are as version-controlled as code.
-3. **Automate Reality:** Integrate diagram generation into CI/CD pipelines so that documentation always reflects the *actual* state of the cluster, not a stale "design goal."
+3. **Automate Reality:** Integrate diagram generation into CI/CD pipelines so that documentation always reflects the _actual_ state of the cluster, not a stale "design goal."
 
 ## Implementation: From Manifest to Map
 
@@ -64,9 +65,9 @@ This automated workflow ensures that when a developer joins the team, they don't
 
 The transition to visual systems mapping has delivered significant operational value:
 
-*   **Faster Incident Triage:** SREs can now pull up an instant map of the affected service's dependencies, reducing the time spent identifying "The Blast Radius" during a failure.
-*   **Reduced Cognitive Load:** By abstracting away the YAML syntax, engineering leads can focus on high-level architectural improvements rather than getting lost in the details.
-*   **Accurate Documentation:** "Documentation Drift" common in large organizations was eliminated. If the YAML changes, the diagram changes—period.
+- **Faster Incident Triage:** SREs can now pull up an instant map of the affected service's dependencies, reducing the time spent identifying "The Blast Radius" during a failure.
+- **Reduced Cognitive Load:** By abstracting away the YAML syntax, engineering leads can focus on high-level architectural improvements rather than getting lost in the details.
+- **Accurate Documentation:** "Documentation Drift" common in large organizations was eliminated. If the YAML changes, the diagram changes—period.
 
 ## Conclusion
 

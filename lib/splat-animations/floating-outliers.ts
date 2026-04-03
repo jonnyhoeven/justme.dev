@@ -1,4 +1,4 @@
-import type { SplatAnimation, SplatParticle, AnimationEffect } from './types'
+import type { SplatAnimation, SplatParticle, AnimationEffect } from './types';
 
 /**
  * Floating Outliers
@@ -14,63 +14,63 @@ export const floatingOutliers: SplatAnimation = {
   name: 'Floating Outliers',
 
   init(particles: SplatParticle[]) {
-    const cx = 160
-    const cy = 160
+    const cx = 160;
+    const cy = 160;
 
     // Find max radius
-    let maxDist = 0
+    let maxDist = 0;
     for (const p of particles) {
-      const d = Math.sqrt((p.ox - cx) ** 2 + (p.oy - cy) ** 2)
-      if (d > maxDist) maxDist = d
+      const d = Math.sqrt((p.ox - cx) ** 2 + (p.oy - cy) ** 2);
+      if (d > maxDist) maxDist = d;
     }
 
     for (const p of particles) {
       // User requested 20% of total points to be tagged as outliers.
-      p.isOutlier = Math.random() < 0.20
-      
+      p.isOutlier = Math.random() < 0.2;
+
       // Each particle gets a unique animation phase for its drift/wobble
-      p.outlierPhase = Math.random() * Math.PI * 2
-      p.wanderFreq = 0.0003 + Math.random() * 0.0005
-      p.wanderAmp = 6 + Math.random() * 8
-      p.coreWobblePhase = Math.random() * Math.PI * 2
+      p.outlierPhase = Math.random() * Math.PI * 2;
+      p.wanderFreq = 0.0003 + Math.random() * 0.0005;
+      p.wanderAmp = 6 + Math.random() * 8;
+      p.coreWobblePhase = Math.random() * Math.PI * 2;
     }
   },
 
   apply(p: SplatParticle, elapsed: number): AnimationEffect {
     // ---- Outlier behavior: Active Wandering Satellite ----
     if (p.isOutlier) {
-      const phase = p.outlierPhase ?? 0
-      const freq = p.wanderFreq ?? 0.0004
-      const amp = p.wanderAmp ?? 10
-      
+      const phase = p.outlierPhase ?? 0;
+      const freq = p.wanderFreq ?? 0.0004;
+      const amp = p.wanderAmp ?? 10;
+
       // Slow, organic wander (drift)
-      const dx = Math.sin(elapsed * freq + phase) * amp
-      const dy = Math.cos(elapsed * freq * 0.7 + phase) * amp
-      
+      const dx = Math.sin(elapsed * freq + phase) * amp;
+      const dy = Math.cos(elapsed * freq * 0.7 + phase) * amp;
+
       // Very weak spring for a 'satellite' feel
-      const springScale = 0.08
-      
+      const springScale = 0.08;
+
       // Rare velocity pulse (every ~20s)
-      let nudgeVx = 0
-      let nudgeVy = 0
+      let nudgeVx = 0;
+      let nudgeVy = 0;
       if (Math.random() < 0.0008) {
-        nudgeVx = (Math.random() - 0.5) * 0.8
-        nudgeVy = (Math.random() - 0.5) * 0.8
+        nudgeVx = (Math.random() - 0.5) * 0.8;
+        nudgeVy = (Math.random() - 0.5) * 0.8;
       }
 
-      return { dx, dy, springScale, nudgeVx, nudgeVy }
+      return { dx, dy, springScale, nudgeVx, nudgeVy };
     }
 
     // ---- Core behavior: Subtle Shiver/Wobble (feels living but stable) ----
-    const wobblePhase = p.coreWobblePhase ?? 0
+    const wobblePhase = p.coreWobblePhase ?? 0;
     // Shorter cycle (2s) but tiny amplitude (0.5px)
-    const wobbleX = Math.sin(elapsed * 0.003 + wobblePhase) * 0.5
-    const wobbleY = Math.cos(elapsed * 0.002 + wobblePhase) * 0.5
+    const wobbleX = Math.sin(elapsed * 0.003 + wobblePhase) * 0.5;
+    const wobbleY = Math.cos(elapsed * 0.002 + wobblePhase) * 0.5;
 
-    return { 
-      dx: wobbleX, 
+    return {
+      dx: wobbleX,
       dy: wobbleY,
       springScale: 1.0
-    }
-  },
-}
+    };
+  }
+};

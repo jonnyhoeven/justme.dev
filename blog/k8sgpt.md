@@ -6,7 +6,7 @@ githost: https://raw.githubusercontent.com/
 branch: main
 readmeFile: README.md
 type: blog
-title: "AI-Assisted SRE: Spearheading Triage with K8sGPT and Local Inference"
+title: 'AI-Assisted SRE: Spearheading Triage with K8sGPT and Local Inference'
 date: 2024-11-01
 year: 2024
 month: Nov
@@ -33,7 +33,7 @@ fetchML: false
 
 ## The Challenge: The "MTTR" Race in Mission-Critical Systems
 
-In high-stakes environments where every second counts during an incident, SREs are often faced with a "Wall of Noise": hundreds of events, log streams, and failing health checks. Identifying the *true* root cause—whether it’s a misconfigured ServiceMesh or a resource-constrained node—is the primary bottleneck for Mean Time to Resolution (MTTR).
+In high-stakes environments where every second counts during an incident, SREs are often faced with a "Wall of Noise": hundreds of events, log streams, and failing health checks. Identifying the _true_ root cause—whether it’s a misconfigured ServiceMesh or a resource-constrained node—is the primary bottleneck for Mean Time to Resolution (MTTR).
 
 The current effort is to integrate a "First Responder" into the cluster—a tool that can scan for anomalies and provide instant, expert-level diagnostic summaries before a human engineer even opens a terminal.
 
@@ -56,14 +56,16 @@ k8sgpt analyze --namespace prod-core --explain
 ```
 
 ### From Logs to Solutions
+
 The goal is to move from "What happened?" to "How to fix it?" instantly. Instead of a generic error message, the SRE team receives a natural-language diagnostic hint:
+
 > "The pod `core-api-xxxx` is failing because it cannot reach the PostgreSQL database. The environment variable `DB_HOST` is pointing to an internal service that does not exist in this namespace. Recommendation: Update the ConfigMap to reference the correct service name."
 
 Spearheading AI-assisted operations is designed to deliver measurable results:
 
-*   **Accelerated Triage:** The initial diagnosis phase is reduced from 10-15 minutes of manual exploration to just a few seconds.
-*   **Empowered Tier-1 Support:** Enabling engineers to handle complex incidents more confidently with the context provided by AI diagnostic hints.
-*   **Zero-Leak Privacy:** Ensuring that no sensitive cluster topology or proprietary code ever leaves the internal network—a key requirement for the **NIS2 compliance** strategy.
+- **Accelerated Triage:** The initial diagnosis phase is reduced from 10-15 minutes of manual exploration to just a few seconds.
+- **Empowered Tier-1 Support:** Enabling engineers to handle complex incidents more confidently with the context provided by AI diagnostic hints.
+- **Zero-Leak Privacy:** Ensuring that no sensitive cluster topology or proprietary code ever leaves the internal network—a key requirement for the **NIS2 compliance** strategy.
 
 ## Conclusion
 

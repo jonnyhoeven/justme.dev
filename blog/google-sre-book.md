@@ -1,6 +1,6 @@
 ---
 type: blog
-title: "Beyond the Theory: Implementing Google SRE Principles in High-Stakes Environments"
+title: 'Beyond the Theory: Implementing Google SRE Principles in High-Stakes Environments'
 date: 2024-10-23
 year: 2024
 month: Oct
@@ -59,8 +59,8 @@ spec:
             / sum(rate(http_request_duration_seconds_count[1h]))) > 0.001
           for: 5m
           labels:
-            severity: "critical"
-            team: "sre-core"
+            severity: 'critical'
+            team: 'sre-core'
 ```
 
 This rule doesn't just trigger an alert; it subtracts from the **Error Budget**. If the budget burns too fast, **ArgoCD** pipelines automatically freeze non-emergency deployments until stability is restored.
@@ -69,9 +69,9 @@ This rule doesn't just trigger an alert; it subtracts from the **Error Budget**.
 
 The practical application of SRE principles in engineering teams has led to:
 
-*   **Aligned Incentives:** Developers are now proactive about performance because they know an exhausted error budget will stall their features.
-*   **Reduced MTTR:** Blameless postmortems led to structural improvements, such as automated circuit breaking and enhanced eBPF-based networking insights with **Cilium**.
-*   **Predictable Scaling:** Quantifiable metrics determine exactly how much "unreliability" can be afforded, allowing for the adoption of early technology (like **BigQuery ML** or **Ollama AI**) without endangering core services.
+- **Aligned Incentives:** Developers are now proactive about performance because they know an exhausted error budget will stall their features.
+- **Reduced MTTR:** Blameless postmortems led to structural improvements, such as automated circuit breaking and enhanced eBPF-based networking insights with **Cilium**.
+- **Predictable Scaling:** Quantifiable metrics determine exactly how much "unreliability" can be afforded, allowing for the adoption of early technology (like **BigQuery ML** or **Ollama AI**) without endangering core services.
 
 ## Conclusion
 
