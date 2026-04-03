@@ -26,6 +26,7 @@ const currentAnimation = ref<SplatAnimation | null>(null)
 const isPopping = ref(false)
 const isCollapsing = ref(false)
 const isManualMode = ref(false)
+const isMobileView = ref(false)
 const shiverIntensity = ref(0)
 const boomOrigin = { x: 0, y: 0 }
 let boomStartTime = 0
@@ -98,6 +99,7 @@ onMounted(async () => {
 
   // 3. Layout Handlers
   const resize = () => {
+    isMobileView.value = typeof window !== 'undefined' && window.innerWidth < 768
     if (!canvasRef.value) return
     const rect = canvasRef.value.parentElement?.getBoundingClientRect()
     if (rect && rect.width > 0) {
@@ -130,6 +132,11 @@ onMounted(async () => {
   
   // 6. Physics Render Loop
   const render = (time: number) => {
+    if (isMobileView.value) {
+      animationId = requestAnimationFrame(render)
+      return
+    }
+
     if (!ctx) return
     ctx.clearRect(0, 0, width, height)
     
@@ -243,6 +250,10 @@ onMounted(async () => {
       if (btn) {
         // --- Proximity Shiver (Hot/Cold) ---
         window.addEventListener('mousemove', (e) => {
+          if (isMobileView.value) {
+            shiverIntensity.value = 0
+            return
+          }
           const rect = btn.getBoundingClientRect()
           const bx = rect.left + rect.width / 2
           const by = rect.top + rect.height / 2
@@ -260,6 +271,7 @@ onMounted(async () => {
         })
 
         btn.onclick = () => {
+          if (isMobileView.value) return
           if (isManualMode.value) {
             btn.innerText = 'it!'
             btn.style.color = ''
@@ -313,7 +325,11 @@ const onDoubleClick = (e: MouseEvent) => {
 </script>
 
 <template>
+  <div v-show="isMobileView" class="HeroSplat fallback-image">
+    <img src="/images/ava.webp" alt="Justme.dev Avatar" />
+  </div>
   <div 
+    v-show="!isMobileView"
     class="HeroSplat image-src" 
     @mousemove="onMouseMove" 
     @mouseleave="onMouseLeave" 
@@ -346,6 +362,22 @@ const onDoubleClick = (e: MouseEvent) => {
 
 @media (max-width: 959px) {
   .HeroSplat { margin-top: 24px; }
+}
+
+.fallback-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 90pt;
+}
+
+.fallback-image img {
+  width: 100%;
+  max-width: 320px;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 canvas {
