@@ -13,7 +13,6 @@ import { flubberMotion } from './flubber-motion'
 import { ferrofluid } from './ferrofluid'
 import { solarFlare } from './solar-flare'
 import { quantumEntanglement } from './quantum-entanglement'
-import { eventHorizon } from './event-horizon'
 import { digitalGlitch } from './digital-glitch'
 import type { SplatAnimation } from './types'
 
@@ -33,7 +32,6 @@ export const animations: SplatAnimation[] = [
   ferrofluid,
   solarFlare,
   quantumEntanglement,
-  eventHorizon,
   digitalGlitch,
 ]
 
