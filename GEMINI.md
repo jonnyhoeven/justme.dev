@@ -25,8 +25,8 @@ This file provides a consolidated overview of the **justme.dev** project for AI 
 | Purpose           | Command                        | Description                                                            |
 | :---------------- | :----------------------------- | :--------------------------------------------------------------------- |
 | **Development**   | `npm run docs:dev`             | Start VitePress dev server with Hot Module Replacement (HMR).          |
-| **ETL (Content)** | `npm run docs:generate`        | Run Python script to fetch/transform remote markdown into `projects/`. |
-| **ETL (Splats)**  | `npm run docs:generate-splats` | (Optional) Generate/process splat-related assets.                      |
+| **ETL (Content)** | `npm run docs:generate`        | Run Python script (via Nix Python) to fetch/transform remote markdown.  |
+| **ETL (Splats)**  | `npm run docs:generate-splats` | Generate/process splat-related assets.                                 |
 | **Build**         | `npm run docs:build`           | Compile static site for production.                                    |
 | **Preview**       | `npm run docs:preview`         | Locally preview the production build.                                  |
 | **Linting**       | `npm run lint`                 | Run ESLint with auto-fix enabled.                                      |
@@ -89,7 +89,7 @@ graph TD
 
 - **🚫 DON'T** edit files in the `projects/` directory directly. They are overwritten by the ETL script.
 - **🚫 DON'T** install new CSS frameworks (Tailwind, UnoCSS) without explicit user permission.
-- **🚫 DON'T** ignore the `.venv` requirement for Python scripts. Always use the virtual environment.
+- **🚫 DON'T** bypass the Nix environment. Always ensure `direnv` has loaded the Nix Flake.
 
 ---
 
@@ -97,7 +97,7 @@ graph TD
 
 To maintain code quality and consistency, all agents **MUST** follow these rules:
 
-1.  **Python Environment Awareness**: Before running any script in `scripts/`, ensure the Python virtual environment (`.venv`) is activated and dependencies are installed via `pip install -r requirements.txt`.
+1.  **Nix Environment Awareness**: This project uses a Nix Flake + `direnv`. Ensure you have `direnv allow`ed the environment. System dependencies (Node 22, Python, ImageMagick) are managed here.
 2.  **Mandatory Cleanup**: Before marking a task as complete, you **MUST** run:
     ```bash
     npm run format && npm run lint

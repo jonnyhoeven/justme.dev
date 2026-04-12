@@ -26,41 +26,27 @@ Scalability: Stateless architecture capable of handling high traffic loads via C
 
 ## Prerequisites
 
-Ensure your environment meets the following requirements for local development:
+This project utilizes a **Nix Flake** and **direnv** to manage a fully declarative development environment. This ensures that Node.js, Python (with libraries), and ImageMagick are automatically provisioned and kept consistent across all machines and CI/CD.
 
-### Node.js Environment
+### 1. Install Nix & Direnv
+If you don't have them installed:
+- [Install Nix](https://nixos.org/download/)
+- [Install direnv](https://direnv.net/docs/installation.html)
 
-Managed via `nvm` for version consistency.
-
-```bash
-# Install nvm (if not present)
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-
-# Install and use the required Node.js version
-nvm install
-nvm use
-```
-
-### Python Environment
-
-Required for the content aggregation pipeline.
+### 2. Enter the Environment
+Once installed, simply `cd` into the project directory and allow the environment:
 
 ```bash
-# Set up a virtual environment
-sudo apt install python3-venv
-python3 -m venv .venv
-source .venv/bin/activate
-
-# Install dependencies
-pip install --upgrade pip
-pip install -r requirements.txt
+direnv allow
 ```
 
-### Project Dependencies
+The environment will automatically load:
+- **Node.js 22**
+- **Python 3** (pre-configured with `pyyaml` and `requests`)
+- **ImageMagick** (for local image processing)
+- **Ruff** (for linting)
 
+### 3. Project Dependencies
 ```bash
 npm install
 ```
@@ -101,13 +87,7 @@ npm run docs:preview
 
 ### Deployment Strategy
 
-Continuous Deployment is managed via GitHub Actions. Commits to the `main` branch trigger
-the [deploy workflow](https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml), which executes the
-following pipeline:
-
-1. Generate: Aggregates latest content from source repositories.
-2. Build: Compiles static assets.
-3. Deploy: Publishes artifacts to GitHub Pages.
+Continuous Deployment is managed via GitHub Actions executing inside a Nix environment. Commits to the `main` branch trigger the [deploy workflow](https://github.com/jonnyhoeven/justme.dev/actions/workflows/deploy.yml), which ensures the production build environment exactly matches the local development state.
 
 ## Configuration & Extensibility
 

@@ -1,5 +1,5 @@
 {
-  description: "justme.dev development environment";
+  description = "justme.dev development environment";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -13,37 +13,36 @@
           inherit system;
           config.allowUnfree = true;
         };
+        
+        # Base packages needed for both local dev and CI
+        basePackages = with pkgs; [
+          nodejs_22
+          (python3.withPackages (ps: with ps; [
+            pyyaml
+            requests
+          ]))
+          ruff
+        ];
       in
       {
-        devShells.default = pkgs.mkShell {
-          nativeBuildInputs = with pkgs; [
-            # Node.js environment
-            nodejs_22
-            # Build tools
-            pkg-config
-            libvips
-            
-            # Python environment for ETL
-            (python3.withPackages (ps: with ps; [
-              pyyaml
-              requests
-            ]))
-            ruff
-          ];
+        devShells = {
+          # Local development shell (includes ImageMagick)
+          default = pkgs.mkShell {
+            nativeBuildInputs = basePackages ++ [ pkgs.imagemagick ];
+            shellHook = ''
+              echo "❄️  justme.dev Nix DevShell (Local) Loaded"
+              echo "Node: $(node --version) | Python: $(python3 --version) | ImageMagick: $(convert -version | head -n 1)"
+              export PATH="$PWD/node_modules/.bin:$PATH"
+            '';
+          };
 
-          shellHook = ''
-            echo "❄️  justme.dev Nix DevShell Loaded"
-            echo "Node version: $(node --version)"
-            echo "Python version: $(python3 --version)"
-            
-            # Ensure local node_modules/.bin is in PATH
-            export PATH="$PWD/node_modules/.bin:$PATH"
-            
-            # Reminder for Python virtual environment if needed
-            if [ ! -d ".venv" ]; then
-              echo "💡 Note: Python .venv not found. Run 'python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt' if you prefer a local venv."
-            fi
-          '';
+          # Lightweight CI shell (excludes ImageMagick)
+          ci = pkgs.mkShell {
+            nativeBuildInputs = basePackages;
+            shellHook = ''
+              echo "❄️  justme.dev Nix CI Shell Loaded"
+            '';
+          };
         };
       });
 }
