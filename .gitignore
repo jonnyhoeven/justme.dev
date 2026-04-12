@@ -9,7 +9,7 @@
 /generate/models.json
 /openai/response/*.bin
 /projects/*.md
-/.venv
+/venv/
 /pyvenv.cfg
 /input_images/
 /bin/
