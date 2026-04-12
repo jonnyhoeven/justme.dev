@@ -29,11 +29,14 @@ Scalability: Stateless architecture capable of handling high traffic loads via C
 This project utilizes a **Nix Flake** and **direnv** to manage a fully declarative development environment. This ensures that Node.js, Python (with libraries), and ImageMagick are automatically provisioned and kept consistent across all machines and CI/CD.
 
 ### 1. Install Nix & Direnv
+
 If you don't have them installed:
+
 - [Install Nix](https://nixos.org/download/)
 - [Install direnv](https://direnv.net/docs/installation.html)
 
 ### 2. Enter the Environment
+
 Once installed, simply `cd` into the project directory and allow the environment:
 
 ```bash
@@ -41,12 +44,14 @@ direnv allow
 ```
 
 The environment will automatically load:
+
 - **Node.js 22**
 - **Python 3** (pre-configured with `pyyaml` and `requests`)
 - **ImageMagick** (for local image processing)
 - **Ruff** (for linting)
 
 ### 3. Project Dependencies
+
 ```bash
 npm install
 ```

@@ -25,7 +25,7 @@ This file provides a consolidated overview of the **justme.dev** project for AI 
 | Purpose           | Command                        | Description                                                            |
 | :---------------- | :----------------------------- | :--------------------------------------------------------------------- |
 | **Development**   | `npm run docs:dev`             | Start VitePress dev server with Hot Module Replacement (HMR).          |
-| **ETL (Content)** | `npm run docs:generate`        | Run Python script (via Nix Python) to fetch/transform remote markdown.  |
+| **ETL (Content)** | `npm run docs:generate`        | Run Python script (via Nix Python) to fetch/transform remote markdown. |
 | **ETL (Splats)**  | `npm run docs:generate-splats` | Generate/process splat-related assets.                                 |
 | **Build**         | `npm run docs:build`           | Compile static site for production.                                    |
 | **Preview**       | `npm run docs:preview`         | Locally preview the production build.                                  |

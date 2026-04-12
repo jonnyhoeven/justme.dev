@@ -29,11 +29,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Nix
-        uses: cachix/install-nix-action@v26
-
-      - name: Magic Nix Cache
-        uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: Install Nix & Setup Cache
+        uses: DeterminateSystems/determinate-nix-action@v3
 
       - name: Lint with Ruff
         run: nix develop .#ci --command ruff check .
