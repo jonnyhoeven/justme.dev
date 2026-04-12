@@ -1,9 +1,10 @@
-.env
-.vitepress/dist
-.vitepress/cache
-.vscode
-.idea
-.direnv
+/.env
+/.vitepress/dist
+/.vitepress/cache
+/.vscode
+/.idea
+/.direnv
+/.ruff_cache
 /node_modules/
 /generate/models.json
 /openai/response/*.bin
