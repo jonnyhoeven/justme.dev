@@ -66,6 +66,8 @@ export interface AnimationContext {
   offsetY: number;
   mouseX: number;
   mouseY: number;
+  /** Frequency data from the audio analyzer (0-255) */
+  audioData?: Uint8Array;
 }
 
 export interface SplatAnimation {

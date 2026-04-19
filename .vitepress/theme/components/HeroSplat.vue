@@ -7,6 +7,7 @@ import {
   type AnimationContext,
   type SplatAnimation
 } from '../../../lib/splat-animations';
+import useMusic from '../composables/useMusic';
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 let animationId: number;
@@ -25,13 +26,13 @@ const currentAnimationIndex = ref(0);
 const currentAnimation = ref<SplatAnimation | null>(null);
 const isPopping = ref(false);
 const isCollapsing = ref(false);
-const isManualMode = ref(false);
 const isMobileView = ref(false);
 const shiverIntensity = ref(0);
 const boomOrigin = { x: 0, y: 0 };
 let boomStartTime = 0;
 let startTime = performance.now();
 let cycleInterval: ReturnType<typeof setInterval>;
+const { audioData, isMusicVisible } = useMusic();
 
 /**
  * Cycle to the next animation.
@@ -45,9 +46,7 @@ const nextAnimation = () => {
   const animation = animations[currentAnimationIndex.value];
 
   // Use a technical but friendly log
-  console.log(
-    `🎨 Animation: ${animation.name} ${isManualMode.value ? '[MANUAL]' : '[AUTO]'}`
-  );
+  console.log(`🎨 Animation: ${animation.name}`);
 
   const w = canvasRef.value?.width || 320;
   const h = canvasRef.value?.height || 320;
@@ -159,7 +158,8 @@ onMounted(async () => {
       offsetX,
       offsetY,
       mouseX: mouse.x,
-      mouseY: mouse.y
+      mouseY: mouse.y,
+      audioData: audioData.value || undefined
     };
 
     if (!currentAnimation.value) return;
@@ -268,7 +268,7 @@ onMounted(async () => {
       if (btn) {
         // --- Proximity Shiver (Hot/Cold) ---
         window.addEventListener('mousemove', (e) => {
-          if (isMobileView.value) {
+          if (isMobileView.value || isMusicVisible.value) {
             shiverIntensity.value = 0;
             return;
           }
@@ -290,20 +290,17 @@ onMounted(async () => {
 
         btn.onclick = () => {
           if (isMobileView.value) return;
-          if (isManualMode.value) {
-            btn.innerText = 'it!';
-            btn.style.color = '';
-            btn.style.textDecorationColor = 'transparent';
-            isManualMode.value = false;
-            cycleInterval = setInterval(nextAnimation, 10000);
-            console.log('▶️ Auto-rotation re-enabled');
-          } else {
+          isMusicVisible.value = !isMusicVisible.value;
+          if (isMusicVisible.value) {
             btn.innerText = 'IT!';
             btn.style.color = 'var(--vp-c-brand)';
             btn.style.textDecorationColor = 'var(--vp-c-brand)';
-            isManualMode.value = true;
-            if (cycleInterval) clearInterval(cycleInterval);
-            console.log('⏹️ Auto-rotation disabled (Manual Mode ACTIVE)');
+            console.log('🎵 Music Easter Egg ACTIVE');
+          } else {
+            btn.innerText = 'it!';
+            btn.style.color = '';
+            btn.style.textDecorationColor = 'transparent';
+            console.log('🔇 Music Easter Egg INACTIVE');
           }
         };
       }
@@ -367,29 +364,6 @@ const onDoubleClick = (e: MouseEvent) => {
   >
     <canvas ref="canvasRef"></canvas>
   </div>
-
-  <!-- Manual Next Button (Easter Egg) -->
-  <button
-    v-if="isManualMode"
-    class="next-btn"
-    @click="nextAnimation"
-    title="Next Animation"
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2.5"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    >
-      <line x1="5" y1="12" x2="19" y2="12"></line>
-      <polyline points="12 5 19 12 12 19"></polyline>
-    </svg>
-  </button>
 </template>
 
 <style scoped>
@@ -427,47 +401,5 @@ canvas {
   width: 100%;
   height: 100%;
   display: block;
-}
-
-.next-btn {
-  position: absolute;
-  /* Position relative to the parent .image-container */
-  bottom: 0;
-  right: 0;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: rgba(20, 20, 20, 0.4);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 100;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-}
-
-.next-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: var(--vp-c-brand);
-  transform: scale(1.15) rotate(5deg);
-  color: var(--vp-c-brand);
-  box-shadow: 0 0 20px var(--vp-c-brand-soft);
-}
-
-.next-btn:active {
-  transform: scale(0.95);
-}
-
-@media (max-width: 959px) {
-  .next-btn {
-    bottom: 1rem;
-    right: 1rem;
-    width: 40px;
-    height: 40px;
-  }
 }
 </style>
