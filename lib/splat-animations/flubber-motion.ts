@@ -4,7 +4,6 @@ import type {
   AnimationEffect,
   AnimationContext
 } from './types';
-import { getAudioLevels } from './audio-utils';
 
 /**
  * Flubber Motion
@@ -34,8 +33,8 @@ export const flubberMotion: SplatAnimation = {
   ): AnimationEffect {
     const phase = p.breathPhaseOffset ?? 0;
     const ampMult = p.breathAmpMult ?? 1;
-    const { audioData, scale } = ctx;
-    const levels = getAudioLevels(audioData);
+    const { scale } = ctx;
+    const levels = ctx.audioLevels;
 
     // --- Audio Reactivity ---
     const audioBoost = levels.volume * 2.0;

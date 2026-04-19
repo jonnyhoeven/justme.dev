@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { SITE_CONSTANTS } from '../../constants';
 
 // Shared state for the music player easter egg
 export const useMusic = () => {
@@ -8,11 +9,7 @@ export const useMusic = () => {
   const audioData = ref<Uint8Array | null>(null);
   const currentTrackIndex = ref(0);
   const currentTime = ref(0);
-  const tracks = [
-    'Sappheiros - Dawn.mp3',
-    'Tokyowalker4 - Way Home by.mp3',
-    'PunchDeck - Neon Underworld.mp3'
-  ];
+  const tracks = SITE_CONSTANTS.MUSIC_TRACKS;
 
   // Actions
   const toggleVisibility = () => {

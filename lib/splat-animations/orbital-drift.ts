@@ -4,7 +4,6 @@ import type {
   AnimationEffect,
   AnimationContext
 } from './types';
-import { getAudioLevels } from './audio-utils';
 
 /**
  * Slow Orbital Drift
@@ -40,8 +39,8 @@ export const orbitalDrift: SplatAnimation = {
   ): AnimationEffect {
     const cx = p.orbitCx ?? 160;
     const cy = p.orbitCy ?? 160;
-    const { audioData, scale } = ctx;
-    const levels = getAudioLevels(audioData);
+    const { scale } = ctx;
+    const levels = ctx.audioLevels;
 
     // --- Smoothing & Reactive Timing ---
     const dt = elapsed - (p.lastElapsed ?? 0);
@@ -53,12 +52,12 @@ export const orbitalDrift: SplatAnimation = {
 
     // --- Dynamic Direction & Speed ---
     // We use a very slow oscillation to change direction every ~40-60 seconds
-    const oscillationSpeed = 0.0001 + levels.bass * 0.0005;
+    const oscillationSpeed = 0.0001 + levels.bass * 0.00005;
     const directionMult = Math.cos(elapsed * oscillationSpeed);
 
     const baseSpeed = p.orbitSpeed ?? 0.00005;
     // Speed up rotation based on smoothed volume, but respect the oscillating direction
-    const musicSpeedBoost = sVol * 0.002;
+    const musicSpeedBoost = sVol * 0.005;
     const currentSpeed = (baseSpeed + musicSpeedBoost) * directionMult;
 
     // Increment angle based on delta time

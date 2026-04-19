@@ -4,7 +4,6 @@ import type {
   AnimationEffect,
   AnimationContext
 } from './types';
-import { getAudioLevels } from './audio-utils';
 
 /**
  * Quantum Entanglement
@@ -48,8 +47,8 @@ export const quantumEntanglement: SplatAnimation = {
     ctx: AnimationContext,
     particles: SplatParticle[]
   ): AnimationEffect {
-    const { audioData, scale } = ctx;
-    const levels = getAudioLevels(audioData);
+    const { scale } = ctx;
+    const levels = ctx.audioLevels;
 
     // Individual decoupled drift - Bass increases the drift speed/amp
     // We use p.individualPhase to ensure they don't move in a rigid wave

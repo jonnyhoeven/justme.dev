@@ -4,7 +4,6 @@ import type {
   AnimationEffect,
   AnimationContext
 } from './types';
-import { getAudioLevels } from './audio-utils';
 
 /**
  * Digital Glitch
@@ -29,8 +28,8 @@ export const digitalGlitch: SplatAnimation = {
     ctx: AnimationContext
   ): AnimationEffect {
     const seed = p.glitchSeed ?? 0.5;
-    const { audioData, scale } = ctx;
-    const levels = getAudioLevels(audioData);
+    const { scale } = ctx;
+    const levels = ctx.audioLevels;
 
     // 1. Digital Signal Noise (Always present)
     // Faster, more jagged than traditional drift

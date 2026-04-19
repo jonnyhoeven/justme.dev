@@ -4,7 +4,6 @@ import type {
   AnimationEffect,
   AnimationContext
 } from './types';
-import { getAudioLevels } from './audio-utils';
 
 /**
  * Entangled Waveform / VU Meter
@@ -37,7 +36,7 @@ export const entangledWaveform: SplatAnimation = {
       return { dx: 0, dy: 0 };
     }
 
-    const levels = getAudioLevels(audioData);
+    const levels = ctx.audioLevels;
     const numBins = audioData.length;
 
     // Map ox (0-320) to frequency bin
@@ -80,8 +79,9 @@ export const entangledWaveform: SplatAnimation = {
     const driftX = Math.sin(time + p.ox * 0.05) * 4;
 
     // Color: Use base color and fade to white based on amplitude
-    const baseColors = p.color.split(',').map((c) => parseInt(c.trim()));
-    const [br, bg, bb] = baseColors;
+    const br = p.cr ?? 0;
+    const bg = p.cg ?? 0;
+    const bb = p.cb ?? 0;
 
     // Shift towards white (255, 255, 255) based on amplitude
     const r = Math.floor(br + (255 - br) * amplitude * 0.5);

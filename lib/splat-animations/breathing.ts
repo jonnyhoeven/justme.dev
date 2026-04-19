@@ -4,7 +4,6 @@ import type {
   AnimationEffect,
   AnimationContext
 } from './types';
-import { getAudioLevels } from './audio-utils';
 
 /**
  * Breathing / Pulse
@@ -34,8 +33,8 @@ export const breathing: SplatAnimation = {
     const amp = p.breathAmpMult ?? 1;
 
     // --- Audio Reactivity ---
-    const { audioData, scale } = ctx;
-    const levels = getAudioLevels(audioData);
+    const { scale } = ctx;
+    const levels = ctx.audioLevels;
     const audioBoost = levels.bass * 2.5; // Bass drives extra expand/contract
 
     // Base pulse (~8s) + individual variations + audio reaction

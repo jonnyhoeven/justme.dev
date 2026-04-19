@@ -4,7 +4,6 @@ import type {
   AnimationEffect,
   AnimationContext
 } from './types';
-import { getAudioLevels } from './audio-utils';
 
 /**
  * Dimensional Portal (3D Projection)
@@ -29,8 +28,8 @@ export const dimensionalPortal: SplatAnimation = {
     elapsed: number,
     ctx: AnimationContext
   ): AnimationEffect {
-    const { audioData, scale } = ctx;
-    const levels = getAudioLevels(audioData);
+    const { scale } = ctx;
+    const levels = ctx.audioLevels;
 
     // --- Smoothing ---
     p.lastElapsed = elapsed;
@@ -90,7 +89,9 @@ export const dimensionalPortal: SplatAnimation = {
     let colorOverride: string | undefined = undefined;
     if (z + zOffset > 0) {
       const brightness = Math.max(0.3, Math.min(1.2, 1 - z / 200));
-      const [r, g, b] = p.color.split(',').map(Number);
+      const r = p.cr ?? 0;
+      const g = p.cg ?? 0;
+      const b = p.cb ?? 0;
       colorOverride = `${Math.floor(r * brightness)}, ${Math.floor(g * brightness)}, ${Math.floor(b * brightness)}`;
     }
 

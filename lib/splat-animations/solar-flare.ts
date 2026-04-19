@@ -4,7 +4,7 @@ import type {
   AnimationEffect,
   AnimationContext
 } from './types';
-import { getAudioLevels, getPeak } from './audio-utils';
+import { getPeak } from './audio-utils';
 
 interface FlarePulse {
   startTime: number;
@@ -41,8 +41,8 @@ export const solarFlare: SplatAnimation = {
     elapsed: number,
     ctx: AnimationContext
   ): AnimationEffect {
-    const { audioData, scale, mouseX, mouseY } = ctx;
-    const levels = getAudioLevels(audioData);
+    const { scale, mouseX, mouseY } = ctx;
+    const levels = ctx.audioLevels;
     const audioPeak = getPeak(levels.bass, 0.5);
 
     // 1. One-shot update per frame to manage pulses
@@ -161,8 +161,9 @@ export const solarFlare: SplatAnimation = {
     // 4. Return Final Combined Effect
     if (bestStrength > 0.01) {
       // Use base color and increase brightness/whiteness based on bestStrength
-      const baseColors = p.color.split(',').map((c) => parseInt(c.trim()));
-      const [br, bg, bb] = baseColors;
+      const br = p.cr ?? 0;
+      const bg = p.cg ?? 0;
+      const bb = p.cb ?? 0;
 
       const r = Math.min(255, Math.floor(br + (255 - br) * bestStrength));
       const g = Math.min(255, Math.floor(bg + (255 - bg) * bestStrength));

@@ -4,7 +4,6 @@ import type {
   AnimationEffect,
   AnimationContext
 } from './types';
-import { getAudioLevels } from './audio-utils';
 
 /**
  * Ambient Wind Waves
@@ -32,8 +31,8 @@ export const windWaves: SplatAnimation = {
   ): AnimationEffect {
     const phase = p.wavePhaseOffset ?? 0;
     const ampMult = p.breathAmpMult ?? 1;
-    const { audioData, scale } = ctx;
-    const levels = getAudioLevels(audioData);
+    const { scale } = ctx;
+    const levels = ctx.audioLevels;
 
     const amplitude = (6.0 + levels.bass * 30.0) * ampMult;
     const frequency = 0.05; // spatial frequency

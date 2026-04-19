@@ -4,7 +4,6 @@ import type {
   AnimationEffect,
   AnimationContext
 } from './types';
-import { getAudioLevels } from './audio-utils';
 
 /**
  * Floating Outliers
@@ -34,8 +33,8 @@ export const floatingOutliers: SplatAnimation = {
     elapsed: number,
     ctx: AnimationContext
   ): AnimationEffect {
-    const { audioData, scale } = ctx;
-    const levels = getAudioLevels(audioData);
+    const { scale } = ctx;
+    const levels = ctx.audioLevels;
 
     // ---- Outlier behavior: Active Wandering Satellite ----
     if (p.isOutlier) {

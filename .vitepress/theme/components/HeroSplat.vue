@@ -8,6 +8,7 @@ import {
   type AnimationContext,
   type SplatAnimation
 } from '../../../lib/splat-animations';
+import { getAudioLevels } from '../../../lib/splat-animations/audio-utils';
 import useMusic from '../composables/useMusic';
 import { SITE_CONSTANTS } from '../../constants';
 
@@ -74,13 +75,19 @@ onMounted(async () => {
       }
 
       particles.push(
-        ...data.map((p: SplatParticle) => ({
-          ...p,
-          x: p.ox,
-          y: p.oy,
-          vx: 0,
-          vy: 0
-        }))
+        ...data.map((p: SplatParticle) => {
+          const [cr, cg, cb] = p.color.split(',').map(Number);
+          return {
+            ...p,
+            x: p.ox,
+            y: p.oy,
+            vx: 0,
+            vy: 0,
+            cr,
+            cg,
+            cb
+          };
+        })
       );
     }
   } catch (e) {
@@ -158,7 +165,8 @@ onMounted(async () => {
       offsetY,
       mouseX: mouse.x,
       mouseY: mouse.y,
-      audioData: audioData.value || undefined
+      audioData: audioData.value || undefined,
+      audioLevels: getAudioLevels(audioData.value || undefined)
     };
 
     if (!currentAnimation.value) return;

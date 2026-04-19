@@ -4,7 +4,6 @@ import type {
   AnimationEffect,
   AnimationContext
 } from './types';
-import { getAudioLevels } from './audio-utils';
 
 /**
  * Ferrofluid
@@ -33,8 +32,8 @@ export const ferrofluid: SplatAnimation = {
     ctx: AnimationContext
   ): AnimationEffect {
     const phase = p.breathPhaseOffset ?? 0;
-    const { audioData, scale, offsetX, offsetY } = ctx;
-    const levels = getAudioLevels(audioData);
+    const { scale, offsetX, offsetY } = ctx;
+    const levels = ctx.audioLevels;
 
     // --- Magnet Source Selection ---
     // If mouse is off-screen, fallback to a 'ghost magnet' that drifts in the center

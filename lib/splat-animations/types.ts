@@ -1,3 +1,5 @@
+import type { AudioLevels } from './audio-utils';
+
 /**
  * Shared types for the splat animation system.
  *
@@ -15,6 +17,11 @@ export interface SplatParticle {
   vy: number;
   color: string;
   mass: number;
+
+  /* ---- pre-parsed color channels (set during data load) ---- */
+  cr?: number;
+  cg?: number;
+  cb?: number;
 
   /* ---- animation-assigned (set during init) ---- */
   isOutlier?: boolean;
@@ -80,6 +87,8 @@ export interface AnimationContext {
   mouseY: number;
   /** Frequency data from the audio analyzer (0-255) */
   audioData?: Uint8Array;
+  /** Pre-computed audio levels (calculated once per frame) */
+  audioLevels: AudioLevels;
 }
 
 export interface SplatAnimation {
