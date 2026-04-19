@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
+import { useWindowSize } from '@vueuse/core';
 import {
   pickRandomAnimation,
   animations,
@@ -8,6 +9,7 @@ import {
   type SplatAnimation
 } from '../../../lib/splat-animations';
 import useMusic from '../composables/useMusic';
+import { SITE_CONSTANTS } from '../../constants';
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 let animationId: number;
@@ -24,12 +26,9 @@ let width = 320;
 let height = 320;
 const currentAnimationIndex = ref(0);
 const currentAnimation = ref<SplatAnimation | null>(null);
-const isPopping = ref(false);
-const isCollapsing = ref(false);
-const isMobileView = ref(false);
+const { width: windowWidth } = useWindowSize();
+const isMobileView = computed(() => windowWidth.value < 768);
 const shiverIntensity = ref(0);
-const boomOrigin = { x: 0, y: 0 };
-let boomStartTime = 0;
 let startTime = performance.now();
 let cycleInterval: ReturnType<typeof setInterval>;
 const { audioData, isMusicVisible } = useMusic();
@@ -39,8 +38,6 @@ const { audioData, isMusicVisible } = useMusic();
  * Accessible to both the auto-timer and the manual 'Next' button.
  */
 const nextAnimation = () => {
-  if (isPopping.value) return;
-
   currentAnimationIndex.value =
     (currentAnimationIndex.value + 1) % animations.length;
   const animation = animations[currentAnimationIndex.value];
@@ -54,6 +51,10 @@ const nextAnimation = () => {
   animation.init(particles, w, h);
   currentAnimation.value = animation;
   startTime = performance.now();
+
+  // Reset the auto-cycle timer
+  if (cycleInterval) clearInterval(cycleInterval);
+  cycleInterval = setInterval(nextAnimation, SITE_CONSTANTS.SPLAT_CYCLE_TIME);
 };
 
 onMounted(async () => {
@@ -104,8 +105,6 @@ onMounted(async () => {
 
   // 3. Layout Handlers
   const resize = () => {
-    isMobileView.value =
-      typeof window !== 'undefined' && window.innerWidth < 768;
     if (!canvasRef.value) return;
     const rect = canvasRef.value.parentElement?.getBoundingClientRect();
     if (rect && rect.width > 0) {
@@ -166,15 +165,9 @@ onMounted(async () => {
     const anim = currentAnimation.value;
 
     // Cache some values outside the particle loop for performance
-    const isPoppingVal = isPopping.value;
-    const isCollapsingVal = isCollapsing.value;
     const shiverInt = shiverIntensity.value;
     const hasShiver = shiverInt > 0.05;
     const vT = time * 0.1; // for shiver
-    const collapseT = isCollapsingVal ? time - boomStartTime : 0;
-    const collapseSpiralT = collapseT - 1000;
-    const collapseSpinFactor = 0.06 * Math.exp(-collapseSpiralT * 0.004);
-    const releaseFactor = Math.min(collapseSpiralT / 800, 1.0);
 
     // Repulsion params
     const rRange = isMobile ? repulsionRange * 0.7 : repulsionRange;
@@ -184,13 +177,10 @@ onMounted(async () => {
       const p = particles[i];
       const baseTargetOx = p.ox * scale + offsetX;
       const baseTargetOy = p.oy * scale + offsetY;
-      const effect = isPoppingVal
-        ? { dx: 0, dy: 0 }
-        : anim.apply(p, elapsed, animCtx, particles);
+      const effect = anim.apply(p, elapsed, animCtx, particles);
       const targetOx = baseTargetOx + effect.dx;
       const targetOy = baseTargetOy + effect.dy;
-      const effectiveSpring =
-        (isPoppingVal ? 0.2 : spring) * (effect.springScale ?? 1);
+      const effectiveSpring = spring * (effect.springScale ?? 1);
 
       const dxm = p.x - mouse.x;
       const dym = p.y - mouse.y;
@@ -200,7 +190,7 @@ onMounted(async () => {
       let fy = 0;
 
       // Optimized Repulsion (avoiding Sqrt if not needed)
-      if (!isPoppingVal && distSq < rRange * rRange && distSq > 0.01) {
+      if (distSq < rRange * rRange && distSq > 0.01) {
         const dist = Math.sqrt(distSq);
         const force = (rRange - dist) / rRange;
         fx += ((dxm / dist) * force * hForce) / p.mass;
@@ -219,25 +209,6 @@ onMounted(async () => {
         fy += vibe;
       }
 
-      // --- Singularity ---
-      if (isCollapsingVal) {
-        const bdx = p.x - boomOrigin.x;
-        const bdy = p.y - boomOrigin.y;
-        if (collapseT < 1000) {
-          const pStart = (p.glitchSeed ?? 0) * 300;
-          if (collapseT > pStart) {
-            const pull = Math.min((collapseT - pStart) / 400, 1.0);
-            fx += -bdx * 0.2 * pull;
-            fy += -bdy * 0.2 * pull;
-          }
-        } else {
-          fx += -bdy * collapseSpinFactor;
-          fy += bdx * collapseSpinFactor;
-          fx += -effectiveSpring * (p.x - targetOx) * (releaseFactor - 1);
-          fy += -effectiveSpring * (p.y - targetOy) * (releaseFactor - 1);
-        }
-      }
-
       if (effect.nudgeVx) fx += effect.nudgeVx;
       if (effect.nudgeVy) fy += effect.nudgeVy;
 
@@ -248,7 +219,8 @@ onMounted(async () => {
 
       const brushColor = effect.colorOverride ?? p.color;
       const brush = getBrush(brushColor);
-      const r = (brush.width / 2) * scale;
+      const sMult = effect.sizeMult ?? 1.0;
+      const r = (brush.width / 2) * scale * sMult;
       ctx.drawImage(brush, p.x - r, p.y - r, r * 2, r * 2);
     }
     animationId = requestAnimationFrame(render);
@@ -309,7 +281,7 @@ onMounted(async () => {
   hookTagline();
   setTimeout(hookTagline, 1000);
 
-  cycleInterval = setInterval(nextAnimation, 10000);
+  cycleInterval = setInterval(nextAnimation, SITE_CONSTANTS.SPLAT_CYCLE_TIME);
   requestAnimationFrame(render);
 });
 
@@ -325,27 +297,12 @@ const onMouseMove = (e: MouseEvent) => {
   mouse.x = e.clientX - rect.left;
   mouse.y = e.clientY - rect.top;
 };
-const onMouseDown = () => {
-  isPopping.value = true;
-};
-const onMouseUp = () => {
-  isPopping.value = false;
-};
 const onMouseLeave = () => {
   mouse.x = -9999;
   mouse.y = -9999;
-  isPopping.value = false;
 };
-const onDoubleClick = (e: MouseEvent) => {
-  if (!canvasRef.value) return;
-  const rect = canvasRef.value.getBoundingClientRect();
-  boomOrigin.x = e.clientX - rect.left;
-  boomOrigin.y = e.clientY - rect.top;
-  boomStartTime = performance.now();
-  isCollapsing.value = true;
-  setTimeout(() => {
-    isCollapsing.value = false;
-  }, 2200);
+const onClick = () => {
+  nextAnimation();
 };
 </script>
 
@@ -358,9 +315,7 @@ const onDoubleClick = (e: MouseEvent) => {
     class="HeroSplat image-src"
     @mousemove="onMouseMove"
     @mouseleave="onMouseLeave"
-    @mousedown="onMouseDown"
-    @mouseup="onMouseUp"
-    @dblclick="onDoubleClick"
+    @click="onClick"
   >
     <canvas ref="canvasRef"></canvas>
   </div>

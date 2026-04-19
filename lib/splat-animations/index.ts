@@ -14,6 +14,8 @@ import { ferrofluid } from './ferrofluid';
 import { solarFlare } from './solar-flare';
 import { quantumEntanglement } from './quantum-entanglement';
 import { digitalGlitch } from './digital-glitch';
+import { entangledWaveform } from './entangled-waveform';
+import { dimensionalPortal } from './dimensional-portal';
 import type { SplatAnimation } from './types';
 
 export type {
@@ -32,7 +34,9 @@ export const animations: SplatAnimation[] = [
   ferrofluid,
   solarFlare,
   quantumEntanglement,
-  digitalGlitch
+  digitalGlitch,
+  entangledWaveform,
+  dimensionalPortal
 ];
 
 /** Total number of available animations */

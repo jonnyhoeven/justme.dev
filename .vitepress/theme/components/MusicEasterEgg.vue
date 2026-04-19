@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onBeforeUnmount, watch } from 'vue';
+import { ref, onBeforeUnmount, watch, computed } from 'vue';
+import { useWindowSize } from '@vueuse/core';
 import useMusic from '../composables/useMusic';
 
 const {
@@ -8,12 +9,27 @@ const {
   setAudioData,
   setPlaying,
   currentTrackIndex,
+  currentTime,
   tracks,
+  setCurrentTime,
   nextTrack,
   prevTrack
 } = useMusic();
 
+const formattedTitle = computed(() => {
+  const track = tracks[currentTrackIndex.value];
+  if (!track) return '';
+  // Remove "justme - " or "justme — " from the beginning
+  const cleanName = track.replace(/^(justme\s*[-—]\s*)/i, '');
+  // Remove file extension
+  return cleanName.replace(/\.[^/.]+$/, '');
+});
+
+const { width: windowWidth } = useWindowSize();
+const isMobileView = computed(() => windowWidth.value < 768);
+
 const volume = ref(0.7);
+const isVolumeOpen = ref(false);
 const progress = ref(0);
 const audioRef = ref<HTMLAudioElement | null>(null);
 let audioContext: AudioContext | null = null;
@@ -32,9 +48,18 @@ const initAudio = () => {
   analyser = audioContext.createAnalyser();
   analyser.fftSize = 256;
 
+  // Create a gain node specifically for the analyser to boost signal for animations
+  const animationGain = audioContext.createGain();
+  animationGain.gain.value = 1.6;
+
   source = audioContext.createMediaElementSource(audioRef.value);
-  source.connect(analyser);
-  analyser.connect(audioContext.destination);
+
+  // Route 1: Boosted signal for animations
+  source.connect(animationGain);
+  animationGain.connect(analyser);
+
+  // Route 2: Direct signal for user output (affected by audio element volume)
+  source.connect(audioContext.destination);
 
   const bufferLength = analyser.frequencyBinCount;
   const dataArray = new Uint8Array(bufferLength);
@@ -59,13 +84,22 @@ const togglePlay = () => {
   if (isPlaying.value) {
     audioRef.value.pause();
   } else {
+    // Restore time if needed before playing
+    if (audioRef.value.currentTime === 0 && currentTime.value > 0) {
+      audioRef.value.currentTime = currentTime.value;
+    }
     audioRef.value.play();
   }
   setPlaying(!isPlaying.value);
 };
 
+const toggleVolume = () => {
+  isVolumeOpen.value = !isVolumeOpen.value;
+};
+
 const handleNext = () => {
   nextTrack();
+  progress.value = 0;
   if (isPlaying.value) {
     setTimeout(() => audioRef.value?.play(), 100);
   }
@@ -73,6 +107,7 @@ const handleNext = () => {
 
 const handlePrev = () => {
   prevTrack();
+  progress.value = 0;
   if (isPlaying.value) {
     setTimeout(() => audioRef.value?.play(), 100);
   }
@@ -80,8 +115,16 @@ const handlePrev = () => {
 
 const onTimeUpdate = () => {
   if (audioRef.value) {
-    progress.value =
-      (audioRef.value.currentTime / audioRef.value.duration) * 100 || 0;
+    const time = audioRef.value.currentTime;
+    setCurrentTime(time);
+    progress.value = (time / audioRef.value.duration) * 100 || 0;
+  }
+};
+
+const onLoadedMetadata = () => {
+  if (audioRef.value && currentTime.value > 0) {
+    audioRef.value.currentTime = currentTime.value;
+    progress.value = (currentTime.value / audioRef.value.duration) * 100 || 0;
   }
 };
 
@@ -90,7 +133,9 @@ const seek = (e: MouseEvent) => {
   const rect = bar.getBoundingClientRect();
   const percent = (e.clientX - rect.left) / rect.width;
   if (audioRef.value) {
-    audioRef.value.currentTime = percent * audioRef.value.duration;
+    const targetTime = percent * audioRef.value.duration;
+    audioRef.value.currentTime = targetTime;
+    setCurrentTime(targetTime);
   }
 };
 
@@ -100,19 +145,39 @@ watch(volume, (newVol) => {
   }
 });
 
+watch(isMusicVisible, (visible) => {
+  if (!visible) {
+    // If hidden, stop playing and cleanup
+    if (isPlaying.value) {
+      setPlaying(false);
+      audioRef.value?.pause();
+    }
+    isVolumeOpen.value = false;
+    cancelAnimationFrame(animationFrame);
+    if (audioContext) {
+      audioContext.close();
+      audioContext = null;
+      analyser = null;
+      source = null;
+    }
+  }
+});
+
 onBeforeUnmount(() => {
   cancelAnimationFrame(animationFrame);
   audioContext?.close();
+  setPlaying(false);
 });
 </script>
 
 <template>
   <Transition name="header-slide">
-    <div v-if="isMusicVisible" class="music-mini-player">
+    <div v-if="isMusicVisible && !isMobileView" class="music-mini-player">
       <audio
         ref="audioRef"
         :src="`/audio/${tracks[currentTrackIndex]}`"
         @timeupdate="onTimeUpdate"
+        @loadedmetadata="onLoadedMetadata"
         @ended="handleNext"
         crossorigin="anonymous"
       ></audio>
@@ -165,33 +230,84 @@ onBeforeUnmount(() => {
             <path d="M16 6h2v12h-2zm-10.5 12 8.5-6-8.5-6z" />
           </svg>
         </button>
+
+        <button
+          class="mini-btn volume-toggle"
+          :class="{ active: isVolumeOpen }"
+          @click.stop="toggleVolume"
+          type="button"
+          title="Volume"
+        >
+          <svg
+            v-if="volume === 0"
+            viewBox="0 0 24 24"
+            width="14"
+            height="14"
+            fill="currentColor"
+          >
+            <path
+              d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zM3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"
+            />
+          </svg>
+          <svg
+            v-else
+            viewBox="0 0 24 24"
+            width="14"
+            height="14"
+            fill="currentColor"
+          >
+            <path
+              d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
+            />
+          </svg>
+        </button>
       </div>
 
-      <div class="mini-info">
-        <div class="track-meta">
-          <div class="track-name-mini-wrap">
-            <span class="track-name-mini" :class="{ 'is-playing': isPlaying }">
-              JUSTME — {{ tracks[currentTrackIndex] }}
-            </span>
+      <div class="mini-content-area">
+        <Transition name="fade-slide" mode="out-in">
+          <!-- Track Info Area -->
+          <div v-if="!isVolumeOpen" class="mini-info" key="info">
+            <div class="track-meta">
+              <div class="track-name-mini-wrap">
+                <span
+                  class="track-name-mini"
+                  :class="{ 'is-playing': isPlaying }"
+                >
+                  {{ formattedTitle }}
+                </span>
+              </div>
+              <div class="mini-visualizer">
+                <div
+                  v-for="i in 4"
+                  :key="i"
+                  class="mini-bar"
+                  :style="{
+                    animationDelay: `${i * 0.1}s`,
+                    animationPlayState: isPlaying ? 'running' : 'paused'
+                  }"
+                ></div>
+              </div>
+            </div>
+            <div class="mini-progress-wrap" @click.stop="seek">
+              <div
+                class="mini-progress-bar"
+                :style="{ width: `${progress}%` }"
+              ></div>
+            </div>
           </div>
-          <div class="mini-visualizer">
-            <div
-              v-for="i in 4"
-              :key="i"
-              class="mini-bar"
-              :style="{
-                animationDelay: `${i * 0.1}s`,
-                animationPlayState: isPlaying ? 'running' : 'paused'
-              }"
-            ></div>
+
+          <!-- Volume Slider Area -->
+          <div v-else class="mini-volume-overlay" key="volume">
+            <input
+              type="range"
+              v-model.number="volume"
+              min="0"
+              max="1"
+              step="0.01"
+              class="volume-range-horizontal"
+            />
           </div>
-        </div>
-        <div class="mini-progress-wrap" @click.stop="seek">
-          <div
-            class="mini-progress-bar"
-            :style="{ width: `${progress}%` }"
-          ></div>
-        </div>
+        </Transition>
       </div>
     </div>
   </Transition>
@@ -199,7 +315,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .music-mini-player {
-  display: flex;
+  display: flex !important;
   align-items: center;
   gap: 12px;
   padding: 4px 12px;
@@ -209,21 +325,25 @@ onBeforeUnmount(() => {
   border: 1px solid var(--vp-c-divider);
   border-radius: 20px;
   height: 32px;
-  max-width: 260px;
+  width: 280px !important;
+  min-width: 280px !important;
+  flex-shrink: 0 !important;
   transition: all 0.3s ease;
   /* Centering logic when in nav-bar slots */
-  position: absolute;
+  position: fixed;
+  top: 16px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 10;
+  z-index: 100;
 }
 
-@media (max-width: 959px) {
+@media (max-width: 767px) {
   .music-mini-player {
     position: relative;
     left: 0;
     transform: none;
-    max-width: 150px;
+    width: 150px !important;
+    min-width: 150px !important;
     margin: 0 10px;
   }
 }
@@ -247,7 +367,8 @@ onBeforeUnmount(() => {
   transition: all 0.2s ease;
 }
 
-.mini-btn:hover {
+.mini-btn:hover,
+.mini-btn.active {
   color: var(--vp-c-brand);
   background: var(--vp-c-bg-mute);
 }
@@ -256,12 +377,73 @@ onBeforeUnmount(() => {
   color: var(--vp-c-text-1);
 }
 
-.mini-info {
+.mini-volume-wrap {
+  position: relative;
+}
+
+.mini-content-area {
   flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.mini-volume-overlay {
+  width: 100%;
+  padding-right: 8px;
+}
+
+.volume-range-horizontal {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  background: var(--vp-c-divider);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  accent-color: var(--vp-c-brand);
+}
+
+.volume-range-horizontal::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--vp-c-text-1);
+  border: 2px solid var(--vp-c-brand);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.volume-range-horizontal::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  background: var(--vp-c-brand);
+}
+
+/* Fade Slide Transition */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateX(10px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.mini-info {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 80px;
 }
 
 .track-meta {
@@ -299,7 +481,6 @@ onBeforeUnmount(() => {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   opacity: 0.8;
-  padding-left: 100%;
 }
 
 .track-name-mini.is-playing {
@@ -308,6 +489,9 @@ onBeforeUnmount(() => {
 
 @keyframes mini-marquee {
   0% {
+    transform: translateX(0);
+  }
+  50% {
     transform: translateX(0);
   }
   100% {
@@ -362,11 +546,5 @@ onBeforeUnmount(() => {
 .header-slide-leave-to {
   opacity: 0;
   transform: translateX(20px);
-}
-
-@media (max-width: 768px) {
-  .music-mini-player {
-    display: none; /* Hide in header on mobile to save space, or maybe move to a different slot */
-  }
 }
 </style>

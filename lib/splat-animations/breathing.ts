@@ -1,4 +1,10 @@
-import type { SplatAnimation, SplatParticle, AnimationEffect } from './types';
+import type {
+  SplatAnimation,
+  SplatParticle,
+  AnimationEffect,
+  AnimationContext
+} from './types';
+import { getAudioLevels } from './audio-utils';
 
 /**
  * Breathing / Pulse
@@ -18,21 +24,31 @@ export const breathing: SplatAnimation = {
     }
   },
 
-  apply(p: SplatParticle, elapsed: number): AnimationEffect {
+  apply(
+    p: SplatParticle,
+    elapsed: number,
+    ctx: AnimationContext
+  ): AnimationEffect {
     const phase = p.breathPhaseOffset ?? 0;
     const speed = p.breathSpeedMult ?? 1;
     const amp = p.breathAmpMult ?? 1;
 
-    // Base pulse (~8s) + individual variations
-    const breathCycle = Math.sin(elapsed * 0.0008 * speed + phase) * (12 * amp);
+    // --- Audio Reactivity ---
+    const { audioData, scale } = ctx;
+    const levels = getAudioLevels(audioData);
+    const audioBoost = levels.bass * 2.5; // Bass drives extra expand/contract
+
+    // Base pulse (~8s) + individual variations + audio reaction
+    const breathCycle =
+      Math.sin(elapsed * 0.0008 * speed + phase) * (12 * amp + audioBoost * 15);
 
     const cx = 160;
     const cy = 160;
     const angle = Math.atan2(p.oy - cy, p.ox - cx);
 
     return {
-      dx: Math.cos(angle) * breathCycle,
-      dy: Math.sin(angle) * breathCycle
+      dx: Math.cos(angle) * breathCycle * scale,
+      dy: Math.sin(angle) * breathCycle * scale
     };
   }
 };

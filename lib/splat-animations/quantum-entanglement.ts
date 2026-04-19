@@ -4,6 +4,7 @@ import type {
   AnimationEffect,
   AnimationContext
 } from './types';
+import { getAudioLevels } from './audio-utils';
 
 /**
  * Quantum Entanglement
@@ -19,6 +20,9 @@ export const quantumEntanglement: SplatAnimation = {
     // Find closest mirror-point partner for each particle (O(N^2) but small N)
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
+      p.individualPhase = Math.random() * Math.PI * 2;
+      p.pz = (Math.random() - 0.5) * 50; // Base depth offset
+
       const tx = 320 - p.ox;
       const ty = 320 - p.oy;
 
@@ -44,36 +48,63 @@ export const quantumEntanglement: SplatAnimation = {
     ctx: AnimationContext,
     particles: SplatParticle[]
   ): AnimationEffect {
-    // Basic gentle drift for everyone
-    const driftT = elapsed * 0.001;
-    const sdx = Math.sin(driftT + p.ox * 0.02) * 2;
-    const sdy = Math.cos(driftT + p.oy * 0.02) * 2;
+    const { audioData, scale } = ctx;
+    const levels = getAudioLevels(audioData);
 
-    // Quantum Effect: mirror the displacement of the partner
+    // Individual decoupled drift - Bass increases the drift speed/amp
+    // We use p.individualPhase to ensure they don't move in a rigid wave
+    const driftT = elapsed * (0.001 + levels.bass * 0.035);
+    const phase = (p.individualPhase ?? 0) + p.ox * 0.01;
+    const sdx = Math.sin(driftT + phase) * (2 + levels.bass * 30);
+    const sdy = Math.cos(driftT + phase * 1.5) * (2 + levels.bass * 30);
+
+    // Quantum Jitter: High-frequency noise driven by treble
+    const jitter = levels.treble * 10.0;
+    const jdx = (Math.random() - 0.5) * jitter;
+    const jdy = (Math.random() - 0.5) * jitter;
+
+    // Depth effect: Pulsing and music-driven depth
+    // Bass pushes things "forward" (larger), mid adds wobble
+    const zBase = p.pz ?? 0;
+    const zMusic =
+      levels.bass * 40 + Math.sin(elapsed * 0.003 + phase) * (levels.mid * 20);
+    let totalZ = zBase + zMusic;
+
+    // Quantum Effect: mirror the displacement AND depth of the partner
     let qdx = 0;
     let qdy = 0;
+    let qdz = 0;
 
     if (p.partnerIdx !== undefined && p.partnerIdx >= 0) {
       const partner = particles[p.partnerIdx];
-      // If partner has moved from their origin, we mirror that movement
-      // We look at their CURRENT x/y relative to their starting ox/oy (in screen space)
-      const scale = ctx.scale;
+      // Mirror displacement
       const p_targetOx = partner.ox * scale + ctx.offsetX;
       const p_targetOy = partner.oy * scale + ctx.offsetY;
 
-      // Displacement of partner from their base target
       const pdx = partner.x - p_targetOx;
       const pdy = partner.y - p_targetOy;
 
-      // Mirror the displacement (A moves right, B moves left)
       qdx = -pdx * 0.5;
       qdy = -pdy * 0.5;
+
+      // Mirror the music-driven depth change from partner (inverted)
+      const p_phase = (partner.individualPhase ?? 0) + partner.ox * 0.01;
+      const p_zMusic =
+        levels.bass * 40 +
+        Math.sin(elapsed * 0.003 + p_phase) * (levels.mid * 20);
+      qdz = -p_zMusic * 0.3;
     }
 
+    totalZ += qdz;
+
+    // Perspective size multiplier
+    const sizeMult = Math.max(0.4, Math.min(2.5, 1.0 + totalZ / 150));
+
     return {
-      dx: sdx * ctx.scale + qdx,
-      dy: sdy * ctx.scale + qdy,
-      springScale: 0.8 // Slightly looser to allow the mirrored movement to stay visible
+      dx: (sdx + jdx) * scale + qdx,
+      dy: (sdy + jdy) * scale + qdy,
+      sizeMult: sizeMult,
+      springScale: 0.7 - levels.bass * 0.3 // Looser on bass drops
     };
   }
 };

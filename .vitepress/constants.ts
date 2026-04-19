@@ -20,5 +20,6 @@ export const SITE_CONSTANTS = {
     LINKEDIN: 'https://www.linkedin.com/in/jonnyhoeven/',
     GOOGLE_DEV: 'https://g.dev/jonnyvanderhoeven',
     REPO: 'https://github.com/jonnyhoeven/justme.dev'
-  }
+  },
+  SPLAT_CYCLE_TIME: 20000
 };

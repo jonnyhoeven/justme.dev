@@ -4,9 +4,10 @@ import type {
   AnimationEffect,
   AnimationContext
 } from './types';
+import { getAudioLevels } from './audio-utils';
 
 /**
- * Digital Glitch (Lightning Spike Edition)
+ * Digital Glitch
  *
  * High-intensity, jittery corruption.
  * When a glitch hits, ALL particles spike in random, jagged directions
@@ -18,7 +19,7 @@ export const digitalGlitch: SplatAnimation = {
   init(particles: SplatParticle[]) {
     for (const p of particles) {
       p.glitchSeed = Math.random();
-      p.glitchSensitivity = 0.5 + Math.random() * 0.5;
+      p.glitchSensitivity = 0.8 + Math.random() * 0.5;
     }
   },
 
@@ -29,62 +30,66 @@ export const digitalGlitch: SplatAnimation = {
   ): AnimationEffect {
     const seed = p.glitchSeed ?? 0.5;
     const { audioData, scale } = ctx;
+    const levels = getAudioLevels(audioData);
 
-    // 1. Chaotic Signal Noise base
-    const baseT = elapsed * 0.003;
-    const noiseX = Math.sin(baseT + seed * 20) * 2;
-    const noiseY = Math.cos(baseT + seed * 20) * 2;
+    // 1. Digital Signal Noise (Always present)
+    // Faster, more jagged than traditional drift
+    const baseT = elapsed * 0.01;
+    const noisePhase = seed * 100;
+
+    // Low-frequency drift (the "signal float")
+    const floatX = Math.sin(elapsed * 0.001 + noisePhase) * 2;
+    const floatY = Math.cos(elapsed * 0.0008 + noisePhase) * 2;
+
+    // High-frequency digital shiver (the "static")
+    const shiverX =
+      (Math.sin(baseT + noisePhase) + (Math.random() - 0.5)) * 1.5;
+    const shiverY =
+      (Math.cos(baseT * 1.2 + noisePhase) + (Math.random() - 0.5)) * 1.5;
 
     // --- Audio Reactivity ---
-    let audioGlitchFactor = 0;
-    let audioJitter = 0;
+    const audioGlitchFactor = Math.pow(levels.bass, 2) * 1.5;
+    const audioJitter = levels.treble * 18; // Slightly more sensitivity
 
-    if (audioData) {
-      // Bass frequencies (indices 2-6) drive the glitching
-      const bass = (audioData[2] + audioData[4] + audioData[6]) / 3;
-      audioGlitchFactor = Math.pow(bass / 255, 2); // Exponent for sharper peaks
-
-      // High frequencies (indices 40-80) drive tiny jitter
-      const treble = (audioData[40] + audioData[60] + audioData[80]) / 3;
-      audioJitter = (treble / 255) * 15;
-    }
-
-    // 2. Multi-stage Glitch Window
+    // 2. Multi-stage Glitch Window (Signal Corruption)
     const pattern =
-      Math.sin(elapsed * 0.004) +
-      Math.sin(elapsed * 0.009) +
-      audioGlitchFactor * 1.5;
-    const isGlitching = pattern > 1.7;
+      Math.sin(elapsed * 0.004) + Math.sin(elapsed * 0.009) + audioGlitchFactor;
+    const isGlitching = pattern > 1.9;
 
     let gdx = 0;
     let gdy = 0;
-    let color: string | undefined = undefined;
     let springScale = 1.0;
+    let sizeMult = 1.0;
 
     if (isGlitching) {
       springScale = 0.01;
-      // High-intensity spike
-      gdx = (Math.random() - 0.5) * (40 + audioJitter * 2);
-      gdy = (Math.random() - 0.5) * (10 + audioJitter);
-      if (audioGlitchFactor > 0.6) {
-        color = '255, 255, 255'; // Flash white on peaks
-      }
+      // High-intensity signal spike
+      gdx = (Math.random() - 0.5) * (45 + audioJitter * 2.5);
+      gdy = (Math.random() - 0.5) * (12 + audioJitter);
+      sizeMult = 0.8 + Math.random() * 0.4; // Glitchy size flickering
     } else {
-      const nearGlitch = pattern > 1.5;
-      springScale = nearGlitch ? 0.3 : 1.2;
+      const nearGlitch = pattern > 1.4;
+      springScale = nearGlitch ? 0.3 : 1.1;
 
-      // Add audio-driven jitter
-      if (audioJitter > 2) {
-        gdx = (Math.random() - 0.5) * audioJitter;
-        gdy = (Math.random() - 0.5) * audioJitter;
+      // Baseline audio-driven jitter
+      gdx = (Math.random() - 0.5) * (audioJitter * 0.6);
+      gdy = (Math.random() - 0.5) * (audioJitter * 0.3);
+
+      // Static "Scanline" offset - occasional horizontal shifts
+      if (Math.sin(elapsed * 0.05 + noisePhase) > 0.99) {
+        gdx += (Math.random() - 0.5) * 15;
       }
+
+      // Subtle constant depth buzz
+      sizeMult =
+        1.0 + Math.sin(baseT * 0.5 + noisePhase) * 0.05 + levels.mid * 0.1;
     }
 
     return {
-      dx: (noiseX + gdx) * scale,
-      dy: (noiseY + gdy) * scale,
-      colorOverride: color,
-      springScale
+      dx: (floatX + shiverX + gdx) * scale,
+      dy: (floatY + shiverY + gdy) * scale,
+      springScale,
+      sizeMult
     };
   }
 };

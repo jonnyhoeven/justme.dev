@@ -38,6 +38,16 @@ export interface SplatParticle {
   partnerIdx?: number;
   glitchSeed?: number;
   glitchSensitivity?: number;
+
+  /** Last seen elapsed time for delta-time calculations */
+  lastElapsed?: number;
+  /** Current angle for orbital animations */
+  orbitAngle?: number;
+  smoothedVolume?: number;
+  /** Individual phase offset for music reactivity */
+  individualPhase?: number;
+  /** Per-particle depth/Z value */
+  pz?: number;
 }
 
 export interface AnimationEffect {
@@ -53,6 +63,8 @@ export interface AnimationEffect {
   nudgeVx?: number;
   /** One-shot velocity nudge Y (added directly to vy) */
   nudgeVy?: number;
+  /** Size multiplier for depth effects (default 1.0) */
+  sizeMult?: number;
 }
 
 export interface AnimationContext {

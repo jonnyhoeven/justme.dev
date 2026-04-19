@@ -1,4 +1,10 @@
-import type { SplatAnimation, SplatParticle, AnimationEffect } from './types';
+import type {
+  SplatAnimation,
+  SplatParticle,
+  AnimationEffect,
+  AnimationContext
+} from './types';
+import { getAudioLevels } from './audio-utils';
 
 /**
  * Ambient Wind Waves
@@ -19,13 +25,20 @@ export const windWaves: SplatAnimation = {
     }
   },
 
-  apply(p: SplatParticle, elapsed: number): AnimationEffect {
+  apply(
+    p: SplatParticle,
+    elapsed: number,
+    ctx: AnimationContext
+  ): AnimationEffect {
     const phase = p.wavePhaseOffset ?? 0;
-    const ampMult = p.breathAmpMult ?? 1; // Reuse breathAmpMult or just use a local random
+    const ampMult = p.breathAmpMult ?? 1;
+    const { audioData, scale } = ctx;
+    const levels = getAudioLevels(audioData);
 
-    const amplitude = 6.0 * ampMult;
+    const amplitude = (6.0 + levels.bass * 30.0) * ampMult;
     const frequency = 0.05; // spatial frequency
-    const speed = 0.0015; // temporal speed — ~4s cycle
+    // Speed increases with audio mid-range
+    const speed = 0.0015 + levels.mid * 0.005;
 
     // Primary ripple wave
     const waveY =
@@ -36,14 +49,15 @@ export const windWaves: SplatAnimation = {
       Math.sin(p.ox * frequency * 0.5 + elapsed * speed * 0.8 + phase) *
       (amplitude * 0.8);
 
-    // High-frequency interference layer for turbulence
-    const interference = Math.sin(p.oy * 0.1 + elapsed * 0.005) * 1.5;
+    // High-frequency interference layer for turbulence (driven by treble)
+    const turbulence = 1.5 + levels.treble * 15.0;
+    const interference = Math.sin(p.oy * 0.1 + elapsed * 0.005) * turbulence;
 
     const waveX = windGust + interference;
 
     return {
-      dx: waveX,
-      dy: waveY + interference * 0.5
+      dx: waveX * scale,
+      dy: (waveY + interference * 0.5) * scale
     };
   }
 };
