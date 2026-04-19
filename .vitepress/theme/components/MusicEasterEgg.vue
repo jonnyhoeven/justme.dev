@@ -328,7 +328,7 @@ onBeforeUnmount(() => {
   width: 280px !important;
   min-width: 280px !important;
   flex-shrink: 0 !important;
-  transition: all 0.3s ease;
+  transition: all var(--duration-normal) ease;
   /* Centering logic when in nav-bar slots */
   position: fixed;
   top: 16px;
@@ -364,7 +364,7 @@ onBeforeUnmount(() => {
   justify-content: center;
   padding: 4px;
   border-radius: 50%;
-  transition: all 0.2s ease;
+  transition: all var(--duration-fast) ease;
 }
 
 .mini-btn:hover,
@@ -414,7 +414,7 @@ onBeforeUnmount(() => {
   border: 2px solid var(--vp-c-brand);
   border-radius: 50%;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--duration-fast) ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
@@ -426,7 +426,7 @@ onBeforeUnmount(() => {
 /* Fade Slide Transition */
 .fade-slide-enter-active,
 .fade-slide-leave-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--duration-normal) var(--ease-standard);
 }
 
 .fade-slide-enter-from {
@@ -539,7 +539,7 @@ onBeforeUnmount(() => {
 /* Transitions */
 .header-slide-enter-active,
 .header-slide-leave-active {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s var(--ease-standard);
 }
 
 .header-slide-enter-from,

@@ -15,11 +15,14 @@ export const breathing: SplatAnimation = {
   name: 'Breathing',
 
   init(particles: SplatParticle[]) {
+    const cx = 160;
+    const cy = 160;
     for (const p of particles) {
       // Individualize the pulse
       p.breathPhaseOffset = Math.random() * Math.PI * 2;
       p.breathSpeedMult = 0.8 + Math.random() * 0.4; // 80% to 120% speed
       p.breathAmpMult = 0.5 + Math.random() * 1.5; // 50% to 200% amplitude
+      p.radialAngle = Math.atan2(p.oy - cy, p.ox - cx);
     }
   },
 
@@ -41,9 +44,7 @@ export const breathing: SplatAnimation = {
     const breathCycle =
       Math.sin(elapsed * 0.0008 * speed + phase) * (12 * amp + audioBoost * 15);
 
-    const cx = 160;
-    const cy = 160;
-    const angle = Math.atan2(p.oy - cy, p.ox - cx);
+    const angle = p.radialAngle ?? 0;
 
     return {
       dx: Math.cos(angle) * breathCycle * scale,

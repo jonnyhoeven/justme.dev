@@ -79,14 +79,12 @@ export const entangledWaveform: SplatAnimation = {
     const driftX = Math.sin(time + p.ox * 0.05) * 4;
 
     // Color: Use base color and fade to white based on amplitude
-    const br = p.cr ?? 0;
-    const bg = p.cg ?? 0;
-    const bb = p.cb ?? 0;
+    const { cr: br, cg: bg, cb: bb } = p;
 
     // Shift towards white (255, 255, 255) based on amplitude
-    const r = Math.floor(br + (255 - br) * amplitude * 0.5);
-    const g = Math.floor(bg + (255 - bg) * amplitude * 0.5);
-    const b = Math.floor(bb + (255 - bb) * amplitude * 0.5);
+    const r = Math.floor(br + (255 - br) * amplitude * 0.5) & 0xf8;
+    const g = Math.floor(bg + (255 - bg) * amplitude * 0.5) & 0xf8;
+    const b = Math.floor(bb + (255 - bb) * amplitude * 0.5) & 0xf8;
 
     const colorOverride = `${r}, ${g}, ${b}`;
 

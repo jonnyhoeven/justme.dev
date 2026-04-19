@@ -225,11 +225,28 @@ onMounted(async () => {
       p.x += p.vx;
       p.y += p.vy;
 
-      const brushColor = effect.colorOverride ?? p.color;
-      const brush = getBrush(brushColor);
       const sMult = effect.sizeMult ?? 1.0;
-      const r = (brush.width / 2) * scale * sMult;
-      ctx.drawImage(brush, p.x - r, p.y - r, r * 2, r * 2);
+      const halfSize = 8 * scale * sMult; // 8 = brushSize(16) / 2
+
+      if (effect.colorOverride) {
+        // Direct fillRect for dynamic colors — avoids unbounded brush cache
+        ctx.fillStyle = `rgb(${effect.colorOverride})`;
+        ctx.fillRect(
+          p.x - halfSize,
+          p.y - halfSize,
+          halfSize * 2,
+          halfSize * 2
+        );
+      } else {
+        const brush = getBrush(p.color);
+        ctx.drawImage(
+          brush,
+          p.x - halfSize,
+          p.y - halfSize,
+          halfSize * 2,
+          halfSize * 2
+        );
+      }
     }
     animationId = requestAnimationFrame(render);
   };

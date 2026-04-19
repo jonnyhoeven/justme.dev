@@ -4,46 +4,22 @@
  */
 
 /**
- * Colors
+ * Design Tokens
  *
- * Each colors have exact same color scale system with 3 levels of solid
- * colors with different brightness, and 1 soft color.
- * 
- * - `XXX-1`: The most solid color used mainly for colored text. It must
- *   satisfy the contrast ratio against when used on top of `XXX-soft`.
- *
- * - `XXX-2`: The color used mainly for hover state of the button.
- *
- * - `XXX-3`: The color for solid background, such as bg color of the button.
- *   It must satisfy the contrast ratio with pure white (#ffffff) text on
- *   top of it.
- *
- * - `XXX-soft`: The color used for subtle background such as custom container
- *   or badges. It must satisfy the contrast ratio when putting `XXX-1` colors
- *   on top of it.
- *
- *   The soft color must be semi transparent alpha channel. This is crucial
- *   because it allows adding multiple "soft" colors on top of each other
- *   to create a accent, such as when having inline code block inside
- *   custom containers.
- *
- * - `default`: The color used purely for subtle indication without any
- *   special meanings attched to it such as bg color for menu hover state.
- *
- * - `brand`: Used for primary brand colors, such as link text, button with
- *   brand theme, etc.
- *
- * - `tip`: Used to indicate useful information. The default theme uses the
- *   brand color for this by default.
- *
- * - `warning`: Used to indicate warning to the users. Used in custom
- *   container, badges, etc.
- *
- * - `danger`: Used to show error, or dangerous message to the users. Used
- *   in custom container, badges, etc.
+ * Centralized motion, radius, shadow, and color tokens used throughout
+ * the theme. Update these to change the global look-and-feel.
  * -------------------------------------------------------------------------- */
 
 :root {
+  /* ── Colors ──────────────────────────────────────────────────────────────
+   *
+   * Each color has the same 3-level scale plus a soft variant:
+   *   -1  Solid text color (must contrast against -soft bg)
+   *   -2  Hover state
+   *   -3  Solid bg   (must contrast against white text)
+   *   -soft Semi-transparent overlay bg
+   * ──────────────────────────────────────────────────────────────────────── */
+
   --vp-c-default-1: var(--vp-c-gray-1);
   --vp-c-default-2: var(--vp-c-gray-2);
   --vp-c-default-3: var(--vp-c-gray-3);
@@ -54,6 +30,22 @@
   --vp-c-brand-2: #8b5cf6;
   --vp-c-brand-3: #4338ca;
   --vp-c-brand-soft: rgba(99, 102, 241, 0.16);
+
+  /* Brand alpha variants (derived from brand palette) */
+  --vp-c-brand-1-alpha-10: rgba(99, 102, 241, 0.1);
+  --vp-c-brand-1-alpha-15: rgba(99, 102, 241, 0.15);
+  --vp-c-brand-1-alpha-20: rgba(99, 102, 241, 0.2);
+  --vp-c-brand-1-alpha-30: rgba(99, 102, 241, 0.3);
+  --vp-c-brand-1-alpha-40: rgba(99, 102, 241, 0.4);
+  --vp-c-brand-2-alpha-10: rgba(139, 92, 246, 0.1);
+  --vp-c-brand-2-alpha-20: rgba(139, 92, 246, 0.2);
+  --vp-c-brand-2-alpha-40: rgba(139, 92, 246, 0.4);
+  --vp-c-blue-500: #3b82f6;
+  --vp-c-blue-500-alpha-30: rgba(59, 130, 246, 0.3);
+
+  /* RGB channels for rgba() composition */
+  --vp-c-bg-elv-rgb: 255, 255, 255;
+  --vp-c-brand-rgb: 99, 102, 241;
 
   --vp-c-tip-1: var(--vp-c-brand-1);
   --vp-c-tip-2: var(--vp-c-brand-2);
@@ -70,36 +62,51 @@
   --vp-c-danger-3: var(--vp-c-red-3);
   --vp-c-danger-soft: var(--vp-c-red-soft);
 
-  --vp-font-family-base: 'Inter', sans-serif;
+  /* ── Typography ──────────────────────────────────────────────────────── */
 
-  /* Modern typography headings */
+  --vp-font-family-base: 'Inter', sans-serif;
   --vp-font-family-heading: 'Outfit', sans-serif;
 
-  /* Light mode custom backgrounds */
+  /* ── Motion ──────────────────────────────────────────────────────────── */
+
+  --ease-smooth: cubic-bezier(0.25, 0.8, 0.25, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast: 0.2s;
+  --duration-normal: 0.3s;
+  --duration-slow: 0.6s;
+
+  /* ── Radii ───────────────────────────────────────────────────────────── */
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ─────────────────────────────────────────────────────────── */
+
+  --shadow-brand-sm: 0 4px 12px var(--vp-c-brand-1-alpha-10);
+  --shadow-brand-md: 0 8px 24px var(--vp-c-brand-1-alpha-30);
+  --shadow-brand-lg: 0 10px 24px var(--vp-c-brand-1-alpha-15);
+
+  /* ── Light mode backgrounds ──────────────────────────────────────────── */
+
   --vp-c-bg: #ffffff;
   --vp-c-bg-alt: hsl(220, 15%, 98%);
   --vp-c-bg-elv: #ffffff;
   --vp-c-bg-soft: hsl(220, 15%, 96%);
   --vp-c-bg-mute: hsl(220, 15%, 92%);
-}
 
-/* Dark mode enriched backgrounds */
-.dark {
-  --vp-c-bg: hsl(220, 22%, 10%);
-  --vp-c-bg-alt: hsl(220, 22%, 13%);
-  --vp-c-bg-elv: hsl(220, 22%, 16%);
-  --vp-c-bg-soft: hsl(220, 22%, 16%);
-  --vp-c-bg-mute: hsl(220, 22%, 19%);
+  /* ── Glassmorphism helpers ───────────────────────────────────────────── */
 
-  --vp-c-text-1: rgba(255, 255, 255, 0.9);
-  --vp-c-text-2: rgba(255, 255, 255, 0.65);
-}
+  --glass-bg-light: rgba(255, 255, 255, 0.6);
+  --glass-bg-dark: rgba(16, 21, 35, 0.6);
+  --glass-border-light: rgba(255, 255, 255, 0.1);
+  --glass-border-dark: rgba(255, 255, 255, 0.05);
 
-/**
- * Component: Button
- * -------------------------------------------------------------------------- */
+  /* ── Button ──────────────────────────────────────────────────────────── */
 
-:root {
   --vp-button-brand-border: transparent;
   --vp-button-brand-text: var(--vp-c-white);
   --vp-button-brand-bg: var(--vp-c-brand-3);
@@ -109,34 +116,37 @@
   --vp-button-brand-active-border: transparent;
   --vp-button-brand-active-text: var(--vp-c-white);
   --vp-button-brand-active-bg: var(--vp-c-brand-1);
-}
 
-/**
- * Component: Home
- * -------------------------------------------------------------------------- */
+  /* ── Custom Block ────────────────────────────────────────────────────── */
 
-:root {
+  --vp-custom-block-tip-border: transparent;
+  --vp-custom-block-tip-text: var(--vp-c-text-1);
+  --vp-custom-block-tip-bg: var(--vp-c-brand-soft);
+  --vp-custom-block-tip-code-bg: var(--vp-c-brand-soft);
+
+  /* ── Home Hero ───────────────────────────────────────────────────────── */
+
   --vp-home-hero-name-color: transparent;
   --vp-home-hero-name-background: -webkit-linear-gradient(
     120deg,
-    #3b82f6 30%,
-    #8b5cf6
+    var(--vp-c-blue-500) 30%,
+    var(--vp-c-brand-2)
   );
 
   --vp-home-hero-image-background-image:
     radial-gradient(
       circle at 20% 30%,
-      rgba(99, 102, 241, 0.4) 0%,
+      var(--vp-c-brand-1-alpha-40) 0%,
       transparent 60%
     ),
     radial-gradient(
       circle at 80% 70%,
-      rgba(139, 92, 246, 0.4) 0%,
+      var(--vp-c-brand-2-alpha-40) 0%,
       transparent 60%
     ),
     radial-gradient(
       circle at 50% 50%,
-      rgba(59, 130, 246, 0.3) 0%,
+      var(--vp-c-blue-500-alpha-30) 0%,
       transparent 80%
     );
   --vp-home-hero-image-filter: blur(120px);
@@ -145,34 +155,56 @@
   --vp-home-hero-padding-top: 96px;
   --vp-home-hero-padding-top-mobile: 64px;
 
+  /* ── Article List Item layout vars ───────────────────────────────────── */
+
   --ls-listitem-image-col: 1;
   --ls-listitem-image-row: 1;
   --ls-listitem-image-width: 100%;
-  --ls-listitem-image-height: 120pt;
+  --ls-listitem-image-height: 160px;
   --ls-listitem-image-bg-blur: 24px;
   --ls-listitem-image-bg-blur-hover: 14px;
   --ls-listitem-content-col: 1;
   --ls-listitem-content-row: 2;
-  --ls-listitem-image-padding: 0pt;
+  --ls-listitem-image-padding: 0;
 
   --ls-listitem-grid-cols: 1fr;
   --ls-listitem-grid-gap: 0;
 }
+
+/* ── Dark mode enriched backgrounds ──────────────────────────────────── */
+
+.dark {
+  --vp-c-bg: hsl(220, 22%, 10%);
+  --vp-c-bg-alt: hsl(220, 22%, 13%);
+  --vp-c-bg-elv: hsl(220, 22%, 16%);
+  --vp-c-bg-soft: hsl(220, 22%, 16%);
+  --vp-c-bg-mute: hsl(220, 22%, 19%);
+
+  --vp-c-text-1: rgba(255, 255, 255, 0.9);
+  --vp-c-text-2: rgba(255, 255, 255, 0.65);
+
+  --vp-c-bg-elv-rgb: 30, 35, 50;
+
+  --glass-bg-light: var(--glass-bg-dark);
+  --glass-border-light: var(--glass-border-dark);
+}
+
+/* ── Responsive breakpoints ──────────────────────────────────────────── */
 
 @media (min-width: 640px) {
   :root {
     --vp-home-hero-image-filter: blur(60px);
     --ls-listitem-image-col: 1;
     --ls-listitem-image-row: 1;
-    --ls-listitem-image-width: 100pt;
-    --ls-listitem-image-height: 100pt;
+    --ls-listitem-image-width: 133px;
+    --ls-listitem-image-height: 133px;
     --ls-listitem-image-bg-blur: 28px;
     --ls-listitem-image-bg-blur-hover: 18px;
     --ls-listitem-content-col: 2;
     --ls-listitem-content-row: 1;
-    --ls-listitem-image-padding: 0pt;
+    --ls-listitem-image-padding: 0;
     --ls-listitem-grid-cols: var(--ls-listitem-image-width) 1fr;
-    --ls-listitem-grid-gap: 32pt;
+    --ls-listitem-grid-gap: 32px;
   }
 }
 
@@ -182,22 +214,6 @@
   }
 }
 
-/**
- * Component: Custom Block
- * -------------------------------------------------------------------------- */
-
-:root {
-  --vp-custom-block-tip-border: transparent;
-  --vp-custom-block-tip-text: var(--vp-c-text-1);
-  --vp-custom-block-tip-bg: var(--vp-c-brand-soft);
-  --vp-custom-block-tip-code-bg: var(--vp-c-brand-soft);
-}
-
-/**
- * Component: Algolia
- * -------------------------------------------------------------------------- */
-
-/*noinspection CssUnusedSymbol*/
 /**
  * Component: Search
  * -------------------------------------------------------------------------- */
@@ -221,19 +237,19 @@
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  border-radius: 9999px !important;
+  border-radius: var(--radius-full) !important;
   padding: 0 12px 0 16px !important;
   height: 38px !important;
   width: auto !important;
   min-width: 140px !important;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  transition: all var(--duration-normal) var(--ease-smooth) !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
 }
 
 .dark .VPSearchButton,
 .dark .DocSearch-Button {
   background-color: rgba(0, 0, 0, 0.2) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: var(--glass-border-dark) !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
 }
 
@@ -241,7 +257,7 @@
 .DocSearch-Button:hover {
   background-color: rgba(var(--vp-c-bg-elv-rgb), 0.6) !important;
   transform: translateY(-2px) scale(1.02) !important;
-  box-shadow: 0 8px 16px rgba(99, 102, 241, 0.15) !important;
+  box-shadow: 0 8px 16px var(--vp-c-brand-1-alpha-15) !important;
   border-color: var(--vp-c-brand-2) !important;
 }
 
@@ -267,7 +283,7 @@
   gap: 2px !important;
   background: rgba(255, 255, 255, 0.1) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  border-radius: 6px !important;
+  border-radius: var(--radius-sm) !important;
   padding: 2px 6px !important;
   height: 20px !important;
   align-items: center !important;
@@ -276,7 +292,7 @@
 .dark .DocSearch-Button-Keys,
 .dark .VPSearchButton-keys {
   background: rgba(0, 0, 0, 0.3) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: var(--glass-border-dark) !important;
 }
 
 .DocSearch-Button-Key,
@@ -307,20 +323,20 @@
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  border-radius: 28px !important;
+  border-radius: var(--radius-xl) !important;
   box-shadow:
     0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04),
-    0 0 40px rgba(99, 102, 241, 0.1) !important;
+    0 0 40px var(--vp-c-brand-1-alpha-10) !important;
   overflow: hidden !important;
 }
 
 .VPLocalSearchBox .search-bar {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-bottom: 1px solid var(--glass-border-light) !important;
   padding: 16px 24px !important;
   background: transparent !important;
   border-radius: 0 !important;
-  transition: all 0.3s ease !important;
+  transition: all var(--duration-normal) ease !important;
 }
 
 .VPLocalSearchBox .search-bar:focus-within {
@@ -345,7 +361,7 @@
 .VPLocalSearchBox .results {
   padding: 16px !important;
   scrollbar-width: thin;
-  scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
+  scrollbar-color: var(--vp-c-brand-1-alpha-30) transparent;
 }
 
 .VPLocalSearchBox .results::-webkit-scrollbar {
@@ -357,21 +373,21 @@
 }
 
 .VPLocalSearchBox .results::-webkit-scrollbar-thumb {
-  background-color: rgba(99, 102, 241, 0.2) !important;
+  background-color: var(--vp-c-brand-1-alpha-20) !important;
   border-radius: 10px !important;
   border: 4px solid transparent !important;
   background-clip: content-box !important;
 }
 
 .VPLocalSearchBox .results::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(99, 102, 241, 0.4) !important;
+  background-color: var(--vp-c-brand-1-alpha-40) !important;
 }
 
 .VPLocalSearchBox .result {
-  border-radius: 16px !important;
+  border-radius: var(--radius-lg) !important;
   margin-bottom: 8px !important;
   padding: 12px 16px !important;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: all var(--duration-fast) var(--ease-standard) !important;
   border: 1px solid transparent !important;
   background-color: rgba(255, 255, 255, 0.03) !important;
 }
@@ -380,7 +396,7 @@
   background-color: var(--vp-c-brand-soft) !important;
   border-color: var(--vp-c-brand-1) !important;
   transform: scale(1.01) !important;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1) !important;
+  box-shadow: var(--shadow-brand-sm) !important;
 }
 
 .VPLocalSearchBox .result:hover:not(.selected) {
@@ -390,14 +406,14 @@
 
 .VPLocalSearchBox .mark {
   color: var(--vp-c-brand-1) !important;
-  background-color: rgba(99, 102, 241, 0.1) !important;
+  background-color: var(--vp-c-brand-1-alpha-10) !important;
   padding: 0 2px !important;
-  border-radius: 4px !important;
+  border-radius: var(--radius-xs) !important;
   font-weight: 700 !important;
 }
 
 .VPLocalSearchBox .search-keyboard-shortcuts {
-  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-top: 1px solid var(--glass-border-light) !important;
   padding: 12px 24px !important;
   background: rgba(0, 0, 0, 0.05) !important;
 }
@@ -408,25 +424,25 @@
 
 /*noinspection CssUnusedSymbol*/
 .VPImage.image-src {
-  border-radius: 9999px;
+  border-radius: var(--radius-full);
   left: 50%;
   top: 58%;
   transform: translate(-50%, -50%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border-light);
   box-shadow:
-    0 0 20px rgba(99, 102, 241, 0.2),
-    0 0 40px rgba(139, 92, 246, 0.1);
+    0 0 20px var(--vp-c-brand-1-alpha-20),
+    0 0 40px var(--vp-c-brand-2-alpha-10);
   animation: antigravity-float 6s ease-in-out infinite;
   backdrop-filter: blur(4px);
-  transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: all 0.5s var(--ease-smooth);
 }
 
 .VPImage.image-src:hover {
   transform: translate(-50%, -50%) scale(1.05);
   border-color: rgba(99, 102, 241, 0.5);
   box-shadow:
-    0 0 30px rgba(99, 102, 241, 0.4),
-    0 0 60px rgba(139, 92, 246, 0.2);
+    0 0 30px var(--vp-c-brand-1-alpha-40),
+    0 0 60px var(--vp-c-brand-2-alpha-20);
 }
 
 /*noinspection CssUnusedSymbol*/
@@ -439,7 +455,7 @@
   0% {
     box-shadow:
       0 5px 15px rgba(0, 0, 0, 0.3),
-      0 0 20px rgba(99, 102, 241, 0.2);
+      0 0 20px var(--vp-c-brand-1-alpha-20);
     transform: translate(-50%, -50%) translateY(0) rotate(0deg);
   }
 
@@ -451,13 +467,13 @@
     transform: translate(-50%, -50%) translateY(5px) rotate(-1deg);
     box-shadow:
       0 20px 30px rgba(0, 0, 0, 0.2),
-      0 0 40px rgba(99, 102, 241, 0.4);
+      0 0 40px var(--vp-c-brand-1-alpha-40);
   }
 
   100% {
     box-shadow:
       0 5px 15px rgba(0, 0, 0, 0.3),
-      0 0 20px rgba(99, 102, 241, 0.2);
+      0 0 20px var(--vp-c-brand-1-alpha-20);
     transform: translate(-50%, -50%) translateY(0) rotate(0deg);
   }
 }
@@ -474,12 +490,12 @@
 
 .homeBadgeLeft {
   float: left;
-  margin-left: 10pt;
+  margin-left: 13px;
 }
 
 .homeBadgeRight {
   float: right;
-  margin-right: 10pt;
+  margin-right: 13px;
 }
 
 h1,
@@ -501,25 +517,25 @@ h6,
 
 /* Glassmorphism overrides for VitePress Components */
 .VPNavBar {
-  background-color: rgba(255, 255, 255, 0.6) !important;
+  background-color: var(--glass-bg-light) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-bottom: 1px solid var(--glass-border-light) !important;
 }
 
 .dark .VPNavBar {
-  background-color: rgba(16, 21, 35, 0.6) !important;
+  background-color: var(--glass-bg-dark) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-bottom: 1px solid var(--glass-border-dark) !important;
 }
 
 .VPFeature {
-  background-color: rgba(255, 255, 255, 0.6) !important;
+  background-color: var(--glass-bg-light) !important;
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px) !important;
   border: 1px solid rgba(0, 0, 0, 0.05) !important;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  transition: all var(--duration-normal) var(--ease-smooth) !important;
   text-decoration: none !important;
   color: inherit !important;
 }
@@ -531,17 +547,17 @@ h6,
 
 .dark .VPFeature {
   background-color: rgba(255, 255, 255, 0.03) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid var(--glass-border-dark) !important;
 }
 
 .VPFeature:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 24px rgba(99, 102, 241, 0.15) !important;
+  box-shadow: var(--shadow-brand-lg) !important;
 }
 
 .dark .VPFeature:hover {
   box-shadow: 0 10px 24px rgba(99, 102, 241, 0.25) !important;
-  border-color: rgba(99, 102, 241, 0.4) !important;
+  border-color: var(--vp-c-brand-1-alpha-40) !important;
 }
 
 .custom-block {
@@ -553,7 +569,7 @@ h6,
 
 .dark .custom-block {
   background-color: rgba(255, 255, 255, 0.03) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid var(--glass-border-dark) !important;
 }
 
 /* --- Dynamic Micro-Animations --- */
@@ -570,13 +586,19 @@ h6,
   }
 }
 
-.VPHero .name,
-.VPHero .text,
-.VPHero .tagline {
-  animation: fadeInUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) both;
+.VPHero .name {
+  animation: fadeInUp 0.8s var(--ease-smooth) both;
+  animation-delay: 0.1s;
+}
+
+.VPHero .text {
+  animation: fadeInUp 0.8s var(--ease-smooth) both;
+  animation-delay: 0.2s;
 }
 
 .VPHero .tagline {
+  animation: fadeInUp 0.8s var(--ease-smooth) both;
+  animation-delay: 0.2s;
   background: linear-gradient(
     135deg,
     var(--vp-c-text-1) 0%,
@@ -589,30 +611,20 @@ h6,
   font-weight: 600 !important;
   letter-spacing: -0.02em !important;
   font-family: var(--vp-font-family-heading) !important;
-  opacity: 0.9;
-}
-
-.VPHero .name {
-  animation-delay: 0.1s;
-}
-
-.VPHero .text,
-.VPHero .tagline {
-  animation-delay: 0.2s;
 }
 
 .VPHero .actions {
-  animation: fadeInUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) both;
+  animation: fadeInUp 0.8s var(--ease-smooth) both;
   animation-delay: 0.3s;
 }
 
 .VPFeatures {
-  animation: fadeInUp 1s cubic-bezier(0.25, 0.8, 0.25, 1) both;
+  animation: fadeInUp 1s var(--ease-smooth) both;
   animation-delay: 0.4s;
 }
 
 .vp-doc > div > * {
-  animation: fadeInUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) both;
+  animation: fadeInUp var(--duration-slow) var(--ease-smooth) both;
 }
 
 .vp-doc > div > *:nth-child(1) {
@@ -636,8 +648,8 @@ h6,
 }
 
 .VPButton {
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-  border-radius: 9999px !important;
+  transition: all var(--duration-normal) var(--ease-smooth) !important;
+  border-radius: var(--radius-full) !important;
 }
 
 .VPButton.brand,
@@ -671,7 +683,7 @@ h6,
 
 .VPButton:hover {
   transform: translateY(-4px) scale(1.03) !important;
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3) !important;
+  box-shadow: var(--shadow-brand-md) !important;
 }
 
 .VPButton:active {
@@ -680,9 +692,9 @@ h6,
 
 .vp-doc a {
   transition:
-    color 0.2s ease,
-    text-decoration-color 0.2s ease,
-    text-underline-offset 0.2s ease;
+    color var(--duration-fast) ease,
+    text-decoration-color var(--duration-fast) ease,
+    text-underline-offset var(--duration-fast) ease;
   text-decoration-color: transparent;
   text-underline-offset: 2px;
 }
@@ -697,7 +709,7 @@ h6,
 /* Refined code blocks and callouts */
 .vp-doc div[class*='language-'],
 .vp-doc .custom-block {
-  border-radius: 12px !important;
+  border-radius: var(--radius-md) !important;
   max-width: 100%;
   overflow-x: auto;
 }
@@ -706,7 +718,7 @@ h6,
 .VPFeature .icon {
   background-color: var(--vp-c-brand-soft) !important;
   padding: 12px !important;
-  border-radius: 12px !important;
+  border-radius: var(--radius-md) !important;
   display: inline-flex !important;
   margin-bottom: 20px !important;
   color: var(--vp-c-brand-1) !important;
@@ -742,23 +754,24 @@ h6,
   text-align: center;
 }
 
+/* Styled as a .VPButton.brand variant with the .flourish sweep */
 .view-all-button {
   display: inline-block;
   padding: 0.8rem 2.2rem;
   background-color: var(--vp-c-brand-3);
   color: #ffffff !important;
-  border-radius: 9999px;
+  border-radius: var(--radius-full);
   font-weight: 600;
   text-decoration: none !important;
   font-family: var(--vp-font-family-heading);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: all var(--duration-normal) var(--ease-smooth);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .view-all-button:hover {
   background-color: var(--vp-c-brand-2);
   transform: translateY(-4px) scale(1.03);
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+  box-shadow: var(--shadow-brand-md);
   text-decoration: none !important;
 }
 
@@ -771,22 +784,22 @@ h6,
  * -------------------------------------------------------------------------- */
 
 .badge-bar {
-  margin: 10pt 0 20pt 0;
+  margin: 13px 0 27px 0;
   position: relative;
   z-index: 20;
 }
 
 .shieldButton {
-  margin-top: 12pt;
-  margin-right: 3pt;
+  margin-top: 16px;
+  margin-right: 5px;
   float: right;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: all var(--duration-normal) var(--ease-smooth);
 }
 
 .shieldButton:hover {
   transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 6px 12px rgba(99, 102, 241, 0.2);
-  border-radius: 4px;
+  box-shadow: 0 6px 12px var(--vp-c-brand-1-alpha-20);
+  border-radius: var(--radius-xs);
 }
 
 /**
@@ -835,9 +848,9 @@ h6,
 }
 
 .post-title {
-  margin: 0 0 0.8rem 0 !important;
-  padding-top: 0 !important;
-  border-top: none !important;
+  margin: 0 0 0.8rem 0;
+  padding-top: 0;
+  border-top: none;
   position: relative;
   font-family: var(--vp-font-family-heading);
   font-weight: 600;
@@ -860,7 +873,7 @@ h6,
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  border-radius: 6pt;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--vp-c-brand-soft);
   transition: all 1s ease-in-out;
   padding: var(--ls-listitem-image-padding);
@@ -876,13 +889,13 @@ h6,
   height: var(--ls-listitem-image-height);
   background-image: radial-gradient(
     circle at 50% 50%,
-    #3b82f6 0%,
-    #8b5cf6 100%
+    var(--vp-c-blue-500) 0%,
+    var(--vp-c-brand-2) 100%
   );
   opacity: 0.25;
   filter: blur(var(--ls-listitem-image-bg-blur));
   z-index: -10;
-  transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: all 0.8s var(--ease-smooth);
   padding: var(--ls-listitem-image-padding);
 }
 
@@ -896,7 +909,7 @@ h6,
  * -------------------------------------------------------------------------- */
 
 .article-detail .container_row {
-  padding: 10pt;
+  padding: 13px;
   grid-template-columns: 1fr;
 }
 
@@ -904,20 +917,20 @@ h6,
 .article-detail .layerimg {
   grid-column: 1;
   grid-row: 1;
-  margin: 8pt 0 10pt 0;
+  margin: 11px 0 13px 0;
   padding: 0;
   width: 100%;
 }
 
 .articleImage {
   width: 100%;
-  height: 270pt;
+  height: 360px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   border: 1px solid var(--vp-c-brand-soft);
   transition: all 1.5s ease-out;
-  border-radius: 6pt;
+  border-radius: var(--radius-sm);
 }
 
 .container_row:hover .articleImage {
@@ -926,10 +939,16 @@ h6,
 
 .articleImagebg {
   width: 100%;
-  height: 250pt;
+  height: 333px;
   z-index: -10;
   transition: all 1s ease-in-out;
-  background: linear-gradient(45deg, #3b82f6, #6366f1, #8b5cf6, #4338ca);
+  background: linear-gradient(
+    45deg,
+    var(--vp-c-blue-500),
+    var(--vp-c-brand-1),
+    var(--vp-c-brand-2),
+    var(--vp-c-brand-3)
+  );
   background-size: 800% 800%;
   filter: blur(var(--ls-listitem-image-bg-blur));
   animation: glow 20s ease infinite;
@@ -959,7 +978,7 @@ h6,
  * -------------------------------------------------------------------------- */
 
 .embed-frame {
-  margin: 3pt;
+  margin: 4px;
 }
 
 .embed-caption {
@@ -968,6 +987,6 @@ h6,
 
 .embed-video {
   margin: 0;
-  padding-top: 15pt;
+  padding-top: 20px;
   display: block;
 }

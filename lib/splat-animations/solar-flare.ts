@@ -161,13 +161,14 @@ export const solarFlare: SplatAnimation = {
     // 4. Return Final Combined Effect
     if (bestStrength > 0.01) {
       // Use base color and increase brightness/whiteness based on bestStrength
-      const br = p.cr ?? 0;
-      const bg = p.cg ?? 0;
-      const bb = p.cb ?? 0;
+      const { cr: br, cg: bg, cb: bb } = p;
 
-      const r = Math.min(255, Math.floor(br + (255 - br) * bestStrength));
-      const g = Math.min(255, Math.floor(bg + (255 - bg) * bestStrength));
-      const b = Math.min(255, Math.floor(bb + (255 - bb) * bestStrength));
+      const r =
+        Math.min(255, Math.floor(br + (255 - br) * bestStrength)) & 0xf8;
+      const g =
+        Math.min(255, Math.floor(bg + (255 - bg) * bestStrength)) & 0xf8;
+      const b =
+        Math.min(255, Math.floor(bb + (255 - bb) * bestStrength)) & 0xf8;
 
       return {
         dx: sdx * scale,

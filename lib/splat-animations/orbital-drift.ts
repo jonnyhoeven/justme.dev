@@ -27,6 +27,9 @@ export const orbitalDrift: SplatAnimation = {
         p.oy - (p.orbitCy ?? 160),
         p.ox - (p.orbitCx ?? 160)
       );
+      p.orbitRadius = Math.sqrt(
+        (p.ox - (p.orbitCx ?? 160)) ** 2 + (p.oy - (p.orbitCy ?? 160)) ** 2
+      );
       p.lastElapsed = 0;
       p.smoothedVolume = 0;
     }
@@ -51,12 +54,12 @@ export const orbitalDrift: SplatAnimation = {
     const sVol = p.smoothedVolume;
 
     // --- Dynamic Direction & Speed ---
-    // We use a very slow oscillation to change direction every ~40-60 seconds
+    // These constants can be calculated once per frame if we used a frame-cache,
+    // but moving the p.ox calculation out of the loop is the bigger win.
     const oscillationSpeed = 0.0001 + levels.bass * 0.00005;
     const directionMult = Math.cos(elapsed * oscillationSpeed);
 
     const baseSpeed = p.orbitSpeed ?? 0.00005;
-    // Speed up rotation based on smoothed volume, but respect the oscillating direction
     const musicSpeedBoost = sVol * 0.005;
     const currentSpeed = (baseSpeed + musicSpeedBoost) * directionMult;
 
@@ -64,8 +67,7 @@ export const orbitalDrift: SplatAnimation = {
     p.orbitAngle = (p.orbitAngle ?? 0) + dt * currentSpeed;
 
     // --- Radial Zoom Out ---
-    const dist = Math.sqrt((p.ox - cx) ** 2 + (p.oy - cy) ** 2);
-    // Subtle breathing/zoom expansion
+    const dist = p.orbitRadius ?? 0;
     const zoomFactor = 1.0 + sVol * 0.12;
     const currentDist = dist * zoomFactor;
 

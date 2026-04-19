@@ -48,7 +48,6 @@ defineProps(['frontmatter']);
         :text="frontmatter.externalUrlLabel"
         type="tip"
         class="shieldButton"
-        style="margin-right: 5pt"
       />
     </a>
   </div>

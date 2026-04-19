@@ -19,9 +19,9 @@ export interface SplatParticle {
   mass: number;
 
   /* ---- pre-parsed color channels (set during data load) ---- */
-  cr?: number;
-  cg?: number;
-  cb?: number;
+  cr: number;
+  cg: number;
+  cb: number;
 
   /* ---- animation-assigned (set during init) ---- */
   isOutlier?: boolean;
@@ -55,6 +55,10 @@ export interface SplatParticle {
   individualPhase?: number;
   /** Per-particle depth/Z value */
   pz?: number;
+  /** Pre-computed angle from center (160, 160) */
+  radialAngle?: number;
+  /** Pre-computed distance from center or orbit center */
+  orbitRadius?: number;
 }
 
 export interface AnimationEffect {

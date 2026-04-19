@@ -89,10 +89,8 @@ export const dimensionalPortal: SplatAnimation = {
     let colorOverride: string | undefined = undefined;
     if (z + zOffset > 0) {
       const brightness = Math.max(0.3, Math.min(1.2, 1 - z / 200));
-      const r = p.cr ?? 0;
-      const g = p.cg ?? 0;
-      const b = p.cb ?? 0;
-      colorOverride = `${Math.floor(r * brightness)}, ${Math.floor(g * brightness)}, ${Math.floor(b * brightness)}`;
+      const { cr: r, cg: g, cb: b } = p;
+      colorOverride = `${Math.floor(r * brightness) & 0xf8}, ${Math.floor(g * brightness) & 0xf8}, ${Math.floor(b * brightness) & 0xf8}`;
     }
 
     return {
