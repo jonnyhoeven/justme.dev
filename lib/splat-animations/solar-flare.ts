@@ -5,6 +5,7 @@ import type {
   AnimationContext
 } from './types';
 import { getPeak } from './audio-utils';
+import { lerpToWhite } from './color-utils';
 
 interface FlarePulse {
   startTime: number;
@@ -14,12 +15,6 @@ interface FlarePulse {
   duration: number;
 }
 
-// Module-level state to track multiple waves
-let activePulses: FlarePulse[] = [];
-let lastUpdateElapsed = -1;
-let lastBeatTime = 0;
-const BEAT_COOLDOWN = 250; // Minimum time between beat-driven waves
-
 /**
  * Solar Flare Animation
  *
@@ -27,162 +22,206 @@ const BEAT_COOLDOWN = 250; // Minimum time between beat-driven waves
  * particles outward with a bright solar flash.
  * High energy, high impact.
  */
-export const solarFlare: SplatAnimation = {
-  name: 'Solar Flare',
 
-  init() {
-    activePulses = [];
-    lastUpdateElapsed = -1;
-    lastBeatTime = 0;
-  },
+// --- Tuning Parameters ---
+const CYCLE_PERIOD = 3000;
+const CYCLE_START_THRES = 50;
+const CYCLE_MIN_ELAPSED = 100;
+const CYCLE_CENTER = 160;
+const CYCLE_RADIUS = 20;
+const CYCLE_PHASE_X = 13.5;
+const CYCLE_PHASE_Y = 7.2;
+const CYCLE_STRENGTH = 1.2;
+const CYCLE_DURATION = 2000;
+const AUDIO_PEAK_THRES = 0.05;
+const BEAT_COOLDOWN = 300;
+const RAND_POS_RANGE = 240;
+const RAND_POS_BASE = 40;
+const AUDIO_STRENGTH_MULT = 1.8;
+const AUDIO_DURATION = 2000;
+const MAX_ACTIVE_PULSES = 12;
+const SIMMER_TIME_SLOW = 0.0007;
+const SIMMER_TIME_FAST = 0.004;
+const SIMMER_BASE_INTENSITY = 0.4;
+const SIMMER_VOL_MULT = 2.5;
+const TREBLE_NOISE_MULT = 5.0;
+const DRIFT_BASE_AMP = 0.3;
+const DRIFT_SPACE_SLOW = 0.02;
+const DRIFT_SPACE_FAST = 0.12;
+const SIMMER_PHASE_X = 0.8;
+const SIMMER_PHASE_Y = 0.7;
+const WAVE_SPEED = 0.07;
+const WAVE_WIDTH = 55;
+const KICK_WIDTH = 12;
+const NUDGE_MULT = 1.5;
+const SPRING_SCALE_BASE = 0.4;
+const SPRING_SCALE_VAR = 0.6;
+const MIN_STRENGTH_THRES = 0.01;
 
-  apply(
-    p: SplatParticle,
-    elapsed: number,
-    ctx: AnimationContext
-  ): AnimationEffect {
-    const { scale, mouseX, mouseY } = ctx;
-    const levels = ctx.audioLevels;
-    const audioPeak = getPeak(levels.bass, 0.5);
+export function createSolarFlare(): SplatAnimation {
+  // Instance-level state captured in closure
+  let activePulses: FlarePulse[] = [];
+  let lastUpdateElapsed = -1;
+  let lastBeatTime = 0;
 
-    // 1. One-shot update per frame to manage pulses
-    // This runs once per frame regardless of how many particles call apply()
-    if (elapsed !== lastUpdateElapsed) {
-      lastUpdateElapsed = elapsed;
+  return {
+    name: 'Solar Flare',
 
-      // Handle the Periodic "Natural" Flare (The Background Cycle)
-      const cyclePeriod = 3000;
-      const timeInCycle = elapsed % cyclePeriod;
-      // Trigger a larger 'natural' flare at the start of every cycle
-      if (timeInCycle < 50 && elapsed > 100) {
-        const cycle = Math.floor(elapsed / cyclePeriod);
-        activePulses.push({
-          startTime: elapsed,
-          originX: 160 + Math.sin(cycle * 13.5) * 20,
-          originY: 160 + Math.cos(cycle * 7.2) * 20,
-          strength: 1.2,
-          duration: 2000 // Lasts longer for big propagation
-        });
-      }
+    init() {
+      activePulses = [];
+      lastUpdateElapsed = -1;
+      lastBeatTime = 0;
+    },
 
-      // Handle Audio Beats (Multiple Waves triggered by music)
-      if (audioPeak > 0.05 && elapsed - lastBeatTime > BEAT_COOLDOWN) {
-        lastBeatTime = elapsed;
+    apply(
+      p: SplatParticle,
+      elapsed: number,
+      ctx: AnimationContext
+    ): AnimationEffect {
+      const { scale, mouseX, mouseY } = ctx;
+      const levels = ctx.audioLevels;
+      const audioPeak = getPeak(levels.bass, 0.5);
 
-        // Origin follows mouse if on screen, otherwise random spot
-        let tx = Math.random() * 240 + 40;
-        let ty = Math.random() * 240 + 40;
-        if (mouseX > 0 && mouseY > 0) {
-          tx = mouseX / scale;
-          ty = mouseY / scale;
+      // 1. One-shot update per frame to manage pulses
+      // This runs once per frame regardless of how many particles call apply()
+      if (elapsed !== lastUpdateElapsed) {
+        lastUpdateElapsed = elapsed;
+
+        // Handle the Periodic "Natural" Flare (The Background Cycle)
+        const cyclePeriod = CYCLE_PERIOD;
+        const timeInCycle = elapsed % cyclePeriod;
+        // Trigger a larger 'natural' flare at the start of every cycle
+        if (timeInCycle < CYCLE_START_THRES && elapsed > CYCLE_MIN_ELAPSED) {
+          const cycle = Math.floor(elapsed / cyclePeriod);
+          activePulses.push({
+            startTime: elapsed,
+            originX:
+              CYCLE_CENTER + Math.sin(cycle * CYCLE_PHASE_X) * CYCLE_RADIUS,
+            originY:
+              CYCLE_CENTER + Math.cos(cycle * CYCLE_PHASE_Y) * CYCLE_RADIUS,
+            strength: CYCLE_STRENGTH,
+            duration: CYCLE_DURATION // Lasts longer for big propagation
+          });
         }
 
-        activePulses.push({
-          startTime: elapsed,
-          originX: tx,
-          originY: ty,
-          strength: audioPeak * 1.8,
-          duration: 2000
-        });
-      }
+        // Handle Audio Beats (Multiple Waves triggered by music)
+        if (
+          audioPeak > AUDIO_PEAK_THRES &&
+          elapsed - lastBeatTime > BEAT_COOLDOWN
+        ) {
+          lastBeatTime = elapsed;
 
-      // Cleanup finished pulses and limit total count for performance
-      activePulses = activePulses.filter(
-        (pulse) => elapsed - pulse.startTime < pulse.duration
-      );
-      if (activePulses.length > 12) {
-        activePulses.shift();
-      }
-    }
+          // Origin follows mouse if on screen, otherwise random spot
+          let tx = Math.random() * RAND_POS_RANGE + RAND_POS_BASE;
+          let ty = Math.random() * RAND_POS_RANGE + RAND_POS_BASE;
+          if (mouseX > 0 && mouseY > 0) {
+            tx = mouseX / scale;
+            ty = mouseY / scale;
+          }
 
-    // 2. Perpetual Surface Movement (The "Solar Simmer")
-    // Inactive pixels now have dynamic randomness based on audio volume/treble
-    const slowT = elapsed * 0.0007;
-    const fastT = elapsed * 0.004;
-    const simmerIntensity = 0.4 + levels.volume * 2.5;
-    const trebleNoise = levels.treble * 5.0;
+          activePulses.push({
+            startTime: elapsed,
+            originX: tx,
+            originY: ty,
+            strength: audioPeak * AUDIO_STRENGTH_MULT,
+            duration: AUDIO_DURATION
+          });
+        }
 
-    // Per-particle base drift + noise
-    const sdx =
-      Math.sin(slowT + p.ox * 0.02) * 0.3 +
-      Math.sin(fastT * 0.8 + p.oy * 0.12) * 0.3 * simmerIntensity +
-      (Math.random() - 0.5) * trebleNoise;
-    const sdy =
-      Math.cos(slowT + p.oy * 0.02) * 0.3 +
-      Math.cos(fastT * 0.7 + p.ox * 0.12) * 0.3 * simmerIntensity +
-      (Math.random() - 0.5) * trebleNoise;
-
-    // 3. Find the Dominant Flare Contribution for this Particle
-    let bestNudgeX = 0;
-    let bestNudgeY = 0;
-    let bestStrength = 0;
-    let minSpringScale = 1.0;
-
-    const WAVE_SPEED = 0.07; // Majestic solarwave propagation
-    const WAVE_WIDTH = 55; // Visual width (color/glow)
-    const KICK_WIDTH = 12; // Physical width (velocity nudge)
-
-    for (let i = 0; i < activePulses.length; i++) {
-      const pulse = activePulses[i];
-      const pdx = p.ox - pulse.originX;
-      const pdy = p.oy - pulse.originY;
-      const dist = Math.sqrt(pdx * pdx + pdy * pdy);
-
-      const life = elapsed - pulse.startTime;
-      const waveRadius = life * WAVE_SPEED;
-      const distFromWave = Math.abs(dist - waveRadius);
-
-      // Effect falls off as it travels and fades over time
-      if (dist < waveRadius + WAVE_WIDTH && distFromWave < WAVE_WIDTH) {
-        const lifeFactor = Math.max(0, 1 - life / pulse.duration);
-        const waveFactor = 1 - distFromWave / WAVE_WIDTH;
-        const currentStrength = waveFactor * pulse.strength * lifeFactor;
-
-        // Narrow physical kick: only push at the leading edge
-        const kickFactor =
-          distFromWave < KICK_WIDTH ? 1 - distFromWave / KICK_WIDTH : 0;
-        const currentKick = kickFactor * pulse.strength * lifeFactor;
-
-        // Dominant wave logic
-        if (currentStrength > bestStrength) {
-          bestStrength = currentStrength;
-
-          const outwardX = pdx / (dist || 0.1);
-          const outwardY = pdy / (dist || 0.1);
-
-          // Significantly lower nudge because waves are slow (impulse builds up over many frames)
-          bestNudgeX = outwardX * currentKick * 1.5;
-          bestNudgeY = outwardY * currentKick * 1.5;
-          minSpringScale = 0.4 + (1 - currentStrength) * 0.6;
+        // Cleanup finished pulses and limit total count for performance
+        activePulses = activePulses.filter(
+          (pulse) => elapsed - pulse.startTime < pulse.duration
+        );
+        if (activePulses.length > MAX_ACTIVE_PULSES) {
+          activePulses.shift();
         }
       }
-    }
 
-    // 4. Return Final Combined Effect
-    if (bestStrength > 0.01) {
-      // Use base color and increase brightness/whiteness based on bestStrength
-      const { cr: br, cg: bg, cb: bb } = p;
+      // 2. Perpetual Surface Movement (The "Solar Simmer")
+      // Inactive pixels now have dynamic randomness based on audio volume/treble
+      const slowT = elapsed * SIMMER_TIME_SLOW;
+      const fastT = elapsed * SIMMER_TIME_FAST;
+      const simmerIntensity =
+        SIMMER_BASE_INTENSITY + levels.volume * SIMMER_VOL_MULT;
+      const trebleNoise = levels.treble * TREBLE_NOISE_MULT;
 
-      const r =
-        Math.min(255, Math.floor(br + (255 - br) * bestStrength)) & 0xf8;
-      const g =
-        Math.min(255, Math.floor(bg + (255 - bg) * bestStrength)) & 0xf8;
-      const b =
-        Math.min(255, Math.floor(bb + (255 - bb) * bestStrength)) & 0xf8;
+      // Per-particle base drift + noise
+      const sdx =
+        Math.sin(slowT + p.ox * DRIFT_SPACE_SLOW) * DRIFT_BASE_AMP +
+        Math.sin(fastT * SIMMER_PHASE_X + p.oy * DRIFT_SPACE_FAST) *
+          DRIFT_BASE_AMP *
+          simmerIntensity +
+        (Math.random() - 0.5) * trebleNoise;
+      const sdy =
+        Math.cos(slowT + p.oy * DRIFT_SPACE_SLOW) * DRIFT_BASE_AMP +
+        Math.cos(fastT * SIMMER_PHASE_Y + p.ox * DRIFT_SPACE_FAST) *
+          DRIFT_BASE_AMP *
+          simmerIntensity +
+        (Math.random() - 0.5) * trebleNoise;
+
+      // 3. Find the Dominant Flare Contribution for this Particle
+      let bestNudgeX = 0;
+      let bestNudgeY = 0;
+      let bestStrength = 0;
+      let minSpringScale = 1.0;
+
+      const waveSpeed = WAVE_SPEED; // Majestic solarwave propagation
+      const waveWidth = WAVE_WIDTH; // Visual width (color/glow)
+      const kickWidth = KICK_WIDTH; // Physical width (velocity nudge)
+
+      for (let i = 0; i < activePulses.length; i++) {
+        const pulse = activePulses[i];
+        const pdx = p.ox - pulse.originX;
+        const pdy = p.oy - pulse.originY;
+        const dist = Math.sqrt(pdx * pdx + pdy * pdy);
+
+        const life = elapsed - pulse.startTime;
+        const waveRadius = life * waveSpeed;
+        const distFromWave = Math.abs(dist - waveRadius);
+
+        // Effect falls off as it travels and fades over time
+        if (dist < waveRadius + waveWidth && distFromWave < waveWidth) {
+          const lifeFactor = Math.max(0, 1 - life / pulse.duration);
+          const waveFactor = 1 - distFromWave / waveWidth;
+          const currentStrength = waveFactor * pulse.strength * lifeFactor;
+
+          // Narrow physical kick: only push at the leading edge
+          const kickFactor =
+            distFromWave < kickWidth ? 1 - distFromWave / kickWidth : 0;
+          const currentKick = kickFactor * pulse.strength * lifeFactor;
+
+          // Dominant wave logic
+          if (currentStrength > bestStrength) {
+            bestStrength = currentStrength;
+
+            const outwardX = pdx / (dist || 0.1);
+            const outwardY = pdy / (dist || 0.1);
+
+            // Significantly lower nudge because waves are slow (impulse builds up over many frames)
+            bestNudgeX = outwardX * currentKick * NUDGE_MULT;
+            bestNudgeY = outwardY * currentKick * NUDGE_MULT;
+            minSpringScale =
+              SPRING_SCALE_BASE + (1 - currentStrength) * SPRING_SCALE_VAR;
+          }
+        }
+      }
+
+      // 4. Return Final Combined Effect
+      if (bestStrength > MIN_STRENGTH_THRES) {
+        return {
+          dx: sdx * scale,
+          dy: sdy * scale,
+          nudgeVx: bestNudgeX,
+          nudgeVy: bestNudgeY,
+          springScale: minSpringScale,
+          colorOverride: lerpToWhite(p.cr, p.cg, p.cb, bestStrength)
+        };
+      }
 
       return {
         dx: sdx * scale,
-        dy: sdy * scale,
-        nudgeVx: bestNudgeX,
-        nudgeVy: bestNudgeY,
-        springScale: minSpringScale,
-        colorOverride: `${r}, ${g}, ${b}`
+        dy: sdy * scale
       };
     }
-
-    return {
-      dx: sdx * scale,
-      dy: sdy * scale
-    };
-  }
-};
+  };
+}

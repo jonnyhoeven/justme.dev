@@ -4,6 +4,21 @@ import type {
   AnimationEffect,
   AnimationContext
 } from './types';
+import { smoothValue } from './audio-utils';
+
+// --- Tuning Parameters ---
+const DEFAULT_CENTER_X = 160;
+const DEFAULT_CENTER_Y = 160;
+const CENTER_VARIANCE = 40;
+const BASE_ORBIT_SPEED_MIN = 0.00003;
+const BASE_ORBIT_SPEED_VARIANCE = 0.00004;
+const VOLUME_SMOOTHING = 0.02;
+const OSCILLATION_BASE = 0.0001;
+const OSCILLATION_BASS_MULT = 0.00005;
+const MUSIC_SPEED_BOOST_MULT = 0.005;
+const VOLUME_ZOOM_FACTOR = 0.12;
+const VOLUME_SIZE_FACTOR = 0.1;
+const SIZE_OSCILLATION_AMP = 0.05;
 
 /**
  * Slow Orbital Drift
@@ -19,19 +34,23 @@ export const orbitalDrift: SplatAnimation = {
     const globalDir = Math.random() > 0.5 ? 1 : -1;
     for (const p of particles) {
       // Each particle gets a unique center point ±20px from true 160, 160
-      p.orbitCx = 160 + (Math.random() - 0.5) * 40;
-      p.orbitCy = 160 + (Math.random() - 0.5) * 40;
+      p.animState.orbitCx =
+        DEFAULT_CENTER_X + (Math.random() - 0.5) * CENTER_VARIANCE;
+      p.animState.orbitCy =
+        DEFAULT_CENTER_Y + (Math.random() - 0.5) * CENTER_VARIANCE;
       // Random direction (global for this session) + variation
-      p.orbitSpeed = globalDir * (0.00003 + Math.random() * 0.00004);
-      p.orbitAngle = Math.atan2(
-        p.oy - (p.orbitCy ?? 160),
-        p.ox - (p.orbitCx ?? 160)
+      p.animState.orbitSpeed =
+        globalDir *
+        (BASE_ORBIT_SPEED_MIN + Math.random() * BASE_ORBIT_SPEED_VARIANCE);
+      p.animState.orbitAngle = Math.atan2(
+        p.oy - p.animState.orbitCy,
+        p.ox - p.animState.orbitCx
       );
-      p.orbitRadius = Math.sqrt(
-        (p.ox - (p.orbitCx ?? 160)) ** 2 + (p.oy - (p.orbitCy ?? 160)) ** 2
+      p.animState.orbitRadius = Math.sqrt(
+        (p.ox - p.animState.orbitCx) ** 2 + (p.oy - p.animState.orbitCy) ** 2
       );
-      p.lastElapsed = 0;
-      p.smoothedVolume = 0;
+      p.animState.lastElapsed = 0;
+      p.animState.smoothedVolume = 0;
     }
   },
 
@@ -40,43 +59,48 @@ export const orbitalDrift: SplatAnimation = {
     elapsed: number,
     ctx: AnimationContext
   ): AnimationEffect {
-    const cx = p.orbitCx ?? 160;
-    const cy = p.orbitCy ?? 160;
+    const cx = p.animState.orbitCx ?? DEFAULT_CENTER_X;
+    const cy = p.animState.orbitCy ?? DEFAULT_CENTER_Y;
     const { scale } = ctx;
     const levels = ctx.audioLevels;
 
     // --- Smoothing & Reactive Timing ---
-    const dt = elapsed - (p.lastElapsed ?? 0);
-    p.lastElapsed = elapsed;
+    const dt = elapsed - (p.animState.lastElapsed ?? 0);
+    p.animState.lastElapsed = elapsed;
 
     // Smoothing factor for volume
-    p.smoothedVolume = (p.smoothedVolume ?? 0) * 0.98 + levels.volume * 0.02;
-    const sVol = p.smoothedVolume;
+    p.animState.smoothedVolume = smoothValue(
+      p.animState.smoothedVolume ?? 0,
+      levels.volume,
+      VOLUME_SMOOTHING
+    );
+    const sVol = p.animState.smoothedVolume;
 
     // --- Dynamic Direction & Speed ---
-    // These constants can be calculated once per frame if we used a frame-cache,
-    // but moving the p.ox calculation out of the loop is the bigger win.
-    const oscillationSpeed = 0.0001 + levels.bass * 0.00005;
+    const oscillationSpeed =
+      OSCILLATION_BASE + levels.bass * OSCILLATION_BASS_MULT;
     const directionMult = Math.cos(elapsed * oscillationSpeed);
 
-    const baseSpeed = p.orbitSpeed ?? 0.00005;
-    const musicSpeedBoost = sVol * 0.005;
+    const baseSpeed = p.animState.orbitSpeed ?? BASE_ORBIT_SPEED_MIN;
+    const musicSpeedBoost = sVol * MUSIC_SPEED_BOOST_MULT;
     const currentSpeed = (baseSpeed + musicSpeedBoost) * directionMult;
 
     // Increment angle based on delta time
-    p.orbitAngle = (p.orbitAngle ?? 0) + dt * currentSpeed;
+    p.animState.orbitAngle = (p.animState.orbitAngle ?? 0) + dt * currentSpeed;
 
     // --- Radial Zoom Out ---
-    const dist = p.orbitRadius ?? 0;
-    const zoomFactor = 1.0 + sVol * 0.12;
+    const dist = p.animState.orbitRadius ?? 0;
+    const zoomFactor = 1.0 + sVol * VOLUME_ZOOM_FACTOR;
     const currentDist = dist * zoomFactor;
 
-    const newOx = cx + Math.cos(p.orbitAngle) * currentDist;
-    const newOy = cy + Math.sin(p.orbitAngle) * currentDist;
+    const newOx = cx + Math.cos(p.animState.orbitAngle) * currentDist;
+    const newOy = cy + Math.sin(p.animState.orbitAngle) * currentDist;
 
     // Depth effect: further particles (smaller orbits) are slightly different size
     const sizeMult =
-      1.0 + sVol * 0.1 + Math.sin(elapsed * 0.001 + p.ox * 0.01) * 0.05;
+      1.0 +
+      sVol * VOLUME_SIZE_FACTOR +
+      Math.sin(elapsed * 0.001 + p.ox * 0.01) * SIZE_OSCILLATION_AMP;
 
     return {
       dx: (newOx - p.ox) * scale,

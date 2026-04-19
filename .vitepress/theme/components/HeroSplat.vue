@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
-import { useWindowSize } from '@vueuse/core';
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue';
+import { useWindowSize, useElementVisibility } from '@vueuse/core';
 import {
   pickRandomAnimation,
   animations,
@@ -33,6 +33,7 @@ const shiverIntensity = ref(0);
 let startTime = performance.now();
 let cycleInterval: ReturnType<typeof setInterval>;
 const { audioData, isMusicVisible } = useMusic();
+const isVisible = useElementVisibility(canvasRef);
 
 /**
  * Cycle to the next animation.
@@ -46,16 +47,15 @@ const nextAnimation = () => {
   // Use a technical but friendly log
   console.log(`🎨 Animation: ${animation.name}`);
 
-  const w = canvasRef.value?.width || 320;
-  const h = canvasRef.value?.height || 320;
-
-  animation.init(particles, w, h);
+  animation.init(particles);
   currentAnimation.value = animation;
   startTime = performance.now();
 
-  // Reset the auto-cycle timer
-  if (cycleInterval) clearInterval(cycleInterval);
-  cycleInterval = setInterval(nextAnimation, SITE_CONSTANTS.SPLAT_CYCLE_TIME);
+  // Reset the auto-cycle timer if visible
+  if (isVisible.value) {
+    if (cycleInterval) clearInterval(cycleInterval);
+    cycleInterval = setInterval(nextAnimation, SITE_CONSTANTS.SPLAT_CYCLE_TIME);
+  }
 };
 
 onMounted(async () => {
@@ -85,7 +85,8 @@ onMounted(async () => {
             vy: 0,
             cr,
             cg,
-            cb
+            cb,
+            animState: {}
           };
         })
       );
@@ -138,14 +139,13 @@ onMounted(async () => {
   if (firstAnim) {
     currentAnimationIndex.value = firstIndex;
     currentAnimation.value = firstAnim;
-    currentAnimation.value.init(particles, width, height);
+    currentAnimation.value.init(particles);
     startTime = performance.now();
   }
 
   // 6. Physics Render Loop
   const render = (time: number) => {
-    if (isMobileView.value) {
-      animationId = requestAnimationFrame(render);
+    if (isMobileView.value || !isVisible.value) {
       return;
     }
 
@@ -171,6 +171,9 @@ onMounted(async () => {
 
     if (!currentAnimation.value) return;
     const anim = currentAnimation.value;
+    if (anim.beforeFrame) {
+      anim.beforeFrame(particles, elapsed, animCtx);
+    }
 
     // Cache some values outside the particle loop for performance
     const shiverInt = shiverIntensity.value;
@@ -306,8 +309,22 @@ onMounted(async () => {
   hookTagline();
   setTimeout(hookTagline, 1000);
 
-  cycleInterval = setInterval(nextAnimation, SITE_CONSTANTS.SPLAT_CYCLE_TIME);
-  requestAnimationFrame(render);
+  watch(
+    isVisible,
+    (visible) => {
+      if (cycleInterval) clearInterval(cycleInterval);
+      if (visible) {
+        cycleInterval = setInterval(
+          nextAnimation,
+          SITE_CONSTANTS.SPLAT_CYCLE_TIME
+        );
+      }
+      if (visible && !isMobileView.value) {
+        animationId = requestAnimationFrame(render);
+      }
+    },
+    { immediate: true }
+  );
 });
 
 onBeforeUnmount(() => {

@@ -54,3 +54,17 @@ export function getAudioLevels(audioData: Uint8Array | undefined): AudioLevels {
 export function getPeak(value: number, threshold: number): number {
   return value > threshold ? (value - threshold) / (1 - threshold) : 0;
 }
+
+/**
+ * Exponential Moving Average (EMA) smoothing function.
+ * @param current The current smoothed value
+ * @param target The new target value to smooth towards
+ * @param factor Smoothing factor (0.0 to 1.0). Lower is smoother.
+ */
+export function smoothValue(
+  current: number,
+  target: number,
+  factor = 0.02
+): number {
+  return current * (1 - factor) + target * factor;
+}

@@ -14,6 +14,38 @@ import type {
  *
  * Spikes form along radial "fingers" pointing toward the magnetic source.
  */
+
+// --- Tuning Parameters ---
+const IDLE_DRIFT_SPEED = 0.001;
+const IDLE_CENTER_COORD = 160;
+const IDLE_DRIFT_AMP = 10;
+const BASE_MAGNETIC_RANGE = 300;
+const BASS_MAGNETIC_RANGE_MULT = 200;
+const BASE_SPIKE_COUNT = 14;
+const BASS_SPIKE_COUNT_MULT = 20;
+const BASE_SPIKE_ROTATION = 0.0015;
+const MID_SPIKE_ROTATION_MULT = 0.01;
+const MID_AUDIO_SPIKE_BOOST = 2.0;
+const BASE_SPIKE_STRENGTH = 10;
+const BASS_SPIKE_STRENGTH_MULT = 20;
+const BASE_ATTRACTION = 20;
+const BASS_ATTRACTION_MULT = 60;
+const VOLUME_BASELINE_MULT = 0.7;
+const MIN_DIST_MAG = 0.1;
+const IDLE_SPRING_SCALE = 1.5;
+const SPIKE_WAVE_POWER = 4.0;
+const SPIKE_FACTOR_POS = 1.8;
+const SPIKE_FACTOR_NEG = -0.4;
+const MICRO_SPIKE_BASE_FREQ = 45;
+const TREBLE_MICRO_FREQ_MULT = 100;
+const MICRO_SPIKE_TIME_MULT = 0.04;
+const MICRO_SPIKE_BASE_AMP = 2.0;
+const TREBLE_MICRO_AMP_MULT = 15;
+const SHIVER_TIME_MULT = 0.05;
+const BASE_SHIVER_AMP = 1.5;
+const TREBLE_SHIVER_AMP_MULT = 5;
+const BASE_SPRING_SCALE = 1.1;
+const INTENSITY_SPRING_MULT = 1.5;
 /**
  * Cache for frame-global calculations to avoid redundant work in the particle loop.
  */
@@ -35,8 +67,7 @@ export const ferrofluid: SplatAnimation = {
 
   init(particles: SplatParticle[]) {
     for (const p of particles) {
-      p.breathPhaseOffset = Math.random() * Math.PI * 2;
-      p.breathSpeedMult = 0.8 + Math.random() * 0.4;
+      p.animState.breathPhaseOffset = Math.random() * Math.PI * 2;
     }
   },
 
@@ -57,20 +88,25 @@ export const ferrofluid: SplatAnimation = {
         frameCache.targetX = ctx.mouseX;
         frameCache.targetY = ctx.mouseY;
       } else {
-        const driftT = elapsed * 0.001;
-        const gx = 160 + Math.sin(driftT) * 10;
-        const gy = 160 + Math.sin(driftT * 2) * 10;
+        const driftT = elapsed * IDLE_DRIFT_SPEED;
+        const gx = IDLE_CENTER_COORD + Math.sin(driftT) * IDLE_DRIFT_AMP;
+        const gy = IDLE_CENTER_COORD + Math.sin(driftT * 2) * IDLE_DRIFT_AMP;
         frameCache.targetX = gx * scale + offsetX;
         frameCache.targetY = gy * scale + offsetY;
       }
 
-      frameCache.magneticRange = (300 + levels.bass * 200) * scale;
-      frameCache.spikeCount = 14 + Math.floor(levels.bass * 20);
-      frameCache.spikeRotationSpeed = 0.0015 + levels.mid * 0.01;
-      frameCache.audioSpikeBoost = levels.mid * 2.0;
-      frameCache.spikeStrength = 10 + levels.bass * 20;
-      frameCache.attractionBase = 20 + levels.bass * 60;
-      frameCache.audioBaseline = levels.volume * 0.7;
+      frameCache.magneticRange =
+        (BASE_MAGNETIC_RANGE + levels.bass * BASS_MAGNETIC_RANGE_MULT) * scale;
+      frameCache.spikeCount =
+        BASE_SPIKE_COUNT + Math.floor(levels.bass * BASS_SPIKE_COUNT_MULT);
+      frameCache.spikeRotationSpeed =
+        BASE_SPIKE_ROTATION + levels.mid * MID_SPIKE_ROTATION_MULT;
+      frameCache.audioSpikeBoost = levels.mid * MID_AUDIO_SPIKE_BOOST;
+      frameCache.spikeStrength =
+        BASE_SPIKE_STRENGTH + levels.bass * BASS_SPIKE_STRENGTH_MULT;
+      frameCache.attractionBase =
+        BASE_ATTRACTION + levels.bass * BASS_ATTRACTION_MULT;
+      frameCache.audioBaseline = levels.volume * VOLUME_BASELINE_MULT;
     }
 
     // --- Per-Particle Calculation ---
@@ -79,7 +115,8 @@ export const ferrofluid: SplatAnimation = {
     const dyMag = p.oy * scale + offsetY - frameCache.targetY;
     const distMag = Math.sqrt(dxMag * dxMag + dyMag * dyMag);
 
-    if (distMag < 0.1) return { dx: 0, dy: 0, springScale: 1.5 };
+    if (distMag < MIN_DIST_MAG)
+      return { dx: 0, dy: 0, springScale: IDLE_SPRING_SCALE };
 
     const angle = Math.atan2(dyMag, dxMag);
 
@@ -93,14 +130,20 @@ export const ferrofluid: SplatAnimation = {
     );
 
     const spikeFactor =
-      Math.pow(Math.abs(spikeWave), 4.0 + frameCache.audioSpikeBoost) *
-      (spikeWave > 0 ? 1.8 : -0.4);
+      Math.pow(
+        Math.abs(spikeWave),
+        SPIKE_WAVE_POWER + frameCache.audioSpikeBoost
+      ) * (spikeWave > 0 ? SPIKE_FACTOR_POS : SPIKE_FACTOR_NEG);
 
     const attraction = -intensity * frameCache.attractionBase;
 
     const microSpikes =
-      Math.sin(angle * (45 + levels.treble * 100) + elapsed * 0.04) *
-      (2.0 + levels.treble * 15) *
+      Math.sin(
+        angle *
+          (MICRO_SPIKE_BASE_FREQ + levels.treble * TREBLE_MICRO_FREQ_MULT) +
+          elapsed * MICRO_SPIKE_TIME_MULT
+      ) *
+      (MICRO_SPIKE_BASE_AMP + levels.treble * TREBLE_MICRO_AMP_MULT) *
       intensity;
 
     const totalDisplacement =
@@ -111,9 +154,12 @@ export const ferrofluid: SplatAnimation = {
     const spikeDx = (dxMag / distMag) * totalDisplacement;
     const spikeDy = (dyMag / distMag) * totalDisplacement;
 
-    const phase = p.breathPhaseOffset ?? 0;
-    const shiver = Math.sin(elapsed * 0.05 + phase) * (1.5 + levels.treble * 5);
-    const springScale = 1.1 + intensity * 1.5 + levels.bass;
+    const phase = p.animState.breathPhaseOffset ?? 0;
+    const shiver =
+      Math.sin(elapsed * SHIVER_TIME_MULT + phase) *
+      (BASE_SHIVER_AMP + levels.treble * TREBLE_SHIVER_AMP_MULT);
+    const springScale =
+      BASE_SPRING_SCALE + intensity * INTENSITY_SPRING_MULT + levels.bass;
 
     return {
       dx: (spikeDx + shiver * 0.5) * scale,

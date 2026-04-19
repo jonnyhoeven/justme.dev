@@ -23,42 +23,13 @@ export interface SplatParticle {
   cg: number;
   cb: number;
 
-  /* ---- animation-assigned (set during init) ---- */
-  isOutlier?: boolean;
-
-  /* ---- orbital-drift assigned ---- */
-  orbitCx?: number;
-  orbitCy?: number;
-  orbitSpeed?: number;
-
-  /* ---- breathing assigned ---- */
-  breathPhaseOffset?: number;
-  breathSpeedMult?: number;
-  breathAmpMult?: number;
-
-  /* ---- floating-outliers assigned ---- */
-  outlierPhase?: number;
-  wanderFreq?: number;
-  wanderAmp?: number;
-  coreWobblePhase?: number;
-  wavePhaseOffset?: number;
-  partnerIdx?: number;
-  glitchSeed?: number;
-  glitchSensitivity?: number;
-
-  /** Last seen elapsed time for delta-time calculations */
-  lastElapsed?: number;
-  /** Current angle for orbital animations */
-  orbitAngle?: number;
-  smoothedVolume?: number;
-  /** Individual phase offset for music reactivity */
-  individualPhase?: number;
-  /** Per-particle depth/Z value */
-  pz?: number;
-  /** Pre-computed angle from center (160, 160) */
-  radialAngle?: number;
-  /** Pre-computed distance from center or orbit center */
-  orbitRadius?: number;
+  /**
+   * Animation-specific state.
+   * Each animation module owns its own keys within this object.
+   * This prevents SplatParticle from becoming a bloated "god object".
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  animState: Record<string, any>;
 }
 
 export interface AnimationEffect {
@@ -98,7 +69,16 @@ export interface AnimationContext {
 export interface SplatAnimation {
   name: string;
   /** One-time setup — tag particles, assign depths, etc. */
-  init(particles: SplatParticle[], width: number, height: number): void;
+  init(particles: SplatParticle[]): void;
+  /**
+   * Optional pre-pass before the particle loop.
+   * Useful for capturing state snapshots or global computations.
+   */
+  beforeFrame?(
+    particles: SplatParticle[],
+    elapsed: number,
+    ctx: AnimationContext
+  ): void;
   /**
    * Per-particle, per-frame effect.
    * @param particle  The particle to animate
