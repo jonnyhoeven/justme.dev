@@ -11,6 +11,7 @@ import {
 import { getAudioLevels } from '../lib/splat-animations/audio-utils';
 import useMusic from '../.vitepress/theme/composables/useMusic';
 import { SITE_CONSTANTS } from '../.vitepress/constants';
+import DebugOverlay from './DebugOverlay.vue';
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 let animationId: number;
@@ -34,6 +35,12 @@ let startTime = performance.now();
 let cycleInterval: ReturnType<typeof setInterval>;
 const { audioData, isMusicVisible } = useMusic();
 const isVisible = useElementVisibility(canvasRef);
+
+const particleCount = ref(0);
+const activeAnimationName = computed(
+  () => currentAnimation.value?.name || 'None'
+);
+const brushCache = new Map<string, HTMLCanvasElement>();
 
 /**
  * Cycle to the next animation.
@@ -97,13 +104,13 @@ onMounted(async () => {
           };
         })
       );
+      particleCount.value = particles.length;
     }
   } catch (e) {
     console.error('Failed to load splat data', e);
   }
 
   // 2. Optimized Material Brush Caching
-  const brushCache = new Map<string, HTMLCanvasElement>();
   const getBrush = (color: string) => {
     if (brushCache.has(color)) return brushCache.get(color)!;
 
@@ -117,36 +124,25 @@ onMounted(async () => {
     c.height = size;
     const ctxC = c.getContext('2d')!;
 
-    // A. Material "Line Shadow" (The drop shadow effect)
-    // Drawn slightly offset and blurred to give depth
-    ctxC.shadowColor = 'rgba(0, 0, 0, 0.35)';
-    ctxC.shadowBlur = 3;
-    ctxC.shadowOffsetY = 1.5;
+    // (Shadow and blurs removed for performance)
 
-    // B. Feathered Body
-    // Radial gradient creates a soft, feathered outline that fits Material Design
     const grad = ctxC.createRadialGradient(
       center,
       center,
-      radius * 0.7,
+      radius,
       center,
       center,
       radius + 1
     );
     grad.addColorStop(0, `rgb(${color})`);
-    grad.addColorStop(1, `rgba(${color}, 0)`);
+    grad.addColorStop(1, `rgba(${color}, 0.2)`);
 
     ctxC.fillStyle = grad;
     ctxC.beginPath();
     ctxC.arc(center, center, radius + 1, 0, Math.PI * 2);
     ctxC.fill();
 
-    // C. Subtle Rim Light (Optional, adds premium feel)
-    ctxC.shadowBlur = 0; // Reset shadow for stroke
-    ctxC.shadowOffsetY = 0;
-    ctxC.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-    ctxC.lineWidth = 0.5;
-    ctxC.stroke();
+    // (Rim light removed for performance)
 
     brushCache.set(color, c);
     return c;
@@ -403,6 +399,10 @@ const onClick = () => {
       aria-label="Interactive 3D particle simulation of avatar"
     ></canvas>
   </div>
+  <DebugOverlay
+    :particle-count="particleCount"
+    :active-animation="activeAnimationName"
+  />
 </template>
 
 <style scoped>
