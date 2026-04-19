@@ -12,10 +12,10 @@ year: 2024
 month: Nov
 outline: deep
 intro: |
-  As critical infrastructure migrates to Kubernetes, the integration of 
-  K8sGPT and local LLMs is being spearheaded. This strategic initiative 
-  aims to automate the initial triage of cluster failures, transforming 
-  cryptic logs into actionable remediation steps while maintaining absolute 
+  As critical infrastructure migrates to Kubernetes, the integration of
+  K8sGPT and local LLMs is being spearheaded. This strategic initiative
+  aims to automate the initial triage of cluster failures, transforming
+  cryptic logs into actionable remediation steps while maintaining absolute
   data privacy in production environments.
 fetchReadme: false
 editLink: true

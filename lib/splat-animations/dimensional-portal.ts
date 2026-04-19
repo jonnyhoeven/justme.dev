@@ -1,3 +1,4 @@
+import { VOLUME_SMOOTHING, CENTER_X, CENTER_Y } from './animation-constants';
 import type {
   SplatAnimation,
   SplatParticle,
@@ -8,15 +9,12 @@ import { smoothValue } from './audio-utils';
 
 // --- Tuning Parameters ---
 const DEPTH_RANGE_Z = 200;
-const VOLUME_SMOOTHING = 0.05;
 const FOCAL_LENGTH = 300;
 const BASE_ROTATION_SPEED = 0.0005;
 const VOLUME_ROTATION_MULT = 0.01;
 const ANGLE_VELOCITY_X = 0.7;
 const ANGLE_VELOCITY_Y = 1.1;
 const ANGLE_VELOCITY_Z = 0.3;
-const CENTER_X = 160;
-const CENTER_Y = 160;
 const TREBLE_DEPTH_AMP = 40;
 const TREBLE_DEPTH_SPEED = 0.01;
 const Z_OFFSET = 250;

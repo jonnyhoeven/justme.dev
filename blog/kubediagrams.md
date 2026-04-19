@@ -12,9 +12,9 @@ year: 2025
 month: May
 outline: deep
 intro: |
-  In complex distributed systems, YAML is not a substitute for a mental model. 
-  Automated visualization was used to transform "Black Box" manifests into clear, 
-  navigable architectural diagrams, ensuring a shared understanding 
+  In complex distributed systems, YAML is not a substitute for a mental model.
+  Automated visualization was used to transform "Black Box" manifests into clear,
+  navigable architectural diagrams, ensuring a shared understanding
   of mission-critical public safety infrastructure.
 fetchReadme: false
 editLink: true

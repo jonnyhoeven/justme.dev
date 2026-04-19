@@ -12,10 +12,10 @@ year: 2024
 month: Apr
 outline: deep
 intro: |
-  Managing stateful workloads on Kubernetes is a Tier-1 SRE challenge. 
-  Implementing CloudNativePG (CNPG) as a production standard has 
-  enabled the creation of a self-healing, highly available PostgreSQL 
-  platform that matches RDS in reliability while surpassing it in 
+  Managing stateful workloads on Kubernetes is a Tier-1 SRE challenge.
+  Implementing CloudNativePG (CNPG) as a production standard has
+  enabled the creation of a self-healing, highly available PostgreSQL
+  platform that matches RDS in reliability while surpassing it in
   portability and control.
 fetchReadme: false
 editLink: true

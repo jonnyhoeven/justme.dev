@@ -11,7 +11,7 @@ import { windWaves } from './wind-waves';
 import { floatingOutliers } from './floating-outliers';
 import { flubberMotion } from './flubber-motion';
 import { ferrofluid } from './ferrofluid';
-import { createSolarFlare } from './solar-flare';
+import { solarFlare } from './solar-flare';
 import { quantumEntanglement } from './quantum-entanglement';
 import { digitalGlitch } from './digital-glitch';
 import { entangledWaveform } from './entangled-waveform';
@@ -32,7 +32,7 @@ export const animations: SplatAnimation[] = [
   floatingOutliers,
   flubberMotion,
   ferrofluid,
-  createSolarFlare(),
+  solarFlare,
   quantumEntanglement,
   digitalGlitch,
   entangledWaveform,

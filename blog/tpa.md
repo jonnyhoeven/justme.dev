@@ -4,8 +4,8 @@ title: 'Automating High-Availability PostgreSQL on AWS: A Deep Dive into Trusted
 date: 2024-03-28
 outline: deep
 intro: |
-  Deploying production-ready PostgreSQL clusters requires more than just `apt-get install`. Trusted Postgres Architect 
-  (TPA) by EDB brings Infrastructure as Code (IaC) principles to database orchestration, allowing you to provision, 
+  Deploying production-ready PostgreSQL clusters requires more than just `apt-get install`. Trusted Postgres Architect
+  (TPA) by EDB brings Infrastructure as Code (IaC) principles to database orchestration, allowing you to provision,
   configure, and manage highly available clusters on AWS EC2 with Ansible-driven automation.
 fetchReadme: false
 editLink: true

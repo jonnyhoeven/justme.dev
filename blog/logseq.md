@@ -12,10 +12,10 @@ year: 2021
 month: Aug
 outline: deep
 intro: |
-  In an SRE career spanning 26 years, the most valuable asset isn't just the code—it's 
-  the accumulated knowledge of how systems fail and recover. Throughout a career, 
-  Logseq has been used to build a private, graph-based "Second Brain," 
-  transforming scattered notes into a searchable, interconnected knowledge base 
+  In an SRE career spanning 26 years, the most valuable asset isn't just the code—it's
+  the accumulated knowledge of how systems fail and recover. Throughout a career,
+  Logseq has been used to build a private, graph-based "Second Brain,"
+  transforming scattered notes into a searchable, interconnected knowledge base
   for mission-critical operations.
 fetchReadme: false
 editLink: true

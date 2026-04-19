@@ -66,6 +66,14 @@ Executes the Python pipeline to fetch and transform remote documentation into lo
 npm run docs:generate
 ```
 
+### Splat/Asset Generation
+
+Generates and processes splat-related assets.
+
+```bash
+npm run docs:generate-splats
+```
+
 ### Local Development
 
 Starts the VitePress development server with hot-reload capabilities.

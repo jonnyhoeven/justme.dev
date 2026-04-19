@@ -12,9 +12,9 @@ year: 2026
 month: Apr
 outline: deep
 intro: |
-  As part of the current move to Kubernetes, the adoption of Cilium and eBPF is 
-  underway. This strategic modernization aims to replace legacy iptables routing 
-  with a high-performance, kernel-native networking foundation, providing the 
+  As part of the current move to Kubernetes, the adoption of Cilium and eBPF is
+  underway. This strategic modernization aims to replace legacy iptables routing
+  with a high-performance, kernel-native networking foundation, providing the
   sub-millisecond latency and deep observability required for real-time crisis management.
 fetchReadme: false
 editLink: true

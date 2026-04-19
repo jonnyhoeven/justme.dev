@@ -12,10 +12,10 @@ year: 2024
 month: Oct
 outline: deep
 intro: |
-  In mission-critical SRE, "having a backup" is no longer enough. 
-  A production-grade immutable storage vault has been implemented using 
-  MinIO and S3 Object Lock. This provides a "Write Once, Read Many" (WORM) 
-  guarantee for offsite backups, ensuring that public safety data remains 
+  In mission-critical SRE, "having a backup" is no longer enough.
+  A production-grade immutable storage vault has been implemented using
+  MinIO and S3 Object Lock. This provides a "Write Once, Read Many" (WORM)
+  guarantee for offsite backups, ensuring that public safety data remains
   impervious to ransomware or accidental deletion.
 fetchReadme: false
 editLink: true

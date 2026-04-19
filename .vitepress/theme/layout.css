@@ -1,0 +1,166 @@
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.VPHero .name,
+.VPHero .text {
+  font-family: var(--vp-font-family-heading) !important;
+}
+
+.vp-doc p,
+.vp-doc li,
+.vp-doc .custom-block p {
+  line-height: 1.7;
+}
+
+/* Glassmorphism overrides for VitePress Components */
+.VPNavBar {
+  background-color: var(--glass-bg-light) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid var(--glass-border-light) !important;
+}
+
+.dark .VPNavBar {
+  background-color: var(--glass-bg-dark) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid var(--glass-border-dark) !important;
+}
+
+.VPFeature {
+  background-color: var(--glass-bg-light) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  transition: all var(--duration-normal) var(--ease-smooth) !important;
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+.VPFeature .title,
+.VPFeature .details {
+  color: inherit !important;
+}
+
+.dark .VPFeature {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid var(--glass-border-dark) !important;
+}
+
+.VPFeature:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-brand-lg) !important;
+}
+
+.dark .VPFeature:hover {
+  box-shadow: 0 10px 24px rgba(99, 102, 241, 0.25) !important;
+  border-color: var(--vp-c-brand-1-alpha-40) !important;
+}
+
+.custom-block {
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  background-color: rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+}
+
+.dark .custom-block {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid var(--glass-border-dark) !important;
+}
+
+/* --- Layout Touches --- */
+
+/* Refined code blocks and callouts */
+.vp-doc div[class*='language-'],
+.vp-doc .custom-block {
+  border-radius: var(--radius-md) !important;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Stylize Feature Card Icons on the Home Page */
+.VPFeature .icon {
+  background-color: var(--vp-c-brand-soft) !important;
+  padding: 12px !important;
+  border-radius: var(--radius-md) !important;
+  display: inline-flex !important;
+  margin-bottom: 20px !important;
+  color: var(--vp-c-brand-1) !important;
+}
+
+/* Make Footer Smaller and Sleeker */
+.VPFooter {
+  font-size: 13px !important;
+  padding: 24px !important;
+}
+
+.VPFooter .message {
+  opacity: 0.7;
+}
+
+/**
+ * Homepage-specific layout and components
+ * -------------------------------------------------------------------------- */
+
+.homepage-content {
+  margin-top: 8rem;
+}
+
+.recent-posts {
+  display: flex;
+  flex-direction: column;
+  gap: 4.5rem;
+  margin-top: 3rem;
+}
+
+.action {
+  margin-top: 4rem;
+  text-align: center;
+}
+
+/* Styled as a .VPButton.brand variant with the .flourish sweep */
+.view-all-button {
+  display: inline-block;
+  padding: 0.8rem 2.2rem;
+  background-color: var(--vp-c-brand-3);
+  color: #ffffff !important;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  text-decoration: none !important;
+  font-family: var(--vp-font-family-heading);
+  transition: all var(--duration-normal) var(--ease-smooth);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.view-all-button:hover {
+  background-color: var(--vp-c-brand-2);
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: var(--shadow-brand-md);
+  text-decoration: none !important;
+}
+
+.view-all-button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/**
+ * Utility: Embed frames (iframes in blog posts)
+ * -------------------------------------------------------------------------- */
+
+.embed-frame {
+  margin: 4px;
+}
+
+.embed-caption {
+  text-align: right;
+}
+
+.embed-video {
+  margin: 0;
+  padding-top: 20px;
+  display: block;
+}

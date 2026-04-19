@@ -1,3 +1,4 @@
+import { CENTER_Y, CANVAS_WIDTH } from './animation-constants';
 import type {
   SplatAnimation,
   SplatParticle,
@@ -15,10 +16,8 @@ import { lerpToWhite } from './color-utils';
  */
 
 // --- Tuning Parameters ---
-const CANVAS_WIDTH = 320;
 const BIN_USAGE_RATIO = 0.6;
 const TIME_MULT = 0.002;
-const CENTER_Y = 160;
 const MIN_CENTER_MULT = 0.15;
 const IDLE_WAVE_TIME_MULT = 0.5;
 const IDLE_WAVE_SPACE_MULT = 0.04;

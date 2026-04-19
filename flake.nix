@@ -13,7 +13,7 @@
           inherit system;
           config.allowUnfree = true;
         };
-        
+
         # Base packages needed for both local dev and CI
         basePackages = with pkgs; [
           nodejs_22
@@ -21,8 +21,11 @@
           (python3.withPackages (ps: with ps; [
             pyyaml
             requests
+            pydantic
+            pillow
           ]))
           ruff
+          pre-commit
         ];
       in
       {

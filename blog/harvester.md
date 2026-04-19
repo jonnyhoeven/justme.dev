@@ -12,9 +12,9 @@ year: 2023
 month: Apr
 outline: deep
 intro: |
-  Cloud-Native doesn't always mean "In the Cloud." During recent 
-  infrastructure projects, Harvester was used to transform bare-metal 
-  hardware into a private cloud, bridging the gap between legacy VMs 
+  Cloud-Native doesn't always mean "In the Cloud." During recent
+  infrastructure projects, Harvester was used to transform bare-metal
+  hardware into a private cloud, bridging the gap between legacy VMs
   and modern Kubernetes workloads with a single, unified control plane.
 fetchReadme: false
 editLink: true

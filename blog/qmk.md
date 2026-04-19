@@ -12,9 +12,9 @@ year: 2023
 month: Apr
 outline: deep
 intro: |
-  As an SRE, the most important tool isn't the terminal—it's the interface that 
-  connects the mind to the machine. Over the years, QMK Firmware has been used to 
-  build customized, programmable hardware that reduces repetitive strain 
+  As an SRE, the most important tool isn't the terminal—it's the interface that
+  connects the mind to the machine. Over the years, QMK Firmware has been used to
+  build customized, programmable hardware that reduces repetitive strain
   and accelerates mission-critical workflows.
 fetchReadme: false
 editLink: true

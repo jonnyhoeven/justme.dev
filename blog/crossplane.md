@@ -12,10 +12,10 @@ year: 2026
 month: Mar
 outline: deep
 intro: |
-  As mission-critical infrastructure moves to Kubernetes, 
-  Crossplane is being used to transform cloud resources into 
-  declarative data. This transition is the foundation of an Internal Developer 
-  Platform (IDP), aiming to eliminate provisioning bottlenecks and empower 
+  As mission-critical infrastructure moves to Kubernetes,
+  Crossplane is being used to transform cloud resources into
+  declarative data. This transition is the foundation of an Internal Developer
+  Platform (IDP), aiming to eliminate provisioning bottlenecks and empower
   engineering teams with a self-service model.
 fetchReadme: false
 editLink: true

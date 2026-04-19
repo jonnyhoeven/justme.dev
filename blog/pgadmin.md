@@ -12,9 +12,9 @@ year: 2024
 month: Apr
 outline: deep
 intro: |
-  Granting developers access to production data shouldn't mean compromising on security. 
-  pgAdmin was deployed on Kubernetes with OIDC integration, replacing insecure 
-  port-forwarding with a centralized, identity-aware portal for the entire 
+  Granting developers access to production data shouldn't mean compromising on security.
+  pgAdmin was deployed on Kubernetes with OIDC integration, replacing insecure
+  port-forwarding with a centralized, identity-aware portal for the entire
   Cloud-Native PG fleet.
 fetchReadme: false
 editLink: true

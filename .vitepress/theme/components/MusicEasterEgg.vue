@@ -305,6 +305,7 @@ onBeforeUnmount(() => {
               max="1"
               step="0.01"
               class="volume-range-horizontal"
+              aria-label="Volume Control"
             />
           </div>
         </Transition>

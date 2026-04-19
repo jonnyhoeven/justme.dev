@@ -1,3 +1,4 @@
+import { CANVAS_WIDTH } from './animation-constants';
 import type {
   SplatAnimation,
   SplatParticle,
@@ -14,7 +15,6 @@ import type {
  */
 
 // --- Tuning Parameters ---
-const CANVAS_WIDTH = 320;
 const CANVAS_HEIGHT = 320;
 const BASE_DEPTH_OFFSET = 50;
 const ENTANGLEMENT_POS_MULT = 0.5;

@@ -1,15 +1,34 @@
 import logging
 import textwrap
+from datetime import date
 from pathlib import Path
-from typing import Any, Dict
+from typing import List, Optional, Union
 
 import yaml
+from pydantic import BaseModel, HttpUrl
 
 import requests
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
+
+
+class ProjectRequest(BaseModel):
+    title: str
+    type: str = "project"
+    date: Union[date, str]
+    image: str
+    fetchReadme: bool = False
+    gitlink: HttpUrl
+    user: Optional[str] = None
+    project: Optional[str] = None
+    branch: str = "main"
+    readmeFile: str = "README.md"
+    languages: Union[str, List[str]]
+    fetchML: bool = False
+    outline: str = "deep"
+    intro: str
 
 
 def get_wrapper_template(post_content: str, readme_content: str) -> str:
@@ -35,15 +54,13 @@ class GenerateFiles:
     def get_readme(self, user: str, project: str, branch: str, readme_file: str) -> str:
         """Fetch README content from GitHub."""
         if not all([user, project, readme_file]):
-            logger.warning(f"Missing user, project, or readme_file for {user}/{project}")
+            logger.warning(f"Missing user, project, or readme_file: {user}/{project}")
             return ""
 
         url = f"https://raw.githubusercontent.com/{user}/{project}/{branch}/{readme_file}"
         try:
             response = requests.get(url, timeout=10)
-            if response.status_code != 200:
-                logger.error(f"Error: No 200 response {url} (Status: {response.status_code})")
-                return ""
+            response.raise_for_status()
             return response.text
         except requests.RequestException as e:
             logger.error(f"Failed to fetch README from {url}: {e}")
@@ -56,26 +73,24 @@ class GenerateFiles:
             return
 
         for req_file in self.req_path.glob("*.yaml"):
-            logger.info(f"Loading {req_file.name}")
             try:
                 with req_file.open("r") as file:
-                    request = yaml.safe_load(file)
+                    data = yaml.safe_load(file)
 
-                if not request:
-                    logger.error(f"Error loading {req_file}")
+                if data is None:
+                    logger.warning(f"Skipping empty request file: {req_file}")
                     continue
 
-                if "type" not in request:
-                    logger.error(f"Error: Missing type in {req_file}")
-                    continue
-
+                # Validate with Pydantic
+                request = ProjectRequest(**data)
                 self.process_request(request, req_file)
-            except yaml.YAMLError as e:
-                logger.error(f"Error parsing YAML {req_file}: {e}")
-            except Exception as e:
-                logger.error(f"Unexpected error processing {req_file}: {e}")
 
-    def process_request(self, request: Dict[str, Any], req_file: Path) -> None:
+            except yaml.YAMLError as e:
+                logger.error(f"Error parsing YAML in {req_file}: {e}")
+            except Exception as e:
+                logger.error(f"Validation error for {req_file}: {e}")
+
+    def process_request(self, request: ProjectRequest, req_file: Path) -> None:
         """Process a single request and generate the markdown file."""
         my_wrap = textwrap.TextWrapper(width=self.max_width)
         basename = req_file.stem
@@ -83,21 +98,21 @@ class GenerateFiles:
 
         readme = ""
         post = ""
-        logger.info(f"Processing {basename}")
+        logger.info(f"Processing project: {request.title} ({basename})")
 
-        if request.get("fetchReadme", False):
+        if request.fetchReadme:
             readme = self.get_readme(
-                request.get("user", ""),
-                request.get("project", ""),
-                request.get("branch", "main"),
-                request.get("readmeFile", ""),
+                request.user or "",
+                request.project or "",
+                request.branch,
+                request.readmeFile,
             )
 
         self.save_post(request, dst_path, post, readme, my_wrap)
 
     @staticmethod
     def save_post(
-        request: Dict[str, Any],
+        request: ProjectRequest,
         dst_path: Path,
         post: str,
         readme: str,
@@ -113,7 +128,13 @@ class GenerateFiles:
         try:
             with dst_path.open("w") as pst_file:
                 pst_file.write("---\n")
-                yaml.safe_dump(request, pst_file, width=120, sort_keys=False)
+                # Convert model to dict for YAML dumping, exclude None values to keep it clean
+                frontmatter = request.model_dump(exclude_none=True)
+                # Convert HttpUrl to string for YAML serialization
+                if "gitlink" in frontmatter:
+                    frontmatter["gitlink"] = str(frontmatter["gitlink"])
+
+                yaml.safe_dump(frontmatter, pst_file, width=120, sort_keys=False)
                 pst_file.write("---\n")
                 pst_file.write(content_template)
         except IOError as e:

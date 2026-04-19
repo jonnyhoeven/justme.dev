@@ -1,3 +1,4 @@
+import { CENTER_X, CENTER_Y } from './animation-constants';
 import type {
   SplatAnimation,
   SplatParticle,
@@ -13,8 +14,6 @@ import type {
  */
 
 // --- Tuning Parameters ---
-const CENTER_X = 160;
-const CENTER_Y = 160;
 const BREATH_SPEED_BASE = 0.8;
 const BREATH_SPEED_VAR = 0.4;
 const BREATH_AMP_BASE = 0.5;

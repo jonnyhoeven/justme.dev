@@ -81,12 +81,12 @@ export default async () => {
     ],
     transformHead: ({ pageData }) => {
       const head: HeadConfig[] = [];
-      const pf = pageData.frontmatter;
+      const pf = pageData.frontmatter ?? {};
       const intro_plh =
         'Just me. Sharing insights, experiences, and tutorials related to software development and site reliability engineering.';
-      const intro = pf && pf.intro ? pf.intro : intro_plh;
+      const intro = pf.intro ? pf.intro : intro_plh;
       const image_plh = SITE_CONSTANTS.IMAGES.DEFAULT;
-      const image = `${SITE_CONSTANTS.HOSTNAME}${pf && pf.image ? pf.image : image_plh}`;
+      const image = `${SITE_CONSTANTS.HOSTNAME}${pf.image ? pf.image : image_plh}`;
 
       head.push([
         'meta',
@@ -185,17 +185,19 @@ export default async () => {
       ],
       footer: {
         message:
+          `<div class="badge-wrapper" style="display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem;">` +
           `<a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/deploy.yml" target="_blank">` +
-          `   <img alt="Github deploy workflow status badge" class="homeBadgeLeft" width="143px" height="20px" src="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/deploy.yml/badge.svg?branch=main">` +
+          `   <img alt="Github deploy workflow status badge" width="143px" height="20px" src="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/deploy.yml/badge.svg?branch=main">` +
           '</a>' +
           `<a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/github-code-scanning/codeql" target="_blank">` +
-          `   <img alt="Github code scanning badge" class="homeBadgeRight" width="120px" height="20px" src="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/github-code-scanning/codeql/badge.svg">` +
+          `   <img alt="Github code scanning badge" width="120px" height="20px" src="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/github-code-scanning/codeql/badge.svg">` +
           '</a>' +
+          `</div>` +
           `&copy; ${new Date().getFullYear()} Justme.dev &bull; <a href="https://raw.githubusercontent.com/jonnyhoeven/justme.dev/main/LICENSE" target="_blank">MIT Licensed</a>`
       }
     },
     sitemap: {
-      hostname: `${SITE_CONSTANTS.HOSTNAME}/`
+      hostname: SITE_CONSTANTS.HOSTNAME
     },
     transformPageData
   });

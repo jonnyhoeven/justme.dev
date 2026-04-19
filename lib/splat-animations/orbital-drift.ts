@@ -1,3 +1,9 @@
+import {
+  VOLUME_SMOOTHING,
+  SIZE_OSCILLATION_AMP,
+  DEFAULT_CENTER_X,
+  DEFAULT_CENTER_Y
+} from './animation-constants';
 import type {
   SplatAnimation,
   SplatParticle,
@@ -7,19 +13,14 @@ import type {
 import { smoothValue } from './audio-utils';
 
 // --- Tuning Parameters ---
-const DEFAULT_CENTER_X = 160;
-const DEFAULT_CENTER_Y = 160;
 const CENTER_VARIANCE = 40;
 const BASE_ORBIT_SPEED_MIN = 0.00003;
 const BASE_ORBIT_SPEED_VARIANCE = 0.00004;
-const VOLUME_SMOOTHING = 0.02;
 const OSCILLATION_BASE = 0.0001;
 const OSCILLATION_BASS_MULT = 0.00005;
 const MUSIC_SPEED_BOOST_MULT = 0.005;
 const VOLUME_ZOOM_FACTOR = 0.12;
 const VOLUME_SIZE_FACTOR = 0.1;
-const SIZE_OSCILLATION_AMP = 0.05;
-
 /**
  * Slow Orbital Drift
  *

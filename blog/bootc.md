@@ -12,10 +12,10 @@ year: 2026
 month: Mar
 outline: deep
 intro: |
-  The future of the operating system involves bootc (Bootable Containers), 
-  representing the final frontier of Platform Engineering. This transition 
-  enables managing the entire OS lifecycle using OCI-compliant GitOps 
-  workflows similar to those for applications, aiming for a declarative, 
+  The future of the operating system involves bootc (Bootable Containers),
+  representing the final frontier of Platform Engineering. This transition
+  enables managing the entire OS lifecycle using OCI-compliant GitOps
+  workflows similar to those for applications, aiming for a declarative,
   immutable foundation.
 fetchReadme: false
 editLink: true

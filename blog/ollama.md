@@ -6,9 +6,9 @@ year: 2025
 month: Feb
 outline: deep
 intro: |
-  GenAI offers a 10x productivity boost, but for mission-critical SRE and development, public 
-  APIs are a non-starter. The use of local LLMs was pioneered 
-  with Ollama to bring AI-assisted coding to teams without leaking proprietary 
+  GenAI offers a 10x productivity boost, but for mission-critical SRE and development, public
+  APIs are a non-starter. The use of local LLMs was pioneered
+  with Ollama to bring AI-assisted coding to teams without leaking proprietary
   code or public safety data.
 fetchReadme: false
 editLink: true

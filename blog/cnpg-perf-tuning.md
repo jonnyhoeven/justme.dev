@@ -12,9 +12,9 @@ year: 2024
 month: Dec
 outline: deep
 intro: |
-  Moving mission-critical databases to Kubernetes is only half the battle. 
-  CloudNativePG clusters were tuned to support a 10x increase in connection 
-  volume and high-throughput ETL pipelines, proving that self-managed 
+  Moving mission-critical databases to Kubernetes is only half the battle.
+  CloudNativePG clusters were tuned to support a 10x increase in connection
+  volume and high-throughput ETL pipelines, proving that self-managed
   database performance can rival—and exceed—managed cloud services.
 fetchReadme: false
 editLink: true

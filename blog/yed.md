@@ -6,10 +6,10 @@ year: 2021
 month: Aug
 outline: deep
 intro: |
-  In an era of browser-based tools, yEd remains the SRE's secret weapon for mapping 
-  chaotic systems. Algorithmic layouts 
-  are consistently used to transform hundreds of undocumented database 
-  relationships into clear, hierarchical maps, providing the clarity needed to 
+  In an era of browser-based tools, yEd remains the SRE's secret weapon for mapping
+  chaotic systems. Algorithmic layouts
+  are consistently used to transform hundreds of undocumented database
+  relationships into clear, hierarchical maps, providing the clarity needed to
   scale complex platforms.
 fetchReadme: false
 editLink: true

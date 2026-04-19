@@ -64,7 +64,7 @@ onMounted(async () => {
   if (!ctx) return;
 
   // 1. Data Ingestion & Mobile Detection
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const isMobile = isMobileView.value;
   try {
     const res = await fetch('/data/splats.json');
     if (res.ok) {
@@ -359,7 +359,11 @@ const onClick = () => {
     @mouseleave="onMouseLeave"
     @click="onClick"
   >
-    <canvas ref="canvasRef"></canvas>
+    <canvas
+      ref="canvasRef"
+      role="img"
+      aria-label="Interactive 3D particle simulation of avatar"
+    ></canvas>
   </div>
 </template>
 
@@ -368,7 +372,7 @@ const onClick = () => {
   width: 100%;
   height: 100%;
   position: absolute;
-  margin-top: 5pt;
+  margin-top: 0.5rem;
   pointer-events: auto;
 }
 
@@ -382,7 +386,7 @@ const onClick = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 90pt;
+  padding-top: 7.5rem;
 }
 
 .fallback-image img {

@@ -1,5 +1,12 @@
 <script setup lang="ts">
-defineProps(['frontmatter']);
+interface Frontmatter {
+  model?: string;
+  [key: string]: unknown;
+}
+
+defineProps<{
+  frontmatter?: Frontmatter;
+}>();
 </script>
 
 <template>

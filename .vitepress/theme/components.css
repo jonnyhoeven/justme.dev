@@ -1,0 +1,599 @@
+/**
+ * Component: Search
+ * -------------------------------------------------------------------------- */
+
+/* Target only the actual button for the pill look, ensuring the container remains transparent */
+.VPNavBarSearch {
+  background: transparent !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.VPSearchButton,
+.DocSearch-Button {
+  margin-top: 2px !important;
+  display: flex !important;
+  align-items: center !important;
+  background-color: rgba(var(--vp-c-bg-elv-rgb), 0.4) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: var(--radius-full) !important;
+  padding: 0 12px 0 16px !important;
+  height: 38px !important;
+  width: auto !important;
+  min-width: 140px !important;
+  transition: all var(--duration-normal) var(--ease-smooth) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+.dark .VPSearchButton,
+.dark .DocSearch-Button {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  border-color: var(--glass-border-dark) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.VPSearchButton:hover,
+.DocSearch-Button:hover {
+  background-color: rgba(var(--vp-c-bg-elv-rgb), 0.6) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 8px 16px var(--vp-c-brand-1-alpha-15) !important;
+  border-color: var(--vp-c-brand-2) !important;
+}
+
+.dark .VPSearchButton:hover,
+.dark .DocSearch-Button:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Internal components of the search button */
+.DocSearch-Button-Placeholder,
+.VPSearchButton-placeholder {
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  color: var(--vp-c-text-2) !important;
+  margin-right: 12px !important;
+}
+
+.DocSearch-Button-Keys,
+.VPSearchButton .DocSearch-Button-Key,
+.VPSearchButton-keys {
+  display: flex !important;
+  gap: 2px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: var(--radius-sm) !important;
+  padding: 2px 6px !important;
+  height: 20px !important;
+  align-items: center !important;
+}
+
+.dark .DocSearch-Button-Keys,
+.dark .VPSearchButton-keys {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border-color: var(--glass-border-dark) !important;
+}
+
+.DocSearch-Button-Key,
+.VPSearchButton-key {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  color: var(--vp-c-text-2) !important;
+  text-transform: uppercase !important;
+}
+
+/* Local Search Modal Styling */
+.VPLocalSearchBox {
+  --vp-local-search-bg: rgba(255, 255, 255, 0.75) !important;
+}
+
+.dark .VPLocalSearchBox {
+  --vp-local-search-bg: rgba(16, 21, 35, 0.75) !important;
+}
+
+.VPLocalSearchBox .backdrop {
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.VPLocalSearchBox .shell {
+  background-color: var(--vp-local-search-bg) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04),
+    0 0 40px var(--vp-c-brand-1-alpha-10) !important;
+  overflow: hidden !important;
+}
+
+.VPLocalSearchBox .search-bar {
+  border-bottom: 1px solid var(--glass-border-light) !important;
+  padding: 16px 24px !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  transition: all var(--duration-normal) ease !important;
+}
+
+.VPLocalSearchBox .search-bar:focus-within {
+  background: rgba(var(--vp-c-brand-rgb), 0.05) !important;
+  border-bottom-color: var(--vp-c-brand-1) !important;
+}
+
+.VPLocalSearchBox .search-input {
+  background: transparent !important;
+  font-family: var(--vp-font-family-base) !important;
+  font-size: 1.2rem !important;
+  color: var(--vp-c-text-1) !important;
+  outline: none !important;
+  padding: 4px 0 !important;
+}
+
+.VPLocalSearchBox .search-input::placeholder {
+  color: var(--vp-c-text-2) !important;
+  opacity: 0.5 !important;
+}
+
+.VPLocalSearchBox .results {
+  padding: 16px !important;
+  scrollbar-width: thin;
+  scrollbar-color: var(--vp-c-brand-1-alpha-30) transparent;
+}
+
+.VPLocalSearchBox .results::-webkit-scrollbar {
+  width: 12px !important;
+}
+
+.VPLocalSearchBox .results::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.VPLocalSearchBox .results::-webkit-scrollbar-thumb {
+  background-color: var(--vp-c-brand-1-alpha-20) !important;
+  border-radius: 10px !important;
+  border: 4px solid transparent !important;
+  background-clip: content-box !important;
+}
+
+.VPLocalSearchBox .results::-webkit-scrollbar-thumb:hover {
+  background-color: var(--vp-c-brand-1-alpha-40) !important;
+}
+
+.VPLocalSearchBox .result {
+  border-radius: var(--radius-lg) !important;
+  margin-bottom: 8px !important;
+  padding: 12px 16px !important;
+  transition: all var(--duration-fast) var(--ease-standard) !important;
+  border: 1px solid transparent !important;
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+.VPLocalSearchBox .result.selected {
+  background-color: var(--vp-c-brand-soft) !important;
+  border-color: var(--vp-c-brand-1) !important;
+  transform: scale(1.01) !important;
+  box-shadow: var(--shadow-brand-sm) !important;
+}
+
+.VPLocalSearchBox .result:hover:not(.selected) {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  transform: translateX(4px) !important;
+}
+
+.VPLocalSearchBox .mark {
+  color: var(--vp-c-brand-1) !important;
+  background-color: var(--vp-c-brand-1-alpha-10) !important;
+  padding: 0 2px !important;
+  border-radius: var(--radius-xs) !important;
+  font-weight: 700 !important;
+}
+
+.VPLocalSearchBox .search-keyboard-shortcuts {
+  border-top: 1px solid var(--glass-border-light) !important;
+  padding: 12px 24px !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+
+/**
+ * Component: Hero floating avatar
+ * -------------------------------------------------------------------------- */
+
+/*noinspection CssUnusedSymbol*/
+.VPImage.image-src {
+  border-radius: var(--radius-full);
+  left: 50%;
+  top: 58%;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--glass-border-light);
+  box-shadow:
+    0 0 20px var(--vp-c-brand-1-alpha-20),
+    0 0 40px var(--vp-c-brand-2-alpha-10);
+  animation: antigravity-float 6s ease-in-out infinite;
+  backdrop-filter: blur(4px);
+  transition: all 0.5s var(--ease-smooth);
+}
+
+.VPImage.image-src:hover {
+  transform: translate(-50%, -50%) scale(1.05);
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow:
+    0 0 30px var(--vp-c-brand-1-alpha-40),
+    0 0 60px var(--vp-c-brand-2-alpha-20);
+}
+
+/*noinspection CssUnusedSymbol*/
+.logo {
+  width: 18px;
+  height: 24px;
+}
+
+@keyframes antigravity-float {
+  0% {
+    box-shadow:
+      0 5px 15px rgba(0, 0, 0, 0.3),
+      0 0 20px var(--vp-c-brand-1-alpha-20);
+    transform: translate(-50%, -50%) translateY(0) rotate(0deg);
+  }
+
+  33% {
+    transform: translate(-50%, -50%) translateY(-10px) rotate(1deg);
+  }
+
+  66% {
+    transform: translate(-50%, -50%) translateY(5px) rotate(-1deg);
+    box-shadow:
+      0 20px 30px rgba(0, 0, 0, 0.2),
+      0 0 40px var(--vp-c-brand-1-alpha-40);
+  }
+
+  100% {
+    box-shadow:
+      0 5px 15px rgba(0, 0, 0, 0.3),
+      0 0 20px var(--vp-c-brand-1-alpha-20);
+    transform: translate(-50%, -50%) translateY(0) rotate(0deg);
+  }
+}
+
+.VPHero {
+  padding-top: var(--vp-home-hero-padding-top-mobile) !important;
+}
+
+@media (min-width: 960px) {
+  .VPHero {
+    padding-top: var(--vp-home-hero-padding-top) !important;
+  }
+}
+
+/* --- Dynamic Micro-Animations --- */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.VPHero .name {
+  animation: fadeInUp 0.8s var(--ease-smooth) both;
+  animation-delay: 0.1s;
+}
+
+.VPHero .text {
+  animation: fadeInUp 0.8s var(--ease-smooth) both;
+  animation-delay: 0.2s;
+}
+
+.VPHero .tagline {
+  animation: fadeInUp 0.8s var(--ease-smooth) both;
+  animation-delay: 0.2s;
+  background: linear-gradient(
+    135deg,
+    var(--vp-c-text-1) 0%,
+    #cbd5e1 50%,
+    var(--vp-c-brand-1) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em !important;
+  font-family: var(--vp-font-family-heading) !important;
+}
+
+.VPHero .actions {
+  animation: fadeInUp 0.8s var(--ease-smooth) both;
+  animation-delay: 0.3s;
+}
+
+.VPFeatures {
+  animation: fadeInUp 1s var(--ease-smooth) both;
+  animation-delay: 0.4s;
+}
+
+.vp-doc > div > * {
+  animation: fadeInUp var(--duration-slow) var(--ease-smooth) both;
+}
+
+.vp-doc > div > *:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.vp-doc > div > *:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.vp-doc > div > *:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.vp-doc > div > *:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+.vp-doc > div > *:nth-child(5) {
+  animation-delay: 0.5s;
+}
+
+.VPButton {
+  transition: all var(--duration-normal) var(--ease-smooth) !important;
+  border-radius: var(--radius-full) !important;
+}
+
+.VPButton.brand,
+.flourish {
+  position: relative;
+  overflow: hidden;
+}
+
+.VPButton.brand::after,
+.flourish::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: none;
+}
+
+.VPButton.brand:hover::after,
+.flourish:hover::after {
+  left: 100%;
+  transition: left 0.7s ease-in-out;
+}
+
+.VPButton:hover {
+  transform: translateY(-4px) scale(1.03) !important;
+  box-shadow: var(--shadow-brand-md) !important;
+}
+
+.VPButton:active {
+  transform: translateY(0) scale(0.98) !important;
+}
+
+.vp-doc a {
+  transition:
+    color var(--duration-fast) ease,
+    text-decoration-color var(--duration-fast) ease,
+    text-underline-offset var(--duration-fast) ease;
+  text-decoration-color: transparent;
+  text-underline-offset: 2px;
+}
+
+.vp-doc a:hover {
+  text-decoration-color: var(--vp-c-brand-1);
+  text-underline-offset: 4px;
+}
+
+/**
+ * Component: Badge Bar (from Badges.vue)
+ * -------------------------------------------------------------------------- */
+
+.badge-bar {
+  margin: 13px 0 27px 0;
+  position: relative;
+  z-index: 20;
+}
+
+.shieldButton {
+  margin-top: 16px;
+  margin-right: 5px;
+  float: right;
+  transition: all var(--duration-normal) var(--ease-smooth);
+}
+
+.shieldButton:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 12px var(--vp-c-brand-1-alpha-20);
+  border-radius: var(--radius-xs);
+}
+
+/**
+ * Component: Article List & Article Item — shared grid layout
+ * -------------------------------------------------------------------------- */
+
+.nolinkdecor {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+.container_row {
+  display: grid;
+  grid-template-columns: var(--ls-listitem-grid-cols);
+  column-gap: var(--ls-listitem-grid-gap);
+  position: relative;
+}
+
+.clickable-card {
+  cursor: pointer;
+}
+
+.stretched-link {
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+}
+
+/* ArticleList: grid layers use CSS-variable positioning */
+.layerbg,
+.layerimg {
+  grid-column: var(--ls-listitem-image-col);
+  grid-row: var(--ls-listitem-image-row);
+  padding: var(--ls-listitem-image-padding);
+}
+
+.layercontent {
+  grid-column: var(--ls-listitem-content-col);
+  grid-row: var(--ls-listitem-content-row);
+  display: flex;
+  flex-direction: column;
+}
+
+.post-title {
+  margin: 0 0 0.8rem 0;
+  padding-top: 0;
+  border-top: none;
+  position: relative;
+  font-family: var(--vp-font-family-heading);
+  font-weight: 600;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.post-intro {
+  font-size: 1rem;
+  line-height: 1.6;
+  opacity: 0.85;
+  margin-bottom: 1.2rem;
+  max-width: 65ch;
+}
+
+/* ArticleList: list-item image */
+.listImage {
+  width: var(--ls-listitem-image-width);
+  height: var(--ls-listitem-image-height);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--vp-c-brand-soft);
+  transition: all 1s ease-in-out;
+  padding: var(--ls-listitem-image-padding);
+}
+
+.container_row:hover .listImage {
+  transform: skew(-0deg, -4deg) rotate(2deg) scale(1.08);
+}
+
+/* ArticleList: background glow behind list-item image */
+.listImagebg {
+  width: var(--ls-listitem-image-width);
+  height: var(--ls-listitem-image-height);
+  background-image: radial-gradient(
+    circle at 50% 50%,
+    var(--vp-c-blue-500) 0%,
+    var(--vp-c-brand-2) 100%
+  );
+  opacity: 0.25;
+  filter: blur(var(--ls-listitem-image-bg-blur));
+  z-index: -10;
+  transition: all 0.8s var(--ease-smooth);
+  padding: var(--ls-listitem-image-padding);
+}
+
+.container_row:hover .listImagebg {
+  transform: skew(-1.5deg, -0.5deg) rotate(-0.4deg) scale(1.05);
+  filter: blur(var(--ls-listitem-image-bg-blur-hover));
+}
+
+/**
+ * Component: Article Detail — overrides for single article page
+ * -------------------------------------------------------------------------- */
+
+.article-detail .container_row {
+  padding: 13px;
+  grid-template-columns: 1fr;
+}
+
+.article-detail .layerbg,
+.article-detail .layerimg {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 11px 0 13px 0;
+  padding: 0;
+  width: 100%;
+}
+
+.articleImage {
+  width: 100%;
+  height: 360px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 1px solid var(--vp-c-brand-soft);
+  transition: all 1.5s ease-out;
+  border-radius: var(--radius-sm);
+}
+
+.container_row:hover .articleImage {
+  transform: skew(-0.5deg, -0.5deg) rotate(-0.4deg) scale(1.04);
+}
+
+.articleImagebg {
+  width: 100%;
+  height: 333px;
+  z-index: -10;
+  transition: all 1s ease-in-out;
+  background: linear-gradient(
+    45deg,
+    var(--vp-c-blue-500),
+    var(--vp-c-brand-1),
+    var(--vp-c-brand-2),
+    var(--vp-c-brand-3)
+  );
+  background-size: 800% 800%;
+  filter: blur(var(--ls-listitem-image-bg-blur));
+  animation: glow 20s ease infinite;
+}
+
+.container_row:hover .articleImagebg {
+  transform: skew(-1.5deg, -0.5deg) rotate(-0.5deg) scale(1.04);
+  filter: blur(var(--ls-listitem-image-bg-blur-hover));
+}
+
+@keyframes glow {
+  0% {
+    background-position: 4% 0;
+  }
+
+  50% {
+    background-position: 97% 100%;
+  }
+
+  100% {
+    background-position: 4% 0;
+  }
+}

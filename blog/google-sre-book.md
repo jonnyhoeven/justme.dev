@@ -6,9 +6,9 @@ year: 2024
 month: Oct
 outline: deep
 intro: |
-  Google's SRE principles provide the blueprint, but real-world execution is a cultural 
-  challenge. During past projects, "The SRE Book" was translated into actionable 
-  engineering practices, using SLOs as Code and Error Budgets to balance rapid deployment 
+  Google's SRE principles provide the blueprint, but real-world execution is a cultural
+  challenge. During past projects, "The SRE Book" was translated into actionable
+  engineering practices, using SLOs as Code and Error Budgets to balance rapid deployment
   with the uncompromising uptime required for public safety.
 fetchReadme: false
 editLink: true
@@ -55,7 +55,7 @@ spec:
       rules:
         - alert: ServiceLevelObjectiveBurnRate
           expr: |
-            (sum(rate(http_request_duration_seconds_count{status=~"5.."}[1h])) 
+            (sum(rate(http_request_duration_seconds_count{status=~"5.."}[1h]))
             / sum(rate(http_request_duration_seconds_count[1h]))) > 0.001
           for: 5m
           labels:

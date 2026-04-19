@@ -29,6 +29,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Cache npm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
+
       - name: Install Nix & Setup Cache
         uses: DeterminateSystems/determinate-nix-action@v3
 
@@ -37,6 +45,9 @@ jobs:
 
       - name: Generate content
         run: nix develop .#ci --command python3 scripts/process_requests.py
+
+      - name: Generate splats
+        run: nix develop .#ci --command npm run docs:generate-splats
 
       - name: Commit and push content changes
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -50,9 +61,11 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v6
 
+      - name: Install npm dependencies
+        run: nix develop .#ci --command npm ci
+
       - name: Build with VitePress
-        run: |
-          nix develop .#ci --command bash -c "npm ci && npm run docs:build"
+        run: nix develop .#ci --command npm run docs:build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4

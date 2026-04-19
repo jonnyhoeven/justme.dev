@@ -12,10 +12,10 @@ year: 2026
 month: Mar
 outline: deep
 intro: |
-  In mission-critical systems, fragmented monitoring is a liability. 
-  OpenTelemetry represents the production observability standard, unifying 
-  traces, metrics, and logs into a single, vendor-neutral pipeline. This provides 
-  high-fidelity data required to maintain public safety infrastructure with 
+  In mission-critical systems, fragmented monitoring is a liability.
+  OpenTelemetry represents the production observability standard, unifying
+  traces, metrics, and logs into a single, vendor-neutral pipeline. This provides
+  high-fidelity data required to maintain public safety infrastructure with
   absolute confidence.
 fetchReadme: false
 editLink: true

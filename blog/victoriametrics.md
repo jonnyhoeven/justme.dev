@@ -10,8 +10,8 @@ title: 'Scalable Monitoring: Why VictoriaMetrics is the Modern Alternative to Pr
 date: 2026-03-17
 outline: deep
 intro: |
-  As infrastructure grows, so does the volume of metrics. VictoriaMetrics offers a high-performance, cost-effective 
-  monitoring solution that remains compatible with the Prometheus ecosystem while providing better compression, 
+  As infrastructure grows, so does the volume of metrics. VictoriaMetrics offers a high-performance, cost-effective
+  monitoring solution that remains compatible with the Prometheus ecosystem while providing better compression,
   lower resource usage, and simpler horizontal scaling.
 fetchReadme: false
 editLink: true

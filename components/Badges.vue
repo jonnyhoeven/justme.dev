@@ -1,5 +1,17 @@
 <script setup lang="ts">
-defineProps(['frontmatter']);
+interface Frontmatter {
+  watchersUrl?: string;
+  starsUrl?: string;
+  forksUrl?: string;
+  langArr?: string[];
+  externalUrl?: string;
+  externalUrlLabel?: string;
+  [key: string]: unknown;
+}
+
+defineProps<{
+  frontmatter?: Frontmatter;
+}>();
 </script>
 
 <template>
@@ -43,6 +55,10 @@ defineProps(['frontmatter']);
       class="textButton"
       v-if="frontmatter.externalUrl"
       :href="frontmatter.externalUrl"
+      :aria-label="
+        'External link to ' + (frontmatter.externalUrlLabel || 'project')
+      "
+      rel="noopener noreferrer"
     >
       <Badge
         :text="frontmatter.externalUrlLabel"
@@ -52,3 +68,14 @@ defineProps(['frontmatter']);
     </a>
   </div>
 </template>
+
+<style scoped>
+.textButton {
+  display: inline-block;
+  border-radius: 4px;
+}
+.textButton:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1, #3498db);
+  outline-offset: 2px;
+}
+</style>

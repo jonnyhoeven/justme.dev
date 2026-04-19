@@ -1,21 +1,42 @@
 <script setup lang="ts">
 import Badges from './Badges.vue';
 
-defineProps(['page']);
+interface Frontmatter {
+  title?: string;
+  image?: string;
+  intro?: string;
+  [key: string]: unknown;
+}
+
+interface Page {
+  url: string;
+  frontmatter?: Frontmatter;
+}
+
+defineProps<{
+  page?: Page;
+}>();
 </script>
 
-<template v-if="page">
-  <div v-if="page.frontmatter" class="container_row clickable-card">
+<template>
+  <article
+    v-if="page && page.frontmatter"
+    class="container_row clickable-card"
+    :aria-labelledby="'title-' + page.url.replace(/\//g, '-')"
+  >
     <div class="listImagebg layerbg"></div>
+
     <div class="layerimg">
       <div
         v-if="page.frontmatter.image"
         class="listImage"
+        role="img"
+        :aria-label="page.frontmatter.title || 'Article thumbnail'"
         :style="{ backgroundImage: 'url(' + page.frontmatter.image + ')' }"
       ></div>
     </div>
     <div v-if="page.frontmatter.title" class="layercontent">
-      <h3 class="post-title">
+      <h3 :id="'title-' + page.url.replace(/\//g, '-')" class="post-title">
         <a :href="page.url" class="nolinkdecor">{{ page.frontmatter.title }}</a>
       </h3>
       <div
@@ -30,5 +51,12 @@ defineProps(['page']);
       class="stretched-link"
       :aria-label="'Read more about ' + page.frontmatter.title"
     ></a>
-  </div>
+  </article>
 </template>
+
+<style scoped>
+.stretched-link:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1, #3498db);
+  outline-offset: 2px;
+}
+</style>
