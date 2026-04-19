@@ -49,10 +49,15 @@ def generate_splats():
     min_x, max_x = float("inf"), float("-inf")
     min_y, max_y = float("inf"), float("-inf")
 
-    # Optimized iteration using get_flattened_data() for matrix-like performance
+    # Optimized iteration using get_flattened_data() (modern) or getdata() (legacy)
     # This avoids the overhead of nested loops and individual pixel lookups
-    L_SCALE = 1.0 / 255.0
-    for i, (r, g, b, a) in enumerate(img.get_flattened_data()):
+    pixel_data = (
+        img.get_flattened_data()
+        if hasattr(img, "get_flattened_data")
+        else img.getdata()
+    )
+
+    for i, (r, g, b, a) in enumerate(pixel_data):
         # Skip transparent pixels early
         if a < 50:
             continue
@@ -79,10 +84,9 @@ def generate_splats():
         if oy > max_y:
             max_y = oy
 
-        luminance = (0.299 * r + 0.587 * g + 0.114 * b) * L_SCALE
-        mass = 0.5 + (max(0, 1 - luminance) * 1.5)
-
-        splats.append({"ox": ox, "oy": oy, "color": f"{r}, {g}, {b}", "mass": mass})
+        # Start with raw scaled coords
+        ox = x * scale
+        splats.append({"ox": ox, "oy": oy, "r": r, "g": g, "b": b})
 
     # Precision re-centering to exact 160, 160
     if splats:
@@ -92,12 +96,20 @@ def generate_splats():
             s["ox"] -= offset_cx
             s["oy"] -= offset_cy
 
+    # Final compact format: [[ox, oy, r, g, b], ...]
+    # Rounding to 2 decimals saved ~30% per float coordinate
+    compact_splats = [
+        [round(s["ox"], 2), round(s["oy"], 2), s["r"], s["g"], s["b"]]
+        for s in splats
+    ]
+
     try:
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        logger.info(f"Generated {len(splats)} particles. Centering and saving...")
+        logger.info(f"Generated {len(compact_splats)} particles. Centering and saving...")
         with open(out_path, "w") as f:
-            json.dump(splats, f)
-        logger.info(f"Successfully saved splats to {out_path}")
+            # Use compact separators to remove all whitespace
+            json.dump(compact_splats, f, separators=(",", ":"))
+        logger.info(f"Successfully saved optimized splats to {out_path}")
     except Exception as e:
         logger.error(f"Failed to save splats to {out_path}: {e}")
         sys.exit(1)

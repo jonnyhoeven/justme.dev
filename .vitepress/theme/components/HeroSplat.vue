@@ -75,14 +75,21 @@ onMounted(async () => {
       }
 
       particles.push(
-        ...data.map((p: SplatParticle) => {
-          const [cr, cg, cb] = p.color.split(',').map(Number);
+        ...data.map((p: [number, number, number, number, number]) => {
+          const [ox, oy, cr, cg, cb] = p;
+          // Calculate mass client-side based on luminance (Darker = Heavier)
+          const luminance = (0.299 * cr + 0.587 * cg + 0.114 * cb) / 255.0;
+          const mass = 0.5 + Math.max(0, 1 - luminance) * 1.5;
+
           return {
-            ...p,
-            x: p.ox,
-            y: p.oy,
+            ox,
+            oy,
+            x: ox,
+            y: oy,
             vx: 0,
             vy: 0,
+            color: `${cr}, ${cg}, ${cb}`,
+            mass,
             cr,
             cg,
             cb,
@@ -95,18 +102,52 @@ onMounted(async () => {
     console.error('Failed to load splat data', e);
   }
 
-  // 2. Optimized Brush Caching
+  // 2. Optimized Material Brush Caching
   const brushCache = new Map<string, HTMLCanvasElement>();
   const getBrush = (color: string) => {
     if (brushCache.has(color)) return brushCache.get(color)!;
-    const size = 16;
+
+    // Oversample (32px source for ~16px draw) provides free antialiasing/sharpness
+    const size = 32;
+    const center = size / 2;
+    const radius = size * 0.35; // Leave room for shadow/feather
+
     const c = document.createElement('canvas');
     c.width = size;
     c.height = size;
     const ctxC = c.getContext('2d')!;
-    // Solid color fill (No feather/blur)
-    ctxC.fillStyle = `rgb(${color})`;
-    ctxC.fillRect(0, 0, size, size);
+
+    // A. Material "Line Shadow" (The drop shadow effect)
+    // Drawn slightly offset and blurred to give depth
+    ctxC.shadowColor = 'rgba(0, 0, 0, 0.35)';
+    ctxC.shadowBlur = 3;
+    ctxC.shadowOffsetY = 1.5;
+
+    // B. Feathered Body
+    // Radial gradient creates a soft, feathered outline that fits Material Design
+    const grad = ctxC.createRadialGradient(
+      center,
+      center,
+      radius * 0.7,
+      center,
+      center,
+      radius + 1
+    );
+    grad.addColorStop(0, `rgb(${color})`);
+    grad.addColorStop(1, `rgba(${color}, 0)`);
+
+    ctxC.fillStyle = grad;
+    ctxC.beginPath();
+    ctxC.arc(center, center, radius + 1, 0, Math.PI * 2);
+    ctxC.fill();
+
+    // C. Subtle Rim Light (Optional, adds premium feel)
+    ctxC.shadowBlur = 0; // Reset shadow for stroke
+    ctxC.shadowOffsetY = 0;
+    ctxC.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctxC.lineWidth = 0.5;
+    ctxC.stroke();
+
     brushCache.set(color, c);
     return c;
   };
@@ -232,22 +273,19 @@ onMounted(async () => {
       const halfSize = 8 * scale * sMult; // 8 = brushSize(16) / 2
 
       if (effect.colorOverride) {
-        // Direct fillRect for dynamic colors — avoids unbounded brush cache
+        // Circular draw for dynamic colors with a slight "bloom" feel
         ctx.fillStyle = `rgb(${effect.colorOverride})`;
-        ctx.fillRect(
-          p.x - halfSize,
-          p.y - halfSize,
-          halfSize * 2,
-          halfSize * 2
-        );
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, halfSize * 1.1, 0, Math.PI * 2);
+        ctx.fill();
       } else {
         const brush = getBrush(p.color);
         ctx.drawImage(
           brush,
-          p.x - halfSize,
-          p.y - halfSize,
-          halfSize * 2,
-          halfSize * 2
+          p.x - halfSize * 1.2, // Padding for the built-in brush shadow
+          p.y - halfSize * 1.2,
+          halfSize * 2.4,
+          halfSize * 2.4
         );
       }
     }

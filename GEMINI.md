@@ -100,7 +100,7 @@ graph TD
 To maintain code quality and consistency, all agents **MUST** follow these rules:
 
 1.  **Nix Environment Awareness**: This project uses a Nix Flake + `direnv`. Ensure you have `direnv allow`ed the environment. System dependencies (Node 22, Python, ImageMagick) are managed here.
-2.  **Mandatory Cleanup**: Before marking a task as complete, you **MUST** ensure all files pass `pre-commit`. Running `npm run format && npm run lint` is still recommended for speed, but `pre-commit run --all-files` is the definitive check.
+2.  **Mandatory Cleanup**: Before marking a task as complete, you **MUST** ensure all files pass `pre-commit`. Running `npm run format && npm run lint` and `ruff check . --fix` is still recommended for speed, but `pre-commit run --all-files` is the definitive check.
 3.  **Automated Enforcement**: Pre-commit hooks are installed and will run automatically on `git commit`. Do not bypass them with `--no-verify`.
 4.  **Fix Regressions**: If the lint or format commands reveal errors (especially those introduced by your changes), fix them immediately.
 5.  **No Direct Output Edits**: Never modify `projects/*.md` files directly. If project content needs changing, update the manifest in `requests/` or the ETL script in `scripts/`.
