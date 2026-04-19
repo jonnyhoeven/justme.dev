@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onBeforeUnmount, watch, computed } from 'vue';
 import { useWindowSize } from '@vueuse/core';
-import useMusic from '../composables/useMusic';
+import useMusic from '../.vitepress/theme/composables/useMusic';
 
 const {
   isMusicVisible,

@@ -23,6 +23,8 @@ export const SITE_CONSTANTS = {
   },
   SPLAT_CYCLE_TIME: 20000,
   MUSIC_TRACKS: [
+    'Marcus P. - Rhythm Magnet.mp3',
+    'Lunar Years - Cozy Coffee House.mp3',
     'Sappheiros - Dawn.mp3',
     'Tokyowalker4 - Way Home by.mp3',
     'PunchDeck - Neon Underworld.mp3'

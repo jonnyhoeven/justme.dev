@@ -16,25 +16,25 @@ import { lerpToWhite } from './color-utils';
  */
 
 // --- Tuning Parameters ---
-const BIN_USAGE_RATIO = 0.6;
-const TIME_MULT = 0.002;
-const MIN_CENTER_MULT = 0.15;
-const IDLE_WAVE_TIME_MULT = 0.5;
-const IDLE_WAVE_SPACE_MULT = 0.04;
+const BIN_USAGE_RATIO = 0.75;
+const TIME_MULT = 0.1;
+const MIN_CENTER_MULT = 0.1;
+const IDLE_WAVE_TIME_MULT = 0.02;
+const IDLE_WAVE_SPACE_MULT = 1;
 const IDLE_WAVE_AMP = 2.5;
 const BASE_WAVE_AMP_MIN = 15;
 const BASS_WAVE_AMP_MULT = 50;
 const PEAK_THRESHOLD = 0.35;
-const JITTER_AMP_MULT = 15;
-const OSCILLATE_TIME_MULT = 20;
-const OSCILLATE_AMP_MULT = 25;
+const JITTER_AMP_MULT = 10;
+const OSCILLATE_TIME_MULT = 10;
+const OSCILLATE_AMP_MULT = 100;
 const DRIFT_X_SPACE_MULT = 0.05;
 const DRIFT_X_AMP = 4;
-const COLOR_LERP_MULT = 0.5;
-const SIZE_MULT_BASE = 0.8;
-const SIZE_MULT_AMP = 1.0;
-const SPRING_SCALE_BASE = 1.0;
-const SPRING_SCALE_AMP_MULT = 0.5;
+const COLOR_LERP_MULT = 0.2;
+const SIZE_MULT_BASE = 0.65;
+const SIZE_MULT_AMP = 0.3;
+const SPRING_SCALE_BASE = 1.8;
+const SPRING_SCALE_AMP_MULT = 0.0001;
 
 export const entangledWaveform: SplatAnimation = {
   name: 'Entangled Waveform',

@@ -25,10 +25,10 @@ const WIND_FREQ_MULT = 0.5;
 const WIND_SPEED_MULT = 0.8;
 const WIND_AMP_MULT = 0.8;
 const TURBULENCE_BASE = 1.5;
-const TREBLE_TURBULENCE_MULT = 15.0;
-const INTERFERENCE_SPACE_MULT = 0.1;
-const INTERFERENCE_TIME_MULT = 0.005;
-const INTERFERENCE_Y_WEIGHT = 0.5;
+const TREBLE_TURBULENCE_MULT = 1.0;
+const INTERFERENCE_SPACE_MULT = 1;
+const INTERFERENCE_TIME_MULT = 0.05;
+const INTERFERENCE_Y_WEIGHT = 0.1;
 
 export const windWaves: SplatAnimation = {
   name: 'Wind Waves',

@@ -16,19 +16,19 @@ import type {
  */
 
 // --- Tuning Parameters ---
-const OUTLIER_PROBABILITY = 0.4;
-const WANDER_FREQ_MIN = 0.0003;
-const WANDER_FREQ_VAR = 0.0005;
-const WANDER_AMP_MIN = 6;
-const WANDER_AMP_VAR = 8;
+const OUTLIER_PROBABILITY = 0.5;
+const WANDER_FREQ_MIN = 0.003;
+const WANDER_FREQ_VAR = 0.0003;
+const WANDER_AMP_MIN = 4;
+const WANDER_AMP_VAR = 4;
 const DEPTH_BASE_MULT = 60;
 const WANDER_FREQ_DEFAULT = 0.0004;
-const WANDER_AMP_DEFAULT = 10;
-const BASS_WANDER_AMP_MULT = 45;
+const WANDER_AMP_DEFAULT = 6;
+const BASS_WANDER_AMP_MULT = 40;
 const WANDER_FREQ_Y_MULT = 0.7;
 const SPRING_SCALE_BASE = 0.08;
 const BASS_SPRING_MULT = 0.05;
-const NUDGE_CHANCE_BASE = 0.0008;
+const NUDGE_CHANCE_BASE = 0.0004;
 const BASS_NUDGE_CHANCE_MULT = 0.06;
 const NUDGE_AMP_BASE = 0.8;
 const BASS_NUDGE_AMP_MULT = 12;
@@ -42,8 +42,8 @@ const WOBBLE_FREQ_X = 0.003;
 const WOBBLE_FREQ_Y = 0.002;
 const WOBBLE_BASE_AMP = 0.5;
 const CORE_SIZE_BASE = 0.95;
-const CORE_MID_SIZE_MULT = 0.15;
-const CORE_Z_SIZE_DIVISOR = 400;
+const CORE_MID_SIZE_MULT = 0.1;
+const CORE_Z_SIZE_DIVISOR = 200;
 const CORE_SPRING_SCALE = 1.0;
 
 export const floatingOutliers: SplatAnimation = {

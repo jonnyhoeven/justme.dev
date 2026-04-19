@@ -9,19 +9,16 @@ import { smoothValue } from './audio-utils';
 
 // --- Tuning Parameters ---
 const DEPTH_RANGE_Z = 200;
-const FOCAL_LENGTH = 300;
-const BASE_ROTATION_SPEED = 0.0005;
-const VOLUME_ROTATION_MULT = 0.01;
-const ANGLE_VELOCITY_X = 0.7;
-const ANGLE_VELOCITY_Y = 1.1;
-const ANGLE_VELOCITY_Z = 0.3;
-const TREBLE_DEPTH_AMP = 40;
-const TREBLE_DEPTH_SPEED = 0.01;
-const Z_OFFSET = 250;
-const BRIGHTNESS_MIN = 0.3;
-const BRIGHTNESS_MAX = 1.2;
-const BRIGHTNESS_FADE_DIST = 200;
-const LOOSE_SPRING_SCALE = 0.8;
+const FOCAL_LENGTH = 400;
+const BASE_ROTATION_SPEED = 0.002;
+const VOLUME_ROTATION_MULT = 0.001;
+const ANGLE_VELOCITY_X = 1;
+const ANGLE_VELOCITY_Y = 1;
+const ANGLE_VELOCITY_Z = 1;
+const TREBLE_DEPTH_AMP = 50;
+const TREBLE_DEPTH_SPEED = 0.001;
+const Z_OFFSET = 150;
+const LOOSE_SPRING_SCALE = 0.5;
 
 /**
  * Dimensional Portal (3D Projection)
@@ -106,23 +103,10 @@ export const dimensionalPortal: SplatAnimation = {
     const projX = CENTER_X + x * perspective;
     const projY = CENTER_Y + y * perspective;
 
-    // --- Depth-based Coloring ---
-    // Darken particles that are further away (simulating depth/atmospheric fog)
-    // p.color is "r, g, b". We scale these values.
-    let colorOverride: string | undefined = undefined;
-    if (z + zOffset > 0) {
-      const brightness = Math.max(
-        BRIGHTNESS_MIN,
-        Math.min(BRIGHTNESS_MAX, 1 - z / BRIGHTNESS_FADE_DIST)
-      );
-      const { cr: r, cg: g, cb: b } = p;
-      colorOverride = `${Math.floor(r * brightness) & 0xf8}, ${Math.floor(g * brightness) & 0xf8}, ${Math.floor(b * brightness) & 0xf8}`;
-    }
-
     return {
       dx: (projX - p.ox) * scale,
       dy: (projY - p.oy) * scale,
-      colorOverride,
+
       springScale: LOOSE_SPRING_SCALE // Slightly looser spring for 3D fluid feel
     };
   }

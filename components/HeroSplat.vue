@@ -7,10 +7,10 @@ import {
   type SplatParticle,
   type AnimationContext,
   type SplatAnimation
-} from '../../../lib/splat-animations';
-import { getAudioLevels } from '../../../lib/splat-animations/audio-utils';
-import useMusic from '../composables/useMusic';
-import { SITE_CONSTANTS } from '../../constants';
+} from '../lib/splat-animations';
+import { getAudioLevels } from '../lib/splat-animations/audio-utils';
+import useMusic from '../.vitepress/theme/composables/useMusic';
+import { SITE_CONSTANTS } from '../.vitepress/constants';
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 let animationId: number;

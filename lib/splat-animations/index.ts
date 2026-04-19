@@ -13,7 +13,6 @@ import { flubberMotion } from './flubber-motion';
 import { ferrofluid } from './ferrofluid';
 import { solarFlare } from './solar-flare';
 import { quantumEntanglement } from './quantum-entanglement';
-import { digitalGlitch } from './digital-glitch';
 import { entangledWaveform } from './entangled-waveform';
 import { dimensionalPortal } from './dimensional-portal';
 import type { SplatAnimation } from './types';
@@ -26,17 +25,16 @@ export type {
 } from './types';
 
 export const animations: SplatAnimation[] = [
-  breathing,
   orbitalDrift,
-  windWaves,
   floatingOutliers,
   flubberMotion,
+  windWaves,
   ferrofluid,
   solarFlare,
   quantumEntanglement,
-  digitalGlitch,
-  entangledWaveform,
-  dimensionalPortal
+  breathing,
+  dimensionalPortal,
+  entangledWaveform
 ];
 
 /** Total number of available animations */
@@ -57,8 +55,8 @@ export function pickRandomAnimation(): {
   animation: SplatAnimation;
   index: number;
 } {
-  const idx = Math.floor(Math.random() * animations.length);
+  const idx = 9; //Math.floor(Math.random() * animations.length);
   const anim = animations[idx];
-  console.log(`🎨 Splat animation: ${anim.name}`);
+  console.log(`🎨 animation: ${idx} - ${anim.name}`);
   return { animation: anim, index: idx };
 }
