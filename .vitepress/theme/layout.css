@@ -98,7 +98,8 @@ h6,
   padding: 24px !important;
 }
 
-.VPFooter .message {
+.VPFooter .message,
+.VPFooter .copyright {
   opacity: 0.7;
 }
 
