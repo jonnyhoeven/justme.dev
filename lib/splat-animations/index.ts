@@ -55,7 +55,7 @@ export function pickRandomAnimation(): {
   animation: SplatAnimation;
   index: number;
 } {
-  const idx = 9; //Math.floor(Math.random() * animations.length);
+  const idx = Math.floor(Math.random() * animations.length);
   const anim = animations[idx];
   console.log(`🎨 animation: ${idx} - ${anim.name}`);
   return { animation: anim, index: idx };
