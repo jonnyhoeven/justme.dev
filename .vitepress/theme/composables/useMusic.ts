@@ -10,6 +10,8 @@ export const useMusic = () => {
   const currentTrackIndex = ref(0);
   const currentTime = ref(0);
   const tracks = SITE_CONSTANTS.MUSIC_TRACKS;
+  /** Set by HeroSplat when its canvas enters/exits the viewport. */
+  const isSplatVisible = ref(false);
 
   // Actions
   const toggleVisibility = () => {
@@ -27,6 +29,10 @@ export const useMusic = () => {
 
   const setCurrentTime = (val: number) => {
     currentTime.value = val;
+  };
+
+  const setSplatVisible = (val: boolean) => {
+    isSplatVisible.value = val;
   };
 
   const nextTrack = () => {
@@ -47,10 +53,12 @@ export const useMusic = () => {
     currentTrackIndex,
     currentTime,
     tracks,
+    isSplatVisible,
     toggleVisibility,
     setAudioData,
     setPlaying,
     setCurrentTime,
+    setSplatVisible,
     nextTrack,
     prevTrack
   };
