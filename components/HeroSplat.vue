@@ -52,7 +52,7 @@ const nextAnimation = () => {
   const animation = animations[currentAnimationIndex.value];
 
   // Use a technical but friendly log
-  console.log(`🎨 Animation: ${animation.name}`);
+  // console.log(`🎨 Animation: ${animation.name}`);
 
   animation.init(particles);
   currentAnimation.value = animation;
@@ -313,8 +313,8 @@ onMounted(async () => {
           const dy = e.clientY - by;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          // Shiver starts at 150px away
-          const maxDist = 150;
+          // Shiver
+          const maxDist = 70;
           if (dist < maxDist) {
             shiverIntensity.value = 0.5 * (1 - dist / maxDist);
           } else {
@@ -329,12 +329,12 @@ onMounted(async () => {
             btn.innerText = 'IT!';
             btn.style.color = 'var(--vp-c-brand)';
             btn.style.textDecorationColor = 'var(--vp-c-brand)';
-            console.log('🎵 Music Easter Egg ACTIVE');
+            // console.log('🎵 Music Easter Egg ACTIVE');
           } else {
             btn.innerText = 'it!';
             btn.style.color = '';
             btn.style.textDecorationColor = 'transparent';
-            console.log('🔇 Music Easter Egg INACTIVE');
+            // console.log('🔇 Music Easter Egg INACTIVE');
           }
         };
       }
