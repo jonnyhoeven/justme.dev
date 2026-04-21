@@ -58,21 +58,17 @@ const SPRING_SCALE_BASE = 0.2;
 const SPRING_SCALE_VAR = 0.3;
 const MIN_STRENGTH_THRES = 0.01;
 
-export function createSolarFlareState() {
-  return {
-    activePulses: [] as FlarePulse[],
-    lastUpdateElapsed: -1,
-    lastBeatTime: 0
-  };
-}
+let sharedState = {
+  activePulses: [] as FlarePulse[],
+  lastUpdateElapsed: -1,
+  lastBeatTime: 0
+};
 
 export const solarFlare: SplatAnimation = {
   name: 'Solar Flare',
 
-  init(particles: SplatParticle[]) {
-    for (const p of particles) {
-      p.animState.solarFlare = createSolarFlareState();
-    }
+  init() {
+    sharedState = { activePulses: [], lastUpdateElapsed: -1, lastBeatTime: 0 };
   },
 
   apply(
@@ -84,7 +80,7 @@ export const solarFlare: SplatAnimation = {
     const levels = ctx.audioLevels;
     const audioPeak = getPeak(levels.bass, 0.5);
 
-    const state = p.animState.solarFlare;
+    const state = sharedState;
     const pseudoRandom = (seed: number) => {
       const x = Math.sin(seed) * 10000;
       return x - Math.floor(x);
