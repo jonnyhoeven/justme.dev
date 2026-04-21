@@ -19,9 +19,7 @@ const {
 const formattedTitle = computed(() => {
   const track = tracks[currentTrackIndex.value];
   if (!track) return '';
-  // Remove "justme - " or "justme — " from the beginning
   const cleanName = track.replace(/^(justme\s*[-—]\s*)/i, '');
-  // Remove file extension
   return cleanName.replace(/\.[^/.]+$/, '');
 });
 
