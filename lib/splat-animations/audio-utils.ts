@@ -11,6 +11,14 @@ export interface AudioLevels {
   volume: number;
 }
 
+/** Cached zero-levels object — use when audio is inactive to avoid allocations. */
+export const ZERO_AUDIO_LEVELS: AudioLevels = Object.freeze({
+  bass: 0,
+  mid: 0,
+  treble: 0,
+  volume: 0
+});
+
 /**
  * Extracts bass, mid, and treble levels from raw frequency data.
  * @param audioData Raw Uint8Array from Audio Analyser
