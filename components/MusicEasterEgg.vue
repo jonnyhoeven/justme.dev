@@ -6,6 +6,7 @@ import useMusic from '../.vitepress/theme/composables/useMusic';
 const {
   isMusicVisible,
   isPlaying,
+  isSplatVisible,
   setAudioData,
   setPlaying,
   currentTrackIndex,
@@ -34,6 +35,21 @@ let audioContext: AudioContext | null = null;
 let analyser: AnalyserNode | null = null;
 let source: MediaElementAudioSourceNode | null = null;
 let animationFrame: number;
+// Reusable buffer — mutated in-place by getByteFrequencyData to avoid per-frame allocations.
+let dataArray: Uint8Array | null = null;
+
+/**
+ * The analysis loop. Runs only while playing AND splats are visible.
+ * Stops itself (no reschedule) when either condition becomes false,
+ * and is restarted by the watcher below when they become true again.
+ */
+const runAnalysis = () => {
+  if (!isPlaying.value || !isSplatVisible.value || !analyser || !dataArray)
+    return;
+  analyser.getByteFrequencyData(dataArray);
+  setAudioData(dataArray);
+  animationFrame = requestAnimationFrame(runAnalysis);
+};
 
 const initAudio = () => {
   if (audioContext || !audioRef.value) return;
@@ -59,18 +75,16 @@ const initAudio = () => {
   // Route 2: Direct signal for user output (affected by audio element volume)
   source.connect(audioContext.destination);
 
-  const bufferLength = analyser.frequencyBinCount;
-  const dataArray = new Uint8Array(bufferLength);
-
-  const update = () => {
-    if (isPlaying.value && analyser) {
-      analyser.getByteFrequencyData(dataArray);
-      setAudioData(new Uint8Array(dataArray));
-    }
-    animationFrame = requestAnimationFrame(update);
-  };
-  update();
+  dataArray = new Uint8Array(analyser.frequencyBinCount);
 };
+
+// Restart the analysis loop whenever both conditions become true.
+watch([isPlaying, isSplatVisible], ([playing, visible]) => {
+  cancelAnimationFrame(animationFrame);
+  if (playing && visible && analyser) {
+    animationFrame = requestAnimationFrame(runAnalysis);
+  }
+});
 
 const togglePlay = () => {
   if (!audioRef.value) return;
@@ -509,15 +523,16 @@ onBeforeUnmount(() => {
   width: 1.5px;
   height: 100%;
   background: var(--vp-c-brand);
+  transform-origin: bottom;
   animation: mini-bounce 0.6s ease-in-out infinite alternate;
 }
 
 @keyframes mini-bounce {
   from {
-    height: 20%;
+    transform: scaleY(0.2);
   }
   to {
-    height: 100%;
+    transform: scaleY(1);
   }
 }
 
