@@ -8,7 +8,10 @@ import {
   type AnimationContext,
   type SplatAnimation
 } from '../lib/splat-animations';
-import { getAudioLevels } from '../lib/splat-animations/audio-utils';
+import {
+  getAudioLevels,
+  ZERO_AUDIO_LEVELS
+} from '../lib/splat-animations/audio-utils';
 import useMusic from '../.vitepress/theme/composables/useMusic';
 import { SITE_CONSTANTS } from '../.vitepress/constants';
 import DebugOverlay from './DebugOverlay.vue';
@@ -33,7 +36,7 @@ const isMobileView = computed(() => windowWidth.value < 768);
 const shiverIntensity = ref(0);
 let startTime = performance.now();
 let cycleInterval: ReturnType<typeof setInterval>;
-const { audioData, isMusicVisible } = useMusic();
+const { audioData, isMusicVisible, setSplatVisible } = useMusic();
 const isVisible = useElementVisibility(canvasRef);
 
 const particleCount = ref(0);
@@ -67,7 +70,10 @@ const nextAnimation = () => {
 
 onMounted(async () => {
   if (!canvasRef.value) return;
-  const ctx = canvasRef.value.getContext('2d', { alpha: true });
+  const ctx = canvasRef.value.getContext('2d', {
+    alpha: true,
+    desynchronized: true
+  });
   if (!ctx) return;
 
   // 1. Data Ingestion & Mobile Detection
@@ -203,7 +209,9 @@ onMounted(async () => {
       mouseX: mouse.x,
       mouseY: mouse.y,
       audioData: audioData.value || undefined,
-      audioLevels: getAudioLevels(audioData.value || undefined)
+      audioLevels: audioData.value
+        ? getAudioLevels(audioData.value)
+        : ZERO_AUDIO_LEVELS
     };
 
     if (!currentAnimation.value) return;
@@ -346,6 +354,7 @@ onMounted(async () => {
   watch(
     isVisible,
     (visible) => {
+      setSplatVisible(visible);
       if (cycleInterval) clearInterval(cycleInterval);
       if (visible) {
         cycleInterval = setInterval(
@@ -364,6 +373,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   cancelAnimationFrame(animationId);
   if (cycleInterval) clearInterval(cycleInterval);
+  setSplatVisible(false);
 });
 
 // Input Handlers
@@ -440,5 +450,6 @@ canvas {
   width: 100%;
   height: 100%;
   display: block;
+  will-change: transform;
 }
 </style>
