@@ -420,7 +420,6 @@ const onClick = () => {
   width: 100%;
   height: 100%;
   position: absolute;
-  margin-top: 0.5rem;
   pointer-events: auto;
 }
 

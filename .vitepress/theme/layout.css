@@ -104,6 +104,24 @@ h6,
 }
 
 /**
+ * HeroSplat — override VitePress image-src size constraints
+ * -------------------------------------------------------------------------- */
+
+@media (min-width: 640px) {
+  .VPHero .image-src {
+    max-width: 400px !important;
+    max-height: 400px !important;
+  }
+}
+
+@media (min-width: 960px) {
+  .VPHero .image-src {
+    max-width: 500px !important;
+    max-height: 500px !important;
+  }
+}
+
+/**
  * Homepage-specific layout and components
  * -------------------------------------------------------------------------- */
 
