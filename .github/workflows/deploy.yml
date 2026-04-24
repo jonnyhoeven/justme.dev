@@ -21,8 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pages: write
-      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -39,8 +37,6 @@ jobs:
 
       - name: Install Nix & Setup Cache
         uses: DeterminateSystems/determinate-nix-action@v3
-        with:
-          flake-hub: false
 
       - name: Lint with Ruff
         run: nix develop .#ci --command ruff check .
@@ -59,9 +55,6 @@ jobs:
           git add -A
           git diff --cached --quiet || git commit -m "chore: auto-generate content [skip ci]"
           git push
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v6
 
       - name: Install npm dependencies
         run: nix develop .#ci --command npm ci
@@ -87,6 +80,9 @@ jobs:
       pages: write
       id-token: write
     steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
