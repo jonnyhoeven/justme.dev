@@ -30,7 +30,7 @@ jobs:
           fetch-depth: 0
 
       - name: Cache npm store
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
@@ -39,6 +39,8 @@ jobs:
 
       - name: Install Nix & Setup Cache
         uses: DeterminateSystems/determinate-nix-action@v3
+        with:
+          flake-hub: false
 
       - name: Lint with Ruff
         run: nix develop .#ci --command ruff check .
@@ -68,7 +70,7 @@ jobs:
         run: nix develop .#ci --command npm run docs:build
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: .vitepress/dist
 
