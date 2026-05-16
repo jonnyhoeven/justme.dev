@@ -13,14 +13,14 @@ repos:
     hooks:
       - id: eslint
         name: ESLint
-        entry: npx eslint --fix
+        entry: pnpm exec eslint --fix
         language: system
         types_or: [javascript, ts, vue]
         require_serial: true
 
       - id: prettier
         name: Prettier
-        entry: npx prettier --write
+        entry: pnpm exec prettier --write
         language: system
         types_or: [javascript, ts, vue, css, markdown, yaml]
         require_serial: true
