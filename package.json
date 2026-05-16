@@ -26,13 +26,5 @@
     "test:coverage": "vitest run --coverage",
     "test:py": "python3 -m pytest",
     "test:all": "vitest run --coverage && python3 -m pytest"
-  },
-  "overrides": {
-    "esbuild": "0.25.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
   }
 }
