@@ -11,6 +11,8 @@ date: 2025-12-04
 year: 2025
 month: Dec
 outline: deep
+summary: Hardening critical infrastructure with NixOS to eliminate configuration drift and provide a deterministic foundation for Kubernetes migrations.
+intro: |
   In mission-critical environments like Public Safety and Crisis Management, "Configuration Drift" isn't
   just a nuisance—it's a system-level risk. NixOS has been implemented as a
   production-ready, deterministic foundation, providing the immutable launchpad
