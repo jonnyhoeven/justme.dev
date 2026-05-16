@@ -53,7 +53,7 @@ The environment will automatically load:
 ### 3. Project Dependencies
 
 ```bash
-npm install
+pnpm install
 ```
 
 ## Operational Workflows
@@ -63,7 +63,7 @@ npm install
 Executes the Python pipeline to fetch and transform remote documentation into local Markdown resources.
 
 ```bash
-npm run docs:generate
+pnpm run docs:generate
 ```
 
 ### Splat/Asset Generation
@@ -71,7 +71,7 @@ npm run docs:generate
 Generates and processes splat-related assets.
 
 ```bash
-npm run docs:generate-splats
+pnpm run docs:generate-splats
 ```
 
 ### Local Development
@@ -79,7 +79,7 @@ npm run docs:generate-splats
 Starts the VitePress development server with hot-reload capabilities.
 
 ```bash
-npm run docs:dev
+pnpm run docs:dev
 ```
 
 ### Production Build
@@ -87,7 +87,7 @@ npm run docs:dev
 Compiles the application into static assets optimized for production deployment.
 
 ```bash
-npm run docs:build
+pnpm run docs:build
 ```
 
 ### Artifact Preview
@@ -95,7 +95,7 @@ npm run docs:build
 Locally preview the production build to verify rendering and behavior.
 
 ```bash
-npm run docs:preview
+pnpm run docs:preview
 ```
 
 ### Deployment Strategy
