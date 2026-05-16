@@ -12,7 +12,8 @@
     "prettier": "^3.8.0",
     "vitepress": "^1.6.4",
     "vitest": "^4.1.4",
-    "vue": "^3.5.22"
+    "vue": "^3.5.22",
+    "esbuild": "0.25.0"
   },
   "scripts": {
     "docs:generate": "python3 scripts/process_requests.py",
@@ -26,5 +27,10 @@
     "test:coverage": "vitest run --coverage",
     "test:py": "python3 -m pytest",
     "test:all": "vitest run --coverage && python3 -m pytest"
+  },
+  "pnpm": {
+    "allowBuilds": [
+      "esbuild"
+    ]
   }
 }
