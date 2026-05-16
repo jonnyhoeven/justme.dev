@@ -32,7 +32,7 @@ fetchML: false
 
 ## The Challenge: Addressing I/O Bottlenecks and Connection Challenges
 
-After an initial migration to **Google Kubernetes Engine (GKE) Autopilot**, a performance "wall" was encountered during peak hours. PostgreSQL clusters suffered from frequent I/O spikes during checkpoints and high memory usage due to many transient connections from microservices.
+After an initial migration to Kubernetes, a performance "wall" was encountered during peak hours. PostgreSQL clusters suffered from frequent I/O spikes during checkpoints and high memory usage due to many transient connections from microservices.
 
 **BigQuery ETL pipelines** required stable, high-throughput access to production data. If the database stalled during a WAL (Write Ahead Log) flush, the effects cascaded across the entire platform.
 
@@ -68,7 +68,7 @@ spec:
 
 ### 2. Scaling with the PgBouncer Pooler
 
-To handle hundreds of concurrent connections from the **GCP Autopilot** fleet, a CloudNativePG `Pooler` resource was deployed. By using **Transaction Mode**, many clients share a smaller pool of persistent database connections:
+To handle hundreds of concurrent connections from the application fleet, a CloudNativePG `Pooler` resource was deployed. By using **Transaction Mode**, many clients share a smaller pool of persistent database connections:
 
 ```yaml
 apiVersion: postgresql.cnpg.io/v1
