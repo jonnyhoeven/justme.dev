@@ -44,8 +44,8 @@ jobs:
       - name: Generate content
         run: nix develop .#ci --command python3 scripts/process_requests.py
 
-      - name: Generate splats
-        run: nix develop .#ci --command python3 scripts/generate_splats.py
+      #- name: Generate splats
+      #  run: nix develop .#ci --command python3 scripts/generate_splats.py
 
       - name: Commit and push content changes
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
