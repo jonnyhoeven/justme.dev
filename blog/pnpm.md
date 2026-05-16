@@ -12,6 +12,11 @@ year: 2026
 month: May
 outline: deep
 summary: Why we migrated to pnpm, how it prevents phantom dependencies, and implementing a 24-hour minimum release age to protect against compromised packages.
+intro: |
+  Package management is a critical vector for supply chain attacks in modern
+  web development. By migrating from standard npm to pnpm, we dramatically
+  improved our security posture through strict dependency isolation and
+  automated defenses against recently published, potentially compromised packages.
 fetchReadme: false
 editLink: true
 image: /images/pnpm.webp
