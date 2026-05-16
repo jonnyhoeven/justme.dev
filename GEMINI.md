@@ -92,6 +92,7 @@ graph TD
 - **🚫 DON'T** edit files in the `projects/` directory directly. They are overwritten by the ETL script.
 - **🚫 DON'T** install new CSS frameworks (Tailwind, UnoCSS) without explicit user permission.
 - **🚫 DON'T** bypass the Nix environment. Always ensure `direnv` has loaded the Nix Flake.
+- **🚫 DON'T** add `overrides` or `allowBuilds` to `package.json`. pnpm v11 ignores these; use `pnpm-workspace.yaml`.
 
 ---
 
@@ -100,8 +101,8 @@ graph TD
 To maintain code quality and consistency, all agents **MUST** follow these rules:
 
 1.  **Nix Environment Awareness**: This project uses a Nix Flake + `direnv`. Ensure you have `direnv allow`ed the environment. System dependencies (Node 22, Python, ImageMagick) are managed here.
-2.  **Mandatory Cleanup**: Before marking a task as complete, you **MUST** ensure all files pass `pre-commit`. Running `pnpm run format && pnpm run lint` and `ruff check . --fix` is still recommended for speed, but `pre-commit run --all-files` is the definitive check.
-3.  **Automated Enforcement**: Pre-commit hooks are installed and will run automatically on `git commit`. Do not bypass them with `--no-verify`.
+2.  **Pnpm v11 Compliance**: This project uses pnpm v11. All package overrides, build approvals (`allowBuilds`), and workspace settings **MUST** be defined in `pnpm-workspace.yaml`. Do not use the `pnpm` field in `package.json`.
+3.  **Mandatory Cleanup**: Before marking a task as complete, you **MUST** ensure all files pass `pre-commit`. Running `pnpm run format && pnpm run lint` and `ruff check . --fix` is still recommended for speed, but `pre-commit run --all-files` is the definitive check.
 4.  **Fix Regressions**: If the lint or format commands reveal errors (especially those introduced by your changes), fix them immediately.
 5.  **No Direct Output Edits**: Never modify `projects/*.md` files directly. If project content needs changing, update the manifest in `requests/` or the ETL script in `scripts/`.
 6.  **Documentation Continuity**: Always ensure `GEMINI.md` is updated if there are changes to commands, schema in `requests/`, or the core architecture.
