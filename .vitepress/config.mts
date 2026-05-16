@@ -193,7 +193,7 @@ export default async () => {
           `   <img alt="Github code scanning badge" width="120px" height="20px" src="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/github-code-scanning/codeql/badge.svg">` +
           '</a>' +
           `</span>`,
-        copyright: `&copy; ${new Date().getFullYear()} Justme.dev &bull; <a href="https://raw.githubusercontent.com/jonnyhoeven/justme.dev/main/LICENSE" target="_blank">MIT Licensed</a>`
+        copyright: `&copy; ${new Date().getFullYear()} <a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}">Justme.dev</a>`
       }
     },
     sitemap: {
