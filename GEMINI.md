@@ -60,13 +60,13 @@ graph TD
 
 ### 📂 Critical Project Structure
 
-| Path          | Role                               | AI Interaction                                          |
-| :------------ | :--------------------------------- | :------------------------------------------------------ |
-| `requests/`   | Source manifests for projects.     | Edit these to add/modify external project sources.      |
-| `projects/`   | **Generated** documentation.       | **DO NOT EDIT.** Run `npm run docs:generate` to update. |
-| `.vitepress/` | Routing, headers, and theme logic. | Modify `config.mts` for global changes.                 |
-| `components/` | Custom Vue components.             | Use these for complex UI interactivity.                 |
-| `scripts/`    | ETL and generation logic.          | Update these to change how external data is fetched.    |
+| Path          | Role                               | AI Interaction                                           |
+| :------------ | :--------------------------------- | :------------------------------------------------------- |
+| `requests/`   | Source manifests for projects.     | Edit these to add/modify external project sources.       |
+| `projects/`   | **Generated** documentation.       | **DO NOT EDIT.** Run `pnpm run docs:generate` to update. |
+| `.vitepress/` | Routing, headers, and theme logic. | Modify `config.mts` for global changes.                  |
+| `components/` | Custom Vue components.             | Use these for complex UI interactivity.                  |
+| `scripts/`    | ETL and generation logic.          | Update these to change how external data is fetched.     |
 
 ### 🛠 Common Workflows
 
