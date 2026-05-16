@@ -1,5 +1,6 @@
 {
   "type": "module",
+  "packageManager": "pnpm@11.1.2",
   "devDependencies": {
     "@eslint/compat": "^2.0.1",
     "@rushstack/eslint-patch": "^1.15.0",
@@ -28,5 +29,10 @@
   },
   "overrides": {
     "esbuild": "0.25.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }
