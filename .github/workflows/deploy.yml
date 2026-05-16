@@ -46,7 +46,7 @@ jobs:
         run: nix develop .#ci --command python3 scripts/process_requests.py
 
       - name: Generate splats
-        run: nix develop .#ci --command pnpm run docs:generate-splats
+        run: nix develop .#ci --command python3 scripts/generate_splats.py
 
       - name: Commit and push content changes
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -58,7 +58,7 @@ jobs:
           git push
 
       - name: Install dependencies
-        run: nix develop .#ci --command pnpm install --frozen-lockfile
+        run: nix develop .#ci --command pnpm install
 
       - name: Build with VitePress
         run: nix develop .#ci --command pnpm run docs:build
