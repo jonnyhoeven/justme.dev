@@ -3,8 +3,14 @@ name: Deployment
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'README.md'
+      - 'GEMINI.md'
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'README.md'
+      - 'GEMINI.md'
   workflow_dispatch:
 
 # Scoped concurrency: cancel running PR builds but allow main branch builds to complete.
