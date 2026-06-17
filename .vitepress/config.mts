@@ -9,7 +9,7 @@ export default async () => {
     lang: SITE_CONSTANTS.LANG,
     title: SITE_CONSTANTS.SITE_NAME,
     ignoreDeadLinks: 'localhostLinks',
-    srcExclude: ['**/README.md'],
+    srcExclude: ['**/README.md', 'venv/**', '.direnv/**', '**/node_modules/**'],
     description: SITE_CONSTANTS.DESCRIPTION,
     head: [
       ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
