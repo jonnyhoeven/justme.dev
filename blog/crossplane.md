@@ -72,8 +72,8 @@ spec:
   deletionPolicy: Delete
 ```
 
-When this is applied, Crossplane's AWS provider handles the underlying API calls. If an unauthorized user or a rogue
-script manually changes the bucket settings in the AWS Console, the Crossplane controller detects the drift and reverts
+When this is applied, Crossplane's provider handles the underlying API calls. If an unauthorized user or a rogue
+script manually changes the bucket settings in the Console, the Crossplane controller detects the drift and reverts
 it immediately.
 
 ## Impact: Scaling the Internal Developer Platform (IDP)
