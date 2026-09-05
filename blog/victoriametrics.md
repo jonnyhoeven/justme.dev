@@ -17,7 +17,6 @@ fetchReadme: false
 editLink: true
 image: /images/victoria.webp
 languages: Go, TypeScript
-fetchML: false
 ---
 
 <!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->

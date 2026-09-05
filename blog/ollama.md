@@ -13,7 +13,6 @@ intro: |
 fetchReadme: false
 editLink: true
 languages: Go
-fetchML: false
 image: /images/ollama.webp
 project: ollama
 user: ollama

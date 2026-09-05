@@ -22,7 +22,6 @@ editLink: true
 image: /images/opentelemetry.webp
 externalUrl: https://opentelemetry.io/
 languages: Go, Java, Python, JavaScript, C++, Rust
-fetchML: false
 ---
 
 <!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->

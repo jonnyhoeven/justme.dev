@@ -26,7 +26,6 @@ class ProjectRequest(BaseModel):
     branch: str = "main"
     readmeFile: str = "README.md"
     languages: Union[str, List[str]]
-    fetchML: bool = False
     outline: str = "deep"
     intro: str
 

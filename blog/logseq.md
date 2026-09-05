@@ -21,7 +21,6 @@ fetchReadme: false
 editLink: true
 image: /images/logseq.webp
 languages: Markdown
-fetchML: false
 ---
 
 <!--suppress CheckEmptyScriptTag, CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->

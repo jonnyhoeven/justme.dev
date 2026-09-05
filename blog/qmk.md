@@ -20,7 +20,6 @@ fetchReadme: false
 editLink: true
 image: /images/qmk.webp
 languages: C, C++, Makefile, Python, Shell, Nix
-fetchML: false
 ---
 
 <!--suppress CheckEmptyScriptTag, CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->

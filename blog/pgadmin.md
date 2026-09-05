@@ -20,7 +20,6 @@ fetchReadme: false
 editLink: true
 image: /images/pgadmin.webp
 languages: Python, JavaScript, PLpgSQL, Shell, TypeScript, CSS, Other
-fetchML: false
 ---
 
 <!--suppress CheckEmptyScriptTag, CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->

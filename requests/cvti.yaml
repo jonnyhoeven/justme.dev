@@ -10,7 +10,6 @@ project: CVTI
 branch: master
 readmeFile: README.md
 languages: Visual Basic .NET
-fetchML: false
 outline: deep
 intro:
   CVTI (Camera & Visual Touch Interface) is an enterprise-grade Facility Automation & IoT Orchestration Platform

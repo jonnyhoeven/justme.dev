@@ -21,7 +21,6 @@ fetchReadme: false
 editLink: true
 image: /images/nixos.webp
 externalUrl: https://nixos.org/
-fetchML: false
 ---
 
 <!--suppress ALL, CheckEmptyScriptTag, HtmlUnknownAttribute -->

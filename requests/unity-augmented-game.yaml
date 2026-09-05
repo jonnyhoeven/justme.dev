@@ -9,7 +9,6 @@ user: jonnyhoeven
 project: unity-augmented-game
 branch: master
 readmeFile: README.md
-fetchML: false
 outline: deep
 languages: Java, C#
 intro:

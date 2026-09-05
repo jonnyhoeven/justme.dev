@@ -20,7 +20,6 @@ fetchReadme: false
 editLink: true
 image: /images/postgres-tuning.webp
 languages: PLpgSQL, YAML, Shell, Go
-fetchML: false
 ---
 
 <!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports-->

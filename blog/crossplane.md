@@ -22,7 +22,6 @@ editLink: true
 image: /images/crossplane.webp
 languages: Go, YAML, HCL
 externalUrl: https://www.crossplane.io/
-fetchML: false
 ---
 
 <!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->

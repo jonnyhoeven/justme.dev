@@ -21,7 +21,6 @@ fetchReadme: false
 editLink: true
 image: /images/pnpm.webp
 externalUrl: https://pnpm.io/
-fetchML: false
 ---
 
 <!--suppress ALL, CheckEmptyScriptTag, HtmlUnknownAttribute -->

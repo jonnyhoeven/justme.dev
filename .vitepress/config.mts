@@ -194,10 +194,10 @@ export default async () => {
         message:
           `<span class="badge-wrapper" style="display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem;">` +
           `<a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/deploy.yml" target="_blank">` +
-          `   <img alt="Github deploy workflow status badge" width="143px" height="20px" src="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/deploy.yml/badge.svg?branch=main">` +
+          `   <img alt="Github deploy workflow status badge" height="20px" src="https://img.shields.io/github/actions/workflow/status/jonnyhoeven/justme.dev/deploy.yml?branch=main">` +
           '</a>' +
           `<a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/github-code-scanning/codeql" target="_blank">` +
-          `   <img alt="Github code scanning badge" width="120px" height="20px" src="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/github-code-scanning/codeql/badge.svg">` +
+          `   <img alt="Github code scanning badge" height="20px" src="https://img.shields.io/github/actions/workflow/status/jonnyhoeven/justme.dev/dynamic/github-code-scanning/codeql?branch=main">` +
           '</a>' +
           `</span>`,
         copyright: `&copy; ${new Date().getFullYear()} <a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}">Justme.dev</a>`

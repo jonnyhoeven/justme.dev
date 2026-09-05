@@ -16,7 +16,6 @@ editLink: true
 image: /images/yed.webp
 languages: Web-based, Java
 externalUrl: https://www.yworks.com/products/yed
-fetchML: false
 ---
 
 <!--suppress ALL, CheckEmptyScriptTag, HtmlUnknownAttribute -->

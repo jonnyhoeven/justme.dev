@@ -23,6 +23,9 @@
             requests
             pydantic
             pillow
+            pytest
+            pytest-cov
+            responses
           ]))
           ruff
           pre-commit

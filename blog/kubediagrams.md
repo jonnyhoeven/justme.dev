@@ -20,7 +20,6 @@ fetchReadme: false
 editLink: true
 image: /images/kubediagrams.webp
 languages: Python, PlantUML, Shell
-fetchML: false
 ---
 
 <!--suppress ALL, CheckEmptyScriptTag, HtmlUnknownAttribute -->

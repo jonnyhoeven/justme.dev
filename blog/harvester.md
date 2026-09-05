@@ -20,7 +20,6 @@ fetchReadme: false
 editLink: true
 image: /images/harvester.webp
 languages: Go, Shell, Other
-fetchML: false
 ---
 
 <!--suppress CheckEmptyScriptTag, CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->

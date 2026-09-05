@@ -21,7 +21,6 @@ editLink: true
 image: /images/argocd.webp
 languages: Go, Other
 externalUrl: https://github.com/argoproj/argo-cd
-fetchML: false
 ---
 
 <!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports-->

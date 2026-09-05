@@ -14,7 +14,6 @@ import {
 } from '../lib/splat-animations/audio-utils';
 import useMusic from '../.vitepress/theme/composables/useMusic';
 import { SITE_CONSTANTS } from '../.vitepress/constants';
-import DebugOverlay from './DebugOverlay.vue';
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 let animationId: number;
@@ -39,11 +38,20 @@ let cycleInterval: ReturnType<typeof setInterval>;
 const { audioData, isMusicVisible, setSplatVisible } = useMusic();
 const isVisible = useElementVisibility(canvasRef);
 
-const particleCount = ref(0);
-const activeAnimationName = computed(
-  () => currentAnimation.value?.name || 'None'
-);
 const brushCache = new Map<string, HTMLCanvasElement>();
+
+const resize = () => {
+  if (!canvasRef.value) return;
+  const rect = canvasRef.value.parentElement?.getBoundingClientRect();
+  if (rect && rect.width > 0) {
+    width = Math.floor(rect.width);
+    height = Math.floor(rect.height);
+    canvasRef.value.width = width;
+    canvasRef.value.height = height;
+  }
+};
+
+let onShiverMouseMove: ((e: MouseEvent) => void) | null = null;
 
 /**
  * Cycle to the next animation.
@@ -110,7 +118,6 @@ onMounted(async () => {
           };
         })
       );
-      particleCount.value = particles.length;
     }
   } catch (e) {
     console.error('Failed to load splat data', e);
@@ -155,16 +162,6 @@ onMounted(async () => {
   };
 
   // 3. Layout Handlers
-  const resize = () => {
-    if (!canvasRef.value) return;
-    const rect = canvasRef.value.parentElement?.getBoundingClientRect();
-    if (rect && rect.width > 0) {
-      width = Math.floor(rect.width);
-      height = Math.floor(rect.height);
-      canvasRef.value.width = width;
-      canvasRef.value.height = height;
-    }
-  };
   window.addEventListener('resize', resize);
   resize();
 
@@ -187,6 +184,18 @@ onMounted(async () => {
   }
 
   // 6. Physics Render Loop
+  const animCtx: AnimationContext = {
+    width,
+    height,
+    scale: 1,
+    offsetX: 0,
+    offsetY: 0,
+    mouseX: mouse.x,
+    mouseY: mouse.y,
+    audioData: undefined,
+    audioLevels: ZERO_AUDIO_LEVELS
+  };
+
   const render = (time: number) => {
     if (isMobileView.value || !isVisible.value) {
       return;
@@ -200,19 +209,17 @@ onMounted(async () => {
     const offsetY = (height - 320 * scale) / 2;
     const elapsed = time - startTime;
 
-    const animCtx: AnimationContext = {
-      width,
-      height,
-      scale,
-      offsetX,
-      offsetY,
-      mouseX: mouse.x,
-      mouseY: mouse.y,
-      audioData: audioData.value || undefined,
-      audioLevels: audioData.value
-        ? getAudioLevels(audioData.value)
-        : ZERO_AUDIO_LEVELS
-    };
+    animCtx.width = width;
+    animCtx.height = height;
+    animCtx.scale = scale;
+    animCtx.offsetX = offsetX;
+    animCtx.offsetY = offsetY;
+    animCtx.mouseX = mouse.x;
+    animCtx.mouseY = mouse.y;
+    animCtx.audioData = audioData.value || undefined;
+    animCtx.audioLevels = audioData.value
+      ? getAudioLevels(audioData.value)
+      : ZERO_AUDIO_LEVELS;
 
     if (!currentAnimation.value) return;
     const anim = currentAnimation.value;
@@ -309,7 +316,10 @@ onMounted(async () => {
       const btn = tagline.querySelector('.it-btn') as HTMLElement;
       if (btn) {
         // --- Proximity Shiver (Hot/Cold) ---
-        window.addEventListener('mousemove', (e) => {
+        if (onShiverMouseMove) {
+          window.removeEventListener('mousemove', onShiverMouseMove);
+        }
+        onShiverMouseMove = (e: MouseEvent) => {
           if (isMobileView.value || isMusicVisible.value) {
             shiverIntensity.value = 0;
             return;
@@ -328,7 +338,8 @@ onMounted(async () => {
           } else {
             shiverIntensity.value = 0;
           }
-        });
+        };
+        window.addEventListener('mousemove', onShiverMouseMove);
 
         btn.onclick = () => {
           if (isMobileView.value) return;
@@ -361,9 +372,11 @@ onMounted(async () => {
           nextAnimation,
           SITE_CONSTANTS.SPLAT_CYCLE_TIME
         );
-      }
-      if (visible && !isMobileView.value) {
-        animationId = requestAnimationFrame(render);
+        if (!isMobileView.value) {
+          animationId = requestAnimationFrame(render);
+        }
+      } else {
+        cancelAnimationFrame(animationId);
       }
     },
     { immediate: true }
@@ -373,6 +386,10 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   cancelAnimationFrame(animationId);
   if (cycleInterval) clearInterval(cycleInterval);
+  window.removeEventListener('resize', resize);
+  if (onShiverMouseMove) {
+    window.removeEventListener('mousemove', onShiverMouseMove);
+  }
   setSplatVisible(false);
 });
 
@@ -409,10 +426,6 @@ const onClick = () => {
       aria-label="Interactive 3D particle simulation of avatar"
     ></canvas>
   </div>
-  <DebugOverlay
-    :particle-count="particleCount"
-    :active-animation="activeAnimationName"
-  />
 </template>
 
 <style scoped>

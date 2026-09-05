@@ -21,7 +21,6 @@ fetchReadme: false
 editLink: true
 image: /images/k8sgpt.webp
 languages: Go, Other
-fetchML: false
 ---
 
 <!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports-->

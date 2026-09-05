@@ -53,7 +53,6 @@ def full_yaml_data() -> dict:
         "branch": "main",
         "readmeFile": "README.md",
         "languages": ["Python", "TypeScript"],
-        "fetchML": False,
         "outline": "deep",
         "intro": "A full project.",
     }

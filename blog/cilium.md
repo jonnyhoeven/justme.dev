@@ -21,7 +21,6 @@ editLink: true
 image: /images/cilium.webp
 languages: Go, Shell, C, Python
 externalUrl: https://cilium.io/
-fetchML: false
 ---
 
 <!--suppress CheckEmptyScriptTag, CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->

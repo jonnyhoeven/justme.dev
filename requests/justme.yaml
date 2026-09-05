@@ -9,7 +9,6 @@ user: jonnyhoeven
 project: justme.dev
 branch: main
 readmeFile: README.md
-fetchML: false
 outline: deep
 languages: CSS,Typescript,Vue
 intro:

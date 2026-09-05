@@ -22,7 +22,6 @@ editLink: true
 image: /images/minio.webp
 languages: Kubernetes, PostgreSQL, AWS
 externalUrl: https://min.io/
-fetchML: false
 ---
 
 <!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->

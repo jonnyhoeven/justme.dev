@@ -11,7 +11,6 @@ fetchReadme: false
 editLink: true
 image: /images/edb.webp
 languages: Python, Jinja, Shell, Dockerfile
-fetchML: false
 ---
 
 <!--suppress ALL, CheckEmptyScriptTag, HtmlUnknownAttribute -->
