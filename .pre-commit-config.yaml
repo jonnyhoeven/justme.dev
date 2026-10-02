@@ -13,21 +13,21 @@ repos:
     hooks:
       - id: eslint
         name: ESLint
-        entry: pnpm exec eslint --fix
+        entry: /etc/profiles/per-user/john/bin/direnv exec . pnpm exec eslint --fix
         language: system
         types_or: [javascript, ts, vue]
         require_serial: true
 
       - id: prettier
         name: Prettier
-        entry: pnpm exec prettier --write
+        entry: /etc/profiles/per-user/john/bin/direnv exec . pnpm exec prettier --write
         language: system
         types_or: [javascript, ts, vue, css, markdown, yaml]
         require_serial: true
 
       - id: ruff
         name: Ruff
-        entry: ruff check --fix
+        entry: /etc/profiles/per-user/john/bin/direnv exec . ruff check --fix
         language: system
         types: [python]
         require_serial: true
