@@ -87,6 +87,13 @@ const isRepeat = ref(false);
 let audioContext: AudioContext | null = null;
 let analyser: AnalyserNode | null = null;
 let animationGain: GainNode | null = null;
+let outputGain: GainNode | null = null;
+
+// User volume only scales the speaker output; the analyser taps the signal
+// before it so the visualisation stays independent of the volume slider.
+const applyVolume = (vol: number) => {
+  if (outputGain) outputGain.gain.value = Math.max(0, Math.min(1, vol));
+};
 let xmPlayer: XMPlayer | null = null;
 let animationFrame: number;
 // Reusable buffer — mutated in-place by getByteFrequencyData to avoid per-frame allocations.
@@ -141,8 +148,10 @@ const doInitAudio = async () => {
   const xmGain = xmPlayer.init(audioContext);
   if (xmGain) {
     xmGain.connect(animationGain);
-    xmGain.connect(audioContext.destination);
-    xmPlayer.setVolume(volume.value);
+    outputGain = audioContext.createGain();
+    xmGain.connect(outputGain);
+    outputGain.connect(audioContext.destination);
+    applyVolume(volume.value);
   }
 };
 
@@ -170,7 +179,7 @@ const togglePlay = async () => {
         currentLoadedXmUrl = currentTrackUrl.value;
         currentSongTitle.value = xmPlayer.songTitle;
       }
-      xmPlayer.setVolume(volume.value);
+      applyVolume(volume.value);
       xmPlayer.play();
       setPlaying(true);
     }
@@ -200,7 +209,7 @@ const handleNext = async () => {
         await xmPlayer.loadUrl(currentTrackUrl.value);
         currentLoadedXmUrl = currentTrackUrl.value;
         currentSongTitle.value = xmPlayer.songTitle;
-        xmPlayer.setVolume(volume.value);
+        applyVolume(volume.value);
         xmPlayer.play();
         setPlaying(true);
       }
@@ -223,7 +232,7 @@ const handlePrev = async () => {
         await xmPlayer.loadUrl(currentTrackUrl.value);
         currentLoadedXmUrl = currentTrackUrl.value;
         currentSongTitle.value = xmPlayer.songTitle;
-        xmPlayer.setVolume(volume.value);
+        applyVolume(volume.value);
         xmPlayer.play();
         setPlaying(true);
       }
@@ -246,7 +255,7 @@ const seek = (e: MouseEvent) => {
 
 watch(volume, (newVol) => {
   if (xmPlayer) {
-    xmPlayer.setVolume(newVol);
+    applyVolume(newVol);
   }
 });
 
@@ -263,6 +272,7 @@ watch(isMusicVisible, (visible) => {
       audioContext = null;
       analyser = null;
       animationGain = null;
+      outputGain = null;
       xmPlayer = null;
       dataArray = null;
       currentLoadedXmUrl = '';
