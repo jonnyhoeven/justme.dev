@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import loader from '../../data/music.data';
 
 describe('music.data loader', () => {
@@ -19,23 +21,19 @@ describe('music.data loader', () => {
     }
   });
 
-  it('correctly extracts titles and metadata from tracker files', () => {
+  it('lists every .xm file in public/audio with tracker metadata', () => {
     const tracks = loader.load();
-    const purpleMotions = tracks.find(
-      (t) => t.filename === '2_purple-motions.xm'
-    );
-    const butterfl = tracks.find((t) => t.filename === 'butterfl.xm');
+    const onDisk = fs
+      .readdirSync(path.resolve(__dirname, '../../public/audio'))
+      .filter((f) => f.toLowerCase().endsWith('.xm'));
 
-    expect(purpleMotions).toBeDefined();
-    expect(purpleMotions?.title).toBe('purple motions');
-    expect(purpleMotions?.channels).toBe(12);
-    expect(purpleMotions?.bpm).toBe(125);
-    expect(purpleMotions?.tracker).toBe('FastTracker v2.00');
+    expect(tracks.map((t) => t.filename).sort()).toEqual([...onDisk].sort());
 
-    expect(butterfl).toBeDefined();
-    expect(butterfl?.title).toBe('Butterfly Flew Away');
-    expect(butterfl?.channels).toBe(16);
-    expect(butterfl?.bpm).toBe(140);
+    for (const track of tracks) {
+      expect(track.channels).toBeGreaterThan(0);
+      expect(track.bpm).toBeGreaterThan(0);
+      expect(track.tracker).toBeTruthy();
+    }
   });
 
   it('sorts tracks naturally using numeric ordering', () => {

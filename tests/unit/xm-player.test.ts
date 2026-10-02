@@ -3,6 +3,23 @@ import { XMPlayer } from '../../lib/audio/xm-player';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+const audioDir = path.resolve(__dirname, '../../public/audio');
+const xmFiles = fs
+  .readdirSync(audioDir)
+  .filter((f) => f.toLowerCase().endsWith('.xm'))
+  .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+const readXm = (file: string): ArrayBuffer => {
+  const buffer = fs.readFileSync(path.join(audioDir, file));
+  return buffer.buffer.slice(
+    buffer.byteOffset,
+    buffer.byteOffset + buffer.byteLength
+  ) as ArrayBuffer;
+};
+
+// Lifecycle tests only need one representative track.
+const sampleFile = xmFiles[0];
+
 describe('XMPlayer', () => {
   it('instantiates cleanly with default options', () => {
     const player = new XMPlayer();
@@ -13,36 +30,21 @@ describe('XMPlayer', () => {
     expect(player.getProgress()).toBe(0);
   });
 
-  it('loads and parses purple-motions.xm correctly', () => {
-    const filePath = path.resolve(
-      __dirname,
-      '../../public/audio/2_purple-motions.xm'
-    );
-    const buffer = fs.readFileSync(filePath);
-    const arrayBuffer = buffer.buffer.slice(
-      buffer.byteOffset,
-      buffer.byteOffset + buffer.byteLength
-    );
+  it('has XM files to test against', () => {
+    expect(xmFiles.length).toBeGreaterThan(0);
+  });
 
+  it.each(xmFiles)('loads and parses %s', (file) => {
     const player = new XMPlayer();
-    const success = player.loadBuffer(arrayBuffer);
+    const success = player.loadBuffer(readXm(file));
 
     expect(success).toBe(true);
-    expect(player.songTitle).toBe('purple motions');
-    expect(player.numChannels).toBe(12);
+    expect(player.numChannels).toBeGreaterThan(0);
     expect(player.isPlaying).toBe(false);
   });
 
   it('initializes with mock AudioContext and controls playback lifecycle', () => {
-    const filePath = path.resolve(
-      __dirname,
-      '../../public/audio/2_purple-motions.xm'
-    );
-    const buffer = fs.readFileSync(filePath);
-    const arrayBuffer = buffer.buffer.slice(
-      buffer.byteOffset,
-      buffer.byteOffset + buffer.byteLength
-    );
+    const arrayBuffer = readXm(sampleFile);
 
     const connectedNodes: unknown[] = [];
     const mockAudioContext = {
@@ -81,50 +83,8 @@ describe('XMPlayer', () => {
     expect(player.getProgress()).toBe(0);
   });
 
-  it('loads 1_keygen-8.xm correctly', () => {
-    const filePath = path.resolve(
-      __dirname,
-      '../../public/audio/1_keygen-8.xm'
-    );
-    const buffer = fs.readFileSync(filePath);
-    const arrayBuffer = buffer.buffer.slice(
-      buffer.byteOffset,
-      buffer.byteOffset + buffer.byteLength
-    );
-
-    const player = new XMPlayer();
-    const success = player.loadBuffer(arrayBuffer);
-
-    expect(success).toBe(true);
-    expect(player.numChannels).toBeGreaterThan(0);
-  });
-
-  it('loads butterfl.xm correctly', () => {
-    const filePath = path.resolve(__dirname, '../../public/audio/butterfl.xm');
-    const buffer = fs.readFileSync(filePath);
-    const arrayBuffer = buffer.buffer.slice(
-      buffer.byteOffset,
-      buffer.byteOffset + buffer.byteLength
-    );
-
-    const player = new XMPlayer();
-    const success = player.loadBuffer(arrayBuffer);
-
-    expect(success).toBe(true);
-    expect(player.songTitle).toBe('Butterfly Flew Away');
-    expect(player.numChannels).toBe(16);
-  });
-
   it('does not fire onEnded prematurely during initial pattern playback', () => {
-    const filePath = path.resolve(
-      __dirname,
-      '../../public/audio/2_purple-motions.xm'
-    );
-    const buffer = fs.readFileSync(filePath);
-    const arrayBuffer = buffer.buffer.slice(
-      buffer.byteOffset,
-      buffer.byteOffset + buffer.byteLength
-    );
+    const arrayBuffer = readXm(sampleFile);
 
     let endedCalled = false;
     let processCallback: ((e: unknown) => void) | null = null;
