@@ -78,8 +78,10 @@ const SCENE_SPRING_SCALE = 2.5;
 const ZERO_EFFECT = Object.freeze({ dx: 0, dy: 0 });
 const audioTracker = new AudioTracker();
 // Every kick pumps the whole cloud outwards from its centre (px per frame at beat = 1)
-const BEAT_PUNCH = 0.75;
-const BEAT_SIZE_PUMP = 0.28;
+const BEAT_PUNCH = 2.5;
+const BEAT_SIZE_PUMP = 0.45;
+// The avatar also breathes: bass/kicks swell its whole outline (fraction of radius)
+const BEAT_SWELL = 0.07;
 const sceneOut: SceneTarget = { x: 0, y: 0, sizeMult: 1 };
 const smoothstep = (t: number) => {
   const c = Math.min(1, Math.max(0, t));
@@ -421,7 +423,8 @@ onMounted(async () => {
         : 0.85 + Math.sin(elapsed * 0.001) * 0.15 + animCtx.audioLevels.bass) +
         beat * 0.35) *
         sceneGlow,
-      morph
+      // Scenes without a glow (text) fade it out in place instead of drifting it
+      scene?.glow === 0 ? 0 : morph
     );
 
     // Cache some values outside the particle loop for performance
@@ -434,6 +437,7 @@ onMounted(async () => {
     const punchX = anchorPx.x + (animCtxAreaCenter.x - anchorPx.x) * morph;
     const punchY = anchorPx.y + (animCtxAreaCenter.y - anchorPx.y) * morph;
     const punchReach = 140 * scale;
+    const swellAmt = BEAT_SWELL * (1 - morph);
 
     // Repulsion params
     const rRange = repulsionRange;
@@ -441,8 +445,11 @@ onMounted(async () => {
 
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
-      const baseTargetOx = p.ox * scale + offsetX;
-      const baseTargetOy = p.oy * scale + offsetY;
+      const swell = 1 + (beat + animCtx.audioLevels.bass * 0.5) * swellAmt;
+      const baseTargetOx =
+        anchorPx.x + (p.ox * scale + offsetX - anchorPx.x) * swell;
+      const baseTargetOy =
+        anchorPx.y + (p.oy * scale + offsetY - anchorPx.y) * swell;
       const effect =
         morph < 1 ? anim.apply(p, elapsed, animCtx, particles) : ZERO_EFFECT;
       let targetOx = baseTargetOx + effect.dx;
@@ -725,7 +732,13 @@ const onClick = (e: MouseEvent) => {
   position: absolute;
   border-radius: 50%;
   background-image: var(--vp-home-hero-image-background-image);
-  mask-image: radial-gradient(closest-side, #000 25%, transparent 100%);
+  /* Hollow centre: the glow haloes the face instead of tinting it purple */
+  mask-image: radial-gradient(
+    closest-side,
+    transparent 30%,
+    #000 55%,
+    transparent 100%
+  );
   will-change: opacity, transform;
 }
 
