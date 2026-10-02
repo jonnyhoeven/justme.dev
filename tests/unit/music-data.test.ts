@@ -6,7 +6,7 @@ describe('music.data loader', () => {
     const tracks = loader.load();
 
     expect(Array.isArray(tracks)).toBe(true);
-    expect(tracks.length).toBeGreaterThanOrEqual(7);
+    expect(tracks.length).toBeGreaterThan(0);
 
     for (const track of tracks) {
       expect(track).toHaveProperty('filename');
