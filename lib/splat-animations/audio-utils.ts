@@ -98,11 +98,13 @@ const TREBLE_END = 0.4;
 const ATTACK_MS = 25;
 const RELEASE_MS = 170;
 const BEAT_DECAY_MS = 200;
-const BEAT_COOLDOWN_MS = 170;
-const BEAT_MIN_LEVEL = 0.3;
-const BEAT_MIN_ONSET = 0.14;
-const BEAT_REARM = 0.05;
-const BASS_AVG_MS = 350;
+const BEAT_COOLDOWN_MS = 120;
+const BEAT_MIN_LEVEL = 0.22;
+const BEAT_MIN_ONSET = 0.1;
+// Re-arm once bass has dipped this far below its peak since the last beat, so a
+// rolling bassline (which never returns to its average) still fires every hit
+const BEAT_REARM_DIP = 0.07;
+const BASS_AVG_MS = 250;
 // Auto-gain: the reference peak falls this much per ms, but never below the floor
 const GAIN_RELEASE = 0.00005;
 const GAIN_FLOOR = 0.2;
@@ -133,6 +135,7 @@ export class AudioTracker {
   private lastBass = 0;
   private sinceBeat = Infinity;
   private armed = true;
+  private peakSinceBeat = 0;
   private primed = false;
 
   update(data: Uint8Array | undefined, dtMs: number): AudioFeel {
@@ -171,14 +174,15 @@ export class AudioTracker {
 
     // Kick: bass that jumps well above its recent average while still rising
     this.sinceBeat += dt;
-    // (after a beat it re-arms only once bass falls back to its average, so a
-    // held note is one beat, not a stream of them)
+    // (after a beat it re-arms only once bass has dipped, so a held note is one
+    // beat, not a stream of them)
     if (!this.primed) {
       this.bassAvg = norm[0]; // don't read the first frame as a kick
       this.primed = true;
     }
     const onset = norm[0] - this.bassAvg;
-    if (onset < BEAT_REARM) this.armed = true;
+    this.peakSinceBeat = Math.max(this.peakSinceBeat, norm[0]);
+    if (norm[0] < this.peakSinceBeat - BEAT_REARM_DIP) this.armed = true;
     if (
       this.armed &&
       onset > BEAT_MIN_ONSET &&
@@ -188,6 +192,7 @@ export class AudioTracker {
     ) {
       this.sinceBeat = 0;
       this.armed = false;
+      this.peakSinceBeat = norm[0];
       o.beats++;
       o.beat = Math.min(1, 0.55 + onset * 1.5);
     } else {

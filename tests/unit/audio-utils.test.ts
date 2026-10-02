@@ -155,6 +155,15 @@ describe('AudioTracker', () => {
     expect(t2.update(frame(0.9), 16).beats).toBe(1);
   });
 
+  it('fires on every hit of a rolling bassline that never goes quiet', () => {
+    const t = new AudioTracker();
+    // 16 frames (~256ms) per cycle: bass swings 0.85 <-> 0.45 for 2 seconds
+    for (let i = 0; i < 120; i++) {
+      t.update(frame(i % 16 < 6 ? 0.85 : 0.45), 16);
+    }
+    expect(t.update(frame(0.45), 16).beats).toBeGreaterThanOrEqual(6);
+  });
+
   it('separates the bands', () => {
     const t = new AudioTracker();
     let l = t.update(frame(0, 0, 0.8), 16);

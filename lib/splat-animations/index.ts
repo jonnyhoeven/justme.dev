@@ -10,7 +10,6 @@ import { windWaves } from './wind-waves';
 import { floatingOutliers } from './floating-outliers';
 import { flubberMotion } from './flubber-motion';
 import { ferrofluid } from './ferrofluid';
-import { solarFlare } from './solar-flare';
 import { quantumEntanglement } from './quantum-entanglement';
 import { dimensionalPortal } from './dimensional-portal';
 import { spectrumHalo } from './spectrum-halo';
@@ -29,7 +28,6 @@ export const animations: SplatAnimation[] = [
   flubberMotion,
   windWaves,
   ferrofluid,
-  solarFlare,
   quantumEntanglement,
   dimensionalPortal,
   spectrumHalo
