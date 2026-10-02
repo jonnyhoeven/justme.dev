@@ -256,9 +256,12 @@ watch(isMusicVisible, (visible) => {
       analyser = null;
       animationGain = null;
       xmPlayer = null;
+      dataArray = null;
       currentLoadedXmUrl = '';
       currentSongTitle.value = '';
     }
+    // Allow initAudio() to build a fresh context when reopened.
+    initPromise = null;
   }
 });
 
