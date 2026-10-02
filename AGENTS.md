@@ -54,3 +54,4 @@ generated_artifacts: projects/*.md, public/projects-cache/
 4. **Canvas animations must pause off-screen.** Use `IntersectionObserver` (or VueUse `useElementVisibility`, which wraps it, as `HeroSplat.vue` does).
 5. **Before finishing,** `pre-commit run --all-files` must pass (`pnpm run format && pnpm run lint` and `ruff check . --fix` are faster spot checks). Fix any errors you introduced.
 6. **Keep this file current** when commands, the `requests/` schema or the architecture change.
+7. **No AI attribution in commits.** Never add `Co-Authored-By: Claude` (or any other AI co-author/"Generated with" trailer) to commit messages or PR descriptions.
