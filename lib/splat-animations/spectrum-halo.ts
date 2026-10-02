@@ -1,5 +1,4 @@
 import { CENTER_X, CENTER_Y } from './animation-constants';
-import { lerpToHighlight } from './color-utils';
 import type {
   SplatAnimation,
   SplatParticle,
@@ -13,7 +12,8 @@ import type {
  * The portrait becomes a radial equalizer: every particle looks up the
  * frequency bin for its angle (mirrored left/right, bass at the top) and is
  * pushed outwards by that band's energy, outer particles most. Each kick sends
- * a bright shockwave ring through the face. Without music it ripples slowly.
+ * a shockwave ring through the face. Motion only, colours are never changed.
+ * Without music it ripples slowly.
  */
 
 // --- Tuning Parameters ---
@@ -28,7 +28,6 @@ const RING_SPEED = 0.42;
 const RING_WIDTH = 26;
 const RING_LIFE = 700;
 const RING_PUSH = 16;
-const PEAK_WHITE_FROM = 0.55;
 const SPARKLE = 2.5;
 const SPRING_SCALE = 0.9;
 
@@ -111,13 +110,10 @@ export const spectrumHalo: SplatAnimation = {
     const jx = jitter ? (Math.random() - 0.5) * jitter : 0;
     const jy = jitter ? (Math.random() - 0.5) * jitter : 0;
 
-    const heat = Math.max(ring, (bar - PEAK_WHITE_FROM) * 2.2);
     return {
       dx: (s.shNx * push + jx) * scale,
       dy: (s.shNy * push + jy) * scale,
-      springScale: SPRING_SCALE,
-      colorOverride:
-        heat > 0.08 ? lerpToHighlight(p.cr, p.cg, p.cb, heat) : undefined
+      springScale: SPRING_SCALE
     };
   }
 };
