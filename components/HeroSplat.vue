@@ -12,14 +12,19 @@ import {
   type AnimationContext,
   type SplatAnimation
 } from '../lib/splat-animations';
+import { scenes } from '../lib/splat-scenes';
+import type { SceneTarget, SplatScene } from '../lib/splat-animations/types';
 import {
-  getAudioLevels,
+  AudioTracker,
   ZERO_AUDIO_LEVELS
 } from '../lib/splat-animations/audio-utils';
+import { setDarkTheme } from '../lib/splat-animations/color-utils';
 import useMusic from '../.vitepress/theme/composables/useMusic';
 import { SITE_CONSTANTS } from '../.vitepress/constants';
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
+const layerRef = ref<HTMLElement | null>(null);
+const glowRef = ref<HTMLElement | null>(null);
 let animationId: number;
 const particles: SplatParticle[] = [];
 
@@ -30,54 +35,139 @@ const repulsionRange = 120;
 const hoverForce = 5;
 
 const mouse = { x: -9999, y: -9999 };
+// The canvas covers the whole hero; the 320-unit avatar space is scaled and
+// anchored over the hero image column (see resize()).
 let width = 320;
 let height = 320;
+let scale = 1;
+let offsetX = 0;
+let offsetY = 0;
+let glowSize = 480;
+let anchorPx = { x: 0, y: 0 };
+let glowLevel = 1;
+let lastGlowWrite = -1;
+let lastGlowMorph = 0;
+const animCtxAreaCenter = { x: 0, y: 0 };
+const MIN_AVATAR_SCALE = 0.7;
+const MAX_AVATAR_SCALE = 1.25;
 const currentAnimationIndex = ref(0);
+/** Single place that reports what is on screen, so each change logs once. */
+const logActive = (kind: 'avatar' | 'scene', name: string) =>
+  console.log(`🎨 ${kind}: ${name}`);
 const currentAnimation = ref<SplatAnimation | null>(null);
 const { width: windowWidth } = useWindowSize();
 const isMobileView = computed(() => windowWidth.value < 768);
 const shiverIntensity = ref(0);
 let startTime = performance.now();
-let cycleInterval: ReturnType<typeof setInterval>;
+
+// Director: avatar animation -> morph -> full-canvas scene -> morph -> ...
+type Phase = 'avatar' | 'toScene' | 'scene' | 'toAvatar';
+let phase: Phase = 'avatar';
+let phaseStart = 0;
+let sceneStart = 0;
+let sceneCounter = -1;
+let currentScene: SplatScene | null = null;
+let skipRequested = false;
+let morphLinear = 0;
+let fastMorph = false;
+let lastFrameTime = 0;
+// Heavier (darker) particles lag behind during a morph, by up to this much
+const MORPH_STAGGER = 0.35;
+// Scenes track their targets more tightly than the soft avatar spring
+const SCENE_SPRING_SCALE = 2.5;
+const ZERO_EFFECT = Object.freeze({ dx: 0, dy: 0 });
+const audioTracker = new AudioTracker();
+// Every kick pumps the whole cloud outwards from its centre (px per frame at beat = 1)
+const BEAT_PUNCH = 0.75;
+const BEAT_SIZE_PUMP = 0.28;
+const sceneOut: SceneTarget = { x: 0, y: 0, sizeMult: 1 };
+const smoothstep = (t: number) => {
+  const c = Math.min(1, Math.max(0, t));
+  return c * c * (3 - 2 * c);
+};
 const { audioData, isMusicVisible, setSplatVisible } = useMusic();
 const isVisible = useElementVisibility(canvasRef);
 
 const brushCache = new Map<string, HTMLCanvasElement>();
 
 const resize = () => {
-  if (!canvasRef.value) return;
-  const rect = canvasRef.value.parentElement?.getBoundingClientRect();
-  if (rect && rect.width > 0) {
-    width = Math.floor(rect.width);
-    height = Math.floor(rect.height);
-    canvasRef.value.width = width;
-    canvasRef.value.height = height;
+  const canvas = canvasRef.value;
+  const layer = layerRef.value;
+  if (!canvas || !layer) return;
+  const rect = layer.getBoundingClientRect();
+  if (rect.width <= 0 || rect.height <= 0) return;
+
+  width = Math.floor(rect.width);
+  height = Math.floor(rect.height);
+  // Assigning width/height clears the canvas, so only do it on real changes
+  if (canvas.width !== width) canvas.width = width;
+  if (canvas.height !== height) canvas.height = height;
+
+  // Anchor the avatar on VitePress' image column, whatever the breakpoint
+  const anchor = layer
+    .closest('.VPHero')
+    ?.querySelector('.image-container')
+    ?.getBoundingClientRect();
+  const anchorW = anchor?.width || 320;
+  const anchorX = anchor
+    ? anchor.left + anchor.width / 2 - rect.left
+    : width / 2;
+  const anchorY = anchor
+    ? anchor.top + anchor.height / 2 - rect.top
+    : height / 2;
+
+  scale = Math.min(
+    MAX_AVATAR_SCALE,
+    Math.max(MIN_AVATAR_SCALE, Math.min(anchorW, height) / 320)
+  );
+  anchorPx = { x: anchorX, y: anchorY };
+  offsetX = anchorX - 160 * scale;
+  offsetY = anchorY - 160 * scale;
+
+  glowSize = Math.min(height * 0.95, 720); // stay inside the layer: no clipped edges
+  const glow = glowRef.value;
+  if (glow) {
+    glow.style.width = glow.style.height = `${glowSize}px`;
+    glow.style.left = `${anchorX - glowSize / 2}px`;
+    glow.style.top = `${anchorY - glowSize / 2}px`;
   }
 };
 
+/** Smoothly drive the DOM glow behind the canvas (compositor-only props). */
+const updateGlow = (target: number, morph: number) => {
+  glowLevel += (target - glowLevel) * 0.08;
+  // Skip writes while the value is effectively unchanged
+  if (
+    (Math.abs(glowLevel - lastGlowWrite) < 0.004 && morph === lastGlowMorph) ||
+    !glowRef.value
+  )
+    return;
+  lastGlowWrite = glowLevel;
+  lastGlowMorph = morph;
+  const level = Math.max(0, glowLevel);
+  // Scenes use the whole hero, so the glow drifts to the middle of the area
+  const gx = (animCtxAreaCenter.x - anchorPx.x) * morph;
+  const gy = (animCtxAreaCenter.y - anchorPx.y) * morph;
+  glowRef.value.style.opacity = String(Math.min(1, level * 0.95));
+  glowRef.value.style.transform = `translate(${gx}px, ${gy}px) scale(${0.85 + Math.min(level, 1.5) * 0.15})`;
+};
+
+let heroEl: HTMLElement | null = null;
+let resizeObserver: ResizeObserver | null = null;
+
 let onShiverMouseMove: ((e: MouseEvent) => void) | null = null;
 
-/**
- * Cycle to the next animation.
- * Accessible to both the auto-timer and the manual 'Next' button.
- */
+/** Switch the avatar-mode animation to the next one. */
 const nextAnimation = () => {
   currentAnimationIndex.value =
     (currentAnimationIndex.value + 1) % animations.length;
   const animation = animations[currentAnimationIndex.value];
 
-  // Use a technical but friendly log
-  // console.log(`🎨 Animation: ${animation.name}`);
-
   animation.init(particles);
   currentAnimation.value = animation;
+  if (layerRef.value) layerRef.value.dataset.animation = animation.name;
+  logActive('avatar', animation.name);
   startTime = performance.now();
-
-  // Reset the auto-cycle timer if visible
-  if (isVisible.value) {
-    if (cycleInterval) clearInterval(cycleInterval);
-    cycleInterval = setInterval(nextAnimation, SITE_CONSTANTS.SPLAT_CYCLE_TIME);
-  }
 };
 
 onMounted(async () => {
@@ -122,13 +212,10 @@ onMounted(async () => {
           })
         );
 
-        // Initial Position Scramble
-        const initialScale = Math.min(width, height) / 320;
-        const initialOffsetX = (width - 320 * initialScale) / 2;
-        const initialOffsetY = (height - 320 * initialScale) / 2;
+        // Initial scatter across the whole hero; the springs pull them home
         particles.forEach((p) => {
-          p.x = Math.random() * 320 * initialScale + initialOffsetX;
-          p.y = Math.random() * 320 * initialScale + initialOffsetY;
+          p.x = Math.random() * width;
+          p.y = Math.random() * height;
         });
 
         if (currentAnimation.value) {
@@ -140,11 +227,15 @@ onMounted(async () => {
     }
   };
 
+  // 2. Layout first, so the scatter and avatar anchor use real dimensions
+  heroEl = layerRef.value?.closest('.VPHero') as HTMLElement | null;
+  resize();
+
   if (!isMobileView.value) {
     await loadParticles();
   }
 
-  // 2. Optimized Material Brush Caching
+  // 3. Optimized Material Brush Caching
   const getBrush = (color: string) => {
     if (brushCache.has(color)) return brushCache.get(color)!;
 
@@ -182,18 +273,15 @@ onMounted(async () => {
     return c;
   };
 
-  // 3. Layout Handlers
-  window.addEventListener('resize', resize);
-  resize();
-
-  // 4. Initial Position Scramble
-  const initialScale = Math.min(width, height) / 320;
-  const initialOffsetX = (width - 320 * initialScale) / 2;
-  const initialOffsetY = (height - 320 * initialScale) / 2;
-  particles.forEach((p) => {
-    p.x = Math.random() * 320 * initialScale + initialOffsetX;
-    p.y = Math.random() * 320 * initialScale + initialOffsetY;
-  });
+  // 4. Layout & input handlers. Pointer events come from the hero itself
+  // (not the canvas) because the text and buttons float above the canvas.
+  resizeObserver = new ResizeObserver(resize);
+  if (layerRef.value) resizeObserver.observe(layerRef.value);
+  const imageEl = heroEl?.querySelector('.image-container');
+  if (imageEl) resizeObserver.observe(imageEl);
+  heroEl?.addEventListener('mousemove', onMouseMove);
+  heroEl?.addEventListener('mouseleave', onMouseLeave);
+  heroEl?.addEventListener('click', onClick);
 
   // 5. Animation Setups
   const { animation: firstAnim, index: firstIndex } = pickRandomAnimation();
@@ -201,6 +289,8 @@ onMounted(async () => {
     currentAnimationIndex.value = firstIndex;
     currentAnimation.value = firstAnim;
     currentAnimation.value.init(particles);
+    if (layerRef.value) layerRef.value.dataset.animation = firstAnim.name;
+    logActive('avatar', firstAnim.name);
     startTime = performance.now();
   }
 
@@ -213,8 +303,28 @@ onMounted(async () => {
     offsetY: 0,
     mouseX: mouse.x,
     mouseY: mouse.y,
+    areaX: 0,
+    areaY: 0,
+    areaW: width,
+    areaH: height,
     audioData: undefined,
-    audioLevels: ZERO_AUDIO_LEVELS
+    audioLevels: ZERO_AUDIO_LEVELS,
+    dt: 16
+  };
+
+  const setPhase = (next: Phase, time: number) => {
+    phase = next;
+    phaseStart = time;
+    if (layerRef.value) layerRef.value.dataset.phase = next;
+    if (next === 'toScene') {
+      currentScene = scenes[++sceneCounter % scenes.length];
+      sceneStart = time;
+      if (layerRef.value) layerRef.value.dataset.scene = currentScene.name;
+      logActive('scene', currentScene.name);
+      currentScene.init(particles, animCtx);
+    } else if (next === 'toAvatar') {
+      nextAnimation();
+    }
   };
 
   const render = (time: number) => {
@@ -225,9 +335,6 @@ onMounted(async () => {
     if (!ctx) return;
     ctx.clearRect(0, 0, width, height);
 
-    const scale = Math.min(width, height) / 320;
-    const offsetX = (width - 320 * scale) / 2;
-    const offsetY = (height - 320 * scale) / 2;
     const elapsed = time - startTime;
 
     animCtx.width = width;
@@ -237,21 +344,96 @@ onMounted(async () => {
     animCtx.offsetY = offsetY;
     animCtx.mouseX = mouse.x;
     animCtx.mouseY = mouse.y;
+    animCtx.areaX = width * SITE_CONSTANTS.SPLAT_SCENE_LEFT_PAD;
+    animCtx.areaY = 0;
+    animCtx.areaW = width - animCtx.areaX;
+    animCtx.areaH = height;
+    animCtxAreaCenter.x = animCtx.areaX + animCtx.areaW / 2;
+    animCtxAreaCenter.y = height / 2;
+    setDarkTheme(document.documentElement.classList.contains('dark'));
+    const dt = Math.min(100, time - lastFrameTime);
+    lastFrameTime = time;
+    animCtx.dt = dt;
     animCtx.audioData = audioData.value || undefined;
-    animCtx.audioLevels = audioData.value
-      ? getAudioLevels(audioData.value)
-      : ZERO_AUDIO_LEVELS;
+    animCtx.audioLevels = audioTracker.update(animCtx.audioData, dt);
+    const beat = animCtx.audioLevels.beat;
 
     if (!currentAnimation.value) return;
     const anim = currentAnimation.value;
-    if (anim.beforeFrame) {
+
+    // --- Director: a click (or the timer) always moves to the *other* kind
+    // of item next: a1 -> s1 -> a2 -> s2 ... Clicks mid-morph reverse it
+    // smoothly, since the morph value eases towards its target.
+    if (phaseStart === 0) phaseStart = time;
+    const skip = skipRequested;
+    skipRequested = false;
+    const phaseT = time - phaseStart;
+    if (skip) {
+      fastMorph = true;
+      // Instant feedback: a small random burst before the morph pulls in
+      for (const p of particles) {
+        p.vx += (Math.random() - 0.5) * 10;
+        p.vy += (Math.random() - 0.5) * 10;
+      }
+      setPhase(
+        phase === 'avatar' || phase === 'toAvatar' ? 'toScene' : 'toAvatar',
+        time
+      );
+    } else if (phase === 'avatar' && phaseT > SITE_CONSTANTS.SPLAT_CYCLE_TIME) {
+      fastMorph = false;
+      setPhase('toScene', time);
+    } else if (phase === 'scene' && phaseT > SITE_CONSTANTS.SPLAT_SCENE_TIME) {
+      fastMorph = false;
+      setPhase('toAvatar', time);
+    }
+
+    const towardsScene = phase === 'toScene' || phase === 'scene';
+    morphLinear = Math.min(
+      1,
+      Math.max(
+        0,
+        morphLinear +
+          ((towardsScene ? 1 : -1) * dt) /
+            (fastMorph
+              ? SITE_CONSTANTS.SPLAT_MORPH_CLICK_TIME
+              : SITE_CONSTANTS.SPLAT_MORPH_TIME)
+      )
+    );
+    if (phase === 'toScene' && morphLinear >= 1) setPhase('scene', time);
+    else if (phase === 'toAvatar' && morphLinear <= 0) setPhase('avatar', time);
+    // Clicks use an ease-out (moves immediately); the timer a gentle ease-in-out
+    const morph = fastMorph
+      ? 1 - (1 - morphLinear) * (1 - morphLinear)
+      : smoothstep(morphLinear);
+    const stagger = fastMorph ? MORPH_STAGGER * 0.5 : MORPH_STAGGER;
+    const scene = morph > 0 ? currentScene : null;
+    const sceneElapsed = time - sceneStart;
+
+    if (morph < 1 && anim.beforeFrame) {
       anim.beforeFrame(particles, elapsed, animCtx);
     }
+    if (scene?.beforeFrame) scene.beforeFrame(sceneElapsed, animCtx);
+
+    const sceneGlow = scene ? 1 + ((scene.glow ?? 1) - 1) * morph : 1;
+    updateGlow(
+      ((anim.glow && morph < 0.5
+        ? anim.glow(elapsed, animCtx)
+        : 0.85 + Math.sin(elapsed * 0.001) * 0.15 + animCtx.audioLevels.bass) +
+        beat * 0.35) *
+        sceneGlow,
+      morph
+    );
 
     // Cache some values outside the particle loop for performance
     const shiverInt = shiverIntensity.value;
     const hasShiver = shiverInt > 0.05;
     const vT = time * 0.1; // for shiver
+
+    // Kick punch: radiates from the avatar centre, drifting to the scene centre
+    const punch = beat > 0.02 ? beat * BEAT_PUNCH * scale : 0;
+    const punchX = anchorPx.x + (animCtxAreaCenter.x - anchorPx.x) * morph;
+    const punchY = anchorPx.y + (animCtxAreaCenter.y - anchorPx.y) * morph;
+    const punchReach = 140 * scale;
 
     // Repulsion params
     const rRange = repulsionRange;
@@ -261,10 +443,36 @@ onMounted(async () => {
       const p = particles[i];
       const baseTargetOx = p.ox * scale + offsetX;
       const baseTargetOy = p.oy * scale + offsetY;
-      const effect = anim.apply(p, elapsed, animCtx, particles);
-      const targetOx = baseTargetOx + effect.dx;
-      const targetOy = baseTargetOy + effect.dy;
-      const effectiveSpring = spring * (effect.springScale ?? 1);
+      const effect =
+        morph < 1 ? anim.apply(p, elapsed, animCtx, particles) : ZERO_EFFECT;
+      let targetOx = baseTargetOx + effect.dx;
+      let targetOy = baseTargetOy + effect.dy;
+      let springMul = effect.springScale ?? 1;
+      let sMult = (effect.sizeMult ?? 1.0) * (1 + beat * BEAT_SIZE_PUMP);
+      let color = effect.colorOverride;
+      let alpha = 1;
+
+      if (scene) {
+        // Per-particle progress through the morph, staggered by mass
+        const delay = ((p.mass - 0.5) / 1.5) * stagger;
+        const m = smoothstep((morph - delay) / (1 - stagger));
+        if (m > 0) {
+          sceneOut.sizeMult = 1;
+          sceneOut.colorOverride = undefined;
+          scene.target(p, i, sceneElapsed, animCtx, sceneOut);
+          targetOx += (sceneOut.x - targetOx) * m;
+          targetOy += (sceneOut.y - targetOy) * m;
+          sMult += (sceneOut.sizeMult - sMult) * m;
+          springMul += (SCENE_SPRING_SCALE - springMul) * m;
+          if (m > 0.5 && sceneOut.colorOverride) color = sceneOut.colorOverride;
+          // Scene opacity, fading out towards the left where the hero text is
+          const leftFade = SITE_CONSTANTS.SPLAT_SCENE_LEFT_FADE;
+          const xFade =
+            leftFade + (1 - leftFade) * smoothstep((p.x / width) * 1.3);
+          alpha = 1 - (1 - (scene.alpha ?? 1) * xFade) * m;
+        }
+      }
+      const effectiveSpring = spring * springMul;
 
       const dxm = p.x - mouse.x;
       const dym = p.y - mouse.y;
@@ -293,6 +501,15 @@ onMounted(async () => {
         fy += vibe;
       }
 
+      if (punch) {
+        const px = p.x - punchX;
+        const py = p.y - punchY;
+        const pd = Math.sqrt(px * px + py * py) || 1;
+        const k = (punch * (0.4 + Math.min(1, pd / punchReach))) / pd / p.mass;
+        fx += px * k;
+        fy += py * k;
+      }
+
       if (effect.nudgeVx) fx += effect.nudgeVx;
       if (effect.nudgeVy) fy += effect.nudgeVy;
 
@@ -301,12 +518,12 @@ onMounted(async () => {
       p.x += p.vx;
       p.y += p.vy;
 
-      const sMult = effect.sizeMult ?? 1.0;
+      ctx.globalAlpha = alpha;
       const halfSize = 8 * scale * sMult; // 8 = brushSize(16) / 2
 
-      if (effect.colorOverride) {
+      if (color) {
         // Circular draw for dynamic colors with a slight "bloom" feel
-        ctx.fillStyle = `rgb(${effect.colorOverride})`;
+        ctx.fillStyle = `rgb(${color})`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, halfSize * 1.1, 0, Math.PI * 2);
         ctx.fill();
@@ -387,12 +604,7 @@ onMounted(async () => {
     isVisible,
     (visible) => {
       setSplatVisible(visible);
-      if (cycleInterval) clearInterval(cycleInterval);
       if (visible) {
-        cycleInterval = setInterval(
-          nextAnimation,
-          SITE_CONSTANTS.SPLAT_CYCLE_TIME
-        );
         if (!isMobileView.value) {
           animationId = requestAnimationFrame(render);
         }
@@ -417,8 +629,10 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   cancelAnimationFrame(animationId);
-  if (cycleInterval) clearInterval(cycleInterval);
-  window.removeEventListener('resize', resize);
+  resizeObserver?.disconnect();
+  heroEl?.removeEventListener('mousemove', onMouseMove);
+  heroEl?.removeEventListener('mouseleave', onMouseLeave);
+  heroEl?.removeEventListener('click', onClick);
   if (onShiverMouseMove) {
     window.removeEventListener('mousemove', onShiverMouseMove);
   }
@@ -436,8 +650,11 @@ const onMouseLeave = () => {
   mouse.x = -9999;
   mouse.y = -9999;
 };
-const onClick = () => {
-  nextAnimation();
+const onClick = (e: MouseEvent) => {
+  // Links, buttons and the music toggle keep their own behaviour
+  if ((e.target as Element | null)?.closest('a, button, .it-btn')) return;
+  // Skip ahead: avatar -> scene, or scene -> avatar
+  skipRequested = true;
 };
 </script>
 
@@ -445,13 +662,10 @@ const onClick = () => {
   <div v-show="isMobileView" class="HeroSplat fallback-image">
     <img src="/images/ava.webp" alt="Justme.dev Avatar" />
   </div>
-  <div
-    v-show="!isMobileView"
-    class="HeroSplat image-src"
-    @mousemove="onMouseMove"
-    @mouseleave="onMouseLeave"
-    @click="onClick"
-  >
+  <!-- Full-hero background layer: glow (back) -> canvas (front). The hero text
+       and buttons sit above it via VitePress' own z-index on .main. -->
+  <div v-show="!isMobileView" ref="layerRef" class="splat-layer">
+    <div ref="glowRef" class="splat-glow" aria-hidden="true"></div>
     <canvas
       ref="canvasRef"
       role="img"
@@ -465,7 +679,6 @@ const onClick = () => {
   width: 100%;
   height: 100%;
   position: absolute;
-  pointer-events: auto;
 }
 
 @media (max-width: 959px) {
@@ -490,7 +703,34 @@ const onClick = () => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
+/* Positioned against .VPHero .container (see layout.css), bleeding slightly
+   past it so particles can drift without hitting a hard edge. */
+.splat-layer {
+  --bleed: 24px;
+  position: absolute;
+  inset: calc(var(--bleed) * -1);
+  z-index: 0;
+  pointer-events: none;
+  /* Feather the edges so the canvas never shows a visible rectangle */
+  mask-image:
+    linear-gradient(to right, transparent, #000 5%, #000 95%, transparent),
+    linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent);
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
+}
+
+/* The old VitePress .image-bg glow: same theme gradients, but softened with a
+   mask instead of a 100px blur filter, and animated via opacity/transform. */
+.splat-glow {
+  position: absolute;
+  border-radius: 50%;
+  background-image: var(--vp-home-hero-image-background-image);
+  mask-image: radial-gradient(closest-side, #000 25%, transparent 100%);
+  will-change: opacity, transform;
+}
+
 canvas {
+  position: relative;
   width: 100%;
   height: 100%;
   display: block;

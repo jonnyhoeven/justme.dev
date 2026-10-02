@@ -44,7 +44,13 @@ generated_artifacts: projects/*.md, public/projects-cache/
 | `lib/splat-animations/` | Hero animations; they read `audioData` / `audioLevels` (`audio-utils.ts`).                                                                                |
 | `data/`                 | VitePress data loaders (`music.data.ts` lists the tracks).                                                                                                |
 
+**Hero splat layout:** `HeroSplat.vue` renders a full-hero background layer (`.splat-layer`: DOM glow `.splat-glow` behind a canvas) positioned against `.VPHero .container`; `layout.css` neutralises VitePress' `.image`/`.image-container` positioning for that. The 320-unit avatar space is scaled/anchored on `.image-container` (`ctx.scale`, `ctx.offsetX/Y`), so animations must use those rather than assume the canvas is 320px. Pointer events are listened for on `.VPHero`. Animations may export an optional `glow()` to drive the glow intensity.
+
+**Scenes:** `lib/splat-scenes/` holds full-canvas scenes (`dot-shapes`, `starfield`, `rotozoom`, `sine-text`). `HeroSplat.vue` runs a director that alternates avatar animation -> morph -> scene -> morph (timings and `SPLAT_SCENE_LEFT_PAD` in `.vitepress/constants.ts`); a click on the hero skips ahead. Scenes implement `SplatScene` (`types.ts`) and write absolute canvas-space targets; all scenes are always in the rotation, independent of the music easter egg. The rAF loop pauses in hidden tabs, so when testing in the Browser pane shim `requestAnimationFrame` with `setTimeout`.
+
 **Hero splat + music easter egg:** clicking "it!" in the tagline toggles `MusicEasterEgg.vue`. `XMPlayer` output goes through an `AnalyserNode`; the FFT bins are published via `setAudioData` and `HeroSplat` hands them to the active animation every frame.
+
+**Audio pipeline:** `AudioTracker` (`audio-utils.ts`, one instance in `HeroSplat.vue`) turns the 1024-point FFT into `ctx.audioLevels`: `bass`/`mid`/`treble`/`volume` (auto-gained, fast attack, slow release) plus `beat` (kick envelope, decays in ~200ms) and `beats` (counter; compare with a stored value to catch a kick). `ctx.dt` is the frame time: integrate angles/phases with it instead of `elapsed * speed`, which jumps when the speed changes. `HeroSplat` also adds a global kick punch (radial impulse, size pump, glow) to every animation and scene, so individual ones only need to add their own flavour (`Spectrum Halo` reads the raw FFT from `ctx.audioData`). `data-animation` / `data-scene` / `data-phase` on `.splat-layer` expose the director state for testing.
 
 ## Rules
 

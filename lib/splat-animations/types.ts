@@ -1,4 +1,4 @@
-import type { AudioLevels } from './audio-utils';
+import type { AudioFeel } from './audio-utils';
 
 /**
  * Shared types for the splat animation system.
@@ -52,18 +52,25 @@ export interface AnimationEffect {
 export interface AnimationContext {
   width: number;
   height: number;
-  /** Display scale factor (viewport / 320) */
+  /** Display scale factor (avatar size / 320) */
   scale: number;
-  /** X offset to center the 320-unit space in the viewport */
+  /** X offset of the 320-unit avatar space within the canvas (the avatar is anchored in the hero image column) */
   offsetX: number;
-  /** Y offset to center the 320-unit space in the viewport */
+  /** Y offset of the 320-unit avatar space within the canvas */
   offsetY: number;
   mouseX: number;
   mouseY: number;
+  /** Full-canvas area available to scenes (left padding already removed) */
+  areaX: number;
+  areaY: number;
+  areaW: number;
+  areaH: number;
   /** Frequency data from the audio analyzer (0-255) */
   audioData?: Uint8Array;
-  /** Pre-computed audio levels (calculated once per frame) */
-  audioLevels: AudioLevels;
+  /** Smoothed band levels and beat info (calculated once per frame) */
+  audioLevels: AudioFeel;
+  /** Milliseconds since the previous frame (clamped to 100) */
+  dt: number;
 }
 
 export interface SplatAnimation {
@@ -80,6 +87,13 @@ export interface SplatAnimation {
     ctx: AnimationContext
   ): void;
   /**
+   * Optional background-glow intensity (0 = off, 1 = normal, up to ~1.5).
+   * Smoothed by HeroSplat and applied to a DOM layer behind the canvas, so
+   * it costs nothing per frame beyond one opacity/transform write.
+   * Defaults to a gentle idle pulse plus bass reactivity.
+   */
+  glow?(elapsed: number, ctx: AnimationContext): number;
+  /**
    * Per-particle, per-frame effect.
    * @param particle  The particle to animate
    * @param elapsed   Milliseconds since the animation started
@@ -91,4 +105,39 @@ export interface SplatAnimation {
     ctx: AnimationContext,
     particles: SplatParticle[]
   ): AnimationEffect;
+}
+
+/** Absolute canvas-space target for one particle in a full-canvas scene. */
+export interface SceneTarget {
+  x: number;
+  y: number;
+  /** Size multiplier (default 1) */
+  sizeMult: number;
+  /** Replacement colour "r, g, b"; undefined keeps the avatar colour */
+  colorOverride?: string;
+}
+
+/**
+ * A full-canvas scene. HeroSplat morphs particles from their avatar position
+ * to the scene target and back. Scenes may write `p.x/p.y` directly to
+ * respawn a particle without it flying across the canvas.
+ */
+export interface SplatScene {
+  name: string;
+  /** Overall opacity while the scene is fully shown (default 1). Keeps busy scenes from fighting the hero text. */
+  alpha?: number;
+  /** Strength of the DOM glow behind the canvas while the scene is shown (default 1, 0 = off). Text scenes switch it off so it doesn't tint the letters. */
+  glow?: number;
+  /** Assign slots / build lookups. Called once per scene start. */
+  init(particles: SplatParticle[], ctx: AnimationContext): void;
+  /** Per-frame precompute. `elapsed` is ms since the scene started. */
+  beforeFrame?(elapsed: number, ctx: AnimationContext): void;
+  /** Fill `out` with the target for particle `i`. Must set x, y and sizeMult. */
+  target(
+    p: SplatParticle,
+    i: number,
+    elapsed: number,
+    ctx: AnimationContext,
+    out: SceneTarget
+  ): void;
 }

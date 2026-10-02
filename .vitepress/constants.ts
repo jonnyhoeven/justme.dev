@@ -21,5 +21,16 @@ export const SITE_CONSTANTS = {
     GOOGLE_DEV: 'https://g.dev/jonnyvanderhoeven',
     REPO: 'https://github.com/jonnyhoeven/justme.dev'
   },
-  SPLAT_CYCLE_TIME: 20000
+  /** How long the avatar animation runs before morphing into a scene (ms) */
+  SPLAT_CYCLE_TIME: 15000,
+  /** How long a full-canvas scene runs before morphing back (ms) */
+  SPLAT_SCENE_TIME: 12000,
+  /** Duration of each avatar <-> scene morph (ms) */
+  SPLAT_MORPH_TIME: 2200,
+  /** Faster morph used when the visitor clicks, so it feels responsive (ms) */
+  SPLAT_MORPH_CLICK_TIME: 900,
+  /** Fraction of the canvas width kept free on the left for scenes (0-1) */
+  SPLAT_SCENE_LEFT_PAD: 0,
+  /** Scene opacity at the far left (behind the hero text), fading to full on the right (0-1) */
+  SPLAT_SCENE_LEFT_FADE: 0.15
 };

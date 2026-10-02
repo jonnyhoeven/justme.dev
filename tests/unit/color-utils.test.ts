@@ -56,3 +56,16 @@ describe('lerpToWhite', () => {
     expect(r0).toBe('0, 128, 248');
   });
 });
+
+describe('lerpToHighlight', () => {
+  it('brightens to white on the dark theme and darkens on the light theme', async () => {
+    const { lerpToHighlight, setDarkTheme } =
+      await import('../../lib/splat-animations/color-utils');
+    setDarkTheme(true);
+    expect(lerpToHighlight(10, 10, 10, 1)).toBe('248, 248, 248');
+    setDarkTheme(false);
+    expect(lerpToHighlight(240, 240, 240, 1)).toBe('88, 88, 96');
+    expect(lerpToHighlight(100, 150, 200, 0)).toBe('96, 144, 200');
+    setDarkTheme(true);
+  });
+});

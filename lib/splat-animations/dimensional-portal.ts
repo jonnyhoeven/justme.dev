@@ -1,40 +1,76 @@
-import { VOLUME_SMOOTHING, CENTER_X, CENTER_Y } from './animation-constants';
+import { CENTER_X, CENTER_Y } from './animation-constants';
 import type {
   SplatAnimation,
   SplatParticle,
   AnimationEffect,
   AnimationContext
 } from './types';
-import { smoothValue } from './audio-utils';
 
 // --- Tuning Parameters ---
 const DEPTH_RANGE_Z = 200;
 const FOCAL_LENGTH = 400;
-const BASE_ROTATION_SPEED = 0.002;
-const VOLUME_ROTATION_MULT = 0.001;
-const ANGLE_VELOCITY_X = 1;
-const ANGLE_VELOCITY_Y = 1;
-const ANGLE_VELOCITY_Z = 1;
+const BASE_ROTATION_SPEED = 0.0006;
+const VOLUME_ROTATION_MULT = 0.0022;
+const BEAT_ROTATION_MULT = 0.004;
 const TREBLE_DEPTH_AMP = 50;
 const TREBLE_DEPTH_SPEED = 0.001;
 const Z_OFFSET = 150;
+const BEAT_ZOOM = 90;
 const LOOSE_SPRING_SCALE = 0.5;
+const MIN_SIZE = 0.5;
+const MAX_SIZE = 1.7;
+
+// Frame state: angles are integrated, so a change in speed never makes the
+// cloud jump the way `elapsed * speed` would.
+let angleX = 0;
+let angleY = 0;
+let angleZ = 0;
+let zoom = 0;
+let cosX = 1;
+let sinX = 0;
+let cosY = 1;
+let sinY = 0;
+let cosZ = 1;
+let sinZ = 0;
 
 /**
  * Dimensional Portal (3D Projection)
  *
- * Particles are projected into a 3D point cloud cube that rotates
- * and reacts to music. "Sploids" move in depth based on treble.
+ * Particles are projected into a rotating 3D point cloud. Near points are
+ * drawn larger, far points smaller; the cloud spins faster with the music and
+ * lunges at the camera on every kick.
  */
 export const dimensionalPortal: SplatAnimation = {
   name: 'Dimensional Portal',
 
   init(particles: SplatParticle[]) {
+    angleX = angleY = angleZ = zoom = 0;
     for (const p of particles) {
-      // Assign a random depth (Z) between -100 and 100
       p.animState.pz = (Math.random() - 0.5) * DEPTH_RANGE_Z;
-      p.animState.smoothedVolume = 0;
     }
+  },
+
+  beforeFrame(_particles, _elapsed, ctx) {
+    const { volume, beat } = ctx.audioLevels;
+    const speed =
+      (BASE_ROTATION_SPEED +
+        volume * VOLUME_ROTATION_MULT +
+        beat * BEAT_ROTATION_MULT) *
+      ctx.dt;
+    angleX += speed * 0.7;
+    angleY += speed;
+    angleZ += speed * 0.4;
+    zoom += (beat * BEAT_ZOOM - zoom) * Math.min(1, ctx.dt * 0.012);
+    cosX = Math.cos(angleX);
+    sinX = Math.sin(angleX);
+    cosY = Math.cos(angleY);
+    sinY = Math.sin(angleY);
+    cosZ = Math.cos(angleZ);
+    sinZ = Math.sin(angleZ);
+  },
+
+  glow(_elapsed, ctx) {
+    return 1 + ctx.audioLevels.beat * 0.5 + ctx.audioLevels.volume * 0.4;
   },
 
   apply(
@@ -42,72 +78,39 @@ export const dimensionalPortal: SplatAnimation = {
     elapsed: number,
     ctx: AnimationContext
   ): AnimationEffect {
-    const { scale } = ctx;
-    const levels = ctx.audioLevels;
-
-    // --- Smoothing ---
-    p.animState.smoothedVolume = smoothValue(
-      p.animState.smoothedVolume ?? 0,
-      levels.volume,
-      VOLUME_SMOOTHING
-    );
-    const sVol = p.animState.smoothedVolume;
-
-    // --- 3D Parameters ---
-    // Focal length for perspective projection
-    const focalLength = FOCAL_LENGTH;
-
-    // Rotation angles based on time and volume
-    const rotationSpeed = BASE_ROTATION_SPEED + sVol * VOLUME_ROTATION_MULT;
-    const angleX = elapsed * rotationSpeed * ANGLE_VELOCITY_X;
-    const angleY = elapsed * rotationSpeed * ANGLE_VELOCITY_Y;
-    const angleZ = elapsed * rotationSpeed * ANGLE_VELOCITY_Z;
-
-    // --- 3D Coordinates (Centered at 160, 160) ---
-    // Use original position (ox, oy) as X and Y
+    const pz: number = p.animState.pz ?? 0;
     let x = p.ox - CENTER_X;
     let y = p.oy - CENTER_Y;
-    let z = p.animState.pz ?? 0;
+    // Treble makes the points shimmer in depth
+    let z =
+      pz +
+      ctx.audioLevels.treble *
+        TREBLE_DEPTH_AMP *
+        Math.sin(elapsed * TREBLE_DEPTH_SPEED + pz);
 
-    // Add depth jitter from treble ("sploids moving in depth")
-    z +=
-      levels.treble *
-      TREBLE_DEPTH_AMP *
-      Math.sin(elapsed * TREBLE_DEPTH_SPEED + (p.animState.pz ?? 0));
+    let t = y * cosX - z * sinX;
+    z = y * sinX + z * cosX;
+    y = t;
 
-    // --- 3D Rotation ---
-    // Rotate around X
-    let tempY = y * Math.cos(angleX) - z * Math.sin(angleX);
-    let tempZ = y * Math.sin(angleX) + z * Math.cos(angleX);
-    y = tempY;
-    z = tempZ;
+    t = x * cosY + z * sinY;
+    z = -x * sinY + z * cosY;
+    x = t;
 
-    // Rotate around Y
-    let tempX = x * Math.cos(angleY) + z * Math.sin(angleY);
-    tempZ = -x * Math.sin(angleY) + z * Math.cos(angleY);
-    x = tempX;
-    z = tempZ;
+    t = x * cosZ - y * sinZ;
+    y = x * sinZ + y * cosZ;
+    x = t;
 
-    // Rotate around Z
-    tempX = x * Math.cos(angleZ) - y * Math.sin(angleZ);
-    tempY = x * Math.sin(angleZ) + y * Math.cos(angleZ);
-    x = tempX;
-    y = tempY;
-
-    // --- Projection ---
-    // Perspective math: x' = x * focal / (focal + z)
-    // We offset the whole scene away from the camera by 200 units
-    const zOffset = Z_OFFSET;
-    const perspective = focalLength / (focalLength + z + zOffset);
-
-    const projX = CENTER_X + x * perspective;
-    const projY = CENTER_Y + y * perspective;
+    const perspective = FOCAL_LENGTH / (FOCAL_LENGTH + z + Z_OFFSET - zoom);
+    const restPerspective = FOCAL_LENGTH / (FOCAL_LENGTH + Z_OFFSET);
 
     return {
-      dx: (projX - p.ox) * scale,
-      dy: (projY - p.oy) * scale,
-
-      springScale: LOOSE_SPRING_SCALE // Slightly looser spring for 3D fluid feel
+      dx: (CENTER_X + x * perspective - p.ox) * ctx.scale,
+      dy: (CENTER_Y + y * perspective - p.oy) * ctx.scale,
+      springScale: LOOSE_SPRING_SCALE,
+      sizeMult: Math.min(
+        MAX_SIZE,
+        Math.max(MIN_SIZE, perspective / restPerspective)
+      )
     };
   }
 };

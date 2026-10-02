@@ -4,8 +4,7 @@ import type {
   AnimationEffect,
   AnimationContext
 } from './types';
-import { getPeak } from './audio-utils';
-import { lerpToWhite } from './color-utils';
+import { lerpToHighlight } from './color-utils';
 
 interface FlarePulse {
   startTime: number;
@@ -33,8 +32,6 @@ const CYCLE_PHASE_X = 4.5;
 const CYCLE_PHASE_Y = 4.0;
 const CYCLE_STRENGTH = 0.6;
 const CYCLE_DURATION = 1500;
-const AUDIO_PEAK_THRES = 0.05;
-const BEAT_COOLDOWN = 300;
 const RAND_POS_RANGE = 240;
 const RAND_POS_BASE = 80;
 const AUDIO_STRENGTH_MULT = 1.8;
@@ -61,14 +58,14 @@ const MIN_STRENGTH_THRES = 0.01;
 let sharedState = {
   activePulses: [] as FlarePulse[],
   lastUpdateElapsed: -1,
-  lastBeatTime: 0
+  lastBeats: 0
 };
 
 export const solarFlare: SplatAnimation = {
   name: 'Solar Flare',
 
   init() {
-    sharedState = { activePulses: [], lastUpdateElapsed: -1, lastBeatTime: 0 };
+    sharedState = { activePulses: [], lastUpdateElapsed: -1, lastBeats: 0 };
   },
 
   apply(
@@ -76,9 +73,8 @@ export const solarFlare: SplatAnimation = {
     elapsed: number,
     ctx: AnimationContext
   ): AnimationEffect {
-    const { scale, mouseX, mouseY } = ctx;
+    const { scale, offsetX, offsetY, mouseX, mouseY } = ctx;
     const levels = ctx.audioLevels;
-    const audioPeak = getPeak(levels.bass, 0.5);
 
     const state = sharedState;
     const pseudoRandom = (seed: number) => {
@@ -109,25 +105,22 @@ export const solarFlare: SplatAnimation = {
       }
 
       // Handle Audio Beats (Multiple Waves triggered by music)
-      if (
-        audioPeak > AUDIO_PEAK_THRES &&
-        elapsed - state.lastBeatTime > BEAT_COOLDOWN
-      ) {
-        state.lastBeatTime = elapsed;
+      if (levels.beats !== state.lastBeats) {
+        state.lastBeats = levels.beats;
 
         // Origin follows mouse if on screen, otherwise deterministic random spot based on elapsed
         let tx = pseudoRandom(elapsed * 1.1) * RAND_POS_RANGE + RAND_POS_BASE;
         let ty = pseudoRandom(elapsed * 1.2) * RAND_POS_RANGE + RAND_POS_BASE;
         if (mouseX > 0 && mouseY > 0) {
-          tx = mouseX / scale;
-          ty = mouseY / scale;
+          tx = (mouseX - offsetX) / scale;
+          ty = (mouseY - offsetY) / scale;
         }
 
         state.activePulses.push({
           startTime: elapsed,
           originX: tx,
           originY: ty,
-          strength: audioPeak * AUDIO_STRENGTH_MULT,
+          strength: levels.beat * AUDIO_STRENGTH_MULT,
           duration: AUDIO_DURATION
         });
       }
@@ -219,7 +212,7 @@ export const solarFlare: SplatAnimation = {
         nudgeVx: bestNudgeX,
         nudgeVy: bestNudgeY,
         springScale: minSpringScale,
-        colorOverride: lerpToWhite(p.cr, p.cg, p.cb, bestStrength)
+        colorOverride: lerpToHighlight(p.cr, p.cg, p.cb, bestStrength)
       };
     }
 

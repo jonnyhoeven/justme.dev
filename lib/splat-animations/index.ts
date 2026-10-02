@@ -5,7 +5,6 @@
  * applied to the HeroSplat canvas particles.
  */
 
-import { breathing } from './breathing';
 import { orbitalDrift } from './orbital-drift';
 import { windWaves } from './wind-waves';
 import { floatingOutliers } from './floating-outliers';
@@ -13,8 +12,8 @@ import { flubberMotion } from './flubber-motion';
 import { ferrofluid } from './ferrofluid';
 import { solarFlare } from './solar-flare';
 import { quantumEntanglement } from './quantum-entanglement';
-import { entangledWaveform } from './entangled-waveform';
 import { dimensionalPortal } from './dimensional-portal';
+import { spectrumHalo } from './spectrum-halo';
 import type { SplatAnimation } from './types';
 
 export type {
@@ -32,9 +31,8 @@ export const animations: SplatAnimation[] = [
   ferrofluid,
   solarFlare,
   quantumEntanglement,
-  breathing,
   dimensionalPortal,
-  entangledWaveform
+  spectrumHalo
 ];
 
 /** Total number of available animations */
@@ -56,7 +54,5 @@ export function pickRandomAnimation(): {
   index: number;
 } {
   const idx = Math.floor(Math.random() * animations.length);
-  const anim = animations[idx];
-  console.log(`🎨 animation: ${idx} - ${anim.name}`);
-  return { animation: anim, index: idx };
+  return { animation: animations[idx], index: idx };
 }

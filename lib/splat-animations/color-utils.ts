@@ -25,3 +25,37 @@ export function lerpToWhite(
   const nb = Math.floor(b + (255 - b) * clampT) & 0xf8;
   return `${nr}, ${ng}, ${nb}`;
 }
+
+/** Near-black: on a white page a "flash" is a darkening, which keeps the dot's own hue. */
+const LIGHT_THEME_HIGHLIGHT = [28, 26, 38];
+/** Cap so even a full flash stays a shade of the original colour */
+const LIGHT_THEME_MAX_MIX = 0.7;
+
+let darkTheme = true;
+
+/** Set by HeroSplat each frame from the page's colour scheme. */
+export function setDarkTheme(dark: boolean): void {
+  darkTheme = dark;
+}
+
+export function isDarkTheme(): boolean {
+  return darkTheme;
+}
+
+/**
+ * Brightens a colour towards white on the dark theme; on the light theme it
+ * darkens towards near-black instead, since white highlights wash out there.
+ */
+export function lerpToHighlight(
+  r: number,
+  g: number,
+  b: number,
+  t: number
+): string {
+  if (darkTheme) return lerpToWhite(r, g, b, t);
+  const k = Math.max(0, Math.min(1, t)) * LIGHT_THEME_MAX_MIX;
+  const [hr, hg, hb] = LIGHT_THEME_HIGHLIGHT;
+  const mix = (from: number, to: number) =>
+    Math.floor(from + (to - from) * k) & 0xf8;
+  return `${mix(r, hr)}, ${mix(g, hg)}, ${mix(b, hb)}`;
+}

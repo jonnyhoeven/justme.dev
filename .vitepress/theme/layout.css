@@ -104,20 +104,30 @@ h6,
 }
 
 /**
- * HeroSplat — override VitePress image-src size constraints
+ * HeroSplat — full-hero background layer
+ *
+ * The splat canvas is absolutely positioned against .VPHero .container, so the
+ * wrappers VitePress puts around the image slot must stop being containing
+ * blocks (the transform on .image-container would otherwise trap it). They
+ * keep their size, so the layout is untouched and HeroSplat can still use
+ * .image-container as the avatar anchor. The built-in .image-bg glow is
+ * replaced by HeroSplat's own animatable one. Below 768px HeroSplat shows its
+ * static fallback image and none of this applies.
  * -------------------------------------------------------------------------- */
 
-@media (min-width: 640px) {
-  .VPHero .image-src {
-    max-width: 400px !important;
-    max-height: 400px !important;
+@media (min-width: 768px) {
+  .VPHero .container {
+    position: relative;
   }
-}
 
-@media (min-width: 960px) {
-  .VPHero .image-src {
-    max-width: 500px !important;
-    max-height: 500px !important;
+  .VPHero .image,
+  .VPHero .image-container {
+    position: static;
+    transform: none;
+  }
+
+  .VPHero .image-bg {
+    display: none;
   }
 }
 

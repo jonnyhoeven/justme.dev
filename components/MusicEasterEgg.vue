@@ -119,7 +119,8 @@ const doInitAudio = async () => {
     (window as any).webkitAudioContext
   )();
   analyser = audioContext.createAnalyser();
-  analyser.fftSize = 256;
+  analyser.fftSize = 1024; // ~43Hz per bin: enough resolution to isolate the kick
+  analyser.smoothingTimeConstant = 0.55;
 
   animationGain = audioContext.createGain();
   animationGain.gain.value = 1.6;
