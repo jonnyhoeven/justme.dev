@@ -2,6 +2,8 @@
 import { ref, onBeforeUnmount, watch, computed } from 'vue';
 import { useWindowSize } from '@vueuse/core';
 import useMusic from '../.vitepress/theme/composables/useMusic';
+import { XMPlayer } from '../lib/audio/xm-player';
+import type { MusicTrack } from '../data/music.data';
 
 const {
   isMusicVisible,
@@ -10,14 +12,14 @@ const {
   setAudioData,
   setPlaying,
   currentTrackIndex,
-  currentTime,
   tracks,
-  setCurrentTime,
   nextTrack,
   prevTrack
 } = useMusic();
 
-const currentTrack = computed(() => tracks[currentTrackIndex.value]);
+const currentTrack = computed<MusicTrack | string | undefined>(
+  () => tracks[currentTrackIndex.value]
+);
 
 const currentTrackUrl = computed(() => {
   const track = currentTrack.value;
@@ -27,26 +29,49 @@ const currentTrackUrl = computed(() => {
       ? track
       : `/audio/${track}`;
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (track as any).url || '';
+  return track.url || '';
 });
+
+const currentSongTitle = ref('');
 
 const formattedTitle = computed(() => {
   const track = currentTrack.value;
-  if (!track) return '';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if (typeof track === 'object' && (track as any).title) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (track as any).title;
+  let baseTitle = currentSongTitle.value;
+  if (!baseTitle && track) {
+    if (typeof track === 'object' && track.title) {
+      baseTitle = track.title;
+    } else {
+      const raw = typeof track === 'string' ? track : track.url || '';
+      const filename = raw.split('/').pop() || raw;
+      baseTitle = decodeURIComponent(filename)
+        .replace(/\.xm$/i, '')
+        .replace(/^\d+[-_.\s]+/, '')
+        .replace(/^(justme\s*[-—]\s*)/i, '')
+        .replace(/[-_]/g, ' ');
+    }
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const raw = typeof track === 'string' ? track : (track as any).url || '';
-  const filename = raw.split('/').pop() || raw;
-  const cleanName = decodeURIComponent(filename).replace(
-    /^(justme\s*[-—]\s*)/i,
-    ''
-  );
-  return cleanName.replace(/\.[^/.]+$/, '');
+  if (!baseTitle) return '';
+
+  if (typeof track === 'object') {
+    const metaParts: string[] = [];
+    if (track.channels) metaParts.push(`${track.channels}ch`);
+    if (track.bpm) metaParts.push(`${track.bpm} BPM`);
+    if (metaParts.length > 0) {
+      return `${baseTitle} • ${metaParts.join(' • ')}`;
+    }
+  }
+
+  return baseTitle;
+});
+
+const trackTooltip = computed(() => {
+  const track = currentTrack.value;
+  if (!track || typeof track !== 'object') return formattedTitle.value;
+  const parts = [track.title];
+  if (track.channels) parts.push(`${track.channels} channels`);
+  if (track.bpm) parts.push(`${track.bpm} BPM`);
+  if (track.tracker) parts.push(track.tracker);
+  return parts.join(' | ');
 });
 
 const { width: windowWidth } = useWindowSize();
@@ -55,29 +80,33 @@ const isMobileView = computed(() => windowWidth.value < 768);
 const volume = ref(0.7);
 const isVolumeOpen = ref(false);
 const progress = ref(0);
-const audioRef = ref<HTMLAudioElement | null>(null);
+
 let audioContext: AudioContext | null = null;
 let analyser: AnalyserNode | null = null;
-let source: MediaElementAudioSourceNode | null = null;
+let animationGain: GainNode | null = null;
+let xmPlayer: XMPlayer | null = null;
 let animationFrame: number;
 // Reusable buffer — mutated in-place by getByteFrequencyData to avoid per-frame allocations.
 let dataArray: Uint8Array | null = null;
+let currentLoadedXmUrl = '';
 
-/**
- * The analysis loop. Runs only while playing AND splats are visible.
- * Stops itself (no reschedule) when either condition becomes false,
- * and is restarted by the watcher below when they become true again.
- */
 const runAnalysis = () => {
-  if (!isPlaying.value || !isSplatVisible.value || !analyser || !dataArray)
-    return;
-  analyser.getByteFrequencyData(dataArray);
-  setAudioData(dataArray);
+  if (!isPlaying.value) return;
+
+  if (isSplatVisible.value && analyser && dataArray) {
+    analyser.getByteFrequencyData(dataArray);
+    setAudioData(dataArray);
+  }
+
+  if (xmPlayer) {
+    progress.value = xmPlayer.getProgress();
+  }
+
   animationFrame = requestAnimationFrame(runAnalysis);
 };
 
 const initAudio = () => {
-  if (audioContext || !audioRef.value) return;
+  if (audioContext) return;
 
   audioContext = new (
     window.AudioContext ||
@@ -87,107 +116,131 @@ const initAudio = () => {
   analyser = audioContext.createAnalyser();
   analyser.fftSize = 256;
 
-  // Create a gain node specifically for the analyser to boost signal for animations
-  const animationGain = audioContext.createGain();
+  animationGain = audioContext.createGain();
   animationGain.gain.value = 1.6;
-
-  source = audioContext.createMediaElementSource(audioRef.value);
-
-  // Route 1: Boosted signal for animations
-  source.connect(animationGain);
   animationGain.connect(analyser);
 
-  // Route 2: Direct signal for user output (affected by audio element volume)
-  source.connect(audioContext.destination);
+  xmPlayer = new XMPlayer({
+    onEnded: () => {
+      handleNext();
+    }
+  });
+
+  const xmGain = xmPlayer.init(audioContext);
+  if (xmGain) {
+    xmGain.connect(animationGain);
+    xmGain.connect(audioContext.destination);
+    xmPlayer.setVolume(volume.value);
+  }
 
   dataArray = new Uint8Array(analyser.frequencyBinCount);
 };
 
-// Restart the analysis loop whenever both conditions become true.
-watch([isPlaying, isSplatVisible], ([playing, visible]) => {
+watch(isPlaying, (playing) => {
   cancelAnimationFrame(animationFrame);
-  if (playing && visible && analyser) {
+  if (playing) {
     animationFrame = requestAnimationFrame(runAnalysis);
   }
 });
 
-const togglePlay = () => {
-  if (!audioRef.value) return;
+const togglePlay = async () => {
+  initAudio();
 
   if (audioContext?.state === 'suspended') {
-    audioContext.resume();
+    await audioContext.resume();
   }
 
   if (isPlaying.value) {
-    audioRef.value.pause();
+    xmPlayer?.pause();
+    setPlaying(false);
   } else {
-    // Restore time if needed before playing
-    if (audioRef.value.currentTime === 0 && currentTime.value > 0) {
-      audioRef.value.currentTime = currentTime.value;
+    if (xmPlayer) {
+      if (currentLoadedXmUrl !== currentTrackUrl.value) {
+        await xmPlayer.loadUrl(currentTrackUrl.value);
+        currentLoadedXmUrl = currentTrackUrl.value;
+        currentSongTitle.value = xmPlayer.songTitle;
+      }
+      xmPlayer.setVolume(volume.value);
+      xmPlayer.play();
+      setPlaying(true);
     }
-    audioRef.value.play();
   }
-  setPlaying(!isPlaying.value);
 };
 
 const toggleVolume = () => {
   isVolumeOpen.value = !isVolumeOpen.value;
 };
 
-const handleNext = () => {
+const handleNext = async () => {
+  const wasPlaying = isPlaying.value;
+  if (xmPlayer?.isPlaying) xmPlayer.stop();
+
   nextTrack();
   progress.value = 0;
-  if (isPlaying.value) {
-    setTimeout(() => audioRef.value?.play(), 100);
+  currentSongTitle.value = '';
+
+  if (wasPlaying) {
+    setTimeout(async () => {
+      initAudio();
+      if (xmPlayer) {
+        await xmPlayer.loadUrl(currentTrackUrl.value);
+        currentLoadedXmUrl = currentTrackUrl.value;
+        currentSongTitle.value = xmPlayer.songTitle;
+        xmPlayer.setVolume(volume.value);
+        xmPlayer.play();
+        setPlaying(true);
+      }
+    }, 100);
   }
 };
 
-const handlePrev = () => {
+const handlePrev = async () => {
+  const wasPlaying = isPlaying.value;
+  if (xmPlayer?.isPlaying) xmPlayer.stop();
+
   prevTrack();
   progress.value = 0;
-  if (isPlaying.value) {
-    setTimeout(() => audioRef.value?.play(), 100);
-  }
-};
+  currentSongTitle.value = '';
 
-const onTimeUpdate = () => {
-  if (audioRef.value) {
-    const time = audioRef.value.currentTime;
-    setCurrentTime(time);
-    progress.value = (time / audioRef.value.duration) * 100 || 0;
-  }
-};
-
-const onLoadedMetadata = () => {
-  if (audioRef.value && currentTime.value > 0) {
-    audioRef.value.currentTime = currentTime.value;
-    progress.value = (currentTime.value / audioRef.value.duration) * 100 || 0;
+  if (wasPlaying) {
+    setTimeout(async () => {
+      initAudio();
+      if (xmPlayer) {
+        await xmPlayer.loadUrl(currentTrackUrl.value);
+        currentLoadedXmUrl = currentTrackUrl.value;
+        currentSongTitle.value = xmPlayer.songTitle;
+        xmPlayer.setVolume(volume.value);
+        xmPlayer.play();
+        setPlaying(true);
+      }
+    }, 100);
   }
 };
 
 const seek = (e: MouseEvent) => {
   const bar = e.currentTarget as HTMLElement;
   const rect = bar.getBoundingClientRect();
-  const percent = (e.clientX - rect.left) / rect.width;
-  if (audioRef.value) {
-    const targetTime = percent * audioRef.value.duration;
-    audioRef.value.currentTime = targetTime;
-    setCurrentTime(targetTime);
+  const percent = Math.max(
+    0,
+    Math.min(1, (e.clientX - rect.left) / rect.width)
+  );
+  if (xmPlayer) {
+    xmPlayer.seek(percent);
+    progress.value = percent * 100;
   }
 };
 
 watch(volume, (newVol) => {
-  if (audioRef.value) {
-    audioRef.value.volume = newVol;
+  if (xmPlayer) {
+    xmPlayer.setVolume(newVol);
   }
 });
 
 watch(isMusicVisible, (visible) => {
   if (!visible) {
-    // If hidden, stop playing and cleanup
     if (isPlaying.value) {
       setPlaying(false);
-      audioRef.value?.pause();
+      xmPlayer?.stop();
     }
     isVolumeOpen.value = false;
     cancelAnimationFrame(animationFrame);
@@ -195,13 +248,20 @@ watch(isMusicVisible, (visible) => {
       audioContext.close();
       audioContext = null;
       analyser = null;
-      source = null;
+      animationGain = null;
+      xmPlayer = null;
+      currentLoadedXmUrl = '';
+      currentSongTitle.value = '';
     }
   }
 });
 
 onBeforeUnmount(() => {
   cancelAnimationFrame(animationFrame);
+  if (xmPlayer) {
+    xmPlayer.stop();
+    xmPlayer = null;
+  }
   audioContext?.close();
   setPlaying(false);
 });
@@ -210,15 +270,6 @@ onBeforeUnmount(() => {
 <template>
   <Transition name="header-slide">
     <div v-if="isMusicVisible && !isMobileView" class="music-mini-player">
-      <audio
-        ref="audioRef"
-        :src="currentTrackUrl"
-        @timeupdate="onTimeUpdate"
-        @loadedmetadata="onLoadedMetadata"
-        @ended="handleNext"
-        crossorigin="anonymous"
-      ></audio>
-
       <div class="mini-controls">
         <button
           class="mini-btn"
@@ -309,6 +360,7 @@ onBeforeUnmount(() => {
                 <span
                   class="track-name-mini"
                   :class="{ 'is-playing': isPlaying }"
+                  :title="trackTooltip"
                 >
                   {{ formattedTitle }}
                 </span>
@@ -413,10 +465,6 @@ onBeforeUnmount(() => {
 
 .mini-btn.play {
   color: var(--vp-c-text-1);
-}
-
-.mini-volume-wrap {
-  position: relative;
 }
 
 .mini-content-area {

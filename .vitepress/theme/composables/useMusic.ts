@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { SITE_CONSTANTS } from '../../constants';
+import { data as tracks } from '../../../data/music.data';
 
 // Shared state for the music player easter egg
 export const useMusic = () => {
@@ -9,7 +9,6 @@ export const useMusic = () => {
   const audioData = ref<Uint8Array | null>(null);
   const currentTrackIndex = ref(0);
   const currentTime = ref(0);
-  const tracks = SITE_CONSTANTS.MUSIC_TRACKS;
   /** Set by HeroSplat when its canvas enters/exits the viewport. */
   const isSplatVisible = ref(false);
 
@@ -36,11 +35,13 @@ export const useMusic = () => {
   };
 
   const nextTrack = () => {
+    if (tracks.length === 0) return;
     currentTrackIndex.value = (currentTrackIndex.value + 1) % tracks.length;
     currentTime.value = 0;
   };
 
   const prevTrack = () => {
+    if (tracks.length === 0) return;
     currentTrackIndex.value =
       (currentTrackIndex.value - 1 + tracks.length) % tracks.length;
     currentTime.value = 0;

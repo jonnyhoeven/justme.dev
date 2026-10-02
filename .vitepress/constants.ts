@@ -21,11 +21,5 @@ export const SITE_CONSTANTS = {
     GOOGLE_DEV: 'https://g.dev/jonnyvanderhoeven',
     REPO: 'https://github.com/jonnyhoeven/justme.dev'
   },
-  SPLAT_CYCLE_TIME: 20000,
-  MUSIC_TRACKS: [
-    'Marcus P. - Rhythm Magnet.mp3',
-    'Lunar Years - Cozy Coffee House.mp3',
-    'Tokyowalker4 - Way Home by.mp3',
-    'PunchDeck - Neon Underworld.mp3'
-  ]
+  SPLAT_CYCLE_TIME: 20000
 };
