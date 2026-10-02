@@ -2,7 +2,7 @@
 import { ref, onBeforeUnmount, watch, computed } from 'vue';
 import { useWindowSize } from '@vueuse/core';
 import useMusic from '../.vitepress/theme/composables/useMusic';
-import { XMPlayer } from '../lib/audio/xm-player';
+import type { XMPlayer } from '../lib/audio/xm-player';
 import type { MusicTrack } from '../data/music.data';
 
 const {
@@ -105,9 +105,14 @@ const runAnalysis = () => {
   animationFrame = requestAnimationFrame(runAnalysis);
 };
 
-const initAudio = () => {
-  if (audioContext) return;
+let initPromise: Promise<void> | null = null;
 
+const initAudio = () => {
+  initPromise ??= doInitAudio();
+  return initPromise;
+};
+
+const doInitAudio = async () => {
   audioContext = new (
     window.AudioContext ||
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -119,7 +124,9 @@ const initAudio = () => {
   animationGain = audioContext.createGain();
   animationGain.gain.value = 1.6;
   animationGain.connect(analyser);
+  dataArray = new Uint8Array(analyser.frequencyBinCount);
 
+  const { XMPlayer } = await import('../lib/audio/xm-player');
   xmPlayer = new XMPlayer({
     onEnded: () => {
       handleNext();
@@ -132,8 +139,6 @@ const initAudio = () => {
     xmGain.connect(audioContext.destination);
     xmPlayer.setVolume(volume.value);
   }
-
-  dataArray = new Uint8Array(analyser.frequencyBinCount);
 };
 
 watch(isPlaying, (playing) => {
@@ -144,7 +149,7 @@ watch(isPlaying, (playing) => {
 });
 
 const togglePlay = async () => {
-  initAudio();
+  await initAudio();
 
   if (audioContext?.state === 'suspended') {
     await audioContext.resume();
@@ -181,7 +186,7 @@ const handleNext = async () => {
 
   if (wasPlaying) {
     setTimeout(async () => {
-      initAudio();
+      await initAudio();
       if (xmPlayer) {
         await xmPlayer.loadUrl(currentTrackUrl.value);
         currentLoadedXmUrl = currentTrackUrl.value;
@@ -204,7 +209,7 @@ const handlePrev = async () => {
 
   if (wasPlaying) {
     setTimeout(async () => {
-      initAudio();
+      await initAudio();
       if (xmPlayer) {
         await xmPlayer.loadUrl(currentTrackUrl.value);
         currentLoadedXmUrl = currentTrackUrl.value;

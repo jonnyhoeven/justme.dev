@@ -16,6 +16,7 @@ export default async () => {
       '**/GEMINI.md',
       '**/gemini.md',
       '**/issues.md',
+      '!(index|blog|projects).md',
       'venv/**',
       '.direnv/**',
       '**/node_modules/**'
