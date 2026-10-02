@@ -35,3 +35,6 @@ coverage/
 /input_images/
 /bin/
 pnpm-debug.log*
+
+# Claude Code local config
+.claude/launch.json

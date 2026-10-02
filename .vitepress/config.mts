@@ -11,6 +11,8 @@ export default async () => {
     ignoreDeadLinks: 'localhostLinks',
     srcExclude: [
       '**/README.md',
+      '**/AGENTS.md',
+      '**/CLAUDE.md',
       '**/GEMINI.md',
       '**/gemini.md',
       '**/issues.md',
