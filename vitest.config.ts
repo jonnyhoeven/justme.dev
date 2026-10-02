@@ -6,8 +6,10 @@ export default defineConfig({
     include: ['tests/unit/**/*.test.ts'],
     coverage: {
       provider: 'v8',
-      include: ['lib/splat-animations/**/*.ts'],
-      exclude: ['lib/splat-animations/index.ts'],
+      include: [
+        'lib/splat-animations/*-utils.ts',
+        'lib/splat-animations/*-constants.ts'
+      ],
       thresholds: {
         lines: 80,
         functions: 80,

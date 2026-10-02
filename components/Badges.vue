@@ -21,24 +21,24 @@ defineProps<{
       :src="frontmatter.watchersUrl"
       alt="Watchers"
       class="shieldButton"
-      width="82px"
-      height="20px"
+      width="82"
+      height="20"
     />
     <img
       v-if="frontmatter.starsUrl"
       :src="frontmatter.starsUrl"
       alt="Stars"
       class="shieldButton"
-      width="60px"
-      height="20px"
+      width="60"
+      height="20"
     />
     <img
       v-if="frontmatter.forksUrl"
       :src="frontmatter.forksUrl"
       alt="Forks"
       class="shieldButton"
-      width="60px"
-      height="20px"
+      width="60"
+      height="20"
     />
     <template v-if="frontmatter.langArr">
       <Badge

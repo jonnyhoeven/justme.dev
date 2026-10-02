@@ -17,10 +17,35 @@ const {
   prevTrack
 } = useMusic();
 
-const formattedTitle = computed(() => {
-  const track = tracks[currentTrackIndex.value];
+const currentTrack = computed(() => tracks[currentTrackIndex.value]);
+
+const currentTrackUrl = computed(() => {
+  const track = currentTrack.value;
   if (!track) return '';
-  const cleanName = track.replace(/^(justme\s*[-—]\s*)/i, '');
+  if (typeof track === 'string') {
+    return track.startsWith('http://') || track.startsWith('https://')
+      ? track
+      : `/audio/${track}`;
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (track as any).url || '';
+});
+
+const formattedTitle = computed(() => {
+  const track = currentTrack.value;
+  if (!track) return '';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (typeof track === 'object' && (track as any).title) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (track as any).title;
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const raw = typeof track === 'string' ? track : (track as any).url || '';
+  const filename = raw.split('/').pop() || raw;
+  const cleanName = decodeURIComponent(filename).replace(
+    /^(justme\s*[-—]\s*)/i,
+    ''
+  );
   return cleanName.replace(/\.[^/.]+$/, '');
 });
 
@@ -187,7 +212,7 @@ onBeforeUnmount(() => {
     <div v-if="isMusicVisible && !isMobileView" class="music-mini-player">
       <audio
         ref="audioRef"
-        :src="`/audio/${tracks[currentTrackIndex]}`"
+        :src="currentTrackUrl"
         @timeupdate="onTimeUpdate"
         @loadedmetadata="onLoadedMetadata"
         @ended="handleNext"

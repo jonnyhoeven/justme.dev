@@ -13,10 +13,12 @@ except ImportError:
     sys.exit(1)
 
 
-def generate_splats():
+def generate_splats(image_path: Path | None = None, out_path: Path | None = None) -> list:
     base_dir = Path(__file__).parent.parent
-    image_path = base_dir / "public" / "images" / "ava.webp"
-    out_path = base_dir / "public" / "data" / "splats.json"
+    if image_path is None:
+        image_path = base_dir / "public" / "images" / "ava.webp"
+    if out_path is None:
+        out_path = base_dir / "public" / "data" / "splats.json"
 
     if not image_path.exists():
         logger.error(f"Image not found: {image_path}")
@@ -70,7 +72,6 @@ def generate_splats():
             min_y = oy
         if oy > max_y:
             max_y = oy
-        ox = x * scale
         splats.append({"ox": ox, "oy": oy, "r": r, "g": g, "b": b})
 
     if splats:
@@ -91,6 +92,7 @@ def generate_splats():
         with open(out_path, "w") as f:
             json.dump(compact_splats, f, separators=(",", ":"))
         logger.info(f"Successfully saved optimized splats to {out_path}")
+        return compact_splats
     except Exception as e:
         logger.error(f"Failed to save splats to {out_path}: {e}")
         sys.exit(1)

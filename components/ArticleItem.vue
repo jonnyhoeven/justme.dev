@@ -19,21 +19,20 @@ defineProps<{
     <div v-if="frontmatter" class="container_row">
       <div class="articleImagebg layerbg"></div>
       <div class="layerimg">
-        <div
+        <img
           v-if="frontmatter.image"
+          :src="frontmatter.image"
+          :alt="frontmatter.title || 'Article image'"
+          loading="lazy"
           class="articleImage"
-          role="img"
-          :aria-label="frontmatter.title || 'Article image'"
-          :style="{ backgroundImage: 'url(' + frontmatter.image + ')' }"
-        ></div>
+        />
         <Badges :frontmatter="frontmatter" />
       </div>
     </div>
 
-    <div
-      v-if="frontmatter && frontmatter.intro"
-      v-html="frontmatter.intro"
-    ></div>
+    <div v-if="frontmatter && frontmatter.intro" class="post-intro">
+      {{ frontmatter.intro }}
+    </div>
     <br />
   </article>
 </template>

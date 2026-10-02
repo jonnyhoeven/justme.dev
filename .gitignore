@@ -18,6 +18,8 @@ pyvenv.cfg
 .vitepress/cache
 .ruff_cache/
 __pycache__/
+coverage/
+.coverage
 
 # Local Environment
 .env

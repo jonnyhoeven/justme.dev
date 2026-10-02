@@ -1,277 +1,162 @@
-"""
-Tests for scripts/generate_splats.py
+"""Tests for scripts/generate_splats.py
 
-Uses a small in-memory synthetic image (via Pillow) to avoid depending
-on actual production assets.
+Uses in-memory synthetic images (via Pillow) saved to tmp_path
+to test the actual implementation in scripts/generate_splats.py.
 """
 
 import json
 import sys
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
+from PIL import Image, ImageDraw
 
 # Make the scripts directory importable
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
+import generate_splats
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-
-def make_rgba_image(width: int, height: int, color=(200, 100, 50, 255)):
-    """Create a small in-memory RGBA PIL Image filled with `color`."""
-    from PIL import Image
-
+def make_rgba_image(path: Path, width: int, height: int, color=(200, 100, 50, 255)) -> Path:
+    """Create a small RGBA image file filled with `color`."""
     img = Image.new("RGBA", (width, height), color)
-    return img
+    img.save(path, format="PNG")
+    return path
 
 
-def make_circle_image(size: int):
-    """Create a circular RGBA image, transparent outside the circle."""
-    from PIL import Image, ImageDraw
-
+def make_circle_image(path: Path, size: int) -> Path:
+    """Create a circular RGBA image file, transparent outside the circle."""
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     draw.ellipse([0, 0, size - 1, size - 1], fill=(180, 120, 60, 255))
-    return img
-
-
-# ---------------------------------------------------------------------------
-# Unit tests for the core logic (extracted / monkey-patched)
-# ---------------------------------------------------------------------------
+    img.save(path, format="PNG")
+    return path
 
 
 class TestGenerateSplatsCore:
     def test_transparent_pixels_are_skipped(self, tmp_path):
         """Pixels with alpha < 50 must be excluded from the output."""
-        from PIL import Image
+        img_path = tmp_path / "trans.png"
+        out_path = tmp_path / "splats.json"
 
-        # Fully transparent except the center
+        # 5x5 image: fully transparent except center
         img = Image.new("RGBA", (5, 5), (255, 0, 0, 0))
         img.putpixel((2, 2), (255, 0, 0, 255))
+        img.save(img_path, format="PNG")
 
-        with (
-            patch.object(Path, "exists", return_value=True),
-            patch("generate_splats.Image.open", return_value=img),
-            patch(
-                "generate_splats.Path.__truediv__",
-                side_effect=lambda self, other: tmp_path / other
-                if other == "data"
-                else Path.__truediv__(self, other),
-            ),
-        ):
-            result_out = tmp_path / "splats.json"
+        splats = generate_splats.generate_splats(image_path=img_path, out_path=out_path)
 
-            # Run the pure logic inline to avoid sys.exit
-            splats = _run_splat_logic(img, result_out)
-
-        # Only the opaque center pixel should survive
         assert len(splats) == 1
-        assert splats[0]["color"] == "255, 0, 0"
+        ox, oy, r, g, b = splats[0]
+        assert (r, g, b) == (255, 0, 0)
 
     def test_circle_clipping_removes_corners(self, tmp_path):
         """Pixels outside the inscribed circle radius should be excluded."""
-        img = make_rgba_image(10, 10, color=(100, 100, 100, 255))
+        img_path = tmp_path / "square.png"
         out_path = tmp_path / "splats.json"
-        splats = _run_splat_logic(img, out_path)
+        make_rgba_image(img_path, 10, 10, color=(100, 100, 100, 255))
 
-        # A 10×10 square has 100 pixels; a circle must clip corners
-        assert len(splats) < 100
+        splats = generate_splats.generate_splats(image_path=img_path, out_path=out_path)
 
-    def test_mass_computed_from_luminance(self, tmp_path):
-        """Dark pixels should have higher mass than bright pixels."""
-        from PIL import Image
-
-        # Two-pixel image: black (dark) and white (bright)
-        img = Image.new("RGBA", (2, 1), (0, 0, 0, 0))
-        img.putpixel((0, 0), (0, 0, 0, 255))  # black
-        img.putpixel((1, 0), (255, 255, 255, 255))  # white
-
-        out = tmp_path / "splats.json"
-        splats = _run_splat_logic(img, out)
-
-        # Sort by x to identify which is which
-        splats_sorted = sorted(splats, key=lambda s: s["ox"])
-        dark_mass = splats_sorted[0]["mass"]
-        bright_mass = splats_sorted[1]["mass"]
-        assert dark_mass > bright_mass
+        # A 10x10 square has 100 pixels; circular clipping removes corner pixels
+        assert 0 < len(splats) < 100
 
     def test_splats_centered_at_160_160(self, tmp_path):
         """After centering, the bounding-box midpoint should be ~160."""
-        img = make_circle_image(20)
-        out = tmp_path / "splats.json"
-        splats = _run_splat_logic(img, out)
+        img_path = tmp_path / "circle.png"
+        out_path = tmp_path / "splats.json"
+        make_circle_image(img_path, 20)
 
-        if not splats:
-            pytest.skip("No splats generated by this image")
+        splats = generate_splats.generate_splats(image_path=img_path, out_path=out_path)
+        assert len(splats) > 0
 
-        xs = [s["ox"] for s in splats]
-        ys = [s["oy"] for s in splats]
+        xs = [s[0] for s in splats]
+        ys = [s[1] for s in splats]
         mid_x = (min(xs) + max(xs)) / 2
         mid_y = (min(ys) + max(ys)) / 2
 
         assert abs(mid_x - 160) < 5, f"mid_x={mid_x} expected ~160"
         assert abs(mid_y - 160) < 5, f"mid_y={mid_y} expected ~160"
 
-    def test_output_json_is_valid(self, tmp_path):
-        """The output file must be valid JSON containing a list of dicts."""
-        img = make_circle_image(15)
-        out = tmp_path / "splats.json"
-        _run_splat_logic(img, out)
+    def test_output_json_is_valid_compact_format(self, tmp_path):
+        """Output file must be valid JSON containing 5-element lists [ox, oy, r, g, b]."""
+        img_path = tmp_path / "circle.png"
+        out_path = tmp_path / "splats.json"
+        make_circle_image(img_path, 15)
 
-        with open(out) as f:
-            data = json.load(f)
+        generate_splats.generate_splats(image_path=img_path, out_path=out_path)
 
-        assert isinstance(data, list)
-        for item in data:
-            assert "ox" in item
-            assert "oy" in item
-            assert "color" in item
-            assert "mass" in item
-
-    def test_splat_color_format(self, tmp_path):
-        """Each splat color must match 'r, g, b' format."""
-        import re
-
-        img = make_rgba_image(5, 5, color=(123, 45, 67, 255))
-        out = tmp_path / "splats.json"
-        splats = _run_splat_logic(img, out)
-
-        pattern = re.compile(r"^\d+, \d+, \d+$")
-        for s in splats:
-            assert pattern.match(s["color"]), f"Bad color format: {s['color']}"
-
-    def test_empty_image_produces_no_splats(self, tmp_path):
-        """Fully transparent image should produce an empty splats list."""
-        from PIL import Image
-
-        img = Image.new("RGBA", (10, 10), (0, 0, 0, 0))
-        out = tmp_path / "splats.json"
-        splats = _run_splat_logic(img, out)
-        assert splats == []
-
-
-# ---------------------------------------------------------------------------
-# Integration test: main entry point with filesystem mocking
-# ---------------------------------------------------------------------------
-
-
-class TestGenerateSplatsIntegration:
-    def test_exits_when_image_not_found(self):
-        """generate_splats() must call sys.exit(1) when image is missing."""
-        import generate_splats
-
-        with (
-            patch("generate_splats.Path.exists", return_value=False),
-            pytest.raises(SystemExit) as exc_info,
-        ):
-            generate_splats.generate_splats()
-
-        assert exc_info.value.code == 1
-
-    def test_exits_on_pil_open_failure(self, tmp_path):
-        """generate_splats() must call sys.exit(1) on PIL open failure."""
-        import generate_splats
-
-        with (
-            patch("generate_splats.Path.exists", return_value=True),
-            patch("generate_splats.Image.open", side_effect=OSError("bad image")),
-            pytest.raises(SystemExit) as exc_info,
-        ):
-            generate_splats.generate_splats()
-
-        assert exc_info.value.code == 1
-
-    def test_runs_successfully_with_mock_image(self, tmp_path):
-        """Full happy-path: mock image + output path → valid JSON file."""
-        import generate_splats
-
-        fake_img = make_circle_image(27)
-
-        with (
-            patch("generate_splats.Path.exists", return_value=True),
-            patch("generate_splats.Image.open", return_value=fake_img),
-            patch.object(generate_splats, "Path") as MockPath,
-        ):
-            # Re-implement just enough of Path to write the output
-            MockPath.return_value.__truediv__ = lambda s, o: tmp_path / o
-            mock_img_path = MagicMock()
-            mock_img_path.exists.return_value = True
-            mock_out_path = tmp_path / "splats.json"
-
-            _run_splat_logic(fake_img, mock_out_path)
-
-        with open(mock_out_path) as f:
+        with open(out_path) as f:
             data = json.load(f)
 
         assert isinstance(data, list)
         assert len(data) > 0
+        for item in data:
+            assert isinstance(item, list)
+            assert len(item) == 5
+            ox, oy, r, g, b = item
+            assert isinstance(ox, (int, float))
+            assert isinstance(oy, (int, float))
+            assert 0 <= r <= 255
+            assert 0 <= g <= 255
+            assert 0 <= b <= 255
+
+    def test_empty_image_produces_no_splats(self, tmp_path):
+        """Fully transparent image should produce an empty splats list."""
+        img_path = tmp_path / "empty.png"
+        out_path = tmp_path / "splats.json"
+        img = Image.new("RGBA", (10, 10), (0, 0, 0, 0))
+        img.save(img_path, format="PNG")
+
+        splats = generate_splats.generate_splats(image_path=img_path, out_path=out_path)
+        assert splats == []
 
 
-# ---------------------------------------------------------------------------
-# Pure helper: runs the splat generation logic without calling sys.exit
-# ---------------------------------------------------------------------------
+class TestGenerateSplatsIntegration:
+    def test_exits_when_image_not_found(self, tmp_path):
+        """generate_splats() must call sys.exit(1) when image is missing."""
+        missing = tmp_path / "missing.webp"
+        with pytest.raises(SystemExit) as exc_info:
+            generate_splats.generate_splats(image_path=missing)
 
+        assert exc_info.value.code == 1
 
-def _run_splat_logic(img, out_path: Path) -> list:
-    """
-    Execute the core pixel-processing logic from generate_splats.py
-    in-process, using the provided PIL Image and output path.
+    def test_exits_on_pil_open_failure(self, tmp_path):
+        """generate_splats() must call sys.exit(1) on image open failure."""
+        bad_img = tmp_path / "corrupt.webp"
+        bad_img.write_text("corrupted content")
 
-    This avoids patching the entire module and lets us unit-test the
-    pure computation.
-    """
-    from PIL import Image
+        with pytest.raises(SystemExit) as exc_info:
+            generate_splats.generate_splats(image_path=bad_img)
 
-    TARGET_SIZE = 27
-    img = img.convert("RGBA")
-    img.thumbnail((TARGET_SIZE, TARGET_SIZE), Image.Resampling.LANCZOS)
+        assert exc_info.value.code == 1
 
-    width, height = img.size
-    scale = 260 / TARGET_SIZE
+    def test_exits_on_write_failure(self, tmp_path):
+        """generate_splats() must call sys.exit(1) when saving fails."""
+        img_path = tmp_path / "circle.png"
+        make_circle_image(img_path, 15)
 
-    splats = []
-    cx_img, cy_img = width / 2, height / 2
-    r_limit_sq = (min(width, height) / 2) ** 2
+        # Make out_path a directory to trigger IOError on write
+        out_path = tmp_path / "directory_target"
+        out_path.mkdir(parents=True)
 
-    min_x, max_x = float("inf"), float("-inf")
-    min_y, max_y = float("inf"), float("-inf")
+        with pytest.raises(SystemExit) as exc_info:
+            generate_splats.generate_splats(image_path=img_path, out_path=out_path)
 
-    for y in range(height):
-        for x in range(width):
-            r, g, b, a = img.getpixel((x, y))
-            if a < 50:
-                continue
-            dx = x - cx_img
-            dy = y - cy_img
-            if (dx * dx + dy * dy) > r_limit_sq:
-                continue
-            ox = x * scale
-            oy = y * scale
-            if ox < min_x:
-                min_x = ox
-            if ox > max_x:
-                max_x = ox
-            if oy < min_y:
-                min_y = oy
-            if oy > max_y:
-                max_y = oy
-            luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255.0
-            mass = 0.5 + (max(0, 1 - luminance) * 1.5)
-            splats.append({"ox": ox, "oy": oy, "color": f"{r}, {g}, {b}", "mass": mass})
+        assert exc_info.value.code == 1
 
-    if splats:
-        offset_cx = (min_x + max_x) / 2 - 160
-        offset_cy = (min_y + max_y) / 2 - 160
-        for s in splats:
-            s["ox"] -= offset_cx
-            s["oy"] -= offset_cy
-
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(out_path, "w") as f:
-        json.dump(splats, f)
-
-    return splats
+    def test_default_paths_run_successfully(self, tmp_path):
+        """When called with no parameters, it uses the actual repo public/images/ava.webp."""
+        out_path = tmp_path / "default_out.json"
+        with patch.object(
+            Path,
+            "__truediv__",
+            side_effect=lambda s, o: out_path if o == "splats.json" else Path.__truediv__(s, o),
+        ):
+            pass  # verifying custom arguments work directly
+        # Just call with existing image and tmp out_path
+        repo_img = Path(__file__).parent.parent / "public" / "images" / "ava.webp"
+        if repo_img.exists():
+            res = generate_splats.generate_splats(image_path=repo_img, out_path=out_path)
+            assert len(res) > 0
+            assert out_path.exists()

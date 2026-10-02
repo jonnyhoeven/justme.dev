@@ -26,50 +26,36 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
 
       - name: Install Nix & Setup Cache
         uses: DeterminateSystems/determinate-nix-action@v3
 
-      - name: Lint with Ruff
+      - name: Install dependencies
+        run: nix develop .#ci --command pnpm install
+
+      - name: Lint
+        run: nix develop .#ci --command pnpm run lint
+
+      - name: Lint Python
         run: nix develop .#ci --command ruff check .
+
+      - name: Run all tests
+        run: nix develop .#ci --command pnpm run test:all
 
       - name: Generate content
         run: nix develop .#ci --command python3 scripts/process_requests.py
-
-      #- name: Generate splats
-      #  run: nix develop .#ci --command python3 scripts/generate_splats.py
-
-      - name: Commit and push content changes
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git diff --cached --quiet || git commit -m "chore: auto-generate content [skip ci]"
-          git push
-
-      - name: Install dependencies
-        run: nix develop .#ci --command pnpm install
 
       - name: Build with VitePress
         run: nix develop .#ci --command pnpm run docs:build
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v5
+        uses: actions/upload-pages-artifact@v3
         with:
           path: .vitepress/dist
 
@@ -87,8 +73,8 @@ jobs:
       id-token: write
     steps:
       - name: Setup Pages
-        uses: actions/configure-pages@v6
+        uses: actions/configure-pages@v5
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@v4

@@ -38,7 +38,7 @@
             nativeBuildInputs = basePackages ++ [ pkgs.imagemagick ];
             shellHook = ''
               echo "❄️  justme.dev Nix DevShell (Local) Loaded"
-              echo "Node: $(node --version) | Python: $(python3 --version) | ImageMagick: $(convert -version | head -n 1)"
+              echo "Node: $(node --version) | Python: $(python3 --version) | ImageMagick: $(magick -version | head -n 1)"
               export PATH="$PWD/node_modules/.bin:$PATH"
             '';
           };

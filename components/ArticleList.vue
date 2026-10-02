@@ -27,23 +27,21 @@ defineProps<{
     <div class="listImagebg layerbg"></div>
 
     <div class="layerimg">
-      <div
+      <img
         v-if="page.frontmatter.image"
+        :src="page.frontmatter.image"
+        :alt="page.frontmatter.title || 'Article thumbnail'"
+        loading="lazy"
         class="listImage"
-        role="img"
-        :aria-label="page.frontmatter.title || 'Article thumbnail'"
-        :style="{ backgroundImage: 'url(' + page.frontmatter.image + ')' }"
-      ></div>
+      />
     </div>
     <div v-if="page.frontmatter.title" class="layercontent">
       <h3 :id="'title-' + page.url.replace(/\//g, '-')" class="post-title">
         <a :href="page.url" class="nolinkdecor">{{ page.frontmatter.title }}</a>
       </h3>
-      <div
-        v-if="page.frontmatter.intro"
-        class="post-intro"
-        v-html="page.frontmatter.intro"
-      ></div>
+      <div v-if="page.frontmatter.intro" class="post-intro">
+        {{ page.frontmatter.intro }}
+      </div>
       <Badges :frontmatter="page.frontmatter" />
     </div>
     <a

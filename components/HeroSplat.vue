@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue';
-import { useWindowSize, useElementVisibility } from '@vueuse/core';
+import {
+  useWindowSize,
+  useElementVisibility,
+  useThrottleFn
+} from '@vueuse/core';
 import {
   pickRandomAnimation,
   animations,
@@ -85,42 +89,59 @@ onMounted(async () => {
   if (!ctx) return;
 
   // 1. Data Ingestion & Mobile Detection
-  const isMobile = isMobileView.value;
-  try {
-    const res = await fetch('/data/splats.json');
-    if (res.ok) {
-      let data = await res.json();
+  let particlesLoaded = false;
+  const loadParticles = async () => {
+    if (particlesLoaded || isMobileView.value) return;
+    particlesLoaded = true;
+    try {
+      const res = await fetch('/data/splats.json');
+      if (res.ok) {
+        const data = await res.json();
 
-      if (isMobile) {
-        data = data.filter((_: unknown, i: number) => i % 2 !== 0);
+        particles.push(
+          ...data.map((p: [number, number, number, number, number]) => {
+            const [ox, oy, cr, cg, cb] = p;
+            // Calculate mass client-side based on luminance (Darker = Heavier)
+            const luminance = (0.299 * cr + 0.587 * cg + 0.114 * cb) / 255.0;
+            const mass = 0.5 + Math.max(0, 1 - luminance) * 1.5;
+
+            return {
+              ox,
+              oy,
+              x: ox,
+              y: oy,
+              vx: 0,
+              vy: 0,
+              color: `${cr}, ${cg}, ${cb}`,
+              mass,
+              cr,
+              cg,
+              cb,
+              animState: {}
+            };
+          })
+        );
+
+        // Initial Position Scramble
+        const initialScale = Math.min(width, height) / 320;
+        const initialOffsetX = (width - 320 * initialScale) / 2;
+        const initialOffsetY = (height - 320 * initialScale) / 2;
+        particles.forEach((p) => {
+          p.x = Math.random() * 320 * initialScale + initialOffsetX;
+          p.y = Math.random() * 320 * initialScale + initialOffsetY;
+        });
+
+        if (currentAnimation.value) {
+          currentAnimation.value.init(particles);
+        }
       }
-
-      particles.push(
-        ...data.map((p: [number, number, number, number, number]) => {
-          const [ox, oy, cr, cg, cb] = p;
-          // Calculate mass client-side based on luminance (Darker = Heavier)
-          const luminance = (0.299 * cr + 0.587 * cg + 0.114 * cb) / 255.0;
-          const mass = 0.5 + Math.max(0, 1 - luminance) * 1.5;
-
-          return {
-            ox,
-            oy,
-            x: ox,
-            y: oy,
-            vx: 0,
-            vy: 0,
-            color: `${cr}, ${cg}, ${cb}`,
-            mass,
-            cr,
-            cg,
-            cb,
-            animState: {}
-          };
-        })
-      );
+    } catch (e) {
+      console.error('Failed to load splat data', e);
     }
-  } catch (e) {
-    console.error('Failed to load splat data', e);
+  };
+
+  if (!isMobileView.value) {
+    await loadParticles();
   }
 
   // 2. Optimized Material Brush Caching
@@ -233,8 +254,8 @@ onMounted(async () => {
     const vT = time * 0.1; // for shiver
 
     // Repulsion params
-    const rRange = isMobile ? repulsionRange * 0.7 : repulsionRange;
-    const hForce = isMobile ? hoverForce * 0.8 : hoverForce;
+    const rRange = repulsionRange;
+    const hForce = hoverForce;
 
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
@@ -319,7 +340,7 @@ onMounted(async () => {
         if (onShiverMouseMove) {
           window.removeEventListener('mousemove', onShiverMouseMove);
         }
-        onShiverMouseMove = (e: MouseEvent) => {
+        onShiverMouseMove = useThrottleFn((e: MouseEvent) => {
           if (isMobileView.value || isMusicVisible.value) {
             shiverIntensity.value = 0;
             return;
@@ -338,7 +359,7 @@ onMounted(async () => {
           } else {
             shiverIntensity.value = 0;
           }
-        };
+        }, 50);
         window.addEventListener('mousemove', onShiverMouseMove);
 
         btn.onclick = () => {
@@ -381,6 +402,17 @@ onMounted(async () => {
     },
     { immediate: true }
   );
+
+  watch(isMobileView, async (isMobile) => {
+    if (!isMobile) {
+      if (!particlesLoaded) {
+        await loadParticles();
+      }
+      if (isVisible.value) {
+        animationId = requestAnimationFrame(render);
+      }
+    }
+  });
 });
 
 onBeforeUnmount(() => {

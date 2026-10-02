@@ -13,6 +13,7 @@ export default async () => {
       '**/README.md',
       '**/GEMINI.md',
       '**/gemini.md',
+      '**/issues.md',
       'venv/**',
       '.direnv/**',
       '**/node_modules/**'
@@ -94,7 +95,15 @@ export default async () => {
       const intro = pf.intro ? pf.intro : intro_plh;
       const image_plh = SITE_CONSTANTS.IMAGES.DEFAULT;
       const image = `${SITE_CONSTANTS.HOSTNAME}${pf.image ? pf.image : image_plh}`;
+      const cleanPath = pageData.relativePath
+        .replace(/(?:^|\/)index\.md$/, '')
+        .replace(/\.md$/, '');
+      const pageUrl = cleanPath
+        ? `${SITE_CONSTANTS.HOSTNAME}/${cleanPath}`
+        : `${SITE_CONSTANTS.HOSTNAME}/`;
+      const fallbackDate = new Date().toISOString().split('T')[0];
 
+      head.push(['link', { rel: 'canonical', href: pageUrl }]);
       head.push([
         'meta',
         {
@@ -119,7 +128,7 @@ export default async () => {
         'meta',
         {
           property: 'og:url',
-          content: `${SITE_CONSTANTS.HOSTNAME}/${pageData.relativePath}`
+          content: pageUrl
         }
       ]);
       head.push([
@@ -133,14 +142,14 @@ export default async () => {
         'meta',
         {
           property: 'article:published_time',
-          content: pf.date ? pf.date : '2025-01-01'
+          content: pf.date ? pf.date : fallbackDate
         }
       ]);
       head.push([
         'meta',
         {
           property: 'article:modified_time',
-          content: pf.date ? pf.date : '2025-01-01'
+          content: pf.date ? pf.date : fallbackDate
         }
       ]);
       head.push(['meta', { name: 'twitter:image', content: image }]);
@@ -148,7 +157,7 @@ export default async () => {
         'meta',
         {
           property: 'twitter:url',
-          content: `${SITE_CONSTANTS.HOSTNAME}/${pageData.relativePath}`
+          content: pageUrl
         }
       ]);
       head.push(['meta', { property: 'twitter:description', content: intro }]);
