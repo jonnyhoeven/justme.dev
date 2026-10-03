@@ -1,15 +1,9 @@
 <script setup lang="ts">
 import Badges from './Badges.vue';
-
-interface Frontmatter {
-  title?: string;
-  image?: string;
-  intro?: string;
-  [key: string]: unknown;
-}
+import type { ArticleFrontmatter } from '../types/frontmatter';
 
 defineProps<{
-  frontmatter?: Frontmatter;
+  frontmatter?: ArticleFrontmatter;
 }>();
 </script>
 
@@ -33,6 +27,5 @@ defineProps<{
     <div v-if="frontmatter && frontmatter.intro" class="post-intro">
       {{ frontmatter.intro }}
     </div>
-    <br />
   </article>
 </template>

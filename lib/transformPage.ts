@@ -1,5 +1,14 @@
-export default (pageData) => {
-  const pf = { ...pageData.frontmatter };
+import type { ArticleFrontmatter } from '../types/frontmatter';
+
+export interface PageLike {
+  frontmatter?: Record<string, unknown> | ArticleFrontmatter;
+  [key: string]: unknown;
+}
+
+export default function transformPage<T extends PageLike>(
+  pageData: T
+): T & { frontmatter: ArticleFrontmatter } {
+  const pf: ArticleFrontmatter = { ...pageData.frontmatter };
   pf.title = pf.title ? pf.title : 'Justme.dev';
   pf.intro = pf.intro ? pf.intro : '';
   pf.image = pf.image ? pf.image : '/images/justme.dev.webp';
@@ -31,4 +40,4 @@ export default (pageData) => {
     ...pageData,
     frontmatter: pf
   };
-};
+}

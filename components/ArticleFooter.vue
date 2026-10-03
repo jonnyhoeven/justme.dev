@@ -1,11 +1,8 @@
 <script setup lang="ts">
-interface Frontmatter {
-  model?: string;
-  [key: string]: unknown;
-}
+import type { ArticleFrontmatter } from '../types/frontmatter';
 
 defineProps<{
-  frontmatter?: Frontmatter;
+  frontmatter?: ArticleFrontmatter;
 }>();
 </script>
 

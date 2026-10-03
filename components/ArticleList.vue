@@ -1,20 +1,9 @@
 <script setup lang="ts">
 import Badges from './Badges.vue';
-
-interface Frontmatter {
-  title?: string;
-  image?: string;
-  intro?: string;
-  [key: string]: unknown;
-}
-
-interface Page {
-  url: string;
-  frontmatter?: Frontmatter;
-}
+import type { ArticlePage } from '../types/frontmatter';
 
 defineProps<{
-  page?: Page;
+  page?: ArticlePage;
 }>();
 </script>
 

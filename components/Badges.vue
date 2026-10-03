@@ -1,16 +1,8 @@
 <script setup lang="ts">
-interface Frontmatter {
-  watchersUrl?: string;
-  starsUrl?: string;
-  forksUrl?: string;
-  langArr?: string[];
-  externalUrl?: string;
-  externalUrlLabel?: string;
-  [key: string]: unknown;
-}
+import type { ArticleFrontmatter } from '../types/frontmatter';
 
 defineProps<{
-  frontmatter?: Frontmatter;
+  frontmatter?: ArticleFrontmatter;
 }>();
 </script>
 
@@ -45,9 +37,8 @@ defineProps<{
         v-for="lang of frontmatter.langArr"
         :key="lang"
         :text="lang"
-        class="shieldButton"
+        class="shieldButton langBadge"
         type="info"
-        style="margin-right: 5pt"
       />
     </template>
     <a
@@ -77,5 +68,8 @@ defineProps<{
 .textButton:focus-visible {
   outline: 2px solid var(--vp-c-brand-1, #3498db);
   outline-offset: 2px;
+}
+.langBadge {
+  margin-right: 6px;
 }
 </style>
