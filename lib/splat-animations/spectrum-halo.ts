@@ -18,11 +18,16 @@ import type {
 
 // --- Tuning Parameters ---
 const MAX_RADIUS = 170;
-const SPECTRUM_SPAN = 0.32; // fraction of the FFT bins that carry the show
-const BIN_CURVE = 1.7; // >1 gives bass more of the circle
-const BAR_REACH = 46;
-const BAR_CURVE = 1.35;
-const IDLE_RIPPLE_AMP = 3.5;
+const BARS = 90; // log-spaced bands around the halo, bass at the top
+const FIRST_BIN = 100;
+const LAST_BIN_FRAC = 0.00001; // fraction of the FFT bins that carry the show
+const BAR_GAIN_FLOOR = 0.0000001; // raw level below which a bar never auto-gains
+const BAR_GAIN_RELEASE = 0.0001; // per ms
+const BAR_ATTACK_MS = 1;
+const BAR_RELEASE_MS = 1;
+const BAR_REACH = 70;
+const BAR_CURVE = 40;
+const IDLE_RIPPLE_AMP = 4.5;
 const IDLE_RIPPLE_SPEED = 0.0018;
 const RING_SPEED = 0.42;
 const RING_WIDTH = 26;
@@ -31,9 +36,44 @@ const RING_PUSH = 16;
 const SPARKLE = 2.5;
 const SPRING_SCALE = 0.9;
 
+const bars = new Float32Array(BARS);
+const barPeak = new Float32Array(BARS).fill(BAR_GAIN_FLOOR);
 let lastBeats = 0;
 let beatTime = -1e9;
 let beatStrength = 0;
+
+/** Collapses the FFT into log-spaced, individually auto-gained bars. */
+function updateBars(data: Uint8Array | undefined, dtMs: number) {
+  const dt = Math.min(100, Math.max(1, dtMs || 16));
+  const attack = 1 - Math.exp(-dt / BAR_ATTACK_MS);
+  const release = 1 - Math.exp(-dt / BAR_RELEASE_MS);
+  const hasData = !!data && data.length > 0;
+  const last = hasData
+    ? Math.max(FIRST_BIN + BARS, data.length * LAST_BIN_FRAC)
+    : 0;
+  const ratio = hasData ? Math.pow(last / FIRST_BIN, 1 / BARS) : 1;
+  let from = FIRST_BIN;
+  for (let b = 0; b < BARS; b++) {
+    let raw = 0;
+    if (hasData) {
+      const to = Math.min(
+        data.length,
+        Math.max(from + 1, Math.round(FIRST_BIN * Math.pow(ratio, b + 1)))
+      );
+      let sum = 0;
+      for (let k = from; k < to; k++) sum += data[k];
+      raw = sum / (to - from) / 255;
+      from = to;
+    }
+    barPeak[b] = Math.max(
+      BAR_GAIN_FLOOR,
+      raw,
+      barPeak[b] - dt * BAR_GAIN_RELEASE
+    );
+    const target = Math.min(1, raw / barPeak[b]);
+    bars[b] += (target - bars[b]) * (target > bars[b] ? attack : release);
+  }
+}
 
 export const spectrumHalo: SplatAnimation = {
   name: 'Spectrum Halo',
@@ -58,6 +98,7 @@ export const spectrumHalo: SplatAnimation = {
   },
 
   beforeFrame(_particles, elapsed, ctx) {
+    updateBars(ctx.audioData, ctx.dt);
     const { beats, beat } = ctx.audioLevels;
     if (beats !== lastBeats) {
       lastBeats = beats;
@@ -85,12 +126,11 @@ export const spectrumHalo: SplatAnimation = {
       IDLE_RIPPLE_AMP *
       s.shRn;
 
-    let bar = 0;
     if (audioData && audioData.length > 0) {
-      const bin = Math.floor(
-        Math.pow(s.shT, BIN_CURVE) * SPECTRUM_SPAN * audioData.length
-      );
-      bar = audioData[bin] / 255;
+      const f = s.shT * (BARS - 1);
+      const i = Math.floor(f);
+      const bar =
+        bars[i] + (bars[Math.min(BARS - 1, i + 1)] - bars[i]) * (f - i);
       push += Math.pow(bar, BAR_CURVE) * BAR_REACH * (0.3 + 0.7 * s.shRn);
     }
 
