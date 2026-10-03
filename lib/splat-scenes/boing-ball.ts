@@ -14,6 +14,12 @@ const LON_SEGMENTS = 8;
 const LAT_SEGMENTS = 4;
 const TILT = 0.38;
 const BOUNCE_PERIOD = 1150;
+// Black at partial opacity darkens the glow floor without shifting its hue
+const SHADOW_COLOR = '0, 0, 0';
+const SHADOW_ALPHA = 0.1;
+// The ball plays in this fraction of the area width, tucked against the right
+// edge so it never bounces behind the hero text
+const PLAY_WIDTH = 0.8;
 const GOLDEN = Math.PI * (3 - Math.sqrt(5));
 
 const GROUND = 0.82; // where the ball lands, fraction of area height
@@ -23,7 +29,6 @@ let nBall = 0;
 let unit = new Float32Array(0);
 let tone = new Uint8Array(0);
 let colors: string[] = [];
-let shadowColor = '';
 
 let bouncePhase = 0;
 let xPhase = 0;
@@ -53,9 +58,9 @@ export const boingBall: SplatScene = {
 
   glowRect(ctx, out) {
     // A flat ellipse around the landing spot, so the glow reads as the floor
-    out.x = ctx.areaX + ctx.areaW / 2;
+    out.x = ctx.areaX + ctx.areaW * (1 - PLAY_WIDTH / 2);
     out.y = ctx.areaY + ctx.areaH * GROUND;
-    out.w = ctx.areaW * 0.95;
+    out.w = ctx.areaW * PLAY_WIDTH * 0.95;
     out.h = ctx.areaH * 0.4;
   },
 
@@ -89,7 +94,6 @@ export const boingBall: SplatScene = {
     colors = dark
       ? ['214, 52, 60', '222, 222, 226', '104, 30, 38', '96, 96, 108']
       : ['204, 44, 52', '48, 54, 88', '230, 156, 160', '168, 174, 198'];
-    shadowColor = dark ? '70, 52, 112' : '60, 52, 84';
     bouncePhase = 0.15;
     xPhase = 0;
     spin = 0;
@@ -105,9 +109,9 @@ export const boingBall: SplatScene = {
     cosS = Math.cos(spin);
     sinS = Math.sin(spin);
 
-    const w = ctx.areaW;
+    const w = ctx.areaW * PLAY_WIDTH;
     const h = ctx.areaH;
-    cx = ctx.areaX + w / 2;
+    cx = ctx.areaX + ctx.areaW - w / 2;
     radius = Math.min(w * 0.16, h * 0.2);
     groundY = ctx.areaY + h * GROUND;
 
@@ -143,7 +147,8 @@ export const boingBall: SplatScene = {
       out.y =
         groundY - radius * 0.02 + Math.sin(a) * r * radius * shadowScale * 0.2;
       out.sizeMult = shadowDot;
-      out.colorOverride = shadowColor;
+      out.alpha = SHADOW_ALPHA;
+      out.colorOverride = SHADOW_COLOR;
       return;
     }
 

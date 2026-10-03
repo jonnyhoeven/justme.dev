@@ -3,31 +3,15 @@ import { dotSize } from './utils';
 
 /**
  * Copper bars (Amiga raster-bar style): horizontal bands of beads sweep up and
- * down on offset sines. Colours stay put; bass and kicks only make the bars
- * thicker.
+ * down on offset sines. Every bead keeps its own avatar colour; bass and kicks
+ * only make the bars thicker.
  */
 
-const BAR_RGB = [
-  [200, 64, 72],
-  [208, 128, 56],
-  [196, 184, 64],
-  [72, 168, 96],
-  [64, 148, 200],
-  [148, 92, 200]
-];
-const SHADES = 6;
-const MIN_SHADE = 0.45;
+const BARS = 6;
 const BAR_THICKNESS = 0.1; // of the area height
 const SWEEP = 0.3; // of the area height
 const BASS_SWELL = 0.5;
 const BEAT_SWELL = 0.9;
-
-const palette: string[][] = BAR_RGB.map(([r, g, b]) =>
-  Array.from({ length: SHADES }, (_, s) => {
-    const k = MIN_SHADE + (1 - MIN_SHADE) * (s / (SHADES - 1));
-    return `${(r * k) | 0}, ${(g * k) | 0}, ${(b * k) | 0}`;
-  })
-);
 
 let total = 1;
 let perBar = 1;
@@ -40,7 +24,7 @@ let thick = 40;
 let time = 0;
 let phase = 0;
 let ripple = 0.2;
-const barY: number[] = BAR_RGB.map(() => 0);
+const barY: number[] = Array.from({ length: BARS }, () => 0);
 
 export const copperBars: SplatScene = {
   name: 'Copper Bars',
@@ -57,7 +41,7 @@ export const copperBars: SplatScene = {
 
   init(particles: SplatParticle[]) {
     total = particles.length;
-    perBar = Math.ceil(total / BAR_RGB.length);
+    perBar = Math.ceil(total / BARS);
     phase = 0;
   },
 
@@ -92,7 +76,7 @@ export const copperBars: SplatScene = {
   },
 
   target(_p, i, _elapsed, _ctx, out) {
-    const b = Math.min(BAR_RGB.length - 1, Math.floor(i / perBar));
+    const b = Math.min(BARS - 1, Math.floor(i / perBar));
     const k = i - b * perBar;
     const barCount = Math.min(perBar, total - b * perBar);
     const row = k % rows;
@@ -105,6 +89,5 @@ export const copperBars: SplatScene = {
       Math.sin(time * 0.002 + col * 0.35 + b) * colStep * ripple;
     out.y = barY[b] + (u * thick) / 2;
     out.sizeMult = size;
-    out.colorOverride = palette[b][Math.round((1 - u * u) * (SHADES - 1))];
   }
 };

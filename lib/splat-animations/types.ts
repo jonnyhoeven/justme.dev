@@ -113,6 +113,8 @@ export interface SceneTarget {
   y: number;
   /** Size multiplier (default 1) */
   sizeMult: number;
+  /** Opacity multiplier on top of the scene's alpha (default 1), e.g. for a shadow that darkens what is behind it */
+  alpha: number;
   /** Replacement colour "r, g, b"; undefined keeps the avatar colour */
   colorOverride?: string;
 }

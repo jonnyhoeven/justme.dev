@@ -235,7 +235,7 @@ export const pong: SplatScene = {
 
     const n = (g: number) => Math.max(1, bounds[g] - (bounds[g - 1] ?? 0));
     const wallStep = (x1 - x0) / (n(0) / 2);
-    const padRows = Math.ceil(n(4) / 2 / PADDLE_COLS);
+    const padRows = Math.max(2, Math.floor(n(4) / 2 / PADDLE_COLS));
     paddleDot = Math.min(4.5, (padH / padRows) * 0.75);
     dots = {
       wall: dotSize(Math.min(3.5, wallStep * 0.35), ctx),
@@ -307,14 +307,14 @@ export const pong: SplatScene = {
         const left = j < per;
         const jj = left ? j : j - per;
         const m = left ? per : count - per;
-        const rows = Math.ceil(m / PADDLE_COLS);
-        const row = Math.floor(jj / PADDLE_COLS);
-        const col = jj % PADDLE_COLS;
+        // Whole rows only; the 0-2 leftover particles stack on the last cell
+        const rows = Math.max(2, Math.floor(m / PADDLE_COLS));
+        const g = Math.min(jj, rows * PADDLE_COLS - 1);
+        const row = Math.floor(g / PADDLE_COLS);
+        const col = g % PADDLE_COLS;
         const recoil = (left ? -recoilL : recoilR) * (x1 - x0) * 0.012;
         out.x = (left ? padLX : padRX) + recoil + (col - 1) * paddleDot * 0.9;
-        out.y =
-          (left ? padLY : padRY) +
-          (rows > 1 ? (row / (rows - 1) - 0.5) * padH : 0);
+        out.y = (left ? padLY : padRY) + (row / (rows - 1) - 0.5) * padH;
         out.sizeMult = dots.paddle;
         out.colorOverride = left ? LEFT_COLOR : RIGHT_COLOR;
         break;
