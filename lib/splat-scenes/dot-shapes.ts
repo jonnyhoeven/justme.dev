@@ -1,4 +1,5 @@
 import type { SplatScene, SplatParticle } from '../splat-animations/types';
+import { frac, R2_A, R2_B } from './utils';
 
 /**
  * Rotating dot shapes (vector-demo style): the particles sit on a sphere,
@@ -10,9 +11,6 @@ const BLEND_FRACTION = 0.3;
 // In shape radii. Far enough that the cube's near and far corners differ by
 // ~1.5x in scale (at 3 it was 2.6x, which made the cube look warped).
 const CAMERA_DISTANCE = 6;
-// Low-discrepancy (R2) sequence constants for even surface coverage
-const R2_A = 0.7548776662466927;
-const R2_B = 0.5698402909980532;
 
 let shapes: Float32Array[] = [];
 let shapeA = 0;
@@ -27,7 +25,6 @@ let cy = 0;
 let radius = 100;
 let angleY = 0;
 
-const frac = (v: number) => v - Math.floor(v);
 const smooth = (t: number) => t * t * (3 - 2 * t);
 
 export const dotShapes: SplatScene = {

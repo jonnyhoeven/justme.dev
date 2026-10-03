@@ -109,12 +109,6 @@ function createXMEngine() {
     ch.periodoffset =
       getVibratoDelta(ch.vibratotype, ch.vibratopos) * ch.vibratodepth;
     if (isNaN(ch.periodoffset)) {
-      debugLog(
-        'vibrato periodoffset NaN?',
-        ch.vibratopos,
-        ch.vibratospeed,
-        ch.vibratodepth
-      );
       ch.periodoffset = 0;
     }
     // only updates on non-first ticks
@@ -251,7 +245,6 @@ function createXMEngine() {
       case 0x0c: // note cut handled in eff_t1_e
         break;
       default:
-        debugLog('unimplemented extended effect E', ch.effectdata.toString(16));
         break;
     }
   }
@@ -270,7 +263,6 @@ function createXMEngine() {
   function eff_t0_f(ch, data) {
     // set tempo
     if (data === 0) {
-      debugLog('tempo 0?');
       return;
     } else if (data < 0x20) {
       player.xm.tempo = data;
@@ -373,9 +365,7 @@ function createXMEngine() {
   }
 
   function eff_unimplemented() {}
-  function eff_unimplemented_t0(ch, data) {
-    debugLog('unimplemented effect', player.prettify_effect(ch.effect, data));
-  }
+  function eff_unimplemented_t0() {}
 
   player.effects_t0 = [
     // effect functions on tick 0
@@ -505,34 +495,11 @@ function createXMEngine() {
     return _note_names[note % 12] + ~~(note / 12);
   }
 
-  function prettify_number(num) {
-    if (num == -1) return '--';
-    if (num < 10) return '0' + num;
-    return num;
-  }
-
-  function prettify_volume(num) {
-    if (num < 0x10) return '--';
-    return num.toString(16);
-  }
-
   function prettify_effect(t, p) {
     if (t >= 10) t = String.fromCharCode(55 + t);
     if (p < 16) p = '0' + p.toString(16);
     else p = p.toString(16);
     return t + p;
-  }
-
-  function prettify_notedata(data) {
-    return (
-      prettify_note(data[0]) +
-      ' ' +
-      prettify_number(data[1]) +
-      ' ' +
-      prettify_volume(data[2]) +
-      ' ' +
-      prettify_effect(data[3], data[4])
-    );
   }
 
   function getstring(dv, offset, len) {
@@ -562,7 +529,6 @@ function createXMEngine() {
   function updateChannelPeriod(ch, period) {
     const freq = 8363 * Math.pow(2, (1152.0 - period) / 192.0);
     if (isNaN(freq)) {
-      debugLog('invalid period!', period);
       return;
     }
     ch.doff = freq / f_smp;
@@ -679,9 +645,7 @@ function createXMEngine() {
         // volume column
         const v = r[i][2];
         ch.voleffectdata = v & 0x0f;
-        if (v < 0x10) {
-          debugLog('channel', i, 'invalid volume', v.toString(16));
-        } else if (v <= 0x50) {
+        if (v >= 0x10 && v <= 0x50) {
           ch.vol = v - 0x10;
         } else if (v >= 0x60 && v < 0x70) {
           // volume slide down
@@ -716,8 +680,6 @@ function createXMEngine() {
             ch.portaspeed = (v & 0x0f) << 4;
           }
           ch.voleffectfn = player.effects_t1[3]; // just run 3x0
-        } else {
-          debugLog('channel', i, 'volume effect', v.toString(16));
         }
       }
 
@@ -729,8 +691,6 @@ function createXMEngine() {
         if (eff_t0 && eff_t0(ch, ch.effectdata)) {
           triggernote = false;
         }
-      } else {
-        debugLog('channel', i, 'effect > 36', ch.effect);
       }
 
       // special handling for portamentos: don't trigger the note
@@ -840,28 +800,8 @@ function createXMEngine() {
         if (ch.voleffectfn) ch.voleffectfn(ch);
         if (ch.effectfn) ch.effectfn(ch);
       }
-      if (isNaN(ch.period)) {
-        debugLog(
-          prettify_notedata(
-            player.xm.patterns[player.cur_pat][player.cur_row][j]
-          ),
-          'set channel',
-          j,
-          'period to NaN'
-        );
-      }
       if (inst === undefined) continue;
-      if (ch.env_vol === undefined) {
-        debugLog(
-          prettify_notedata(
-            player.xm.patterns[player.cur_pat][player.cur_row][j]
-          ),
-          'set channel',
-          j,
-          'env_vol to undefined, but note is playing'
-        );
-        continue;
-      }
+      if (ch.env_vol === undefined) continue;
       ch.volE = ch.env_vol.Tick(ch.release);
       ch.panE = ch.env_pan.Tick(ch.release);
       updateChannelPeriod(ch, ch.period + ch.periodoffset);
@@ -873,7 +813,6 @@ function createXMEngine() {
   function MixSilenceIntoBuf(ch, start, end, dataL, dataR) {
     let s = ch.filterstate[1];
     if (isNaN(s)) {
-      debugLog('NaN filterstate?', ch.filterstate, ch.filter);
       return;
     }
     for (var i = start; i < end; i++) {
@@ -889,12 +828,6 @@ function createXMEngine() {
     ch.filterstate[1] = s;
     ch.filterstate[2] = s;
     if (isNaN(s)) {
-      debugLog(
-        'NaN filterstate after adding silence?',
-        ch.filterstate,
-        ch.filter,
-        i
-      );
       return;
     }
     return 0;
@@ -932,7 +865,6 @@ function createXMEngine() {
     if (volR < 0) volR = 0;
     if (volR === 0 && volL === 0) return;
     if (isNaN(volR) || isNaN(volL)) {
-      debugLog('NaN volume!?', ch.number, volL, volR, volE, panE, ch.vol);
       return;
     }
     let k = ch.off;
@@ -962,15 +894,6 @@ function createXMEngine() {
     let failsafe = 100;
     while (i < end) {
       if (failsafe-- === 0) {
-        debugLog(
-          'failsafe in mixing loop! channel',
-          ch.number,
-          k,
-          sample_end,
-          loopstart,
-          looplen,
-          dk
-        );
         break;
       }
       if (k >= sample_end) {

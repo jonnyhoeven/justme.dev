@@ -17,19 +17,13 @@ const {
   prevTrack
 } = useMusic();
 
-const currentTrack = computed<MusicTrack | string | undefined>(
+const currentTrack = computed<MusicTrack | undefined>(
   () => tracks[currentTrackIndex.value]
 );
 
 const currentTrackUrl = computed(() => {
   const track = currentTrack.value;
-  if (!track) return '';
-  if (typeof track === 'string') {
-    return track.startsWith('http://') || track.startsWith('https://')
-      ? track
-      : `/audio/${track}`;
-  }
-  return track.url || '';
+  return track?.url || '';
 });
 
 const currentSongTitle = ref('');
@@ -38,10 +32,10 @@ const formattedTitle = computed(() => {
   const track = currentTrack.value;
   let baseTitle = currentSongTitle.value;
   if (!baseTitle && track) {
-    if (typeof track === 'object' && track.title) {
+    if (track.title) {
       baseTitle = track.title;
     } else {
-      const raw = typeof track === 'string' ? track : track.url || '';
+      const raw = track.url || '';
       const filename = raw.split('/').pop() || raw;
       baseTitle = decodeURIComponent(filename)
         .replace(/\.xm$/i, '')
@@ -52,7 +46,7 @@ const formattedTitle = computed(() => {
   }
   if (!baseTitle) return '';
 
-  if (typeof track === 'object') {
+  if (track) {
     const metaParts: string[] = [];
     if (track.channels) metaParts.push(`${track.channels}ch`);
     if (track.bpm) metaParts.push(`${track.bpm} BPM`);
@@ -66,7 +60,7 @@ const formattedTitle = computed(() => {
 
 const trackTooltip = computed(() => {
   const track = currentTrack.value;
-  if (!track || typeof track !== 'object') return formattedTitle.value;
+  if (!track) return formattedTitle.value;
   const parts = [track.title];
   if (track.channels) parts.push(`${track.channels} channels`);
   if (track.bpm) parts.push(`${track.bpm} BPM`);
@@ -125,8 +119,8 @@ const initAudio = () => {
 const doInitAudio = async () => {
   audioContext = new (
     window.AudioContext ||
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).webkitAudioContext
+    (window as unknown as { webkitAudioContext?: typeof AudioContext })
+      .webkitAudioContext
   )();
   analyser = audioContext.createAnalyser();
   analyser.fftSize = 1024; // ~43Hz per bin: enough resolution to isolate the kick

@@ -1,8 +1,8 @@
 import {
   VOLUME_SMOOTHING,
   SIZE_OSCILLATION_AMP,
-  DEFAULT_CENTER_X,
-  DEFAULT_CENTER_Y
+  CENTER_X,
+  CENTER_Y
 } from './animation-constants';
 import type {
   SplatAnimation,
@@ -43,10 +43,8 @@ export const orbitalDrift: SplatAnimation = {
     const globalDir = Math.random() > 0.5 ? 1 : -1;
     for (const p of particles) {
       // Each particle gets a unique center point ±20px from true 160, 160
-      p.animState.orbitCx =
-        DEFAULT_CENTER_X + (Math.random() - 0.5) * CENTER_VARIANCE;
-      p.animState.orbitCy =
-        DEFAULT_CENTER_Y + (Math.random() - 0.5) * CENTER_VARIANCE;
+      p.animState.orbitCx = CENTER_X + (Math.random() - 0.5) * CENTER_VARIANCE;
+      p.animState.orbitCy = CENTER_Y + (Math.random() - 0.5) * CENTER_VARIANCE;
       // Random direction (global for this session) + variation
       p.animState.orbitSpeed =
         globalDir *
@@ -83,8 +81,8 @@ export const orbitalDrift: SplatAnimation = {
     elapsed: number,
     ctx: AnimationContext
   ): AnimationEffect {
-    const cx = p.animState.orbitCx ?? DEFAULT_CENTER_X;
-    const cy = p.animState.orbitCy ?? DEFAULT_CENTER_Y;
+    const cx = p.animState.orbitCx ?? CENTER_X;
+    const cy = p.animState.orbitCy ?? CENTER_Y;
     const { scale } = ctx;
 
     const baseSpeed = p.animState.orbitSpeed ?? BASE_ORBIT_SPEED_MIN;
