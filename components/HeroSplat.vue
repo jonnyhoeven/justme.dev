@@ -29,7 +29,16 @@ import { SITE_CONSTANTS } from '../.vitepress/constants';
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const layerRef = ref<HTMLElement | null>(null);
 const glowRef = ref<HTMLElement | null>(null);
-let animationId: number;
+let animationId = 0;
+
+const stopLoop = () => {
+  if (animationId) {
+    cancelAnimationFrame(animationId);
+    animationId = 0;
+  }
+};
+
+let startLoop = () => {};
 const particles: SplatParticle[] = [];
 
 // Physics parameters
@@ -360,6 +369,7 @@ onMounted(async () => {
 
   const render = (time: number) => {
     if (isMobileView.value || !isVisible.value) {
+      animationId = 0;
       return;
     }
 
@@ -639,16 +649,20 @@ onMounted(async () => {
   hookTagline();
   setTimeout(hookTagline, 1000);
 
+  startLoop = () => {
+    if (isMobileView.value || !isVisible.value) return;
+    if (animationId) cancelAnimationFrame(animationId);
+    animationId = requestAnimationFrame(render);
+  };
+
   watch(
     isVisible,
     (visible) => {
       setSplatVisible(visible);
       if (visible) {
-        if (!isMobileView.value) {
-          animationId = requestAnimationFrame(render);
-        }
+        startLoop();
       } else {
-        cancelAnimationFrame(animationId);
+        stopLoop();
       }
     },
     { immediate: true }
@@ -659,15 +673,16 @@ onMounted(async () => {
       if (!particlesLoaded) {
         await loadParticles();
       }
-      if (isVisible.value) {
-        animationId = requestAnimationFrame(render);
-      }
+      startLoop();
+    } else {
+      stopLoop();
     }
   });
 });
 
 onBeforeUnmount(() => {
-  cancelAnimationFrame(animationId);
+  stopLoop();
+  startLoop = () => {};
   resizeObserver?.disconnect();
   heroEl?.removeEventListener('mousemove', onMouseMove);
   heroEl?.removeEventListener('mouseleave', onMouseLeave);

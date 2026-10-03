@@ -194,16 +194,24 @@ const toggleVolume = () => {
   isVolumeOpen.value = !isVolumeOpen.value;
 };
 
-const handleNext = async () => {
+let skipTimeout: ReturnType<typeof setTimeout> | null = null;
+
+const switchTrack = (advanceFn: () => void) => {
+  if (skipTimeout) {
+    clearTimeout(skipTimeout);
+    skipTimeout = null;
+  }
+
   const wasPlaying = isPlaying.value;
   if (xmPlayer?.isPlaying) xmPlayer.stop();
 
-  nextTrack();
+  advanceFn();
   progress.value = 0;
   currentSongTitle.value = '';
 
   if (wasPlaying) {
-    setTimeout(async () => {
+    skipTimeout = setTimeout(async () => {
+      skipTimeout = null;
       await initAudio();
       if (xmPlayer) {
         await xmPlayer.loadUrl(currentTrackUrl.value);
@@ -217,28 +225,8 @@ const handleNext = async () => {
   }
 };
 
-const handlePrev = async () => {
-  const wasPlaying = isPlaying.value;
-  if (xmPlayer?.isPlaying) xmPlayer.stop();
-
-  prevTrack();
-  progress.value = 0;
-  currentSongTitle.value = '';
-
-  if (wasPlaying) {
-    setTimeout(async () => {
-      await initAudio();
-      if (xmPlayer) {
-        await xmPlayer.loadUrl(currentTrackUrl.value);
-        currentLoadedXmUrl = currentTrackUrl.value;
-        currentSongTitle.value = xmPlayer.songTitle;
-        applyVolume(volume.value);
-        xmPlayer.play();
-        setPlaying(true);
-      }
-    }, 100);
-  }
-};
+const handleNext = () => switchTrack(nextTrack);
+const handlePrev = () => switchTrack(prevTrack);
 
 const seek = (e: MouseEvent) => {
   const bar = e.currentTarget as HTMLElement;
@@ -261,6 +249,10 @@ watch(volume, (newVol) => {
 
 watch(isMusicVisible, (visible) => {
   if (!visible) {
+    if (skipTimeout) {
+      clearTimeout(skipTimeout);
+      skipTimeout = null;
+    }
     if (isPlaying.value) {
       setPlaying(false);
       xmPlayer?.stop();
@@ -284,6 +276,10 @@ watch(isMusicVisible, (visible) => {
 });
 
 onBeforeUnmount(() => {
+  if (skipTimeout) {
+    clearTimeout(skipTimeout);
+    skipTimeout = null;
+  }
   cancelAnimationFrame(animationFrame);
   if (xmPlayer) {
     xmPlayer.stop();
