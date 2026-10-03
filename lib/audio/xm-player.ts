@@ -570,6 +570,8 @@ function createXMEngine() {
   }
 
   function periodForNote(ch, note) {
+    // channel was silenced (e.g. by a seek) and has no sample yet
+    if (!ch.samp) return ch.period;
     return 1920 - (note + ch.samp.note) * 16 - ch.fine / 8.0;
   }
 
@@ -1245,6 +1247,8 @@ function createXMEngine() {
     player.xm.flags = dv.getUint16(0x4a, true);
     player.xm.tempo = dv.getUint16(0x4c, true);
     player.xm.bpm = dv.getUint16(0x4e, true);
+    player.xm.initial_tempo = player.xm.tempo;
+    player.xm.initial_bpm = player.xm.bpm;
     player.xm.channelinfo = [];
     player.xm.global_volume = player.max_global_volume;
 
@@ -1619,6 +1623,29 @@ function createXMEngine() {
 
   player.setCurrentPattern = setCurrentPattern;
 
+  // Cut every voice and clear per-channel effect state, so notes started
+  // before a jump don't keep ringing (their note-offs are never reached).
+  player.silenceChannels = function () {
+    const channels = player.xm.channelinfo || [];
+    for (const ch of channels) {
+      ch.inst = undefined;
+      ch.samp = undefined;
+      ch.env_vol = undefined;
+      ch.env_pan = undefined;
+      ch.voleffectfn = undefined;
+      ch.effectfn = undefined;
+      ch.release = 0;
+      ch.volE = 0;
+      ch.panE = 0;
+      ch.retrig = 0;
+      ch.periodoffset = 0;
+    }
+    player.xm.global_volume = player.max_global_volume;
+    player.xm.global_volumeslide = undefined;
+    player.xm.tempo = player.xm.initial_tempo;
+    player.xm.bpm = player.xm.initial_bpm;
+  };
+
   return player;
 }
 
@@ -1709,10 +1736,12 @@ export class XMPlayer {
       Math.max(0, Math.min(0.999, percent)) * totalPats
     );
     this.engine.cur_songpos = targetIdx;
+    this.engine.silenceChannels();
     this.engine.cur_row = 0;
-    this.engine.next_row = 1;
+    this.engine.next_row = 0;
     this.engine.cur_ticksamp = 0;
-    this.engine.cur_tick = 0;
+    // start on the last tick so the next one wraps to row 0 and triggers it
+    this.engine.cur_tick = this.engine.xm.tempo - 1;
     this.engine.setCurrentPattern();
   }
 }
