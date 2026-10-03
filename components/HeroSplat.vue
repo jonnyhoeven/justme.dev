@@ -292,7 +292,7 @@ onMounted(async () => {
     currentAnimation.value = firstAnim;
     currentAnimation.value.init(particles);
     if (layerRef.value) layerRef.value.dataset.animation = firstAnim.name;
-    logActive('avatar', firstAnim.name);
+    logActive('avatar', firstIndex + ' ' + firstAnim.name);
     startTime = performance.now();
   }
 
