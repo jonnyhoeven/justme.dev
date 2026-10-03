@@ -6,8 +6,7 @@ intro: |
 image: /images/justme.dev.webp
 ---
 
-<!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute -->
-<script setup>// noinspection JSUnresolvedReference
+<script setup>
 import {data as pages} from './data/blog.data.js';
 import ArticleList from './components/ArticleList.vue';
 </script>

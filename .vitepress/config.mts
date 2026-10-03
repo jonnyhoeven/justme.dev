@@ -1,5 +1,3 @@
-// noinspection JSUnusedGlobalSymbols
-
 import { defineConfig, HeadConfig } from 'vitepress';
 import transformPageData from './transformPageData';
 import { SITE_CONSTANTS } from './constants';

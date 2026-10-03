@@ -301,8 +301,6 @@ onMounted(async () => {
     c.height = size;
     const ctxC = c.getContext('2d')!;
 
-    // (Shadow and blurs removed for performance)
-
     const grad = ctxC.createRadialGradient(
       center,
       center,
@@ -318,8 +316,6 @@ onMounted(async () => {
     ctxC.beginPath();
     ctxC.arc(center, center, radius + 1, 0, Math.PI * 2);
     ctxC.fill();
-
-    // (Rim light removed for performance)
 
     brushCache.set(color, c);
     return c;

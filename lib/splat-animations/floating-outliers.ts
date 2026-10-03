@@ -8,7 +8,7 @@ import type {
 /**
  * Floating Outliers
  *
- * ~40% of particles are tagged as "outliers".
+ * 50% of particles are tagged as "outliers".
  * They use a much weaker spring so they drift lazily, and receive
  * random velocity nudges driven by audio bass.
  *
