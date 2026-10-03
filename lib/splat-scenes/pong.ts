@@ -53,7 +53,7 @@ const NEUTRAL = '150, 160, 180';
 const LINE_COLOR = '120, 130, 150';
 
 // Particle groups in draw order: walls, net, score, trail, paddles, ball
-const SHARE = [0.12, 0.08, 0.25, 0.3, 0.2, 0.05];
+const SHARE = [0.12, 0.08, 0.25, 0.3, 0.1, 0.15];
 const bounds: number[] = [];
 let groupLookup = new Uint8Array(0);
 let groupOffset: number[] = [];

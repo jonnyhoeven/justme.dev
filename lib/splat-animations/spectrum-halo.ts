@@ -20,7 +20,6 @@ import type {
 const MAX_RADIUS = 170;
 const BARS = 90; // log-spaced bands around the halo, bass at the top
 const FIRST_BIN = 100;
-const LAST_BIN_FRAC = 0.5; // fraction of the FFT bins that carry the show
 const BAR_GAIN_FLOOR = 0.0000001; // raw level below which a bar never auto-gains
 const BAR_GAIN_RELEASE = 0.0001; // per ms
 const BAR_ATTACK_MS = 1;
@@ -48,9 +47,7 @@ function updateBars(data: Uint8Array | undefined, dtMs: number) {
   const attack = 1 - Math.exp(-dt / BAR_ATTACK_MS);
   const release = 1 - Math.exp(-dt / BAR_RELEASE_MS);
   const hasData = !!data && data.length > 0;
-  const last = hasData
-    ? Math.max(FIRST_BIN + BARS, Math.round(data.length * LAST_BIN_FRAC))
-    : 0;
+  const last = hasData ? FIRST_BIN + BARS : 0;
   const ratio = hasData ? Math.pow(last / FIRST_BIN, 1 / BARS) : 1;
   let from = FIRST_BIN;
   for (let b = 0; b < BARS; b++) {
