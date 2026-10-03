@@ -13,7 +13,11 @@ import {
   type SplatAnimation
 } from '../lib/splat-animations';
 import { scenes } from '../lib/splat-scenes';
-import type { SceneTarget, SplatScene } from '../lib/splat-animations/types';
+import type {
+  GlowRect,
+  SceneTarget,
+  SplatScene
+} from '../lib/splat-animations/types';
 import {
   AudioTracker,
   ZERO_AUDIO_LEVELS
@@ -135,8 +139,15 @@ const resize = () => {
   }
 };
 
+const glowRect: GlowRect = { x: 0, y: 0, w: 0, h: 0 };
+
 /** Smoothly drive the DOM glow behind the canvas (compositor-only props). */
-const updateGlow = (target: number, morph: number) => {
+const updateGlow = (
+  target: number,
+  morph: number,
+  scene: SplatScene | null,
+  sceneCtx: AnimationContext
+) => {
   glowLevel += (target - glowLevel) * 0.08;
   // Skip writes while the value is effectively unchanged
   if (
@@ -147,11 +158,29 @@ const updateGlow = (target: number, morph: number) => {
   lastGlowWrite = glowLevel;
   lastGlowMorph = morph;
   const level = Math.max(0, glowLevel);
-  // Scenes use the whole hero, so the glow drifts to the middle of the area
-  const gx = (animCtxAreaCenter.x - anchorPx.x) * morph;
-  const gy = (animCtxAreaCenter.y - anchorPx.y) * morph;
+  // Scenes use the whole hero, so the glow drifts to the middle of the area,
+  // or is stretched over the rectangle the scene asks for
+  let cx = animCtxAreaCenter.x;
+  let cy = animCtxAreaCenter.y;
+  let rx = 1;
+  let ry = 1;
+  let core = 0;
+  if (scene?.glowRect) {
+    scene.glowRect(sceneCtx, glowRect);
+    cx = glowRect.x;
+    cy = glowRect.y;
+    rx = glowRect.w / glowSize;
+    ry = glowRect.h / glowSize;
+    core = morph;
+  }
+  const gx = (cx - anchorPx.x) * morph;
+  const gy = (cy - anchorPx.y) * morph;
+  const pulse = 0.85 + Math.min(level, 1.5) * 0.15;
+  const sx = (1 + (rx - 1) * morph) * pulse;
+  const sy = (1 + (ry - 1) * morph) * pulse;
   glowRef.value.style.opacity = String(Math.min(1, level * 0.95));
-  glowRef.value.style.transform = `translate(${gx}px, ${gy}px) scale(${0.85 + Math.min(level, 1.5) * 0.15})`;
+  glowRef.value.style.setProperty('--glow-core', String(core));
+  glowRef.value.style.transform = `translate(${gx}px, ${gy}px) scale(${sx}, ${sy})`;
 };
 
 let heroEl: HTMLElement | null = null;
@@ -424,7 +453,9 @@ onMounted(async () => {
         beat * 0.35) *
         sceneGlow,
       // Scenes without a glow (text) fade it out in place instead of drifting it
-      scene?.glow === 0 ? 0 : morph
+      scene?.glow === 0 ? 0 : morph,
+      scene,
+      animCtx
     );
 
     // Cache some values outside the particle loop for performance
@@ -735,7 +766,7 @@ const onClick = (e: MouseEvent) => {
   /* Hollow centre: the glow haloes the face instead of tinting it purple */
   mask-image: radial-gradient(
     closest-side,
-    transparent 30%,
+    rgba(0, 0, 0, var(--glow-core, 0)) 30%,
     #000 55%,
     transparent 100%
   );

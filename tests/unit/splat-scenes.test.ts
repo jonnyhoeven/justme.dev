@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { FONT, LINES } from '../../lib/splat-scenes/sine-text';
 import { scenes } from '../../lib/splat-scenes';
+import { DIGITS } from '../../lib/splat-scenes/pong';
 
 describe('sine text font', () => {
   it('has a glyph for every character except spaces', () => {
@@ -15,6 +16,17 @@ describe('sine text font', () => {
       const rows = glyph.split('/');
       expect(rows, char).toHaveLength(7);
       for (const row of rows) expect(row, char).toHaveLength(5);
+    }
+  });
+});
+
+describe('pong digits', () => {
+  it('defines digits 0-9 as 5 rows of 3 columns', () => {
+    expect(DIGITS).toHaveLength(10);
+    for (const d of DIGITS) {
+      const rows = d.split('/');
+      expect(rows).toHaveLength(5);
+      for (const row of rows) expect(row).toHaveLength(3);
     }
   });
 });

@@ -22,6 +22,14 @@ export const starfield: SplatScene = {
   name: 'Starfield',
   alpha: 1,
 
+  glowRect(ctx, out) {
+    // The glow becomes the Milky Way seen edge-on: a band through the middle
+    out.x = ctx.areaX + ctx.areaW / 2;
+    out.y = ctx.areaY + ctx.areaH / 2;
+    out.w = ctx.areaW * 1.3;
+    out.h = ctx.areaH * 0.28;
+  },
+
   init(particles: SplatParticle[]) {
     warp = 0;
     for (const p of particles) {

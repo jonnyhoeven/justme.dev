@@ -117,6 +117,15 @@ export interface SceneTarget {
   colorOverride?: string;
 }
 
+/** A rectangle in canvas px that the background glow is stretched to fill. */
+export interface GlowRect {
+  /** Centre */
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
 /**
  * A full-canvas scene. HeroSplat morphs particles from their avatar position
  * to the scene target and back. Scenes may write `p.x/p.y` directly to
@@ -128,6 +137,12 @@ export interface SplatScene {
   alpha?: number;
   /** Strength of the DOM glow behind the canvas while the scene is shown (default 1, 0 = off). Text scenes switch it off so it doesn't tint the letters. */
   glow?: number;
+  /**
+   * Stretch the DOM glow into this rectangle instead of a circle in the middle
+   * of the area (it also loses its hollow centre), e.g. to act as a floor.
+   * Write into `out`; called every frame.
+   */
+  glowRect?(ctx: AnimationContext, out: GlowRect): void;
   /** Assign slots / build lookups. Called once per scene start. */
   init(particles: SplatParticle[], ctx: AnimationContext): void;
   /** Per-frame precompute. `elapsed` is ms since the scene started. */
