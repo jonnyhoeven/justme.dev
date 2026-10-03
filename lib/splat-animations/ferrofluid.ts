@@ -50,7 +50,6 @@ const INTENSITY_SPRING_MULT = 1.2;
  * Cache for frame-global calculations to avoid redundant work in the particle loop.
  */
 const frameCache = {
-  lastElapsed: -1,
   targetX: 0,
   targetY: 0,
   magneticRange: 0,
@@ -71,6 +70,40 @@ export const ferrofluid: SplatAnimation = {
     }
   },
 
+  beforeFrame(
+    _particles: SplatParticle[],
+    elapsed: number,
+    ctx: AnimationContext
+  ) {
+    const { scale, offsetX, offsetY } = ctx;
+    const levels = ctx.audioLevels;
+
+    const isMousePresent = ctx.mouseX > 0 && ctx.mouseY > 0;
+    if (isMousePresent) {
+      frameCache.targetX = ctx.mouseX;
+      frameCache.targetY = ctx.mouseY;
+    } else {
+      const driftT = elapsed * IDLE_DRIFT_SPEED;
+      const gx = IDLE_CENTER_COORD + Math.sin(driftT) * IDLE_DRIFT_AMP;
+      const gy = IDLE_CENTER_COORD + Math.sin(driftT * 2) * IDLE_DRIFT_AMP;
+      frameCache.targetX = gx * scale + offsetX;
+      frameCache.targetY = gy * scale + offsetY;
+    }
+
+    frameCache.magneticRange =
+      (BASE_MAGNETIC_RANGE + levels.bass * BASS_MAGNETIC_RANGE_MULT) * scale;
+    frameCache.spikeCount =
+      BASE_SPIKE_COUNT + Math.floor(levels.bass * BASS_SPIKE_COUNT_MULT);
+    frameCache.spikeRotationSpeed =
+      BASE_SPIKE_ROTATION + levels.mid * MID_SPIKE_ROTATION_MULT;
+    frameCache.audioSpikeBoost = levels.mid * MID_AUDIO_SPIKE_BOOST;
+    frameCache.spikeStrength =
+      BASE_SPIKE_STRENGTH + levels.bass * BASS_SPIKE_STRENGTH_MULT;
+    frameCache.attractionBase =
+      BASE_ATTRACTION + levels.bass * BASS_ATTRACTION_MULT;
+    frameCache.audioBaseline = levels.volume * VOLUME_BASELINE_MULT;
+  },
+
   apply(
     p: SplatParticle,
     elapsed: number,
@@ -78,36 +111,6 @@ export const ferrofluid: SplatAnimation = {
   ): AnimationEffect {
     const { scale, offsetX, offsetY } = ctx;
     const levels = ctx.audioLevels;
-
-    // --- Frame-level Cache Update ---
-    if (frameCache.lastElapsed !== elapsed) {
-      frameCache.lastElapsed = elapsed;
-
-      const isMousePresent = ctx.mouseX > 0 && ctx.mouseY > 0;
-      if (isMousePresent) {
-        frameCache.targetX = ctx.mouseX;
-        frameCache.targetY = ctx.mouseY;
-      } else {
-        const driftT = elapsed * IDLE_DRIFT_SPEED;
-        const gx = IDLE_CENTER_COORD + Math.sin(driftT) * IDLE_DRIFT_AMP;
-        const gy = IDLE_CENTER_COORD + Math.sin(driftT * 2) * IDLE_DRIFT_AMP;
-        frameCache.targetX = gx * scale + offsetX;
-        frameCache.targetY = gy * scale + offsetY;
-      }
-
-      frameCache.magneticRange =
-        (BASE_MAGNETIC_RANGE + levels.bass * BASS_MAGNETIC_RANGE_MULT) * scale;
-      frameCache.spikeCount =
-        BASE_SPIKE_COUNT + Math.floor(levels.bass * BASS_SPIKE_COUNT_MULT);
-      frameCache.spikeRotationSpeed =
-        BASE_SPIKE_ROTATION + levels.mid * MID_SPIKE_ROTATION_MULT;
-      frameCache.audioSpikeBoost = levels.mid * MID_AUDIO_SPIKE_BOOST;
-      frameCache.spikeStrength =
-        BASE_SPIKE_STRENGTH + levels.bass * BASS_SPIKE_STRENGTH_MULT;
-      frameCache.attractionBase =
-        BASE_ATTRACTION + levels.bass * BASS_ATTRACTION_MULT;
-      frameCache.audioBaseline = levels.volume * VOLUME_BASELINE_MULT;
-    }
 
     // --- Per-Particle Calculation ---
     // Use ox/oy as stable reference points to avoid jitter/feedback

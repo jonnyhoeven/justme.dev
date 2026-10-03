@@ -25,6 +25,10 @@ let zoom = 1;
 let tile = 300;
 let angle = 0;
 let gain = 1;
+let invTileZoom = 1;
+let sizeMult = 1;
+let midX = 0;
+let midY = 0;
 
 export const rotozoom: SplatScene = {
   name: 'Rotozoom',
@@ -75,9 +79,13 @@ export const rotozoom: SplatScene = {
       ? 1 + beat * 0.55 + volume * 0.2
       : 1 - beat * 0.4 - volume * 0.1;
     tile = ctx.areaH;
+    invTileZoom = 1 / (tile * zoom);
+    sizeMult = (spacing * 0.041) / ctx.scale;
+    midX = ctx.areaX + ctx.areaW / 2;
+    midY = ctx.areaY + ctx.areaH / 2;
   },
 
-  target(p, i, _elapsed, ctx, out) {
+  target(_p, i, _elapsed, _ctx, out) {
     const col = i % cols;
     const row = Math.floor(i / cols);
     // Centre the short last row instead of leaving a gap at the bottom right
@@ -87,10 +95,10 @@ export const rotozoom: SplatScene = {
     const y = gridY + row * spacing;
 
     // Screen offset from the middle of the area -> rotated, zoomed UV
-    const dx = x - (ctx.areaX + ctx.areaW / 2);
-    const dy = y - (ctx.areaY + ctx.areaH / 2);
-    const u = (dx * cosA - dy * sinA) / (tile * zoom) + 0.5;
-    const v = (dx * sinA + dy * cosA) / (tile * zoom) + 0.5;
+    const dx = x - midX;
+    const dy = y - midY;
+    const u = (dx * cosA - dy * sinA) * invTileZoom + 0.5;
+    const v = (dx * sinA + dy * cosA) * invTileZoom + 0.5;
     const tx = Math.floor((u - Math.floor(u)) * TEX);
     const ty = Math.floor((v - Math.floor(v)) * TEX);
     const k = (ty * TEX + tx) * 3;
@@ -98,7 +106,7 @@ export const rotozoom: SplatScene = {
     out.x = x;
     out.y = y;
     // ~0.36 * spacing radius: round dots with a visible gap, not a solid tile
-    out.sizeMult = (spacing * 0.041) / ctx.scale;
+    out.sizeMult = sizeMult;
     out.colorOverride = `${Math.min(255, texture[k] * gain) | 0}, ${Math.min(255, texture[k + 1] * gain) | 0}, ${Math.min(255, texture[k + 2] * gain) | 0}`;
   }
 };

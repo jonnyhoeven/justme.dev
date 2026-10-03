@@ -13,6 +13,8 @@ const SHADOW_FRACTION = 0.07;
 const LON_SEGMENTS = 8;
 const LAT_SEGMENTS = 4;
 const TILT = 0.38;
+const COS_TILT = Math.cos(TILT);
+const SIN_TILT = Math.sin(TILT);
 const BOUNCE_PERIOD = 1150;
 // Black at partial opacity darkens the glow floor without shifting its hue
 const SHADOW_COLOR = '0, 0, 0';
@@ -158,8 +160,8 @@ export const boingBall: SplatScene = {
     const uz = unit[k * 3 + 2];
     const x1 = ux * cosS + uz * sinS;
     const z1 = -ux * sinS + uz * cosS;
-    const x2 = x1 * Math.cos(TILT) - uy * Math.sin(TILT);
-    const y2 = x1 * Math.sin(TILT) + uy * Math.cos(TILT);
+    const x2 = x1 * COS_TILT - uy * SIN_TILT;
+    const y2 = x1 * SIN_TILT + uy * COS_TILT;
 
     out.x = ballX + x2 * radius * squashX;
     out.y = ballY + y2 * radius * squashY;

@@ -21,6 +21,13 @@ const OSCILLATION_BASS_MULT = 0.00005;
 const MUSIC_SPEED_BOOST_MULT = 0.005;
 const VOLUME_ZOOM_FACTOR = 0.15;
 const VOLUME_SIZE_FACTOR = 0.02;
+
+let smoothedVolume = 0;
+let musicSpeedBoost = 0;
+let directionMult = 1;
+let zoomFactor = 1;
+let baseSizeBoost = 1;
+
 /**
  * Slow Orbital Drift
  *
@@ -32,6 +39,7 @@ export const orbitalDrift: SplatAnimation = {
   name: 'Orbital Drift',
 
   init(particles: SplatParticle[]) {
+    smoothedVolume = 0;
     const globalDir = Math.random() > 0.5 ? 1 : -1;
     for (const p of particles) {
       // Each particle gets a unique center point ±20px from true 160, 160
@@ -50,9 +58,24 @@ export const orbitalDrift: SplatAnimation = {
       p.animState.orbitRadius = Math.sqrt(
         (p.ox - p.animState.orbitCx) ** 2 + (p.oy - p.animState.orbitCy) ** 2
       );
-      p.animState.lastElapsed = 0;
-      p.animState.smoothedVolume = 0;
     }
+  },
+
+  beforeFrame(
+    _particles: SplatParticle[],
+    elapsed: number,
+    ctx: AnimationContext
+  ) {
+    const levels = ctx.audioLevels;
+    const factor = Math.min(1, (ctx.dt / 16.67) * VOLUME_SMOOTHING);
+    smoothedVolume = smoothValue(smoothedVolume, levels.volume, factor);
+
+    const oscillationSpeed =
+      OSCILLATION_BASE + levels.bass * OSCILLATION_BASS_MULT;
+    directionMult = Math.cos(elapsed * oscillationSpeed);
+    musicSpeedBoost = smoothedVolume * MUSIC_SPEED_BOOST_MULT;
+    zoomFactor = 1.0 + smoothedVolume * VOLUME_ZOOM_FACTOR;
+    baseSizeBoost = 1.0 + smoothedVolume * VOLUME_SIZE_FACTOR;
   },
 
   apply(
@@ -63,35 +86,16 @@ export const orbitalDrift: SplatAnimation = {
     const cx = p.animState.orbitCx ?? DEFAULT_CENTER_X;
     const cy = p.animState.orbitCy ?? DEFAULT_CENTER_Y;
     const { scale } = ctx;
-    const levels = ctx.audioLevels;
-
-    // --- Smoothing & Reactive Timing ---
-    const dt = elapsed - (p.animState.lastElapsed ?? 0);
-    p.animState.lastElapsed = elapsed;
-
-    // Smoothing factor for volume
-    p.animState.smoothedVolume = smoothValue(
-      p.animState.smoothedVolume ?? 0,
-      levels.volume,
-      VOLUME_SMOOTHING
-    );
-    const sVol = p.animState.smoothedVolume;
-
-    // --- Dynamic Direction & Speed ---
-    const oscillationSpeed =
-      OSCILLATION_BASE + levels.bass * OSCILLATION_BASS_MULT;
-    const directionMult = Math.cos(elapsed * oscillationSpeed);
 
     const baseSpeed = p.animState.orbitSpeed ?? BASE_ORBIT_SPEED_MIN;
-    const musicSpeedBoost = sVol * MUSIC_SPEED_BOOST_MULT;
     const currentSpeed = (baseSpeed + musicSpeedBoost) * directionMult;
 
     // Increment angle based on delta time
-    p.animState.orbitAngle = (p.animState.orbitAngle ?? 0) + dt * currentSpeed;
+    p.animState.orbitAngle =
+      (p.animState.orbitAngle ?? 0) + ctx.dt * currentSpeed;
 
     // --- Radial Zoom Out ---
     const dist = p.animState.orbitRadius ?? 0;
-    const zoomFactor = 1.0 + sVol * VOLUME_ZOOM_FACTOR;
     const currentDist = dist * zoomFactor;
 
     const newOx = cx + Math.cos(p.animState.orbitAngle) * currentDist;
@@ -99,14 +103,13 @@ export const orbitalDrift: SplatAnimation = {
 
     // Depth effect: further particles (smaller orbits) are slightly different size
     const sizeMult =
-      1.0 +
-      sVol * VOLUME_SIZE_FACTOR +
+      baseSizeBoost +
       Math.sin(elapsed * 0.001 + p.ox * 0.01) * SIZE_OSCILLATION_AMP;
 
     return {
       dx: (newOx - p.ox) * scale,
       dy: (newOy - p.oy) * scale,
-      sizeMult: sizeMult
+      sizeMult
     };
   }
 };

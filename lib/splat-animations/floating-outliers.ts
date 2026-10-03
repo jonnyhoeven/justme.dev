@@ -46,6 +46,15 @@ const CORE_MID_SIZE_MULT = 0.1;
 const CORE_Z_SIZE_DIVISOR = 200;
 const CORE_SPRING_SCALE = 1.0;
 
+let nudgeChance = NUDGE_CHANCE_BASE;
+let nudgeAmp = NUDGE_AMP_BASE;
+let audioShiver = 0;
+let baseSpringScale = SPRING_SCALE_BASE;
+let bassWanderAmp = 0;
+let bassSize = SIZE_BASE_OUTLIER;
+let coreWobbleAmp = WOBBLE_BASE_AMP;
+let coreBaseSize = CORE_SIZE_BASE;
+
 export const floatingOutliers: SplatAnimation = {
   name: 'Floating Outliers',
 
@@ -61,53 +70,58 @@ export const floatingOutliers: SplatAnimation = {
     }
   },
 
+  beforeFrame(
+    _particles: SplatParticle[],
+    _elapsed: number,
+    ctx: AnimationContext
+  ) {
+    const levels = ctx.audioLevels;
+    nudgeChance = NUDGE_CHANCE_BASE + levels.bass * BASS_NUDGE_CHANCE_MULT;
+    nudgeAmp = NUDGE_AMP_BASE + levels.bass * BASS_NUDGE_AMP_MULT;
+    audioShiver =
+      levels.treble * TREBLE_SHIVER_MULT + levels.mid * MID_SHIVER_MULT;
+    baseSpringScale = Math.max(
+      0.01,
+      SPRING_SCALE_BASE - levels.bass * BASS_SPRING_MULT
+    );
+    bassWanderAmp = levels.bass * BASS_WANDER_AMP_MULT;
+    bassSize = SIZE_BASE_OUTLIER + levels.bass * BASS_SIZE_MULT;
+    coreWobbleAmp = WOBBLE_BASE_AMP + audioShiver;
+    coreBaseSize = CORE_SIZE_BASE + levels.mid * CORE_MID_SIZE_MULT;
+  },
+
   apply(
     p: SplatParticle,
     elapsed: number,
     ctx: AnimationContext
   ): AnimationEffect {
     const { scale } = ctx;
-    const levels = ctx.audioLevels;
 
     // ---- Outlier behavior: Active Wandering Satellite ----
     if (p.animState.isOutlier) {
       const phase = p.animState.outlierPhase ?? 0;
       const freq = p.animState.wanderFreq ?? WANDER_FREQ_DEFAULT;
-      const amp =
-        (p.animState.wanderAmp ?? WANDER_AMP_DEFAULT) +
-        levels.bass * BASS_WANDER_AMP_MULT; // Bass expands wander range
+      const amp = (p.animState.wanderAmp ?? WANDER_AMP_DEFAULT) + bassWanderAmp;
 
       // Slow, organic wander (drift)
       const dx = Math.sin(elapsed * freq + phase) * amp;
       const dy = Math.cos(elapsed * freq * WANDER_FREQ_Y_MULT + phase) * amp;
 
       // Weak spring
-      const springScale = Math.max(
-        0.01,
-        SPRING_SCALE_BASE - levels.bass * BASS_SPRING_MULT
-      );
+      const springScale = baseSpringScale;
 
       // Bass-driven velocity pulse
       let nudgeVx = 0;
       let nudgeVy = 0;
       // High bass levels trigger more frequent nudges
-      const nudgeChance =
-        NUDGE_CHANCE_BASE + levels.bass * BASS_NUDGE_CHANCE_MULT;
       if (Math.random() < nudgeChance) {
-        nudgeVx =
-          (Math.random() - 0.5) *
-          (NUDGE_AMP_BASE + levels.bass * BASS_NUDGE_AMP_MULT);
-        nudgeVy =
-          (Math.random() - 0.5) *
-          (NUDGE_AMP_BASE + levels.bass * BASS_NUDGE_AMP_MULT);
+        nudgeVx = (Math.random() - 0.5) * nudgeAmp;
+        nudgeVy = (Math.random() - 0.5) * nudgeAmp;
       }
 
       // Outliers have more distinct size changes
       const distPhase = Math.sin(elapsed * SIZE_DIST_PHASE_TIME_MULT + phase);
-      const sizeMult =
-        SIZE_BASE_OUTLIER +
-        levels.bass * BASS_SIZE_MULT +
-        distPhase * DIST_PHASE_SIZE_MULT;
+      const sizeMult = bassSize + distPhase * DIST_PHASE_SIZE_MULT;
 
       return {
         dx: dx * scale,
@@ -121,20 +135,13 @@ export const floatingOutliers: SplatAnimation = {
 
     // ---- Core behavior: Subtle Shiver/Wobble driven by Treble ----
     const wobblePhase = p.animState.coreWobblePhase ?? 0;
-    const audioShiver =
-      levels.treble * TREBLE_SHIVER_MULT + levels.mid * MID_SHIVER_MULT;
     const wobbleX =
-      Math.sin(elapsed * WOBBLE_FREQ_X + wobblePhase) *
-      (WOBBLE_BASE_AMP + audioShiver);
+      Math.sin(elapsed * WOBBLE_FREQ_X + wobblePhase) * coreWobbleAmp;
     const wobbleY =
-      Math.cos(elapsed * WOBBLE_FREQ_Y + wobblePhase) *
-      (WOBBLE_BASE_AMP + audioShiver);
+      Math.cos(elapsed * WOBBLE_FREQ_Y + wobblePhase) * coreWobbleAmp;
 
     // Subtle depth pulse for core particles
-    const sizeMult =
-      CORE_SIZE_BASE +
-      levels.mid * CORE_MID_SIZE_MULT +
-      (p.animState.pz ?? 0) / CORE_Z_SIZE_DIVISOR;
+    const sizeMult = coreBaseSize + (p.animState.pz ?? 0) / CORE_Z_SIZE_DIVISOR;
 
     return {
       dx: wobbleX * scale,

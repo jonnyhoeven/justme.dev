@@ -64,9 +64,11 @@ const animCtxAreaCenter = { x: 0, y: 0 };
 const MIN_AVATAR_SCALE = 0.7;
 const MAX_AVATAR_SCALE = 1.25;
 const currentAnimationIndex = ref(0);
-/** Single place that reports what is on screen, so each change logs once. */
-const logActive = (kind: 'avatar' | 'scene', name: string) =>
-  console.log(`🎨 ${kind}: ${name}`);
+const logActive = (kind: 'avatar' | 'scene', name: string) => {
+  if (import.meta.env.DEV) {
+    console.log(`🎨 ${kind}: ${name}`);
+  }
+};
 const currentAnimation = ref<SplatAnimation | null>(null);
 const { width: windowWidth } = useWindowSize();
 const isMobileView = computed(() => windowWidth.value < 768);
@@ -194,6 +196,7 @@ const updateGlow = (
 
 let heroEl: HTMLElement | null = null;
 let resizeObserver: ResizeObserver | null = null;
+let themeObserver: MutationObserver | null = null;
 
 let onShiverMouseMove: ((e: MouseEvent) => void) | null = null;
 
@@ -211,6 +214,15 @@ const nextAnimation = () => {
 };
 
 onMounted(async () => {
+  setDarkTheme(document.documentElement.classList.contains('dark'));
+  themeObserver = new MutationObserver(() => {
+    setDarkTheme(document.documentElement.classList.contains('dark'));
+  });
+  themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class']
+  });
+
   if (!canvasRef.value) return;
   const ctx = canvasRef.value.getContext('2d', {
     alpha: true,
@@ -391,7 +403,6 @@ onMounted(async () => {
     animCtx.areaH = height;
     animCtxAreaCenter.x = animCtx.areaX + animCtx.areaW / 2;
     animCtxAreaCenter.y = height / 2;
-    setDarkTheme(document.documentElement.classList.contains('dark'));
     const dt = Math.min(100, time - lastFrameTime);
     lastFrameTime = time;
     animCtx.dt = dt;
@@ -483,6 +494,7 @@ onMounted(async () => {
     // Repulsion params
     const rRange = repulsionRange;
     const hForce = hoverForce;
+    let lastAlpha = -1;
 
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
@@ -567,7 +579,10 @@ onMounted(async () => {
       p.x += p.vx;
       p.y += p.vy;
 
-      ctx.globalAlpha = alpha;
+      if (alpha !== lastAlpha) {
+        ctx.globalAlpha = alpha;
+        lastAlpha = alpha;
+      }
       const halfSize = 8 * scale * sMult; // 8 = brushSize(16) / 2
 
       if (color) {
@@ -684,6 +699,7 @@ onBeforeUnmount(() => {
   stopLoop();
   startLoop = () => {};
   resizeObserver?.disconnect();
+  themeObserver?.disconnect();
   heroEl?.removeEventListener('mousemove', onMouseMove);
   heroEl?.removeEventListener('mouseleave', onMouseLeave);
   heroEl?.removeEventListener('click', onClick);

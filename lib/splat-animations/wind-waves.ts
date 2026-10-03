@@ -30,6 +30,10 @@ const INTERFERENCE_SPACE_MULT = 1;
 const INTERFERENCE_TIME_MULT = 0.05;
 const INTERFERENCE_Y_WEIGHT = 0.1;
 
+let speed = SPEED_BASE;
+let turbulence = TURBULENCE_BASE;
+let baseAmplitude = AMP_BASE;
+
 export const windWaves: SplatAnimation = {
   name: 'Wind Waves',
 
@@ -42,6 +46,17 @@ export const windWaves: SplatAnimation = {
     }
   },
 
+  beforeFrame(
+    _particles: SplatParticle[],
+    _elapsed: number,
+    ctx: AnimationContext
+  ) {
+    const levels = ctx.audioLevels;
+    speed = SPEED_BASE + levels.mid * MID_SPEED_MULT;
+    turbulence = TURBULENCE_BASE + levels.treble * TREBLE_TURBULENCE_MULT;
+    baseAmplitude = AMP_BASE + levels.bass * BASS_AMP_MULT;
+  },
+
   apply(
     p: SplatParticle,
     elapsed: number,
@@ -50,12 +65,9 @@ export const windWaves: SplatAnimation = {
     const phase = p.animState.wavePhaseOffset ?? 0;
     const ampMult = p.animState.breathAmpMult ?? 1;
     const { scale } = ctx;
-    const levels = ctx.audioLevels;
 
-    const amplitude = (AMP_BASE + levels.bass * BASS_AMP_MULT) * ampMult;
+    const amplitude = baseAmplitude * ampMult;
     const frequency = SPATIAL_FREQ; // spatial frequency
-    // Speed increases with audio mid-range
-    const speed = SPEED_BASE + levels.mid * MID_SPEED_MULT;
 
     // Primary ripple wave
     const waveY =
@@ -71,7 +83,6 @@ export const windWaves: SplatAnimation = {
       (amplitude * WIND_AMP_MULT);
 
     // High-frequency interference layer for turbulence (driven by treble)
-    const turbulence = TURBULENCE_BASE + levels.treble * TREBLE_TURBULENCE_MULT;
     const interference =
       Math.sin(
         p.oy * INTERFERENCE_SPACE_MULT + elapsed * INTERFERENCE_TIME_MULT

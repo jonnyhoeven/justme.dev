@@ -39,6 +39,12 @@ const SPRING_SCALE_BASE = 0.8;
 const SPRING_VELOCITY_MULT = 0.4;
 const SPRING_AUDIO_MULT = 0.5;
 
+let churnSpeed = CHURN_SPEED_BASE;
+let layer1Amp = LAYER1_AMP_BASE;
+let layer2Amp = LAYER2_AMP_BASE;
+let layer3Amp = LAYER3_AMP_BASE;
+let audioBoost = 0;
+
 export const flubberMotion: SplatAnimation = {
   name: 'Flubber Motion',
 
@@ -52,6 +58,19 @@ export const flubberMotion: SplatAnimation = {
     }
   },
 
+  beforeFrame(
+    _particles: SplatParticle[],
+    _elapsed: number,
+    ctx: AnimationContext
+  ) {
+    const levels = ctx.audioLevels;
+    churnSpeed = CHURN_SPEED_BASE + levels.mid * CHURN_MID_MULT;
+    layer1Amp = LAYER1_AMP_BASE + levels.bass * LAYER1_BASS_MULT;
+    layer2Amp = LAYER2_AMP_BASE + levels.mid * LAYER2_MID_MULT;
+    layer3Amp = LAYER3_AMP_BASE + levels.treble * TREBLE_ENERGY_MULT;
+    audioBoost = levels.volume * AUDIO_BOOST_MULT;
+  },
+
   apply(
     p: SplatParticle,
     elapsed: number,
@@ -60,38 +79,24 @@ export const flubberMotion: SplatAnimation = {
     const phase = p.animState.breathPhaseOffset ?? 0;
     const ampMult = p.animState.breathAmpMult ?? 1;
     const { scale } = ctx;
-    const levels = ctx.audioLevels;
-
-    // --- Audio Reactivity ---
-    const audioBoost = levels.volume * AUDIO_BOOST_MULT;
 
     // --- The "Lumpy" Logic ---
     // We use 3 layers of motion moving at different speeds (flubber-style)
     // Layer 1: Large slow pulse (The "Breath") - Bass drives extra expand
     const layer1 =
-      Math.sin(elapsed * LAYER1_TIME_MULT + phase) *
-      (LAYER1_AMP_BASE + levels.bass * LAYER1_BASS_MULT) *
-      ampMult;
+      Math.sin(elapsed * LAYER1_TIME_MULT + phase) * layer1Amp * ampMult;
 
     // Layer 2: Medium lumpy swell (The "Churn")
     // Mid/Bass frequencies increase the churn speed and amplitude
-    const churnSpeed = CHURN_SPEED_BASE + levels.mid * CHURN_MID_MULT;
     const lumpyPhaseX = elapsed * churnSpeed + p.ox * LUMPY_SPACE_MULT_X;
     const lumpyPhaseY = elapsed * churnSpeed + p.oy * LUMPY_SPACE_MULT_Y;
-    const layer2X =
-      Math.sin(lumpyPhaseX) * (LAYER2_AMP_BASE + levels.mid * LAYER2_MID_MULT);
-    const layer2Y =
-      Math.cos(lumpyPhaseY) * (LAYER2_AMP_BASE + levels.mid * LAYER2_MID_MULT);
+    const layer2X = Math.sin(lumpyPhaseX) * layer2Amp;
+    const layer2Y = Math.cos(lumpyPhaseY) * layer2Amp;
 
     // Layer 3: Toxic shiver (The "Energy")
     // Ultra-fast vibrations driven by Treble frequencies
-    const treblyEnergy = levels.treble * TREBLE_ENERGY_MULT;
-    const layer3X =
-      Math.sin(elapsed * LAYER3_TIME_MULT_X + phase) *
-      (LAYER3_AMP_BASE + treblyEnergy);
-    const layer3Y =
-      Math.cos(elapsed * LAYER3_TIME_MULT_Y + phase) *
-      (LAYER3_AMP_BASE + treblyEnergy);
+    const layer3X = Math.sin(elapsed * LAYER3_TIME_MULT_X + phase) * layer3Amp;
+    const layer3Y = Math.cos(elapsed * LAYER3_TIME_MULT_Y + phase) * layer3Amp;
 
     // Combine for final displacement
     const dx = (layer1 * LAYER1_WEIGHT + layer2X + layer3X) * scale;

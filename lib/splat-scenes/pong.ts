@@ -55,6 +55,8 @@ const LINE_COLOR = '120, 130, 150';
 // Particle groups in draw order: walls, net, score, trail, paddles, ball
 const SHARE = [0.12, 0.08, 0.25, 0.3, 0.1, 0.1, 0.05];
 const bounds: number[] = [];
+let groupLookup = new Uint8Array(0);
+let groupOffset: number[] = [];
 
 // Court (px, canvas space), recomputed every frame
 let x0 = 0;
@@ -206,6 +208,18 @@ export const pong: SplatScene = {
     }
     bounds[bounds.length - 1] = particles.length;
 
+    groupLookup = new Uint8Array(particles.length);
+    groupOffset = new Array(bounds.length);
+    let start = 0;
+    for (let g = 0; g < bounds.length; g++) {
+      groupOffset[g] = start;
+      const end = bounds[g];
+      for (let i = start; i < end; i++) {
+        groupLookup[i] = g;
+      }
+      start = end;
+    }
+
     scoreL = scoreR = 0;
     padLY = padRY = ctx.areaY + ctx.areaH / 2;
     recoilL = recoilR = 0;
@@ -248,9 +262,10 @@ export const pong: SplatScene = {
   },
 
   target(_p, i, _elapsed, _ctx, out) {
-    const g = bounds.findIndex((b) => i < b);
-    const j = i - (bounds[g - 1] ?? 0);
-    const count = bounds[g] - (bounds[g - 1] ?? 0);
+    const g = groupLookup[i];
+    const offset = groupOffset[g];
+    const j = i - offset;
+    const count = bounds[g] - offset;
     out.colorOverride = LINE_COLOR;
 
     switch (g) {
