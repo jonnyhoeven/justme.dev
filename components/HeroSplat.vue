@@ -86,7 +86,7 @@ const BEAT_PUNCH = 2.5;
 const BEAT_SIZE_PUMP = 0.45;
 // The avatar also breathes: bass/kicks swell its whole outline (fraction of radius)
 const BEAT_SWELL = 0.07;
-const sceneOut: SceneTarget = { x: 0, y: 0, sizeMult: 1 };
+const sceneOut: SceneTarget = { x: 0, y: 0, sizeMult: 1, alpha: 1 };
 const smoothstep = (t: number) => {
   const c = Math.min(1, Math.max(0, t));
   return c * c * (3 - 2 * c);
@@ -496,6 +496,7 @@ onMounted(async () => {
         const m = smoothstep((morph - delay) / (1 - stagger));
         if (m > 0) {
           sceneOut.sizeMult = 1;
+          sceneOut.alpha = 1;
           sceneOut.colorOverride = undefined;
           scene.target(p, i, sceneElapsed, animCtx, sceneOut);
           targetOx += (sceneOut.x - targetOx) * m;
@@ -507,7 +508,7 @@ onMounted(async () => {
           const leftFade = SITE_CONSTANTS.SPLAT_SCENE_LEFT_FADE;
           const xFade =
             leftFade + (1 - leftFade) * smoothstep((p.x / width) * 1.3);
-          alpha = 1 - (1 - (scene.alpha ?? 1) * xFade) * m;
+          alpha = 1 - (1 - (scene.alpha ?? 1) * xFade * sceneOut.alpha) * m;
         }
       }
       const effectiveSpring = spring * springMul;
