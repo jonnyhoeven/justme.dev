@@ -21,6 +21,8 @@ export const SITE_CONSTANTS = {
     GOOGLE_DEV: 'https://g.dev/jonnyvanderhoeven',
     REPO: 'https://github.com/jonnyhoeven/justme.dev'
   },
+  /** Viewport width (px) below which the hero shows the static avatar and the music mini-player is hidden. CSS media queries can't read this; keep them at `MOBILE_BREAKPOINT - 1` / `MOBILE_BREAKPOINT` (768px). */
+  MOBILE_BREAKPOINT: 768,
   /** How long the avatar animation runs before morphing into a scene (ms) */
   SPLAT_CYCLE_TIME: 15000,
   /** How long a full-canvas scene runs before morphing back (ms) */

@@ -71,7 +71,9 @@ const logActive = (kind: 'avatar' | 'scene', name: string) => {
 };
 const currentAnimation = ref<SplatAnimation | null>(null);
 const { width: windowWidth } = useWindowSize();
-const isMobileView = computed(() => windowWidth.value < 768);
+const isMobileView = computed(
+  () => windowWidth.value < SITE_CONSTANTS.MOBILE_BREAKPOINT
+);
 const shiverIntensity = ref(0);
 let startTime = performance.now();
 
@@ -160,6 +162,10 @@ const updateGlow = (
   sceneCtx: AnimationContext
 ) => {
   glowLevel += (target - glowLevel) * 0.08;
+  glowRef.value?.classList.toggle(
+    'splat-glow--rect',
+    scene?.glowShape === 'rect'
+  );
   // Skip writes while the value is effectively unchanged
   if (
     (Math.abs(glowLevel - lastGlowWrite) < 0.004 && morph === lastGlowMorph) ||
@@ -175,14 +181,14 @@ const updateGlow = (
   let cy = animCtxAreaCenter.y;
   let rx = 1;
   let ry = 1;
-  let core = 0;
+  // Solid glow everywhere except Dot Shapes, which keeps a hollow centre
+  const core = scene?.name === 'Dot Shapes' ? 1 - morph : 1;
   if (scene?.glowRect) {
     scene.glowRect(sceneCtx, glowRect);
     cx = glowRect.x;
     cy = glowRect.y;
     rx = glowRect.w / glowSize;
     ry = glowRect.h / glowSize;
-    core = morph;
   }
   const gx = (cx - anchorPx.x) * morph;
   const gy = (cy - anchorPx.y) * morph;
@@ -755,7 +761,8 @@ const onClick = (e: MouseEvent) => {
   position: absolute;
 }
 
-@media (max-width: 959px) {
+/* Keep in sync with SITE_CONSTANTS.MOBILE_BREAKPOINT (768) */
+@media (max-width: 767px) {
   .HeroSplat {
     margin-top: 24px;
   }
@@ -781,16 +788,30 @@ const onClick = (e: MouseEvent) => {
    past it so particles can drift without hitting a hard edge. */
 .splat-layer {
   --bleed: 24px;
+  /* VitePress' .VPHero bottom padding (64px from 640px up): the layer runs to
+     the hero's edge so it is clipped by the feature cards, not mid-air. */
+  --hero-pad-bottom: 64px;
+  /* Tuck the layer this far under the fixed nav bar so it is clipped by the
+     header with no gap, whatever the exact nav height rounds to. */
+  --nav-overlap: 8px;
+  /* Hero top padding minus the nav height: the layer runs up to the header. */
+  --hero-pad-top: calc(
+    var(--vp-home-hero-padding-top-mobile) - var(--vp-nav-height)
+  );
   position: absolute;
   inset: calc(var(--bleed) * -1);
+  top: calc((var(--hero-pad-top) + var(--nav-overlap)) * -1);
+  bottom: calc(var(--hero-pad-bottom) * -1);
   z-index: 0;
   pointer-events: none;
-  /* Feather the edges so the canvas never shows a visible rectangle */
-  mask-image:
-    linear-gradient(to right, transparent, #000 5%, #000 95%, transparent),
-    linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent);
-  mask-composite: intersect;
-  -webkit-mask-composite: source-in;
+}
+
+@media (min-width: 960px) {
+  .splat-layer {
+    --hero-pad-top: calc(
+      var(--vp-home-hero-padding-top) - var(--vp-nav-height)
+    );
+  }
 }
 
 /* The old VitePress .image-bg glow: same theme gradients, but softened with a
@@ -807,6 +828,17 @@ const onClick = (e: MouseEvent) => {
     transparent 100%
   );
   will-change: opacity, transform;
+}
+
+/* Rectangular glow (Pong arena): two crossed linear fades give feathered,
+   square-ish edges instead of the elliptical falloff. */
+.splat-glow--rect {
+  border-radius: 8%;
+  mask-image:
+    linear-gradient(to right, transparent, #000 14%, #000 86%, transparent),
+    linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
 }
 
 canvas {

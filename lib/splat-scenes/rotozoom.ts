@@ -33,7 +33,7 @@ let midY = 0;
 export const rotozoom: SplatScene = {
   name: 'Rotozoom',
   alpha: 0.8,
-  glow: 0.4,
+  glow: 0,
 
   init(particles: SplatParticle[]) {
     count = particles.length;

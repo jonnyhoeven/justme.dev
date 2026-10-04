@@ -50,14 +50,16 @@ h6,
   border: 1px solid var(--glass-border-dark) !important;
 }
 
-.VPFeature:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-brand-lg) !important;
-}
+@media (hover: hover) {
+  .VPFeature:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-brand-lg) !important;
+  }
 
-.dark .VPFeature:hover {
-  box-shadow: 0 10px 24px rgba(99, 102, 241, 0.25) !important;
-  border-color: var(--vp-c-brand-1-alpha-40) !important;
+  .dark .VPFeature:hover {
+    box-shadow: 0 10px 24px rgba(99, 102, 241, 0.25) !important;
+    border-color: var(--vp-c-brand-1-alpha-40) !important;
+  }
 }
 
 .custom-block {

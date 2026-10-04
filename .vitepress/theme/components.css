@@ -25,9 +25,15 @@
   padding: 0 12px 0 16px !important;
   height: 38px !important;
   width: auto !important;
-  min-width: 140px !important;
   transition: all var(--duration-normal) var(--ease-smooth) !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+@media (min-width: 768px) {
+  .VPSearchButton,
+  .DocSearch-Button {
+    min-width: 140px !important;
+  }
 }
 
 .dark .VPSearchButton,
@@ -37,18 +43,20 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
 }
 
-.VPSearchButton:hover,
-.DocSearch-Button:hover {
-  background-color: rgba(var(--vp-c-bg-elv-rgb), 0.6) !important;
-  transform: translateY(-2px) scale(1.02) !important;
-  box-shadow: 0 8px 16px var(--vp-c-brand-1-alpha-15) !important;
-  border-color: var(--vp-c-brand-2) !important;
-}
+@media (hover: hover) {
+  .VPSearchButton:hover,
+  .DocSearch-Button:hover {
+    background-color: rgba(var(--vp-c-bg-elv-rgb), 0.6) !important;
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 8px 16px var(--vp-c-brand-1-alpha-15) !important;
+    border-color: var(--vp-c-brand-2) !important;
+  }
 
-.dark .VPSearchButton:hover,
-.dark .DocSearch-Button:hover {
-  background-color: rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4) !important;
+  .dark .VPSearchButton:hover,
+  .dark .DocSearch-Button:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4) !important;
+  }
 }
 
 /* Internal components of the search button */

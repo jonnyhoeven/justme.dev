@@ -35,8 +35,8 @@ export const copperBars: SplatScene = {
     // The glow stretches into one wide bar through the middle of the hero
     out.x = ctx.areaX + ctx.areaW / 2;
     out.y = ctx.areaY + ctx.areaH / 2;
-    out.w = ctx.areaW * 1.25;
-    out.h = ctx.areaH * 0.3;
+    out.w = ctx.areaW * 0.95;
+    out.h = ctx.areaH * 0.15;
   },
 
   init(particles: SplatParticle[]) {

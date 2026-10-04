@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onBeforeUnmount, watch, computed } from 'vue';
 import { useWindowSize } from '@vueuse/core';
+import { SITE_CONSTANTS } from '../.vitepress/constants';
 import useMusic from '../.vitepress/theme/composables/useMusic';
 import type { XMPlayer } from '../lib/audio/xm-player';
 import type { MusicTrack } from '../data/music.data';
@@ -69,7 +70,9 @@ const trackTooltip = computed(() => {
 });
 
 const { width: windowWidth } = useWindowSize();
-const isMobileView = computed(() => windowWidth.value < 768);
+const isMobileView = computed(
+  () => windowWidth.value < SITE_CONSTANTS.MOBILE_BREAKPOINT
+);
 
 const volume = ref(0.7);
 const isVolumeOpen = ref(false);
@@ -457,17 +460,6 @@ onBeforeUnmount(() => {
   left: 50%;
   transform: translateX(-50%);
   z-index: 100;
-}
-
-@media (max-width: 767px) {
-  .music-mini-player {
-    position: relative;
-    left: 0;
-    transform: none;
-    width: 150px !important;
-    min-width: 150px !important;
-    margin: 0 10px;
-  }
 }
 
 .mini-controls {

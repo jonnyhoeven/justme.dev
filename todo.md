@@ -6,7 +6,7 @@ This document outlines the roadmap and requirements for hosting large 3D Gaussia
 
 ## 📌 Context & Cloudflare R2 Setup
 
-- **Cloudflare R2 Console**: [Cloudflare R2 Overview](https://dash.cloudflare.com/df22016f7c6305bfd306445c79947e9d/r2/overview)
+- **Cloudflare R2 Console**: Cloudflare dashboard → R2 → Overview
 - **Primary Objective**: Offload heavy static assets (Gaussian Splat `.splat`/`.ply`/`.ksplat` models, audio files, high-res images) from the Git repository and GitHub Pages deployment bundle onto high-performance, zero-egress-fee cloud storage.
 - **Site URL**: `https://justme.dev` (Local: `http://localhost:5173`)
 
@@ -46,7 +46,7 @@ This document outlines the roadmap and requirements for hosting large 3D Gaussia
 
 ### Phase 2: Local Staging & Sync Scripting
 
-- [ ] Add `/cdn/` to [`.gitignore`](file:///Users/john/IdeaProjects/justme.dev/.gitignore).
+- [ ] Add `/cdn/` to [`.gitignore`](.gitignore).
 - [ ] Organize local staging assets:
   ```
   cdn/
@@ -63,13 +63,23 @@ This document outlines the roadmap and requirements for hosting large 3D Gaussia
   - Responsive canvas sizing.
   - Progressive streaming of `.splat` files from `https://cdn.justme.dev/splats/<name>.splat`.
   - Orbit camera controls and touch navigation for mobile.
-  - `IntersectionObserver` lifecycle management (pause rendering when canvas is outside the viewport per `GEMINI.md`).
+  - `IntersectionObserver` lifecycle management (pause rendering when canvas is outside the viewport per `AGENTS.md` rule 4).
 - [ ] Add a demo page or section in the documentation portal displaying the live 3D capture.
 
 ### Phase 4: CI Pre-Deployment & Integrity Validation
 
-- [ ] Create `scripts/verify_cdn_assets.py` to run in [`.github/workflows/deploy.yml`](file:///Users/john/IdeaProjects/justme.dev/.github/workflows/deploy.yml) before `docs:build`.
+- [ ] Create `scripts/verify_cdn_assets.py` to run in [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) before `docs:build`.
 - [ ] Validate that all splat models and audio files referenced in site constants return HTTP 200/206 with correct `Content-Type` and CORS headers.
+
+---
+
+## 🔤 Fonts on Cloudflare R2
+
+- [ ] Fonts can't be bundled locally, so serve them from the R2 bucket next to the images (e.g. `cdn.justme.dev/fonts/`).
+  - [ ] Upload Inter (400-700) and Outfit (400-800) as `.woff2`.
+  - [ ] Add `@font-face` rules (`font-display: swap`) in `.vitepress/theme/` pointing at the R2 URLs.
+  - [ ] Replace the Google Fonts `<link>` tags (`preconnect` + stylesheet) in `.vitepress/config.mts` with a `preload` for the critical weights.
+  - [ ] Ensure the R2 CORS policy allows font requests from the site origins.
 
 ---
 
@@ -84,7 +94,7 @@ The orphaned `tests/e2e/blog.spec.js` file was removed because `@playwright/test
 ### Key Technical Considerations
 
 1. **Card Link Selector Bug Fix (`a.post-title a` vs `a.stretched-link`)**:
-   - In [`components/ArticleList.vue`](file:///Users/john/IdeaProjects/justme.dev/components/ArticleList.vue), article cards use two distinct link elements:
+   - In [`components/ArticleList.vue`](components/ArticleList.vue), article cards use two distinct link elements:
      - The visible title heading: `<h3 class="post-title"><a :href="page.url" class="nolinkdecor">{{ page.frontmatter.title }}</a></h3>`
      - The absolute overlay hit area: `<a :href="page.url" class="stretched-link" :aria-label="..."></a>`
    - The original spec searched for `a.stretched-link.nolinkdecor`, erroneously expecting both classes on a single element.
@@ -108,3 +118,18 @@ The orphaned `tests/e2e/blog.spec.js` file was removed because `@playwright/test
   - [ ] Add Hero splat canvas rendering and Easter Egg audio toggle interaction tests.
 - [ ] **Phase 3: CI Integration**
   - [ ] Add Playwright execution step to `.github/workflows/deploy.yml` within the Nix CI job.
+
+---
+
+## 📱 Phone Layout Follow-ups
+
+Remaining items from the phone layout review. Needs a real-device or emulator check at 375px, 414px and 700px wide.
+
+- [ ] **Fallback avatar spacing** ([`components/HeroSplat.vue`](components/HeroSplat.vue)): `.fallback-image` is `position: absolute; height: 100%` with a hardcoded `padding-top: 7.5rem`, plus the 24px margin and `--vp-home-hero-padding-top-mobile` (64px). Verify it doesn't overlap the hero buttons or leave a large gap, then move it into the normal flow if needed.
+  - [ ] Add `width`/`height` attributes to the avatar `<img>` to avoid layout shift while loading.
+- [ ] **Backdrop blur cost on mobile**: the navbar, `.VPFeature` and `.custom-block` all use `backdrop-filter: blur(...)`. Profile scrolling on a low-end phone and reduce or drop the blur below 768px if it janks.
+- [ ] **Homepage spacing** ([`.vitepress/theme/layout.css`](.vitepress/theme/layout.css)): `.homepage-content { margin-top: 8rem }` and `.recent-posts { gap: 4.5rem }` are the same on every screen. Scale them down, e.g. `clamp(4rem, 10vw, 8rem)`.
+- [ ] **Embeds and touch hover**:
+  - [ ] Ensure iframes in blog posts (`.embed-frame`, `.embed-video`) have `max-width: 100%` so they don't overflow phones.
+  - [ ] Wrap the remaining `:hover` transforms (`.view-all-button`, `.container_row:hover`, `.shieldButton:hover`) in `@media (hover: hover)`.
+- [ ] **Music easter egg on phones**: the mini-player is hidden below `SITE_CONSTANTS.MOBILE_BREAKPOINT` (768px), so music is unavailable on phones. Decide whether to add a compact player.

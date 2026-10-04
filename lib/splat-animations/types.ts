@@ -145,6 +145,8 @@ export interface SplatScene {
    * Write into `out`; called every frame.
    */
   glowRect?(ctx: AnimationContext, out: GlowRect): void;
+  /** Shape of the glow when `glowRect` is used: a soft ellipse (default) or a rectangle with feathered edges. */
+  glowShape?: 'ellipse' | 'rect';
   /** Assign slots / build lookups. Called once per scene start. */
   init(particles: SplatParticle[], ctx: AnimationContext): void;
   /** Per-frame precompute. `elapsed` is ms since the scene started. */

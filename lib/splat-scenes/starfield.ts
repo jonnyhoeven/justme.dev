@@ -27,7 +27,7 @@ export const starfield: SplatScene = {
     out.x = ctx.areaX + ctx.areaW / 2;
     out.y = ctx.areaY + ctx.areaH / 2;
     out.w = ctx.areaW * 1.3;
-    out.h = ctx.areaH * 0.28;
+    out.h = ctx.areaH * 0.14;
   },
 
   init(particles: SplatParticle[]) {

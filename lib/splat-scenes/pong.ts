@@ -74,6 +74,10 @@ let dots = { wall: 1, net: 1, score: 1, trail: 1, paddle: 1, ball: 1 };
 // Game state
 let bx = 0;
 let by = 0;
+// Displayed ball position: glides to the serve spot instead of teleporting,
+// so the spring-driven particles don't overshoot a sudden jump
+let shX = 0;
+let shY = 0;
 let dirX = 1;
 let slope = 0;
 let rally = 0;
@@ -119,8 +123,6 @@ function serve() {
   ballColor = NEUTRAL;
   offsetL = aim();
   offsetR = aim();
-  trailX.fill(bx);
-  trailY.fill(by);
 }
 
 function score(left: boolean) {
@@ -190,6 +192,7 @@ export const pong: SplatScene = {
   name: 'Particle Pong',
   alpha: 0.9,
   glow: 0.7,
+  glowShape: 'rect',
 
   glowRect(_ctx, out) {
     // The glow lights up the arena itself
@@ -226,6 +229,10 @@ export const pong: SplatScene = {
     trailAcc = 0;
     layoutCourt(ctx);
     serve();
+    shX = bx;
+    shY = by;
+    trailX.fill(bx);
+    trailY.fill(by);
   },
 
   beforeFrame(_elapsed, ctx) {
@@ -237,14 +244,22 @@ export const pong: SplatScene = {
 
     const { beat } = ctx.audioLevels;
     step(Math.min(ctx.dt, 50), beat);
+    if (serveTimer > 0) {
+      const k = 1 - Math.exp(-Math.min(ctx.dt, 50) / 150);
+      shX += (bx - shX) * k;
+      shY += (by - shY) * k;
+    } else {
+      shX = bx;
+      shY = by;
+    }
 
     trailAcc += ctx.dt;
     while (trailAcc >= TRAIL_STEP) {
       trailAcc -= TRAIL_STEP;
       trailX.copyWithin(1, 0);
       trailY.copyWithin(1, 0);
-      trailX[0] = bx;
-      trailY[0] = by;
+      trailX[0] = shX;
+      trailY[0] = shY;
     }
 
     const n = (g: number) => Math.max(1, bounds[g] - (bounds[g - 1] ?? 0));
@@ -338,8 +353,8 @@ export const pong: SplatScene = {
         // the ball: a small disc
         const r = Math.sqrt((j + 0.5) / count) * ballRadius * 0.7;
         const a = j * 2.399963;
-        out.x = bx + Math.cos(a) * r;
-        out.y = by + Math.sin(a) * r;
+        out.x = shX + Math.cos(a) * r;
+        out.y = shY + Math.sin(a) * r;
         out.sizeMult = dots.ball;
         out.colorOverride = ballColor;
       }
