@@ -31,9 +31,6 @@ importers:
       '@vueuse/core':
         specifier: ^14.4.0
         version: 14.4.0(vue@3.5.43(typescript@6.0.3))
-      esbuild:
-        specifier: 0.25.0
-        version: 0.25.0
       eslint:
         specifier: ^9.39.5
         version: 9.39.5
