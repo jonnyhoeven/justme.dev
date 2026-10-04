@@ -607,9 +607,17 @@ onMounted(async () => {
     if (!tagline || tagline.querySelector('.it-btn')) return;
     const text = tagline.textContent || '';
     if (text.includes('it!')) {
-      tagline.innerHTML = text.replace(
-        'it!',
-        '<span class="it-btn" style="cursor: pointer; transition: all 0.2s ease; font-weight: bold;">it!</span>'
+      // Build nodes instead of assigning innerHTML so tagline text is never parsed as markup.
+      const [before] = text.split('it!', 1);
+      const span = document.createElement('span');
+      span.className = 'it-btn';
+      span.style.cssText =
+        'cursor: pointer; transition: all 0.2s ease; font-weight: bold;';
+      span.textContent = 'it!';
+      tagline.replaceChildren(
+        document.createTextNode(before),
+        span,
+        document.createTextNode(text.slice(before.length + 3))
       );
       const btn = tagline.querySelector('.it-btn') as HTMLElement;
       if (btn) {

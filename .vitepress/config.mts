@@ -37,7 +37,7 @@ export default defineConfig({
       }
     ],
     // Static Opengraph stuff
-    ['meta', { property: 'og:sitename', content: SITE_CONSTANTS.SITE_NAME }],
+    ['meta', { property: 'og:site_name', content: SITE_CONSTANTS.SITE_NAME }],
     ['meta', { property: 'og:locale', content: SITE_CONSTANTS.LANG }],
     ['meta', { property: 'og:type', content: 'article' }],
     ['meta', { property: 'article:author', content: SITE_CONSTANTS.AUTHOR }],
@@ -193,10 +193,10 @@ export default defineConfig({
     footer: {
       message:
         `<span class="badge-wrapper" style="display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem;">` +
-        `<a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/deploy.yml" target="_blank">` +
+        `<a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/deploy.yml" target="_blank" rel="noopener noreferrer">` +
         `   <img alt="Github deploy workflow status badge" height="20px" src="https://img.shields.io/github/actions/workflow/status/jonnyhoeven/justme.dev/deploy.yml?branch=main">` +
         '</a>' +
-        `<a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/github-code-scanning/codeql" target="_blank">` +
+        `<a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/github-code-scanning/codeql" target="_blank" rel="noopener noreferrer">` +
         `   <img alt="Github code scanning badge" height="20px" src="https://img.shields.io/github/actions/workflow/status/jonnyhoeven/justme.dev/dynamic/github-code-scanning/codeql?branch=main">` +
         '</a>' +
         `</span>`,
