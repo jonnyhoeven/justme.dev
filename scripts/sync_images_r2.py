@@ -53,6 +53,17 @@ def load_env() -> dict[str, str]:
     }
 
 
+def compute_file_md5(filepath: Path) -> str:
+    """Calculate MD5 hash of a local file."""
+    import hashlib
+
+    hasher = hashlib.md5()
+    with open(filepath, "rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            hasher.update(chunk)
+    return hasher.hexdigest()
+
+
 def list_existing_r2_objects(s3: Any, bucket: str, prefix: str = "") -> dict[str, dict[str, Any]]:
     """List all objects currently in the R2 bucket under prefix."""
     print(f"Fetching existing objects from R2 bucket '{bucket}' (prefix: '{prefix}')...")
@@ -141,6 +152,9 @@ def main() -> None:
     print(f"Discovered {len(local_files)} image files.")
 
     existing_objects = list_existing_r2_objects(s3, cfg["bucket_name"], args.prefix)
+    local_remote_keys = {rk for _, rk in local_files}
+    orphaned_keys = [k for k in existing_objects if k not in local_remote_keys]
+
     to_upload: list[tuple[Path, str]] = []
 
     for local_path, remote_key in local_files:
@@ -148,10 +162,29 @@ def main() -> None:
             rem = existing_objects[remote_key]
             local_size = local_path.stat().st_size
             if rem["size"] == local_size:
-                continue
+                if rem.get("etag") and "-" not in rem["etag"]:
+                    local_hash = compute_file_md5(local_path)
+                    if local_hash.lower() == rem["etag"].lower():
+                        continue
+                else:
+                    continue
         to_upload.append((local_path, remote_key))
 
     print(f"Images needing upload: {len(to_upload)} / {len(local_files)}")
+    print(f"Orphaned remote images to delete: {len(orphaned_keys)}")
+
+    if orphaned_keys:
+        for i in range(0, len(orphaned_keys), 1000):
+            batch = orphaned_keys[i : i + 1000]
+            if args.dry_run:
+                for k in batch:
+                    print(f"[DRY-RUN] Delete remote {k}")
+            else:
+                delete_payload = {"Objects": [{"Key": k} for k in batch]}
+                s3.delete_objects(Bucket=cfg["bucket_name"], Delete=delete_payload)
+                for k in batch:
+                    print(f"Deleted remote {k}")
+        print(f"Cleaned up {len(orphaned_keys)} orphaned remote images from R2.")
 
     if to_upload:
         completed = 0

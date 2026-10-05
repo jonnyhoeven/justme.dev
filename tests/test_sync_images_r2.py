@@ -63,6 +63,14 @@ def test_upload_single_file(tmp_path: Path) -> None:
     assert upload_single_file(mock_s3, "bucket", test_file, "images/img.webp", dry_run=False) is False
 
 
+def test_compute_file_md5(tmp_path: Path) -> None:
+    from scripts.sync_images_r2 import compute_file_md5
+
+    test_file = tmp_path / "img.webp"
+    test_file.write_bytes(b"sample bytes")
+    assert compute_file_md5(test_file) == "1c9760fe707208d0ae9ff600ddf6cc9d"
+
+
 def test_sync_images_main_flow(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("R2_ENDPOINT_URL", "https://example.com")
     monkeypatch.setenv("R2_BUCKET_NAME", "media")

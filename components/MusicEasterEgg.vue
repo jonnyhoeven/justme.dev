@@ -188,6 +188,14 @@ const {
   overscan: 10
 });
 
+// When search query or favorites filter changes, reset scroll position so top items are rendered
+watch([searchQuery, onlyFavorites], () => {
+  if (containerProps.ref.value) {
+    containerProps.ref.value.scrollTop = 0;
+  }
+  scrollTo(0);
+});
+
 const scrollToCurrentTrack = () => {
   if (!isPlaylistOpen.value) {
     isPlaylistOpen.value = true;
@@ -732,10 +740,10 @@ onBeforeUnmount(() => {
                   onlyFavorites ? 'Show all tracks' : 'Show favorites only'
                 "
               >
-                ★ {{ favorites.size }}
+                ★
               </button>
               <span class="track-count-badge">
-                {{ filteredTracks.length }} / {{ tracks.length }}
+                {{ filteredTracks.length }}
               </span>
             </div>
           </div>

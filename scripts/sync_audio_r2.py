@@ -248,8 +248,11 @@ def main() -> None:
     )
     print(f"Discovered {len(local_files)} files to consider (Playable XM tracks: {len(tracks)}).")
 
-    # Check remote objects for delta sync
+    # Check remote objects for delta sync and deletions
     existing_objects = list_existing_r2_objects(s3, cfg["bucket_name"], args.prefix)
+    local_remote_keys = {rk for _, rk in local_files}
+    orphaned_keys = [k for k in existing_objects if k not in local_remote_keys]
+
     to_upload: list[tuple[Path, str]] = []
 
     for local_path, remote_key in local_files:
@@ -257,10 +260,31 @@ def main() -> None:
             rem = existing_objects[remote_key]
             local_size = local_path.stat().st_size
             if rem["size"] == local_size:
-                continue
+                # If sizes match, check MD5 digest against remote ETag
+                if rem.get("etag") and "-" not in rem["etag"]:
+                    local_hash = compute_file_md5(local_path)
+                    if local_hash.lower() == rem["etag"].lower():
+                        continue
+                else:
+                    continue
         to_upload.append((local_path, remote_key))
 
     print(f"Files needing upload: {len(to_upload)} / {len(local_files)}")
+    print(f"Orphaned remote files to delete: {len(orphaned_keys)}")
+
+    # Delete orphaned remote objects (batch delete up to 1000 per request)
+    if orphaned_keys:
+        for i in range(0, len(orphaned_keys), 1000):
+            batch = orphaned_keys[i : i + 1000]
+            if args.dry_run:
+                for k in batch:
+                    print(f"[DRY-RUN] Delete remote {k}")
+            else:
+                delete_payload = {"Objects": [{"Key": k} for k in batch]}
+                s3.delete_objects(Bucket=cfg["bucket_name"], Delete=delete_payload)
+                for k in batch:
+                    print(f"Deleted remote {k}")
+        print(f"Cleaned up {len(orphaned_keys)} orphaned remote files from R2.")
 
     if to_upload:
         completed = 0
@@ -286,6 +310,7 @@ def main() -> None:
     output_catalog.parent.mkdir(parents=True, exist_ok=True)
     with open(output_catalog, "w", encoding="utf-8") as f:
         json.dump(tracks, f, indent=2)
+        f.write("\n")
 
     print(f"Wrote {len(tracks)} tracks to {output_catalog}")
     print("Sync process completed successfully!")
