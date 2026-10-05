@@ -20,6 +20,8 @@ describe('useMusic composable', () => {
     music.currentTrackIndex.value = 0;
     music.setCurrentTime(0);
     music.setSplatVisible(false);
+    music.isShuffle.value = false;
+    music.history.value = [];
   });
 
   it('exports default and named useMusic returning identical singleton state', () => {
@@ -75,5 +77,39 @@ describe('useMusic composable', () => {
 
     prevTrack();
     expect(currentTrackIndex.value).toBe(1);
+  });
+
+  it('handles shuffle mode and tracks navigation history', () => {
+    const {
+      toggleShuffle,
+      isShuffle,
+      nextTrack,
+      prevTrack,
+      setTrackIndex,
+      currentTrackIndex,
+      history
+    } = useMusic();
+
+    expect(isShuffle.value).toBe(false);
+    toggleShuffle();
+    expect(isShuffle.value).toBe(true);
+
+    const initial = currentTrackIndex.value;
+    nextTrack();
+    // After moving to next track, initial index is in history
+    expect(history.value).toContain(initial);
+
+    // prevTrack pops from history
+    prevTrack();
+    expect(currentTrackIndex.value).toBe(initial);
+
+    // direct index selection
+    setTrackIndex(2);
+    expect(currentTrackIndex.value).toBe(2);
+    prevTrack();
+    expect(currentTrackIndex.value).toBe(initial);
+
+    toggleShuffle();
+    expect(isShuffle.value).toBe(false);
   });
 });
