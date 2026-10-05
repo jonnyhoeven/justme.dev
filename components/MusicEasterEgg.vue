@@ -184,7 +184,7 @@ const {
   wrapperProps,
   scrollTo
 } = useVirtualList(filteredTracks, {
-  itemHeight: 46,
+  itemHeight: 48,
   overscan: 10
 });
 
@@ -740,7 +740,19 @@ onBeforeUnmount(() => {
                   onlyFavorites ? 'Show all tracks' : 'Show favorites only'
                 "
               >
-                ★
+                <svg
+                  viewBox="0 0 24 24"
+                  width="12"
+                  height="12"
+                  :fill="onlyFavorites ? '#ef4444' : 'none'"
+                  :stroke="onlyFavorites ? '#ef4444' : 'currentColor'"
+                  stroke-width="2"
+                  class="filter-heart-icon"
+                >
+                  <path
+                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                  />
+                </svg>
               </button>
               <span class="track-count-badge">
                 {{ filteredTracks.length }}
@@ -763,19 +775,26 @@ onBeforeUnmount(() => {
                 <div
                   class="item-fav-col"
                   @click.stop="toggleFavorite(item.track.filename)"
+                  :title="
+                    favorites.has(item.track.filename)
+                      ? 'Remove from Favorites'
+                      : 'Add to Favorites'
+                  "
                 >
                   <svg
                     viewBox="0 0 24 24"
-                    width="12"
-                    height="12"
+                    width="13"
+                    height="13"
                     :fill="
-                      favorites.has(item.track.filename)
-                        ? 'var(--vp-c-brand)'
-                        : 'none'
+                      favorites.has(item.track.filename) ? '#ef4444' : 'none'
                     "
-                    stroke="currentColor"
+                    :stroke="
+                      favorites.has(item.track.filename)
+                        ? '#ef4444'
+                        : 'var(--vp-c-text-3)'
+                    "
                     stroke-width="2"
-                    class="item-star"
+                    class="item-heart"
                     :class="{ starred: favorites.has(item.track.filename) }"
                   >
                     <path
@@ -789,47 +808,48 @@ onBeforeUnmount(() => {
                     <span class="item-title" :title="item.track.filename">
                       {{ item.displayTitle }}
                     </span>
-                    <span
-                      v-if="
-                        item.originalIndex === currentTrackIndex && isPlaying
-                      "
-                      class="playing-pulse-badge"
-                    >
-                      PLAYING
-                    </span>
+
+                    <div class="item-badges-right">
+                      <!-- Channels badge with audio channel icon -->
+                      <span
+                        v-if="item.track.channels"
+                        class="meta-tag channels-tag"
+                        :title="`${item.track.channels} channels`"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="9"
+                          height="9"
+                          fill="currentColor"
+                        >
+                          <path
+                            d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"
+                          />
+                        </svg>
+                        {{ item.track.channels }}ch
+                      </span>
+
+                      <!-- BPM pill badge (3 numbers small) -->
+                      <span
+                        v-if="item.track.bpm"
+                        class="meta-tag bpm-tag"
+                        :title="`${item.track.bpm} BPM`"
+                      >
+                        {{ item.track.bpm }} BPM
+                      </span>
+                    </div>
                   </div>
 
                   <div class="item-row-meta">
-                    <!-- Channels badge with audio channel icon -->
-                    <span
-                      v-if="item.track.channels"
-                      class="meta-tag channels-tag"
-                      :title="`${item.track.channels} channels`"
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        width="10"
-                        height="10"
-                        fill="currentColor"
-                      >
-                        <path
-                          d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"
-                        />
-                      </svg>
-                      {{ item.track.channels }}ch
-                    </span>
-
-                    <!-- BPM pill badge (3 numbers small) -->
-                    <span
-                      v-if="item.track.bpm"
-                      class="meta-tag bpm-tag"
-                      :title="`${item.track.bpm} BPM`"
-                    >
-                      {{ item.track.bpm }} BPM
-                    </span>
-
                     <span class="meta-filename" :title="item.track.filename">
                       {{ item.track.filename }}
+                    </span>
+                    <span
+                      v-if="item.track.tracker"
+                      class="meta-tag tracker-tag"
+                      :title="item.track.tracker"
+                    >
+                      {{ item.track.tracker }}
                     </span>
                   </div>
                 </div>
@@ -1034,12 +1054,11 @@ onBeforeUnmount(() => {
 
 .track-name-mini {
   display: inline-block;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  opacity: 0.9;
+  letter-spacing: 0.2px;
+  opacity: 0.95;
 }
 
 .track-name-mini.is-playing {
@@ -1180,12 +1199,13 @@ onBeforeUnmount(() => {
 .playlist-item {
   display: flex;
   align-items: center;
-  height: 46px;
+  height: 48px;
   padding: 0 10px;
   gap: 8px;
   cursor: pointer;
   border-bottom: 1px solid rgba(var(--vp-c-divider-rgb, 128, 128, 128), 0.08);
-  transition: background var(--duration-fast) ease;
+  border-left: 3px solid transparent;
+  transition: all var(--duration-fast) ease;
 }
 
 .playlist-item:hover {
@@ -1193,7 +1213,8 @@ onBeforeUnmount(() => {
 }
 
 .playlist-item.is-active {
-  background: var(--vp-c-brand-soft);
+  background: rgba(var(--vp-c-brand-rgb), 0.12);
+  border-left-color: var(--vp-c-brand);
 }
 
 .item-fav-col {
@@ -1202,15 +1223,18 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--vp-c-text-3);
   transition: transform var(--duration-fast) ease;
 }
 
 .item-fav-col:hover {
-  transform: scale(1.2);
+  transform: scale(1.15);
 }
 
-.item-star.starred {
+.item-heart {
+  transition: all var(--duration-fast) ease;
+}
+
+.item-heart.starred {
   color: #ef4444;
 }
 
@@ -1220,77 +1244,95 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
 }
 
 .item-row-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
+  gap: 8px;
 }
 
 .item-title {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--vp-c-text-1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.25;
 }
 
 .playlist-item.is-active .item-title {
-  color: var(--vp-c-brand);
+  color: var(--vp-c-text-1);
+  font-weight: 700;
 }
 
-.playing-pulse-badge {
-  font-size: 8px;
-  font-weight: 700;
-  color: var(--vp-c-brand);
-  background: var(--vp-c-brand-soft);
-  padding: 1px 4px;
-  border-radius: 4px;
-  letter-spacing: 0.5px;
+.item-badges-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .item-row-meta {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 6px;
-  font-size: 9px;
-  color: var(--vp-c-text-3);
-}
-
-.meta-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  font-size: 9px;
-  padding: 1px 4px;
-  border-radius: 4px;
-  background: var(--vp-c-bg-mute);
-  flex-shrink: 0;
-}
-
-.bpm-tag {
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  color: var(--vp-c-brand);
+  font-size: 10px;
+  color: var(--vp-c-text-2);
+  width: 100%;
 }
 
 .meta-filename {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  opacity: 0.7;
+  color: var(--vp-c-text-2);
+  font-size: 9.5px;
+  flex: 1;
+  min-width: 0;
+}
+
+.meta-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 8.5px;
+  padding: 0 4px;
+  height: 16px;
+  line-height: 16px;
+  border-radius: 3px;
+  background: var(--vp-c-bg-mute);
+  border: 1px solid var(--vp-c-divider);
+  color: var(--vp-c-text-2);
+  flex-shrink: 0;
+}
+
+.tracker-tag {
+  font-weight: 500;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bpm-tag {
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  color: var(--vp-c-text-2);
 }
 
 .empty-search-state {
   padding: 24px 12px;
   text-align: center;
   font-size: 11px;
-  color: var(--vp-c-text-3);
+  color: var(--vp-c-text-2);
 }
 
 /* Transitions */
