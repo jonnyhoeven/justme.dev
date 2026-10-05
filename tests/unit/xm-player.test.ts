@@ -1,36 +1,33 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { XMPlayer } from '../../lib/audio/xm-player';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
 
-const audioDir = path.resolve(__dirname, '../../public/audio');
-const starterFiles = [
-  '1_keygen-8.xm',
-  '2_deadlock.xm',
-  '3_butterfl.xm',
-  '4_external.xm',
-  '5_purple-motions.xm'
-];
-const onDiskXm = fs
-  .readdirSync(audioDir)
-  .filter((f) => f.toLowerCase().endsWith('.xm'));
-const xmFiles = starterFiles.filter((f) => onDiskXm.includes(f));
-if (xmFiles.length === 0) {
-  xmFiles.push(...onDiskXm.slice(0, 5));
-}
+const MEDIA_BASE_URL = (
+  process.env.R2_PUBLIC_URL || 'https://media.justme.dev'
+).replace(/\/+$/, '');
 
-const readXm = (file: string): ArrayBuffer => {
-  const buffer = fs.readFileSync(path.join(audioDir, file));
-  return buffer.buffer.slice(
-    buffer.byteOffset,
-    buffer.byteOffset + buffer.byteLength
-  ) as ArrayBuffer;
+// Use a single lightweight track (~25KB) to minimize bucket transfer usage during CI and dev.
+const SAMPLE_TRACK = '5_purple-motions.xm';
+
+let sampleBuffer: ArrayBuffer | null = null;
+
+const getSampleBuffer = (): ArrayBuffer => {
+  if (!sampleBuffer) {
+    throw new Error(`Buffer not loaded for ${SAMPLE_TRACK}`);
+  }
+  return sampleBuffer.slice(0);
 };
 
-// Lifecycle tests only need one representative track.
-const sampleFile = xmFiles[0];
-
 describe('XMPlayer', () => {
+  beforeAll(async () => {
+    const res = await fetch(`${MEDIA_BASE_URL}/audio/${SAMPLE_TRACK}`);
+    if (!res.ok) {
+      throw new Error(
+        `Failed to fetch ${SAMPLE_TRACK} from bucket: ${res.status} ${res.statusText}`
+      );
+    }
+    sampleBuffer = await res.arrayBuffer();
+  }, 15000);
+
   it('instantiates cleanly with default options', () => {
     const player = new XMPlayer();
     expect(player).toBeDefined();
@@ -40,21 +37,18 @@ describe('XMPlayer', () => {
     expect(player.getProgress()).toBe(0);
   });
 
-  it('has XM files to test against', () => {
-    expect(xmFiles.length).toBeGreaterThan(0);
-  });
-
-  it.each(xmFiles)('loads and parses %s', (file) => {
+  it('loads and parses sample XM file from media bucket', () => {
     const player = new XMPlayer();
-    const success = player.loadBuffer(readXm(file));
+    const success = player.loadBuffer(getSampleBuffer());
 
     expect(success).toBe(true);
     expect(player.numChannels).toBeGreaterThan(0);
     expect(player.isPlaying).toBe(false);
+    expect(player.songTitle).toBeTruthy();
   });
 
   it('initializes with mock AudioContext and controls playback lifecycle', () => {
-    const arrayBuffer = readXm(sampleFile);
+    const arrayBuffer = getSampleBuffer();
 
     const connectedNodes: unknown[] = [];
     const mockAudioContext = {
@@ -94,7 +88,7 @@ describe('XMPlayer', () => {
   });
 
   it('does not fire onEnded prematurely during initial pattern playback', () => {
-    const arrayBuffer = readXm(sampleFile);
+    const arrayBuffer = getSampleBuffer();
 
     let endedCalled = false;
     let processCallback: ((e: unknown) => void) | null = null;

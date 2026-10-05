@@ -4,7 +4,7 @@ import * as path from 'node:path';
 import loader from '../../data/music.data';
 
 describe('music.data loader', () => {
-  it('loads tracks from public/audio/*.xm at build time', () => {
+  it('loads tracks at build time from catalog or media bucket', () => {
     const tracks = loader.load();
 
     expect(Array.isArray(tracks)).toBe(true);
@@ -16,20 +16,24 @@ describe('music.data loader', () => {
       expect(track).toHaveProperty('title');
       expect(track.filename.endsWith('.xm')).toBe(true);
       expect(
-        track.url.startsWith('/audio/') || track.url.includes('/audio/')
+        track.url.startsWith('https://media.justme.dev/audio/') ||
+          track.url.startsWith('/audio/')
       ).toBe(true);
       expect(typeof track.title).toBe('string');
       expect(track.title.length).toBeGreaterThan(0);
     }
   });
 
-  it('lists every .xm file in public/audio with tracker metadata', () => {
+  it('lists tracks from catalog with tracker metadata', () => {
     const tracks = loader.load();
-    const onDisk = fs
-      .readdirSync(path.resolve(__dirname, '../../public/audio'))
-      .filter((f) => f.toLowerCase().endsWith('.xm'));
+    const catalogPath = path.resolve(__dirname, '../../data/music-tracks.json');
 
-    expect(tracks.map((t) => t.filename).sort()).toEqual([...onDisk].sort());
+    if (fs.existsSync(catalogPath)) {
+      const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf-8'));
+      expect(tracks.map((t) => t.filename).sort()).toEqual(
+        catalog.map((t: { filename: string }) => t.filename).sort()
+      );
+    }
 
     for (const track of tracks) {
       if (track.channels !== undefined) {
