@@ -25,6 +25,9 @@ generated_artifacts: projects/*.md, public/projects-cache/
 | Dev server (HMR)   | `pnpm run docs:dev`                                              |
 | ETL: content       | `pnpm run docs:generate`                                         |
 | ETL: splat assets  | `pnpm run docs:generate-splats`                                  |
+| Sync audio to R2   | `pnpm run audio:sync`                                            |
+| Sync images to R2  | `pnpm run images:sync`                                           |
+| Sync all media     | `pnpm run media:sync`                                            |
 | Build / preview    | `pnpm run docs:build` / `docs:preview`                           |
 | Lint / format (JS) | `pnpm run lint` / `pnpm run format`                              |
 | Lint (Python)      | `ruff check . --fix`                                             |

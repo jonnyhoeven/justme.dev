@@ -2,15 +2,16 @@ export const SITE_CONSTANTS = {
   AUTHOR: 'Jonny van der Hoeven',
   SITE_NAME: 'Justme.dev',
   HOSTNAME: 'https://justme.dev',
+  MEDIA_URL: 'https://media.justme.dev',
   LANG: 'en-US',
   DESCRIPTION: 'Justme.dev - Jonny van der Hoeven. Just make it!',
   KEYWORDS:
     'Personal Portfolio, justme.dev, SRE, Kubernetes, Infrastructure as Code',
   IMAGES: {
-    DEFAULT: '/images/justme.dev.webp',
-    LOGO_LIGHT: '/images/logo.webp',
-    LOGO_DARK: '/images/logo_dark.webp',
-    GOOGLE_ICON: '/images/google.webp',
+    DEFAULT: 'https://media.justme.dev/images/justme.dev.webp',
+    LOGO_LIGHT: 'https://media.justme.dev/images/logo.webp',
+    LOGO_DARK: 'https://media.justme.dev/images/logo_dark.webp',
+    GOOGLE_ICON: 'https://media.justme.dev/images/google.webp',
     FAVICON_MASK_COLOR: '#16673c',
     THEME_COLOR: '#ffffff'
   },

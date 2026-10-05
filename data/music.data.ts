@@ -16,8 +16,26 @@ declare const data: MusicTrack[];
 export { data };
 
 export default defineLoader({
-  watch: ['../public/audio/*.xm'],
+  watch: ['../data/music-tracks.json', '../public/audio/*.xm'],
   load(): MusicTrack[] {
+    const catalogPath = path.resolve(__dirname, '../data/music-tracks.json');
+    if (fs.existsSync(catalogPath)) {
+      try {
+        const raw = fs.readFileSync(catalogPath, 'utf-8');
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.sort((a, b) =>
+            a.filename.localeCompare(b.filename, undefined, {
+              numeric: true,
+              sensitivity: 'base'
+            })
+          );
+        }
+      } catch {
+        // Fallback to local files if JSON is corrupted or invalid
+      }
+    }
+
     const audioDir = path.resolve(__dirname, '../public/audio');
     if (!fs.existsSync(audioDir)) return [];
 

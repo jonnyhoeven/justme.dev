@@ -31,6 +31,12 @@ coverage/
 /public/data/splats.json
 /public/projects-cache/
 
+# Audio library (synced to Cloudflare R2; keep initial demo tracks tracked)
+/public/audio/*
+
+# Image library (synced to Cloudflare R2)
+/public/images/*
+
 # Other
 /input_images/
 /bin/

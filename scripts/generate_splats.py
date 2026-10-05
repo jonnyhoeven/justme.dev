@@ -13,20 +13,34 @@ except ImportError:
     sys.exit(1)
 
 
-def generate_splats(image_path: Path | None = None, out_path: Path | None = None) -> list:
+def generate_splats(image_path: Path | str | None = None, out_path: Path | None = None) -> list:
     base_dir = Path(__file__).parent.parent
     if image_path is None:
-        image_path = base_dir / "public" / "images" / "ava.webp"
+        local_candidate = base_dir / "public" / "images" / "ava.webp"
+        if local_candidate.exists():
+            image_path = local_candidate
+        else:
+            image_path = "https://media.justme.dev/images/ava.webp"
     if out_path is None:
         out_path = base_dir / "public" / "data" / "splats.json"
 
-    if not image_path.exists():
-        logger.error(f"Image not found: {image_path}")
-        sys.exit(1)
-
     try:
-        logger.info(f"Loading image: {image_path}")
-        img = Image.open(image_path).convert("RGBA")
+        if isinstance(image_path, str) and (image_path.startswith("http://") or image_path.startswith("https://")):
+            import io
+            import urllib.request
+
+            logger.info(f"Downloading image from CDN: {image_path}")
+            req = urllib.request.Request(image_path, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = resp.read()
+            img = Image.open(io.BytesIO(data)).convert("RGBA")
+        else:
+            image_path = Path(image_path)
+            if not image_path.exists():
+                logger.error(f"Image not found: {image_path}")
+                sys.exit(1)
+            logger.info(f"Loading image: {image_path}")
+            img = Image.open(image_path).convert("RGBA")
     except Exception as e:
         logger.error(f"Failed to open image {image_path}: {e}")
         sys.exit(1)

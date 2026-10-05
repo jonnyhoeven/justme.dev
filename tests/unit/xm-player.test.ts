@@ -4,10 +4,20 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 const audioDir = path.resolve(__dirname, '../../public/audio');
-const xmFiles = fs
+const starterFiles = [
+  '1_keygen-8.xm',
+  '2_deadlock.xm',
+  '3_butterfl.xm',
+  '4_external.xm',
+  '5_purple-motions.xm'
+];
+const onDiskXm = fs
   .readdirSync(audioDir)
-  .filter((f) => f.toLowerCase().endsWith('.xm'))
-  .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  .filter((f) => f.toLowerCase().endsWith('.xm'));
+const xmFiles = starterFiles.filter((f) => onDiskXm.includes(f));
+if (xmFiles.length === 0) {
+  xmFiles.push(...onDiskXm.slice(0, 5));
+}
 
 const readXm = (file: string): ArrayBuffer => {
   const buffer = fs.readFileSync(path.join(audioDir, file));

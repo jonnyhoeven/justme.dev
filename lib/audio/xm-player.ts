@@ -1618,7 +1618,11 @@ export class XMPlayer {
 
   loadBuffer(buf: ArrayBuffer): boolean {
     this.stop();
-    return this.engine.load(buf);
+    try {
+      return this.engine.load(buf);
+    } catch {
+      return false;
+    }
   }
 
   play(): void {

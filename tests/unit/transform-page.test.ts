@@ -10,7 +10,9 @@ describe('transformPage', () => {
 
     expect(result.frontmatter.title).toBe('Justme.dev');
     expect(result.frontmatter.intro).toBe('');
-    expect(result.frontmatter.image).toBe('/images/justme.dev.webp');
+    expect(result.frontmatter.image).toBe(
+      'https://media.justme.dev/images/justme.dev.webp'
+    );
     expect(result.frontmatter.externalUrlLabel).toBe('View site');
     expect(result.frontmatter.watchersUrl).toBeNull();
     expect(result.frontmatter.starsUrl).toBeNull();

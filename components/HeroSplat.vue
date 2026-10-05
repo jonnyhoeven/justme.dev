@@ -740,7 +740,10 @@ const onClick = (e: MouseEvent) => {
 
 <template>
   <div v-show="isMobileView" class="HeroSplat fallback-image">
-    <img src="/images/ava.webp" alt="Justme.dev Avatar" />
+    <img
+      src="https://media.justme.dev/images/ava.webp"
+      alt="Justme.dev Avatar"
+    />
   </div>
   <!-- Full-hero background layer: glow (back) -> canvas (front). The hero text
        and buttons sit above it via VitePress' own z-index on .main. -->

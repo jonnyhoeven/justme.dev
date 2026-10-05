@@ -11,7 +11,12 @@ export default function transformPage<T extends PageLike>(
   const pf: ArticleFrontmatter = { ...pageData.frontmatter };
   pf.title = pf.title ? pf.title : 'Justme.dev';
   pf.intro = pf.intro ? pf.intro : '';
-  pf.image = pf.image ? pf.image : '/images/justme.dev.webp';
+  const defaultImg = '/images/justme.dev.webp';
+  let rawImage = (pf.image ? pf.image : defaultImg).trim();
+  if (rawImage.startsWith('/images/')) {
+    rawImage = `https://media.justme.dev${rawImage}`;
+  }
+  pf.image = rawImage;
   pf.externalUrl = pf.gitlink ? `${pf.gitlink}` : pf.externalUrl;
   pf.externalUrlLabel = pf.gitlink ? 'View on Github' : 'View site';
 

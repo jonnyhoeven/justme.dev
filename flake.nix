@@ -26,6 +26,8 @@
             pytest
             pytest-cov
             responses
+            boto3
+            python-dotenv
           ]))
           ruff
           pre-commit
