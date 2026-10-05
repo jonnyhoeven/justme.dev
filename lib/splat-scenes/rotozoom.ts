@@ -15,7 +15,6 @@ const texture = new Uint8Array(TEX * TEX * 3);
 let count = 1;
 let cols = 1;
 let rows = 1;
-let lastRowCols = 1;
 let spacing = 20;
 let gridX = 0;
 let gridY = 0;
@@ -58,13 +57,24 @@ export const rotozoom: SplatScene = {
   },
 
   beforeFrame(elapsed, ctx) {
-    rows = Math.max(
-      1,
-      Math.round(Math.sqrt((count * ctx.areaH) / Math.max(1, ctx.areaW)))
-    );
-    cols = Math.max(1, Math.ceil(count / rows));
-    rows = Math.max(1, Math.ceil(count / cols));
-    lastRowCols = count - (rows - 1) * cols;
+    const targetAspect = Math.max(1e-4, ctx.areaW) / Math.max(1e-4, ctx.areaH);
+    let bestRows = 1;
+    let bestCols = count;
+    let bestDiff = Infinity;
+    for (let r = 1; r <= count; r++) {
+      if (count % r === 0) {
+        const c = count / r;
+        const gridAspect = c / r;
+        const diff = Math.abs(Math.log(gridAspect / targetAspect));
+        if (diff < bestDiff) {
+          bestDiff = diff;
+          bestRows = r;
+          bestCols = c;
+        }
+      }
+    }
+    rows = bestRows;
+    cols = bestCols;
     spacing = Math.min(ctx.areaW / cols, ctx.areaH / rows);
     gridX = ctx.areaX + (ctx.areaW - cols * spacing) / 2 + spacing / 2;
     gridY = ctx.areaY + (ctx.areaH - rows * spacing) / 2 + spacing / 2;
@@ -88,10 +98,7 @@ export const rotozoom: SplatScene = {
   target(_p, i, _elapsed, _ctx, out) {
     const col = i % cols;
     const row = Math.floor(i / cols);
-    // Centre the short last row instead of leaving a gap at the bottom right
-    const rowShift =
-      row === rows - 1 ? ((cols - lastRowCols) * spacing) / 2 : 0;
-    const x = gridX + col * spacing + rowShift;
+    const x = gridX + col * spacing;
     const y = gridY + row * spacing;
 
     // Screen offset from the middle of the area -> rotated, zoomed UV
