@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Jonny van der Hoeven
+// SPDX-License-Identifier: GPL-3.0-or-later
 export const VOLUME_SMOOTHING = 0.05;
 export const SIZE_OSCILLATION_AMP = 0.05;
 export const CENTER_X = 160;

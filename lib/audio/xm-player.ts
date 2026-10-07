@@ -1,8 +1,13 @@
+// SPDX-FileCopyrightText: 2015 Andy Sloane <andy@a1k0n.net> (jsxm, MIT License)
+// SPDX-FileCopyrightText: Jonny van der Hoeven
+// SPDX-License-Identifier: GPL-3.0-or-later AND MIT
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, no-var */
 /**
  * FastTracker 2 (.XM) Player for Web Audio API.
  * Adapted from Andy Sloane's jsxm for modern TypeScript / ES Module environments.
  */
+
+import { decodeCp437Byte } from './cp437';
 
 export interface XMPlayerOptions {
   bufferSize?: number;
@@ -507,7 +512,7 @@ function createXMEngine() {
     for (let i = offset; i < offset + len; i++) {
       const c = dv.getUint8(i);
       if (c === 0) break;
-      str.push(String.fromCharCode(c));
+      str.push(decodeCp437Byte(c));
     }
     return str.join('');
   }
@@ -1553,21 +1558,35 @@ function createXMEngine() {
     for (const ch of channels) {
       ch.inst = undefined;
       ch.samp = undefined;
+      ch.note = undefined;
       ch.env_vol = undefined;
       ch.env_pan = undefined;
       ch.voleffectfn = undefined;
       ch.effectfn = undefined;
       ch.release = 0;
+      ch.vol = 0;
       ch.volE = 0;
       ch.panE = 0;
+      ch.vL = 0;
+      ch.vR = 0;
+      ch.vLprev = 0;
+      ch.vRprev = 0;
+      ch.off = 0;
       ch.retrig = 0;
       ch.periodoffset = 0;
+      if (ch.filterstate) {
+        ch.filterstate[0] = 0;
+        ch.filterstate[1] = 0;
+        ch.filterstate[2] = 0;
+      }
     }
     player.xm.global_volume = player.max_global_volume;
     player.xm.global_volumeslide = undefined;
     player.xm.tempo = player.xm.initial_tempo;
     player.xm.bpm = player.xm.initial_bpm;
   };
+
+  player.XMView = XMView;
 
   return player;
 }
@@ -1670,5 +1689,126 @@ export class XMPlayer {
     // start on the last tick so the next one wraps to row 0 and triggers it
     this.engine.cur_tick = this.engine.xm.tempo - 1;
     this.engine.setCurrentPattern();
+  }
+
+  jumpToOrder(orderIdx: number): void {
+    if (!this.engine.xm || !this.engine.xm.songpats) return;
+    if (orderIdx < 0 || orderIdx >= this.engine.xm.songpats.length) return;
+    this.engine.cur_songpos = orderIdx;
+    this.engine.silenceChannels();
+    this.engine.cur_row = 0;
+    this.engine.next_row = 0;
+    this.engine.cur_ticksamp = 0;
+    this.engine.cur_tick = (this.engine.xm.tempo || 6) - 1;
+    this.engine.setCurrentPattern();
+  }
+
+  getTrackerState() {
+    const xm = this.engine.xm || {};
+    return {
+      curSongPos: this.engine.cur_songpos,
+      curPat: this.engine.cur_pat,
+      curRow: this.engine.cur_row,
+      bpm: xm.bpm || 125,
+      tempo: xm.tempo || 6,
+      songlen: xm.songpats ? xm.xm_songlen || xm.songpats.length : 0,
+      songpats: xm.songpats ? [...xm.songpats] : [],
+      numChannels: xm.nchan || 0
+    };
+  }
+
+  getPattern(patIndex: number) {
+    if (!this.engine.xm?.patterns) return null;
+    return this.engine.xm.patterns[patIndex] || null;
+  }
+
+  getInstruments() {
+    if (!this.engine.xm?.instruments) return [];
+    return this.engine.xm.instruments.map((inst: any, idx: number) => ({
+      index: idx + 1,
+      name: (inst.name || '').trim(),
+      samples: (inst.samples || []).map((s: any) => ({
+        name: (s.sampname || '').trim(),
+        len: s.len || 0,
+        vol: s.vol ?? 64,
+        pan: s.pan ?? 128,
+        loop: s.loop || 0,
+        looplen: s.looplen || 0,
+        type: s.type || 0
+      }))
+    }));
+  }
+
+  setChannelMute(channelIdx: number, mute: boolean): void {
+    if (!this.engine.xm?.channelinfo) return;
+    if (this.engine.xm.channelinfo[channelIdx]) {
+      this.engine.xm.channelinfo[channelIdx].mute = mute ? 1 : 0;
+    }
+  }
+
+  isChannelMuted(channelIdx: number): boolean {
+    if (!this.engine.xm?.channelinfo) return false;
+    return !!this.engine.xm.channelinfo[channelIdx]?.mute;
+  }
+
+  getChannelInfo(channelIdx: number) {
+    if (!this.engine.xm?.channelinfo) return null;
+    return this.engine.xm.channelinfo[channelIdx] || null;
+  }
+
+  setBpm(bpm: number): void {
+    if (!this.engine.xm) return;
+    const clamped = Math.max(32, Math.min(255, Math.round(bpm)));
+    this.engine.xm.bpm = clamped;
+  }
+
+  resetBpm(): void {
+    if (!this.engine.xm) return;
+    this.engine.xm.bpm = this.engine.xm.initial_bpm || 125;
+  }
+
+  get defaultBpm(): number {
+    return this.engine.xm?.initial_bpm || 125;
+  }
+
+  setScopeListener(
+    listener:
+      ((data: { vu: Float32Array; scopes?: Float32Array[] }) => void) | null,
+    width = 64
+  ): void {
+    if (!this.engine.XMView) return;
+    this.engine.XMView.scope_width = listener ? width : 0;
+    this.engine.XMView.pushEvent = listener
+      ? (event: any) => {
+          listener({ vu: event.vu, scopes: event.scopes });
+        }
+      : null;
+  }
+
+  static prettifyNote(note: number): string {
+    if (note < 0) return '···';
+    if (note === 96) return '^^^';
+    const noteNames = [
+      'C-',
+      'C#',
+      'D-',
+      'D#',
+      'E-',
+      'F-',
+      'F#',
+      'G-',
+      'G#',
+      'A-',
+      'A#',
+      'B-'
+    ];
+    return noteNames[note % 12] + Math.floor(note / 12);
+  }
+
+  static prettifyEffect(type: number, param: number): string {
+    if (type === 0 && param === 0) return '···';
+    const t = type >= 10 ? String.fromCharCode(55 + type) : type.toString();
+    const p = param < 16 ? '0' + param.toString(16) : param.toString(16);
+    return (t + p).toUpperCase();
   }
 }

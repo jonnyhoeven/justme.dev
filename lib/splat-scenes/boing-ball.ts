@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Jonny van der Hoeven
+// SPDX-License-Identifier: GPL-3.0-or-later
 import type { SplatScene, SplatParticle } from '../splat-animations/types';
 import { isDarkTheme } from '../splat-animations/color-utils';
 import { dotSize } from './utils';

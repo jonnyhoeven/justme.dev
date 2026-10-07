@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Jonny van der Hoeven
+// SPDX-License-Identifier: GPL-3.0-or-later
 import { describe, it, expect } from 'vitest';
 import { lerpToWhite } from '../../lib/splat-animations/color-utils';
 

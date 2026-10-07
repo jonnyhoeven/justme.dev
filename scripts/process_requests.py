@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: Jonny van der Hoeven
+# SPDX-License-Identifier: GPL-3.0-or-later
 import logging
 import textwrap
 from datetime import date

@@ -24,11 +24,11 @@ features:
       Build a custom Kubernetes cluster using K3s and ArgoCD. This workshop guides
       you through your first application deployment using a professional GitOps workflow.
     link: /projects/workshop
-  - title: AI-Driven Metadata Enrichment Pipeline
+  - title: FastTracker II & Chiptune Archive
     details:
-      This project implements a scalable, cloud-native ETL (Extract, Transform, Load)
-      pipeline designed to aggregate, enrich, and persist historical music chart data spanning over six decades (1965–Present).
-    link: /projects/top-40-crawl
+      Interactive Web Audio player and real-time visualizer for 3,000+ tracker songs.
+      Inspect multi-channel oscilloscopes, live pattern sequences, instruments, and samples.
+    link: /blog/tracker
   - title: Justme.dev
     details:
       Open-source documentation powered by VitePress. This site leverages Vue.js and

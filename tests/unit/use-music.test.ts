@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Jonny van der Hoeven
+// SPDX-License-Identifier: GPL-3.0-or-later
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 vi.mock('../../data/music.data', () => ({

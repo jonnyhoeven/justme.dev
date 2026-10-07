@@ -106,3 +106,13 @@ Continuous Deployment is managed via GitHub Actions executing inside a Nix envir
 
 - **Request Manifests**: Content sources are defined in `requests/*.yaml`.
 - **Output Structure**: Generated Markdown files are organized into the `projects/` folder
+
+## License
+
+The source code of this repository is licensed under the [GNU General Public License v3.0 or later](LICENSE)
+(`GPL-3.0-or-later`). Every first-party source file carries an
+[SPDX](https://spdx.dev/) header. Third-party components and their licenses are listed in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+The license covers the code only. The tracker music served from the media bucket belongs to its original
+composers, and content aggregated from other repositories keeps the licenses of those repositories.

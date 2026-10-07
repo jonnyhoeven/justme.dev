@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Jonny van der Hoeven
+// SPDX-License-Identifier: GPL-3.0-or-later
 import { CANVAS_WIDTH } from './animation-constants';
 import type {
   SplatAnimation,

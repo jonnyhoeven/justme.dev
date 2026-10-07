@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: Jonny van der Hoeven
+# SPDX-License-Identifier: GPL-3.0-or-later
 """
 Tests for scripts/process_requests.py
 

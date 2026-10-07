@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Jonny van der Hoeven
+// SPDX-License-Identifier: GPL-3.0-or-later
 import type { AnimationContext } from '../splat-animations/types';
 
 // Low-discrepancy (R2) sequence constants for even, deterministic scatter

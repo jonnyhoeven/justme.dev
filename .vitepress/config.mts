@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Jonny van der Hoeven
+// SPDX-License-Identifier: GPL-3.0-or-later
 import { defineConfig, HeadConfig } from 'vitepress';
 import transformPageData from './transformPageData';
 import { SITE_CONSTANTS } from './constants';
@@ -200,7 +202,11 @@ export default defineConfig({
         `   <img alt="Github code scanning badge" height="20px" src="https://img.shields.io/github/actions/workflow/status/jonnyhoeven/justme.dev/dynamic/github-code-scanning/codeql?branch=main">` +
         '</a>' +
         `</span>`,
-      copyright: `&copy; ${new Date().getFullYear()} <a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}">Justme.dev</a>`
+      copyright:
+        `&copy; ${new Date().getFullYear()} ${SITE_CONSTANTS.AUTHOR} &middot; ` +
+        `<a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}">Justme.dev</a> source code under ` +
+        `<a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/blob/main/LICENSE">GPL-3.0-or-later</a> &middot; ` +
+        'tracker music &copy; its original artists'
     }
   },
   sitemap: {

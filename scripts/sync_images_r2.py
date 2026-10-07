@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: Jonny van der Hoeven
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Sync local images library (public/images/) to Cloudflare R2 bucket.
 
 Usage:

@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: Jonny van der Hoeven -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <script setup lang="ts">
 import Badges from './Badges.vue';
 import type { ArticleFrontmatter } from '../types/frontmatter';

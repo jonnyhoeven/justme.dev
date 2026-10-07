@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Jonny van der Hoeven
+// SPDX-License-Identifier: GPL-3.0-or-later
 import type { SplatScene, SplatParticle } from '../splat-animations/types';
 import { frac, R2_A, R2_B } from './utils';
 

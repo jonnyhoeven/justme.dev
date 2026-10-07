@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Jonny van der Hoeven
+// SPDX-License-Identifier: GPL-3.0-or-later
 import type { ArticleFrontmatter } from '../types/frontmatter';
 
 export interface PageLike {

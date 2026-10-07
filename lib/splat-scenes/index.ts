@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Jonny van der Hoeven
+// SPDX-License-Identifier: GPL-3.0-or-later
 import { dotShapes } from './dot-shapes';
 import { rotozoom } from './rotozoom';
 import { starfield } from './starfield';

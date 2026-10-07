@@ -1,10 +1,9 @@
+<!-- SPDX-FileCopyrightText: Jonny van der Hoeven -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue';
-import {
-  useWindowSize,
-  useElementVisibility,
-  useThrottleFn
-} from '@vueuse/core';
+import { useWindowSize, useElementVisibility } from '@vueuse/core';
+
 import {
   pickRandomAnimation,
   animations,
@@ -74,7 +73,6 @@ const { width: windowWidth } = useWindowSize();
 const isMobileView = computed(
   () => windowWidth.value < SITE_CONSTANTS.MOBILE_BREAKPOINT
 );
-const shiverIntensity = ref(0);
 let startTime = performance.now();
 
 // Director: avatar animation -> morph -> full-canvas scene -> morph -> ...
@@ -104,7 +102,8 @@ const smoothstep = (t: number) => {
   const c = Math.min(1, Math.max(0, t));
   return c * c * (3 - 2 * c);
 };
-const { audioData, isMusicVisible, setSplatVisible } = useMusic();
+const { audioData, setSplatVisible } = useMusic();
+
 const isVisible = useElementVisibility(canvasRef);
 
 const brushCache = new Map<string, HTMLCanvasElement>();
@@ -203,8 +202,6 @@ const updateGlow = (
 let heroEl: HTMLElement | null = null;
 let resizeObserver: ResizeObserver | null = null;
 let themeObserver: MutationObserver | null = null;
-
-let onShiverMouseMove: ((e: MouseEvent) => void) | null = null;
 
 /** Switch the avatar-mode animation to the next one. */
 const nextAnimation = () => {
@@ -481,13 +478,9 @@ onMounted(async () => {
       animCtx
     );
 
-    // Cache some values outside the particle loop for performance
-    const shiverInt = shiverIntensity.value;
-    const hasShiver = shiverInt > 0.05;
-    const vT = time * 0.1; // for shiver
-
     // Kick punch: radiates from the avatar centre, drifting to the scene centre
     const punch = beat > 0.02 ? beat * BEAT_PUNCH * scale : 0;
+
     const punchX = anchorPx.x + (animCtxAreaCenter.x - anchorPx.x) * morph;
     const punchY = anchorPx.y + (animCtxAreaCenter.y - anchorPx.y) * morph;
     const punchReach = 140 * scale;
@@ -556,14 +549,6 @@ onMounted(async () => {
       fx += -effectiveSpring * (p.x - targetOx);
       fy += -effectiveSpring * (p.y - targetOy);
 
-      // --- Shiver Effect (Easter Egg) ---
-      if (hasShiver) {
-        const vPhase = p.ox * 0.5 + p.oy * 0.5;
-        const vibe = Math.sin(vT + vPhase) * shiverInt * 10;
-        fx += vibe;
-        fy += vibe;
-      }
-
       if (punch) {
         const px = p.x - punchX;
         const py = p.y - punchY;
@@ -607,73 +592,6 @@ onMounted(async () => {
     animationId = requestAnimationFrame(render);
   };
 
-  // 7. Easter Egg Hook: "Just make it!" -> "Just make IT!"
-  const hookTagline = () => {
-    const tagline = document.querySelector('.tagline');
-    if (!tagline || tagline.querySelector('.it-btn')) return;
-    const text = tagline.textContent || '';
-    if (text.includes('it!')) {
-      // Build nodes instead of assigning innerHTML so tagline text is never parsed as markup.
-      const [before] = text.split('it!', 1);
-      const span = document.createElement('span');
-      span.className = 'it-btn';
-      span.style.cssText =
-        'cursor: pointer; transition: all 0.2s ease; font-weight: bold;';
-      span.textContent = 'it!';
-      tagline.replaceChildren(
-        document.createTextNode(before),
-        span,
-        document.createTextNode(text.slice(before.length + 3))
-      );
-      const btn = tagline.querySelector('.it-btn') as HTMLElement;
-      if (btn) {
-        // --- Proximity Shiver (Hot/Cold) ---
-        if (onShiverMouseMove) {
-          window.removeEventListener('mousemove', onShiverMouseMove);
-        }
-        onShiverMouseMove = useThrottleFn((e: MouseEvent) => {
-          if (isMobileView.value || isMusicVisible.value) {
-            shiverIntensity.value = 0;
-            return;
-          }
-          const rect = btn.getBoundingClientRect();
-          const bx = rect.left + rect.width / 2;
-          const by = rect.top + rect.height / 2;
-          const dx = e.clientX - bx;
-          const dy = e.clientY - by;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          // Shiver
-          const maxDist = 70;
-          if (dist < maxDist) {
-            shiverIntensity.value = 0.5 * (1 - dist / maxDist);
-          } else {
-            shiverIntensity.value = 0;
-          }
-        }, 50);
-        window.addEventListener('mousemove', onShiverMouseMove);
-
-        btn.onclick = () => {
-          if (isMobileView.value) return;
-          isMusicVisible.value = !isMusicVisible.value;
-          if (isMusicVisible.value) {
-            btn.innerText = 'IT!';
-            btn.style.color = 'var(--vp-c-brand)';
-            btn.style.textDecorationColor = 'var(--vp-c-brand)';
-            // console.log('🎵 Music Easter Egg ACTIVE');
-          } else {
-            btn.innerText = 'it!';
-            btn.style.color = '';
-            btn.style.textDecorationColor = 'transparent';
-            // console.log('🔇 Music Easter Egg INACTIVE');
-          }
-        };
-      }
-    }
-  };
-  hookTagline();
-  setTimeout(hookTagline, 1000);
-
   startLoop = () => {
     if (isMobileView.value || !isVisible.value) return;
     if (animationId) cancelAnimationFrame(animationId);
@@ -713,9 +631,6 @@ onBeforeUnmount(() => {
   heroEl?.removeEventListener('mousemove', onMouseMove);
   heroEl?.removeEventListener('mouseleave', onMouseLeave);
   heroEl?.removeEventListener('click', onClick);
-  if (onShiverMouseMove) {
-    window.removeEventListener('mousemove', onShiverMouseMove);
-  }
   setSplatVisible(false);
 });
 
@@ -731,8 +646,8 @@ const onMouseLeave = () => {
   mouse.y = -9999;
 };
 const onClick = (e: MouseEvent) => {
-  // Links, buttons and the music toggle keep their own behaviour
-  if ((e.target as Element | null)?.closest('a, button, .it-btn')) return;
+  // Links and buttons keep their own behaviour
+  if ((e.target as Element | null)?.closest('a, button')) return;
   // Skip ahead: avatar -> scene, or scene -> avatar
   skipRequested = true;
 };

@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: Jonny van der Hoeven
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Tests for scripts/generate_splats.py
 
 Uses in-memory synthetic images (via Pillow) saved to tmp_path

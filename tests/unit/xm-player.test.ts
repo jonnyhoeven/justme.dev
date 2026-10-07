@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Jonny van der Hoeven
+// SPDX-License-Identifier: GPL-3.0-or-later
 import { describe, it, expect, beforeAll } from 'vitest';
 import { XMPlayer } from '../../lib/audio/xm-player';
 

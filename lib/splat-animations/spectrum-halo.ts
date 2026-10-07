@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Jonny van der Hoeven
+// SPDX-License-Identifier: GPL-3.0-or-later
 import { CENTER_X, CENTER_Y } from './animation-constants';
 import type {
   SplatAnimation,

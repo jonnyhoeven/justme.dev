@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: Jonny van der Hoeven
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Sync local audio library to Cloudflare R2 bucket and generate playlist catalog.
 
 Usage:

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Jonny van der Hoeven
+// SPDX-License-Identifier: GPL-3.0-or-later
 export const SITE_CONSTANTS = {
   AUTHOR: 'Jonny van der Hoeven',
   SITE_NAME: 'Justme.dev',
