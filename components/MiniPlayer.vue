@@ -1,8 +1,15 @@
 <!-- SPDX-FileCopyrightText: Jonny van der Hoeven -->
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
-import { useWindowSize, useVirtualList } from '@vueuse/core';
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  watch,
+  computed,
+  nextTick
+} from 'vue';
+import { useWindowSize, useVirtualList, useResizeObserver } from '@vueuse/core';
 import { SITE_CONSTANTS } from '../.vitepress/constants';
 import useMusic from '../.vitepress/theme/composables/useMusic';
 import type { MusicTrack } from '../data/music.data';
@@ -67,6 +74,32 @@ const formattedTitle = computed(() => {
 
   return baseTitle;
 });
+
+// Ping-pong marquee: only scroll when the title is wider than its box.
+const nameWrapRef = ref<HTMLElement | null>(null);
+const nameRef = ref<HTMLElement | null>(null);
+const marqueeShift = ref(0);
+
+const MARQUEE_SPEED_PX_PER_S = 35;
+
+const measureMarquee = () => {
+  const wrap = nameWrapRef.value;
+  const name = nameRef.value;
+  if (!wrap || !name) return;
+  marqueeShift.value = Math.max(0, name.offsetWidth - wrap.clientWidth);
+};
+
+const marqueeStyle = computed(() => ({
+  '--marquee-shift': `${marqueeShift.value}px`,
+  '--marquee-duration': `${Math.max(
+    4,
+    marqueeShift.value / MARQUEE_SPEED_PX_PER_S + 2
+  )}s`
+}));
+
+useResizeObserver(nameWrapRef, measureMarquee);
+useResizeObserver(nameRef, measureMarquee);
+watch(formattedTitle, () => nextTick(measureMarquee));
 
 const trackTooltip = computed(() => {
   const track = currentTrack.value;
@@ -214,6 +247,12 @@ const scrollToCurrentTrack = () => {
     }
   }, 50);
 };
+
+// The panel is v-if'd, so its list remounts at the top on every open. While
+// playing, jump to the current track (e.g. the random one picked on load).
+watch(isPlaylistOpen, (open) => {
+  if (open && isPlaying.value) scrollToCurrentTrack();
+});
 
 let volumeBeforeMute = 0.7;
 const toggleMute = () => {
@@ -470,13 +509,19 @@ onBeforeUnmount(() => {
         <div class="mini-info">
           <div class="track-meta">
             <div
+              ref="nameWrapRef"
               class="track-name-mini-wrap"
               @click.stop="scrollToCurrentTrack"
               title="Click to scroll to track in playlist"
             >
               <span
+                ref="nameRef"
                 class="track-name-mini clickable"
-                :class="{ 'is-playing': isPlaying }"
+                :class="{
+                  'is-scrolling': marqueeShift > 0,
+                  'is-paused': !isPlaying
+                }"
+                :style="marqueeStyle"
                 :title="trackTooltip"
               >
                 {{ formattedTitle }}
@@ -843,15 +888,15 @@ onBeforeUnmount(() => {
   mask-image: linear-gradient(
     to right,
     transparent,
-    black 4%,
-    black 96%,
+    black 12px,
+    black calc(100% - 12px),
     transparent
   );
   -webkit-mask-image: linear-gradient(
     to right,
     transparent,
-    black 4%,
-    black 96%,
+    black 12px,
+    black calc(100% - 12px),
     transparent
   );
 }
@@ -862,6 +907,8 @@ onBeforeUnmount(() => {
 
 .track-name-mini {
   display: inline-block;
+  /* Side padding keeps the first/last letters clear of the edge fade. */
+  padding: 0 12px;
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
@@ -869,19 +916,29 @@ onBeforeUnmount(() => {
   opacity: 0.95;
 }
 
-.track-name-mini.is-playing {
-  animation: mini-marquee 8s linear infinite;
+.track-name-mini.is-scrolling {
+  animation: mini-marquee var(--marquee-duration, 8s) ease-in-out infinite
+    alternate;
+}
+
+.track-name-mini.is-scrolling.is-paused {
+  animation-play-state: paused;
 }
 
 @keyframes mini-marquee {
-  0% {
+  0%,
+  15% {
     transform: translateX(0);
   }
-  50% {
-    transform: translateX(0);
-  }
+  85%,
   100% {
-    transform: translateX(-100%);
+    transform: translateX(calc(-1 * var(--marquee-shift, 0px)));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track-name-mini.is-scrolling {
+    animation: none;
   }
 }
 
