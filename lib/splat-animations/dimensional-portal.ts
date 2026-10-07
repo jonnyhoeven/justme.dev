@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { CENTER_X, CENTER_Y } from './animation-constants';
+import { frac } from '../splat-scenes/utils';
 import type {
   SplatAnimation,
   SplatParticle,
@@ -9,66 +10,93 @@ import type {
 } from './types';
 
 // --- Tuning Parameters ---
-const DEPTH_RANGE_Z = 200;
-const FOCAL_LENGTH = 400;
+// Half the cube's edge in avatar units. The corners reach HALF * sqrt(3) from
+// the centre, which must stay well inside the 320-unit avatar space.
+const HALF = 74;
+// Far enough that the near and far corners differ by only ~1.4x in scale; any
+// closer and the cube looks warped.
+const CAMERA_DISTANCE = 520;
 const BASE_ROTATION_SPEED = 0.0006;
 const VOLUME_ROTATION_MULT = 0.0022;
 const BEAT_ROTATION_MULT = 0.004;
-const TREBLE_DEPTH_AMP = 50;
-const TREBLE_DEPTH_SPEED = 0.001;
-const Z_OFFSET = 150;
+const TILT_BASE = 0.5;
+const TILT_SWAY = 0.35;
+const TILT_SPEED = 0.0003;
 const BEAT_ZOOM = 90;
-const LOOSE_SPRING_SCALE = 0.5;
-const MIN_SIZE = 0.5;
-const MAX_SIZE = 1.7;
+const TREBLE_SHIMMER = 6;
+const SPRING_SCALE = 2;
+const MIN_SIZE = 0.6;
+const MAX_SIZE = 1.5;
+// Every EDGE_EVERY-th particle sits on a cube edge instead of a face, so the
+// silhouette reads as a cube rather than a cloud.
+const EDGE_EVERY = 4;
+const R2_A = 0.7548776662466927;
+const R2_B = 0.5698402909980532;
 
-// Frame state: angles are integrated, so a change in speed never makes the
-// cloud jump the way `elapsed * speed` would.
-let angleX = 0;
+// Frame state: the yaw is integrated, so a change in speed never makes the
+// cube jump the way `elapsed * speed` would.
 let angleY = 0;
-let angleZ = 0;
 let zoom = 0;
 let cosX = 1;
 let sinX = 0;
 let cosY = 1;
 let sinY = 0;
-let cosZ = 1;
-let sinZ = 0;
 
 /**
- * Dimensional Portal (3D Projection)
+ * Dimensional Portal (rotating cube)
  *
- * Particles are projected into a rotating 3D point cloud. Near points are
- * drawn larger, far points smaller; the cloud spins faster with the music and
- * lunges at the camera on every kick.
+ * The particles are spread over the surface and edges of a cube that spins
+ * about its vertical axis with a gently swaying tilt. Near points are drawn
+ * larger, far points smaller; the cube spins faster with the music and lunges
+ * at the camera on every kick.
  */
 export const dimensionalPortal: SplatAnimation = {
   name: 'Dimensional Portal',
 
   init(particles: SplatParticle[]) {
-    angleX = angleY = angleZ = zoom = 0;
-    for (const p of particles) {
-      p.animState.pz = (Math.random() - 0.5) * DEPTH_RANGE_Z;
-    }
+    angleY = zoom = 0;
+    particles.forEach((p, i) => {
+      const a = frac((i + 1) * R2_A) * 2 - 1;
+      const b = frac((i + 1) * R2_B) * 2 - 1;
+      let x: number;
+      let y: number;
+      let z: number;
+      if (i % EDGE_EVERY === 0) {
+        // One of the 12 edges: the axis the edge runs along, then which of the
+        // four corners of the other two axes it sits at
+        const k = i / EDGE_EVERY;
+        const axis = k % 3;
+        const sa = k & 4 ? -1 : 1;
+        const sb = k & 8 ? -1 : 1;
+        const c = [sa, sb];
+        c.splice(axis, 0, a);
+        [x, y, z] = c;
+      } else {
+        const face = i % 6;
+        const axis = face >> 1;
+        const c = [a, b];
+        c.splice(axis, 0, face & 1 ? -1 : 1);
+        [x, y, z] = c;
+      }
+      p.animState.cx = x * HALF;
+      p.animState.cy = y * HALF;
+      p.animState.cz = z * HALF;
+    });
   },
 
-  beforeFrame(_particles, _elapsed, ctx) {
+  beforeFrame(_particles, elapsed, ctx) {
     const { volume, beat } = ctx.audioLevels;
-    const speed =
+    angleY +=
       (BASE_ROTATION_SPEED +
         volume * VOLUME_ROTATION_MULT +
         beat * BEAT_ROTATION_MULT) *
       ctx.dt;
-    angleX += speed * 0.7;
-    angleY += speed;
-    angleZ += speed * 0.4;
+    const tilt = TILT_BASE + Math.sin(elapsed * TILT_SPEED) * TILT_SWAY;
     zoom += (beat * BEAT_ZOOM - zoom) * Math.min(1, ctx.dt * 0.012);
-    cosX = Math.cos(angleX);
-    sinX = Math.sin(angleX);
+    cosX = Math.cos(tilt);
+    sinX = Math.sin(tilt);
     cosY = Math.cos(angleY);
     sinY = Math.sin(angleY);
-    cosZ = Math.cos(angleZ);
-    sinZ = Math.sin(angleZ);
   },
 
   glow(_elapsed, ctx) {
@@ -80,39 +108,24 @@ export const dimensionalPortal: SplatAnimation = {
     elapsed: number,
     ctx: AnimationContext
   ): AnimationEffect {
-    const pz: number = p.animState.pz ?? 0;
-    let x = p.ox - CENTER_X;
-    let y = p.oy - CENTER_Y;
-    // Treble makes the points shimmer in depth
-    let z =
-      pz +
-      ctx.audioLevels.treble *
-        TREBLE_DEPTH_AMP *
-        Math.sin(elapsed * TREBLE_DEPTH_SPEED + pz);
+    const { cx, cy, cz } = p.animState;
+    // Treble makes the cube's skin shimmer along its normal-ish depth axis
+    const shimmer =
+      ctx.audioLevels.treble * TREBLE_SHIMMER * Math.sin(elapsed * 0.004 + cx);
 
-    let t = y * cosX - z * sinX;
-    z = y * sinX + z * cosX;
-    y = t;
+    // Yaw about the vertical axis, then tilt about the horizontal one
+    const x1 = cx * cosY + cz * sinY;
+    const z1 = -cx * sinY + cz * cosY;
+    const y2 = cy * cosX - z1 * sinX;
+    const z2 = cy * sinX + z1 * cosX + shimmer;
 
-    t = x * cosY + z * sinY;
-    z = -x * sinY + z * cosY;
-    x = t;
-
-    t = x * cosZ - y * sinZ;
-    y = x * sinZ + y * cosZ;
-    x = t;
-
-    const perspective = FOCAL_LENGTH / (FOCAL_LENGTH + z + Z_OFFSET - zoom);
-    const restPerspective = FOCAL_LENGTH / (FOCAL_LENGTH + Z_OFFSET);
+    const perspective = CAMERA_DISTANCE / (CAMERA_DISTANCE + z2 - zoom);
 
     return {
-      dx: (CENTER_X + x * perspective - p.ox) * ctx.scale,
-      dy: (CENTER_Y + y * perspective - p.oy) * ctx.scale,
-      springScale: LOOSE_SPRING_SCALE,
-      sizeMult: Math.min(
-        MAX_SIZE,
-        Math.max(MIN_SIZE, perspective / restPerspective)
-      )
+      dx: (CENTER_X + x1 * perspective - p.ox) * ctx.scale,
+      dy: (CENTER_Y + y2 * perspective - p.oy) * ctx.scale,
+      springScale: SPRING_SCALE,
+      sizeMult: Math.min(MAX_SIZE, Math.max(MIN_SIZE, perspective))
     };
   }
 };
