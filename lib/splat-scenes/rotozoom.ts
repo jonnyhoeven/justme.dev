@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import type { SplatScene, SplatParticle } from '../splat-animations/types';
 import { isDarkTheme } from '../splat-animations/color-utils';
+import { setColor } from './utils';
 
 /**
  * Rotozoomer: particles form a dot-matrix grid whose colours are sampled from
@@ -18,6 +19,8 @@ let count = 1;
 let cols = 1;
 let rows = 1;
 let spacing = 20;
+let pitchX = 20;
+let pitchY = 20;
 let gridX = 0;
 let gridY = 0;
 let cosA = 1;
@@ -77,9 +80,14 @@ export const rotozoom: SplatScene = {
     }
     rows = bestRows;
     cols = bestCols;
-    spacing = Math.min(ctx.areaW / cols, ctx.areaH / rows);
-    gridX = ctx.areaX + (ctx.areaW - cols * spacing) / 2 + spacing / 2;
-    gridY = ctx.areaY + (ctx.areaH - rows * spacing) / 2 + spacing / 2;
+    // The particle count only allows a few grid shapes, so stretch the pitch
+    // to fill the area edge to edge instead of leaving empty borders. Dots
+    // stay round, sized by the tighter pitch.
+    pitchX = ctx.areaW / cols;
+    pitchY = ctx.areaH / rows;
+    spacing = Math.min(pitchX, pitchY);
+    gridX = ctx.areaX + pitchX / 2;
+    gridY = ctx.areaY + pitchY / 2;
 
     const { beat, volume } = ctx.audioLevels;
     angle += ctx.dt * (0.0004 + volume * 0.0012 + beat * 0.0015);
@@ -100,8 +108,8 @@ export const rotozoom: SplatScene = {
   target(_p, i, _elapsed, _ctx, out) {
     const col = i % cols;
     const row = Math.floor(i / cols);
-    const x = gridX + col * spacing;
-    const y = gridY + row * spacing;
+    const x = gridX + col * pitchX;
+    const y = gridY + row * pitchY;
 
     // Screen offset from the middle of the area -> rotated, zoomed UV
     const dx = x - midX;
@@ -116,6 +124,11 @@ export const rotozoom: SplatScene = {
     out.y = y;
     // ~0.36 * spacing radius: round dots with a visible gap, not a solid tile
     out.sizeMult = sizeMult;
-    out.colorOverride = `${Math.min(255, texture[k] * gain) | 0}, ${Math.min(255, texture[k + 1] * gain) | 0}, ${Math.min(255, texture[k + 2] * gain) | 0}`;
+    setColor(
+      out,
+      Math.min(255, texture[k] * gain),
+      Math.min(255, texture[k + 1] * gain),
+      Math.min(255, texture[k + 2] * gain)
+    );
   }
 };

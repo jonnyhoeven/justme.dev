@@ -5,6 +5,7 @@
  * https://github.com/vuejs/vitepress/blob/main/src/client/theme-default/styles/vars.css
  */
 
+@import './fonts.css';
 @import './tokens.css';
 @import './layout.css';
 @import './components.css';

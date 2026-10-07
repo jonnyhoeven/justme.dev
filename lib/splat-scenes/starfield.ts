@@ -1,10 +1,13 @@
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later
 import type { SplatScene, SplatParticle } from '../splat-animations/types';
+import { isDarkTheme } from '../splat-animations/color-utils';
+import { HUE_SPAN, HUE_START, HUE_SWAY, setHsl } from './utils';
 
 /**
  * Starfield: every particle is a star flying out of the middle of the area
- * towards the viewer, growing as it gets close.
+ * towards the viewer, growing as it gets close. Stars share Dot Shapes'
+ * blue-indigo-violet hue band and brighten as they approach.
  */
 
 const SPEED = 0.00007;
@@ -19,6 +22,9 @@ let cy = 0;
 let halfW = 1;
 let halfH = 1;
 let warp = 0;
+let dark = true;
+let lightBase = 0.62;
+let hueShift = 0;
 
 export const starfield: SplatScene = {
   name: 'Starfield',
@@ -51,9 +57,12 @@ export const starfield: SplatScene = {
     }
   },
 
-  beforeFrame(_elapsed, ctx) {
+  beforeFrame(elapsed, ctx) {
     // Integrated so speed changes never make the stars jump; bass and kicks hit the throttle
     const { bass, beat } = ctx.audioLevels;
+    dark = isDarkTheme();
+    lightBase = dark ? 0.62 : 0.42;
+    hueShift = Math.sin(elapsed * 0.0004) * HUE_SWAY;
     warp += ctx.dt * SPEED * (1 + bass * 4 + beat * 9);
     cx = ctx.areaX + ctx.areaW / 2;
     cy = ctx.areaY + ctx.areaH / 2;
@@ -70,6 +79,14 @@ export const starfield: SplatScene = {
     out.x = cx + s.x * halfW * spread;
     out.y = cy + s.y * halfH * spread;
     out.sizeMult = 0.15 + depth * 0.75;
+
+    // Same blue-indigo-violet hue band as Dot Shapes. Far stars fade into the
+    // page, near ones reach full brightness.
+    const hue = HUE_START + s.seed * HUE_SPAN + hueShift;
+    const fade = 0.25 + depth * 0.75;
+    // Dark page: dim towards black. Light page: wash out towards white.
+    const light = dark ? lightBase * fade : 1 - (1 - lightBase) * fade;
+    setHsl(out, hue, 0.85, light);
 
     // Respawn at the middle instead of flying back across the canvas
     if (depth < s.lastDepth) {

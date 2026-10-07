@@ -117,8 +117,16 @@ export interface SceneTarget {
   sizeMult: number;
   /** Opacity multiplier on top of the scene's alpha (default 1), e.g. for a shadow that darkens what is behind it */
   alpha: number;
-  /** Replacement colour "r, g, b"; undefined keeps the avatar colour */
-  colorOverride?: string;
+  /**
+   * Scene colour (0-255 channels), used when `tint` is true. HeroSplat blends
+   * each splat from its avatar colour to this as it travels to the scene, and
+   * back again on the way home. Use `setColor` from `splat-scenes/utils`.
+   */
+  r: number;
+  g: number;
+  b: number;
+  /** False keeps the avatar colour (reset to false before every `target` call) */
+  tint: boolean;
 }
 
 /** A rectangle in canvas px that the background glow is stretched to fill. */

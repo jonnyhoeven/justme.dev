@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import type { SplatScene, SplatParticle } from '../splat-animations/types';
 import { isDarkTheme } from '../splat-animations/color-utils';
-import { dotSize } from './utils';
+import { dotSize, setColor } from './utils';
 
 /**
  * The Amiga "Boing" ball: a red/white checkered sphere bounces and spins,
@@ -19,7 +19,7 @@ const COS_TILT = Math.cos(TILT);
 const SIN_TILT = Math.sin(TILT);
 const BOUNCE_PERIOD = 1150;
 // Black at partial opacity darkens the glow floor without shifting its hue
-const SHADOW_COLOR = '0, 0, 0';
+const SHADOW_COLOR = [0, 0, 0] as const;
 const SHADOW_ALPHA = 0.1;
 // The ball plays in this fraction of the area width, tucked against the right
 // edge so it never bounces behind the hero text
@@ -32,7 +32,7 @@ let nShadow = 0;
 let nBall = 0;
 let unit = new Float32Array(0);
 let tone = new Uint8Array(0);
-let colors: string[] = [];
+let colors: (readonly number[])[] = [];
 
 let bouncePhase = 0;
 let xPhase = 0;
@@ -96,8 +96,18 @@ export const boingBall: SplatScene = {
     // theme the checker is deep slate (white vanishes) and the back faces fade
     // towards the page instead of towards black.
     colors = dark
-      ? ['214, 52, 60', '222, 222, 226', '104, 30, 38', '96, 96, 108']
-      : ['204, 44, 52', '48, 54, 88', '230, 156, 160', '168, 174, 198'];
+      ? [
+          [214, 52, 60],
+          [222, 222, 226],
+          [104, 30, 38],
+          [96, 96, 108]
+        ]
+      : [
+          [204, 44, 52],
+          [48, 54, 88],
+          [230, 156, 160],
+          [168, 174, 198]
+        ];
     bouncePhase = 0.15;
     xPhase = 0;
     spin = 0;
@@ -152,7 +162,7 @@ export const boingBall: SplatScene = {
         groundY - radius * 0.02 + Math.sin(a) * r * radius * shadowScale * 0.2;
       out.sizeMult = shadowDot;
       out.alpha = SHADOW_ALPHA;
-      out.colorOverride = SHADOW_COLOR;
+      setColor(out, ...SHADOW_COLOR);
       return;
     }
 
@@ -169,6 +179,7 @@ export const boingBall: SplatScene = {
     out.y = ballY + y2 * radius * squashY;
     const front = z1 > 0;
     out.sizeMult = ballDot * (front ? 0.85 + 0.2 * z1 : 0.55);
-    out.colorOverride = colors[tone[k] + (front ? 0 : 2)];
+    const [r, g, b] = colors[tone[k] + (front ? 0 : 2)];
+    setColor(out, r, g, b);
   }
 };

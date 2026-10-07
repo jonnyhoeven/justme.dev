@@ -5,7 +5,7 @@ import type {
   SplatScene,
   SplatParticle
 } from '../splat-animations/types';
-import { dotSize, frac, R2_A, R2_B } from './utils';
+import { dotSize, frac, R2_A, R2_B, setColor } from './utils';
 
 /**
  * Particle Pong: two AI paddles rally a comet-trailed ball under a dot-matrix
@@ -49,10 +49,11 @@ const MISS_CHANCE = 0.22;
 const NET_DASHES = 12;
 const PADDLE_COLS = 3;
 
-const LEFT_COLOR = '72, 176, 224';
-const RIGHT_COLOR = '220, 92, 160';
-const NEUTRAL = '150, 160, 180';
-const LINE_COLOR = '120, 130, 150';
+type RGB = readonly [number, number, number];
+const LEFT_COLOR: RGB = [72, 176, 224];
+const RIGHT_COLOR: RGB = [220, 92, 160];
+const NEUTRAL: RGB = [150, 160, 180];
+const LINE_COLOR: RGB = [120, 130, 150];
 
 // Particle groups in draw order: walls, net, score, trail, paddles, ball
 const SHARE = [0.12, 0.08, 0.25, 0.3, 0.1, 0.15];
@@ -92,7 +93,7 @@ let offsetL = 0;
 let offsetR = 0;
 let recoilL = 0;
 let recoilR = 0;
-let ballColor = NEUTRAL;
+let ballColor: RGB = NEUTRAL;
 let trailAcc = 0;
 const trailX = new Float32Array(TRAIL_LEN);
 const trailY = new Float32Array(TRAIL_LEN);
@@ -283,7 +284,7 @@ export const pong: SplatScene = {
     const offset = groupOffset[g];
     const j = i - offset;
     const count = bounds[g] - offset;
-    out.colorOverride = LINE_COLOR;
+    setColor(out, ...LINE_COLOR);
 
     switch (g) {
       case 0: {
@@ -320,7 +321,7 @@ export const pong: SplatScene = {
           cy * cell +
           (frac(jj * R2_B + 0.3) - 0.5) * cell * 0.8;
         out.sizeMult = dots.score;
-        out.colorOverride = left ? LEFT_COLOR : RIGHT_COLOR;
+        setColor(out, ...(left ? LEFT_COLOR : RIGHT_COLOR));
         break;
       }
       case 3: {
@@ -330,7 +331,7 @@ export const pong: SplatScene = {
         out.x = trailX[s] + (frac(j * R2_A) - 0.5) * ballRadius * 0.8;
         out.y = trailY[s] + (frac(j * R2_B) - 0.5) * ballRadius * 0.8;
         out.sizeMult = dots.trail * taper;
-        out.colorOverride = ballColor;
+        setColor(out, ...ballColor);
         break;
       }
       case 4: {
@@ -348,7 +349,7 @@ export const pong: SplatScene = {
         out.x = (left ? padLX : padRX) + recoil + (col - 1) * paddleDot * 0.9;
         out.y = (left ? padLY : padRY) + (row / (rows - 1) - 0.5) * padH;
         out.sizeMult = dots.paddle;
-        out.colorOverride = left ? LEFT_COLOR : RIGHT_COLOR;
+        setColor(out, ...(left ? LEFT_COLOR : RIGHT_COLOR));
         break;
       }
       default: {
@@ -358,7 +359,7 @@ export const pong: SplatScene = {
         out.x = shX + Math.cos(a) * r;
         out.y = shY + Math.sin(a) * r;
         out.sizeMult = dots.ball;
-        out.colorOverride = ballColor;
+        setColor(out, ...ballColor);
       }
     }
   }

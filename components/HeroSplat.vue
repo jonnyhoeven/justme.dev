@@ -97,7 +97,26 @@ const BEAT_PUNCH = 2.5;
 const BEAT_SIZE_PUMP = 0.45;
 // The avatar also breathes: bass/kicks swell its whole outline (fraction of radius)
 const BEAT_SWELL = 0.07;
-const sceneOut: SceneTarget = { x: 0, y: 0, sizeMult: 1, alpha: 1 };
+const sceneOut: SceneTarget = {
+  x: 0,
+  y: 0,
+  sizeMult: 1,
+  alpha: 1,
+  r: 0,
+  g: 0,
+  b: 0,
+  tint: false
+};
+const colorOut = [0, 0, 0];
+/** Parses an animation's "r, g, b" override into the shared `colorOut`. */
+const parseRgb = (rgb: string) => {
+  const a = rgb.indexOf(',');
+  const b = rgb.indexOf(',', a + 1);
+  colorOut[0] = +rgb.slice(0, a);
+  colorOut[1] = +rgb.slice(a + 1, b);
+  colorOut[2] = +rgb.slice(b + 1);
+  return colorOut;
+};
 const smoothstep = (t: number) => {
   const c = Math.min(1, Math.max(0, t));
   return c * c * (3 - 2 * c);
@@ -505,6 +524,7 @@ onMounted(async () => {
       let springMul = effect.springScale ?? 1;
       let sMult = (effect.sizeMult ?? 1.0) * (1 + beat * BEAT_SIZE_PUMP);
       let color = effect.colorOverride;
+      let dotRadius = 1.1;
       let alpha = 1;
 
       if (scene) {
@@ -514,13 +534,28 @@ onMounted(async () => {
         if (m > 0) {
           sceneOut.sizeMult = 1;
           sceneOut.alpha = 1;
-          sceneOut.colorOverride = undefined;
+          sceneOut.tint = false;
           scene.target(p, i, sceneElapsed, animCtx, sceneOut);
           targetOx += (sceneOut.x - targetOx) * m;
           targetOy += (sceneOut.y - targetOy) * m;
           sMult += (sceneOut.sizeMult - sMult) * m;
           springMul += (SCENE_SPRING_SCALE - springMul) * m;
-          if (m > 0.5 && sceneOut.colorOverride) color = sceneOut.colorOverride;
+          if (sceneOut.tint) {
+            // Fade each splat from its avatar colour to the scene colour (and
+            // back again), rather than keeping the avatar's skin tones
+            const base = color ? parseRgb(color) : colorOut;
+            if (!color) {
+              base[0] = p.cr;
+              base[1] = p.cg;
+              base[2] = p.cb;
+            }
+            const r = base[0] + (sceneOut.r - base[0]) * m;
+            const g = base[1] + (sceneOut.g - base[1]) * m;
+            const b = base[2] + (sceneOut.b - base[2]) * m;
+            color = `${r | 0}, ${g | 0}, ${b | 0}`;
+            // The avatar brush is a bit smaller than a plain dot of the same size
+            dotRadius = 0.88 + 0.22 * m;
+          }
           // Scene opacity, fading out towards the left where the hero text is
           const leftFade = SITE_CONSTANTS.SPLAT_SCENE_LEFT_FADE;
           const xFade =
@@ -576,7 +611,7 @@ onMounted(async () => {
         // Circular draw for dynamic colors with a slight "bloom" feel
         ctx.fillStyle = `rgb(${color})`;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, halfSize * 1.1, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, halfSize * dotRadius, 0, Math.PI * 2);
         ctx.fill();
       } else {
         const brush = getBrush(p.color);
@@ -732,29 +767,121 @@ const onClick = (e: MouseEvent) => {
   }
 }
 
-/* The old VitePress .image-bg glow: same theme gradients, but softened with a
-   mask instead of a 100px blur filter, and animated via opacity/transform. */
+/* Background glow: two soft colour fields (brand indigo and violet) with
+   eased, Gaussian-like falloffs, slowly orbiting inside one feathered mask so
+   the halo drifts like an aurora instead of sitting as a flat gradient. Only
+   opacity/transform animate, so it stays on the compositor. */
 .splat-glow {
+  --glow-indigo: var(--vp-c-brand-1);
+  --glow-violet: var(--vp-c-brand-2);
+  --glow-azure: var(--vp-c-blue-500);
   position: absolute;
   border-radius: 50%;
-  background-image: var(--vp-home-hero-image-background-image);
-  /* Hollow centre: the glow haloes the face instead of tinting it purple */
+  /* Hollow centre: the glow haloes the face instead of tinting it purple.
+     Eased stops, no visible ring where the falloff ends. */
   mask-image: radial-gradient(
     closest-side,
-    rgba(0, 0, 0, var(--glow-core, 0)) 30%,
-    #000 55%,
+    rgba(0, 0, 0, var(--glow-core, 0)) 24%,
+    rgba(0, 0, 0, 0.92) 46%,
+    rgba(0, 0, 0, 0.62) 62%,
+    rgba(0, 0, 0, 0.3) 76%,
+    rgba(0, 0, 0, 0.1) 88%,
+    rgba(0, 0, 0, 0.02) 96%,
     transparent 100%
   );
   will-change: opacity, transform;
 }
 
-/* Rectangular glow (Pong arena): two crossed linear fades give feathered,
+.splat-glow::before,
+.splat-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  will-change: transform;
+}
+
+.splat-glow::before {
+  background:
+    radial-gradient(
+      ellipse 46% 46% at 30% 36%,
+      color-mix(in srgb, var(--glow-indigo) 44%, transparent) 0%,
+      color-mix(in srgb, var(--glow-indigo) 33%, transparent) 14%,
+      color-mix(in srgb, var(--glow-indigo) 19%, transparent) 34%,
+      color-mix(in srgb, var(--glow-indigo) 8%, transparent) 56%,
+      color-mix(in srgb, var(--glow-indigo) 2%, transparent) 78%,
+      transparent 100%
+    ),
+    radial-gradient(
+      ellipse 44% 44% at 72% 66%,
+      color-mix(in srgb, var(--glow-violet) 40%, transparent) 0%,
+      color-mix(in srgb, var(--glow-violet) 30%, transparent) 14%,
+      color-mix(in srgb, var(--glow-violet) 17%, transparent) 34%,
+      color-mix(in srgb, var(--glow-violet) 7%, transparent) 56%,
+      color-mix(in srgb, var(--glow-violet) 2%, transparent) 78%,
+      transparent 100%
+    );
+  animation: splat-glow-orbit 38s linear infinite;
+}
+
+/* A cooler azure field counter-rotates behind, so the colours slowly trade
+   places and the overall tone never sits still */
+.splat-glow::after {
+  background: radial-gradient(
+    ellipse 52% 52% at 58% 44%,
+    color-mix(in srgb, var(--glow-azure) 30%, transparent) 0%,
+    color-mix(in srgb, var(--glow-azure) 22%, transparent) 16%,
+    color-mix(in srgb, var(--glow-azure) 12%, transparent) 38%,
+    color-mix(in srgb, var(--glow-azure) 4%, transparent) 62%,
+    transparent 100%
+  );
+  animation: splat-glow-orbit 56s linear infinite reverse;
+}
+
+@keyframes splat-glow-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splat-glow::before,
+  .splat-glow::after {
+    animation: none;
+  }
+}
+
+/* Rectangular glow (Pong arena): two crossed eased fades give feathered,
    square-ish edges instead of the elliptical falloff. */
 .splat-glow--rect {
   border-radius: 8%;
   mask-image:
-    linear-gradient(to right, transparent, #000 14%, #000 86%, transparent),
-    linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+    linear-gradient(
+      to right,
+      transparent,
+      rgba(0, 0, 0, 0.1) 3%,
+      rgba(0, 0, 0, 0.38) 7%,
+      rgba(0, 0, 0, 0.75) 11%,
+      #000 15%,
+      #000 85%,
+      rgba(0, 0, 0, 0.75) 89%,
+      rgba(0, 0, 0, 0.38) 93%,
+      rgba(0, 0, 0, 0.1) 97%,
+      transparent
+    ),
+    linear-gradient(
+      to bottom,
+      transparent,
+      rgba(0, 0, 0, 0.1) 3%,
+      rgba(0, 0, 0, 0.38) 7%,
+      rgba(0, 0, 0, 0.75) 11%,
+      #000 15%,
+      #000 85%,
+      rgba(0, 0, 0, 0.75) 89%,
+      rgba(0, 0, 0, 0.38) 93%,
+      rgba(0, 0, 0, 0.1) 97%,
+      transparent
+    );
   mask-composite: intersect;
   -webkit-mask-composite: source-in;
 }

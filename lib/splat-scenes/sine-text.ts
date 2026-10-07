@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later
 import type { SplatScene } from '../splat-animations/types';
+import { isDarkTheme } from '../splat-animations/color-utils';
+import { setHsl } from './utils';
 
 /**
  * Sine-wave text, demo-scene style: "JUST / MAKE IT!" in a 5x7 bitmap font,
  * built from overlapping particles (a few per font pixel) so the strokes are
  * bold, with a travelling sine wave running through the letters. The whole
  * phrase is always on screen, so it reads at any moment, however early the
- * scene is skipped.
+ * scene is skipped. A muted indigo gradient rolls along the phrase with the wave.
  */
 
 export const LINES = ['JUST', 'MAKE IT!'];
@@ -15,6 +17,7 @@ export const LINES = ['JUST', 'MAKE IT!'];
 const GLYPH_COLS = 5;
 const GLYPH_ROWS = 7;
 const ADVANCE = GLYPH_COLS + 1;
+const WIDEST_COLS = Math.max(...LINES.map((l) => l.length * ADVANCE - 1));
 const LINE_GAP_ROWS = 2.5;
 const WAVE_FREQ = 0.012;
 const WAVE_SPEED = 0.003;
@@ -55,6 +58,7 @@ let amp = 0;
 let phase = 0;
 let energy = 0;
 let ramp = 0;
+let lightness = 0.6;
 
 const buildPixels = () => {
   if (pixels.length) return;
@@ -87,7 +91,15 @@ const hash = (i: number, salt: number) => {
 
 export const sineText: SplatScene = {
   name: 'Sine Text',
-  glow: 0,
+  // Faint: just enough to seat the phrase in the page without tinting the letters
+  glow: 0.3,
+
+  glowRect(_ctx, out) {
+    out.x = cx;
+    out.y = cy;
+    out.w = WIDEST_COLS * cell * 1.5;
+    out.h = blockRows * cell * 1.6;
+  },
 
   init() {
     phase = 0;
@@ -98,9 +110,8 @@ export const sineText: SplatScene = {
     const { volume, bass, beat } = ctx.audioLevels;
     phase += ctx.dt * WAVE_SPEED * (1 + volume * 2.5);
     energy = 1 + bass * 1.3 + beat * 0.7;
-    const widestCols = Math.max(...LINES.map((l) => l.length * ADVANCE - 1));
     cell = Math.min(
-      (ctx.areaW * FIT_WIDTH) / widestCols,
+      (ctx.areaW * FIT_WIDTH) / WIDEST_COLS,
       (ctx.areaH * FIT_HEIGHT) / blockRows
     );
     cx = ctx.areaX + ctx.areaW * CENTER_X;
@@ -108,6 +119,7 @@ export const sineText: SplatScene = {
     // The wave grows in, so the text first assembles flat and readable
     ramp = Math.min(1, elapsed / WAVE_RAMP_MS);
     amp = cell * 0.7 * ramp * energy;
+    lightness = isDarkTheme() ? 0.68 : 0.52;
   },
 
   target(_p, i, _elapsed, ctx, out) {
@@ -124,5 +136,15 @@ export const sineText: SplatScene = {
     out.y = y;
     // ~0.75 * cell radius: neighbouring dots overlap into solid strokes
     out.sizeMult = (cell * 0.085) / ctx.scale;
+    // Muted brand indigo (0.67): a narrow hue sway along the wave, crests a
+    // touch lighter than troughs, and a little per-dot variation so the
+    // overlapping strokes get depth instead of flat saturated fills
+    const wave = Math.sin(x * WAVE_FREQ + phase);
+    setHsl(
+      out,
+      0.665 + wave * 0.035,
+      0.5,
+      lightness + wave * 0.05 + (hash(i, 3) - 0.5) * 0.06
+    );
   }
 };

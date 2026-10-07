@@ -37,3 +37,12 @@ SOFTWARE.
 The bitmap font in [`public/fonts/spleen/`](public/fonts/spleen/) is
 [Spleen](https://github.com/fcambus/spleen) 2.2.0 by Frederic Cambus. Its license text is kept next to the font
 files in [`public/fonts/spleen/LICENSE`](public/fonts/spleen/LICENSE).
+
+## Inter and Outfit (SIL Open Font License 1.1)
+
+The web fonts in [`fonts/`](fonts/) are served from the Cloudflare R2 media CDN (`media.justme.dev/fonts/`).
+
+- [Inter](https://github.com/rsms/inter), copyright 2016 The Inter Project Authors.
+  License: [`fonts/inter/OFL.txt`](fonts/inter/OFL.txt).
+- [Outfit](https://github.com/Outfitio/Outfit-Fonts), copyright 2021 The Outfit Project Authors.
+  License: [`fonts/outfit/OFL.txt`](fonts/outfit/OFL.txt).

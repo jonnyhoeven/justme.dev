@@ -75,11 +75,11 @@ This document outlines the roadmap and requirements for hosting large 3D Gaussia
 
 ## 🔤 Fonts on Cloudflare R2
 
-- [ ] Fonts can't be bundled locally, so serve them from the R2 bucket next to the images (e.g. `cdn.justme.dev/fonts/`).
-  - [ ] Upload Inter (400-700) and Outfit (400-800) as `.woff2`.
-  - [ ] Add `@font-face` rules (`font-display: swap`) in `.vitepress/theme/` pointing at the R2 URLs.
-  - [ ] Replace the Google Fonts `<link>` tags (`preconnect` + stylesheet) in `.vitepress/config.mts` with a `preload` for the critical weights.
-  - [ ] Ensure the R2 CORS policy allows font requests from the site origins.
+- [x] Serve fonts from the R2 bucket next to the images (`media.justme.dev/fonts/`).
+  - [x] Upload Inter (400-700) and Outfit (400-800) as variable `.woff2` (all subsets) with `pnpm run fonts:sync`.
+  - [x] Add `@font-face` rules (`font-display: swap`) in `.vitepress/theme/fonts.css` pointing at the R2 URLs.
+  - [x] Replace the Google Fonts `<link>` tags in `.vitepress/config.mts` with a `preconnect` and `preload` of the latin subsets.
+  - [x] R2 CORS already allows `https://justme.dev` and `http://localhost:5173`, so fonts also load in `docs:dev`.
 
 ---
 

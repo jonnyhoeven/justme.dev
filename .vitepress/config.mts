@@ -22,22 +22,21 @@ export default defineConfig({
   ],
   description: SITE_CONSTANTS.DESCRIPTION,
   head: [
-    ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
+    // Fonts live on the R2 media CDN (see theme/fonts.css); preload the latin subsets used above the fold.
     [
       'link',
+      { rel: 'preconnect', href: SITE_CONSTANTS.MEDIA_URL, crossorigin: '' }
+    ],
+    ...['inter', 'outfit'].map((family): HeadConfig => [
+      'link',
       {
-        rel: 'preconnect',
-        href: 'https://fonts.gstatic.com',
+        rel: 'preload',
+        as: 'font',
+        type: 'font/woff2',
+        href: `${SITE_CONSTANTS.MEDIA_URL}/fonts/${family}/${family}-latin.woff2`,
         crossorigin: ''
       }
-    ],
-    [
-      'link',
-      {
-        href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap',
-        rel: 'stylesheet'
-      }
-    ],
+    ]),
     // Static Opengraph stuff
     ['meta', { property: 'og:site_name', content: SITE_CONSTANTS.SITE_NAME }],
     ['meta', { property: 'og:locale', content: SITE_CONSTANTS.LANG }],

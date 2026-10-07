@@ -1,11 +1,22 @@
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later
 import type { SplatScene, SplatParticle } from '../splat-animations/types';
-import { frac, R2_A, R2_B } from './utils';
+import { isDarkTheme } from '../splat-animations/color-utils';
+import {
+  frac,
+  HUE_SPAN,
+  HUE_START,
+  HUE_SWAY,
+  R2_A,
+  R2_B,
+  setHsl
+} from './utils';
 
 /**
  * Rotating dot shapes (vector-demo style): the particles sit on a sphere,
  * torus and cube surface in turn, morphing between them while spinning.
+ * Each dot gets a hue from its place on the surface, kept within the site's
+ * blue-indigo-violet brand range, and is shaded by depth so the far side recedes.
  */
 
 const SHAPE_TIME = 4500;
@@ -13,7 +24,6 @@ const BLEND_FRACTION = 0.3;
 // In shape radii. Far enough that the cube's near and far corners differ by
 // ~1.5x in scale (at 3 it was 2.6x, which made the cube look warped).
 const CAMERA_DISTANCE = 6;
-
 let shapes: Float32Array[] = [];
 let shapeA = 0;
 let shapeB = 0;
@@ -26,6 +36,8 @@ let cx = 0;
 let cy = 0;
 let radius = 100;
 let angleY = 0;
+let hueShift = 0;
+let lightBase = 0.6;
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
 
@@ -83,6 +95,9 @@ export const dotShapes: SplatScene = {
     // Integrated spin: faster with the music, kicked forward on each beat
     const { volume, beat, bass } = ctx.audioLevels;
     angleY += ctx.dt * (0.0007 + volume * 0.002 + beat * 0.004);
+    hueShift = Math.sin(elapsed * 0.0004) * HUE_SWAY;
+    // Light enough to glow on a dark page, deep enough to read on a light one
+    lightBase = isDarkTheme() ? 0.62 : 0.42;
     const ay = angleY;
     const ax = 0.5 + Math.sin(elapsed * 0.0003) * 0.4;
     cosY = Math.cos(ay);
@@ -114,5 +129,10 @@ export const dotShapes: SplatScene = {
     out.x = cx + x1 * radius * persp;
     out.y = cy + y2 * radius * persp;
     out.sizeMult = 0.35 + persp * 0.4;
+
+    // Hue follows the particle's fixed spot on the surface; depth shades it
+    const hue = HUE_START + frac((i + 1) * R2_A) * HUE_SPAN + hueShift;
+    const depthShade = Math.max(0, Math.min(1, (persp - 0.7) / 0.6));
+    setHsl(out, hue, 0.85, lightBase * (0.55 + 0.45 * depthShade));
   }
 };
