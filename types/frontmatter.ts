@@ -3,6 +3,8 @@
 export interface ArticleFrontmatter {
   title?: string;
   image?: string;
+  /** Hide the hero image on the article page (list cards still use it). */
+  hideImage?: boolean;
   intro?: string;
   model?: string;
   date?: string;

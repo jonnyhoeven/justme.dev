@@ -10,6 +10,7 @@ intro: |
 fetchReadme: false
 editLink: true
 image: /images/justme.dev.webp
+hideImage: true
 languages: Web Audio, FastTracker 2, Chiptune
 ---
 

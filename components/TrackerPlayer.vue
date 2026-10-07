@@ -2,7 +2,11 @@
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
-import { useVirtualList } from '@vueuse/core';
+import {
+  useElementSize,
+  useElementVisibility,
+  useVirtualList
+} from '@vueuse/core';
 import useMusic from '../.vitepress/theme/composables/useMusic';
 import { XMPlayer } from '../lib/audio/xm-player';
 import type { MusicTrack } from '../data/music.data';
@@ -29,7 +33,6 @@ const {
   setVolume,
   setBpm,
   resetBpm,
-  setTrackIndex,
   selectTrack,
   handleNext,
   handlePrev,
@@ -41,8 +44,12 @@ const {
 } = useMusic();
 
 // Canvas refs
+const playerRootRef = ref<HTMLElement | null>(null);
+const isOnScreen = useElementVisibility(playerRootRef);
 const scopesCanvasRef = ref<HTMLCanvasElement | null>(null);
 const patternCanvasRef = ref<HTMLCanvasElement | null>(null);
+const patternPaneRef = ref<HTMLElement | null>(null);
+const { width: patternPaneWidth } = useElementSize(patternPaneRef);
 const orderContainerRef = ref<HTMLElement | null>(null);
 const isOrderGridMode = ref(false);
 
@@ -207,6 +214,17 @@ const handleProgressBarClick = (e: MouseEvent) => {
 // ==========================================
 let rafId: number | null = null;
 
+// Split channels into rows of near-equal length (e.g. 22 -> 8/7/7, 21 -> 7/7/7)
+// so no tiles are left empty and every row spans the full canvas width.
+const scopeRowLayout = (numCh: number) => {
+  const rows = Math.ceil(numCh / 8);
+  const base = Math.floor(numCh / rows);
+  const extra = numCh % rows;
+  const rowStart = (r: number) => r * base + Math.min(r, extra);
+  const rowCount = (r: number) => base + (r < extra ? 1 : 0);
+  return { rows, rowStart, rowCount };
+};
+
 const renderOscilloscopes = () => {
   const canvas = scopesCanvasRef.value;
   if (!canvas) return;
@@ -218,19 +236,17 @@ const renderOscilloscopes = () => {
   ctx.clearRect(0, 0, width, height);
 
   const numCh = Math.max(1, trackerState.value.numChannels || 4);
-  const cols = Math.min(8, numCh);
-  const rows = Math.ceil(numCh / cols);
-
-  const boxW = width / cols;
+  const { rows, rowStart, rowCount } = scopeRowLayout(numCh);
   const boxH = height / rows;
 
   const scopes = channelScopes.value;
   const mutes = channelMutes.value;
 
   for (let ch = 0; ch < numCh; ch++) {
-    const col = ch % cols;
-    const row = Math.floor(ch / cols);
-    const x0 = col * boxW;
+    let row = 0;
+    while (row + 1 < rows && ch >= rowStart(row + 1)) row++;
+    const boxW = width / rowCount(row);
+    const x0 = (ch - rowStart(row)) * boxW;
     const y0 = row * boxH;
     const isMuted = mutes[ch];
 
@@ -279,27 +295,82 @@ const renderOscilloscopes = () => {
 // ==========================================
 // Canvas Pattern Grid Renderer
 // ==========================================
+// Modules can have up to 32 channels, far more than fit in the pane at a
+// readable size. Rather than a hidden horizontal scroll, the channels are split
+// into pages of near-equal size that each fill the pane width (see pager).
+const PATTERN_CH_MIN_WIDTH = 96;
+const PATTERN_ROW_NUM_WIDTH = 36;
+const PATTERN_HEIGHT = 320;
+const PATTERN_HEADER_HEIGHT = 18;
+
+const patternPage = ref(0);
+
+const patternPages = computed(() => {
+  const numCh = Math.max(1, trackerState.value.numChannels || 4);
+  const width = patternPaneWidth.value;
+  // Pane hidden (width 0) or not measured yet: don't paginate.
+  const perPage = width
+    ? Math.max(
+        1,
+        Math.floor((width - PATTERN_ROW_NUM_WIDTH) / PATTERN_CH_MIN_WIDTH)
+      )
+    : numCh;
+  const pages = Math.ceil(numCh / perPage);
+  const base = Math.floor(numCh / pages);
+  const extra = numCh % pages;
+  return Array.from({ length: pages }, (_, p) => {
+    const start = p * base + Math.min(p, extra);
+    return { start, end: start + base + (p < extra ? 1 : 0) };
+  });
+});
+
+const activePatternPage = computed(() =>
+  Math.min(patternPage.value, patternPages.value.length - 1)
+);
+
+watch(currentTrackIndex, () => {
+  patternPage.value = 0;
+});
+
 const renderPatternGrid = () => {
   const canvas = patternCanvasRef.value;
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  const width = canvas.width;
-  const height = canvas.height;
-  ctx.clearRect(0, 0, width, height);
-
   const patData = getActivePatternData();
   const curRow = trackerState.value.curRow;
-  const numCh = Math.max(1, trackerState.value.numChannels || 4);
+  const mutes = channelMutes.value;
 
+  // Back the canvas with device pixels so the monospace text stays crisp on
+  // HiDPI screens; all drawing below is in CSS pixels.
+  const width =
+    patternPaneWidth.value || canvas.parentElement?.clientWidth || 0;
+  if (!width) return;
+  const height = PATTERN_HEIGHT;
+  const dpr = window.devicePixelRatio || 1;
+  const bitmapW = Math.round(width * dpr);
+  const bitmapH = Math.round(height * dpr);
+  if (canvas.width !== bitmapW || canvas.height !== bitmapH) {
+    canvas.width = bitmapW;
+    canvas.height = bitmapH;
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, width, height);
+
+  // Patterns can have up to 256 rows, not always 64.
+  const numRows = patData ? patData.length : 64;
+
+  const rowNumWidth = PATTERN_ROW_NUM_WIDTH;
+  const { start: chStart, end: chEnd } =
+    patternPages.value[activePatternPage.value];
+  const pageChannels = chEnd - chStart;
   const rowHeight = 20;
   const centerRowY = Math.floor(height / (2 * rowHeight)) * rowHeight;
   const visibleRowsCount = Math.floor(height / rowHeight);
   const halfVisible = Math.floor(visibleRowsCount / 2);
 
-  const rowNumWidth = 36;
-  const chWidth = Math.max(90, (width - rowNumWidth) / numCh);
+  const chWidth = (width - rowNumWidth) / pageChannels;
 
   // Background
   ctx.fillStyle = '#090a0f';
@@ -322,7 +393,7 @@ const renderPatternGrid = () => {
 
     if (yPos < -rowHeight || yPos > height) continue;
 
-    const isValidRow = rowIdx >= 0 && rowIdx < 64;
+    const isValidRow = rowIdx >= 0 && rowIdx < numRows;
 
     // Row number column
     ctx.fillStyle = rowIdx === curRow ? '#60a5fa' : '#52525b';
@@ -335,14 +406,18 @@ const renderPatternGrid = () => {
 
     const rowData = patData[rowIdx];
 
-    // Channels
-    for (let c = 0; c < numCh; c++) {
+    // Channels on the current page
+    for (let c = chStart; c < chEnd; c++) {
       const cell = rowData[c];
-      const cx = rowNumWidth + c * chWidth;
+      const cx = rowNumWidth + (c - chStart) * chWidth;
+      const dim = mutes[c];
+
+      if (dim) ctx.globalAlpha = 0.35;
 
       if (!cell) {
         ctx.fillStyle = '#3f3f46';
         ctx.fillText('··· ·· ·· ···', cx + 4, yPos + 14);
+        ctx.globalAlpha = 1;
         continue;
       }
 
@@ -377,6 +452,8 @@ const renderPatternGrid = () => {
       const effStr = XMPlayer.prettifyEffect(eff, param);
       ctx.fillStyle = effStr !== '···' ? '#f43f5e' : '#3f3f46';
       ctx.fillText(effStr, cx + 66, yPos + 14);
+
+      ctx.globalAlpha = 1;
     }
   }
 
@@ -386,12 +463,32 @@ const renderPatternGrid = () => {
   ctx.beginPath();
   ctx.moveTo(rowNumWidth, 0);
   ctx.lineTo(rowNumWidth, height);
-  for (let c = 1; c <= numCh; c++) {
+  for (let c = 1; c <= pageChannels; c++) {
     const cx = rowNumWidth + c * chWidth;
     ctx.moveTo(cx, 0);
     ctx.lineTo(cx, height);
   }
   ctx.stroke();
+
+  // Sticky channel header, so the columns stay identifiable (and match the
+  // CHn tiles in the waveform grid above) while the rows scroll underneath.
+  ctx.fillStyle = 'rgba(9, 10, 15, 0.94)';
+  ctx.fillRect(0, 0, width, PATTERN_HEADER_HEIGHT);
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+  ctx.beginPath();
+  ctx.moveTo(0, PATTERN_HEADER_HEIGHT - 0.5);
+  ctx.lineTo(width, PATTERN_HEADER_HEIGHT - 0.5);
+  ctx.stroke();
+  ctx.font = '10px monospace';
+  for (let c = chStart; c < chEnd; c++) {
+    const isMuted = mutes[c];
+    ctx.fillStyle = isMuted ? '#ef4444' : 'rgba(255, 255, 255, 0.55)';
+    ctx.fillText(
+      `CH${c + 1}${isMuted ? ' (M)' : ''}`,
+      rowNumWidth + (c - chStart) * chWidth + 4,
+      12
+    );
+  }
 };
 
 const animLoop = () => {
@@ -399,8 +496,18 @@ const animLoop = () => {
   if (activeTab.value === 'pattern') {
     renderPatternGrid();
   }
-  rafId = requestAnimationFrame(animLoop);
+  rafId = isOnScreen.value ? requestAnimationFrame(animLoop) : null;
 };
+
+// Canvas animations pause off-screen (AGENTS.md rule 4) and resume on return.
+watch(isOnScreen, (visible) => {
+  if (visible && rafId === null) {
+    rafId = requestAnimationFrame(animLoop);
+  } else if (!visible && rafId !== null) {
+    cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+});
 
 // Handle scope canvas clicks to mute/solo
 const handleScopesCanvasClick = (e: MouseEvent) => {
@@ -414,17 +521,15 @@ const handleScopesCanvasClick = (e: MouseEvent) => {
   const clickY = (e.clientY - rect.top) * scaleY;
 
   const numCh = Math.max(1, trackerState.value.numChannels || 4);
-  const cols = Math.min(8, numCh);
-  const rows = Math.ceil(numCh / cols);
+  const { rows, rowStart, rowCount } = scopeRowLayout(numCh);
+  const row = Math.min(rows - 1, Math.floor(clickY / (canvas.height / rows)));
+  const col = Math.min(
+    rowCount(row) - 1,
+    Math.floor(clickX / (canvas.width / rowCount(row)))
+  );
+  const chIdx = rowStart(row) + col;
 
-  const boxW = canvas.width / cols;
-  const boxH = canvas.height / rows;
-
-  const col = Math.floor(clickX / boxW);
-  const row = Math.floor(clickY / boxH);
-  const chIdx = row * cols + col;
-
-  if (chIdx < numCh) {
+  if (chIdx >= 0 && chIdx < numCh) {
     if (e.shiftKey || e.altKey) {
       soloChannel(chIdx);
     } else {
@@ -447,7 +552,9 @@ onMounted(() => {
           t.filename.toLowerCase() === trackParam.toLowerCase()
       );
       if (matchIdx !== -1) {
-        setTrackIndex(matchIdx);
+        // selectTrack (not setTrackIndex) so audio that is already playing
+        // switches to the linked track instead of drifting out of sync with it.
+        selectTrack(matchIdx);
       }
     }
   }
@@ -455,21 +562,25 @@ onMounted(() => {
   rafId = requestAnimationFrame(animLoop);
 });
 
-// Auto-scroll the active pattern order pill into view
+// Keep the active pattern order pill centred in its strip. Scroll the strip
+// itself: scrollIntoView() would also scroll the page vertically whenever the
+// strip is off-screen, yanking the reader back up mid-scroll.
 watch(
   () => trackerState.value.curSongPos,
   (pos) => {
-    if (!orderContainerRef.value || isOrderGridMode.value) return;
-    const activeEl = orderContainerRef.value.querySelector(
+    const container = orderContainerRef.value;
+    if (!container || isOrderGridMode.value) return;
+    const activeEl = container.querySelector(
       `[data-order-idx="${pos}"]`
     ) as HTMLElement | null;
-    if (activeEl) {
-      activeEl.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'center'
-      });
-    }
+    if (!activeEl) return;
+    const c = container.getBoundingClientRect();
+    const el = activeEl.getBoundingClientRect();
+    container.scrollTo({
+      left:
+        container.scrollLeft + (el.left - c.left) - (c.width - el.width) / 2,
+      behavior: 'smooth'
+    });
   }
 );
 
@@ -482,7 +593,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="tracker-player-wrap">
+  <div ref="playerRootRef" class="tracker-player-wrap">
     <!-- Top Bar: Song Title, Deep link, Stats -->
     <div class="tracker-header-card">
       <div class="header-main-info">
@@ -769,6 +880,12 @@ onBeforeUnmount(() => {
         </button>
       </div>
     </div>
+    <!-- Reserves the card's height until a song is loaded, so starting playback
+         does not push everything below it (and the reader's scroll position)
+         down. -->
+    <div v-else class="tracker-sequence-card sequence-placeholder">
+      Press play to load the pattern order list.
+    </div>
 
     <!-- Channel Oscilloscopes Grid Canvas -->
     <div class="tracker-scopes-card">
@@ -817,13 +934,31 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- Tab Content: Live Pattern Matrix -->
-      <div v-show="activeTab === 'pattern'" class="tab-pane pattern-pane">
-        <canvas
-          ref="patternCanvasRef"
-          width="800"
-          height="320"
-          class="pattern-canvas"
-        ></canvas>
+      <div
+        v-show="activeTab === 'pattern'"
+        ref="patternPaneRef"
+        class="tab-pane pattern-pane"
+      >
+        <div
+          v-if="patternPages.length > 1"
+          class="pattern-pager"
+          role="group"
+          aria-label="Pattern channel pages"
+        >
+          <span class="pattern-pager-label">Channels</span>
+          <button
+            v-for="(page, i) in patternPages"
+            :key="i"
+            type="button"
+            class="pager-btn"
+            :class="{ active: i === activePatternPage }"
+            :aria-pressed="i === activePatternPage"
+            @click="patternPage = i"
+          >
+            {{ page.start + 1 }}–{{ page.end }}
+          </button>
+        </div>
+        <canvas ref="patternCanvasRef" class="pattern-canvas"></canvas>
       </div>
 
       <!-- Tab Content: Instruments & Samples -->
@@ -938,6 +1073,17 @@ onBeforeUnmount(() => {
   border: 1px solid var(--vp-c-divider);
   border-radius: 12px;
   padding: 16px;
+}
+
+/* Same height as the loaded single-row order card (title row + pill row) */
+.sequence-placeholder {
+  min-height: 118px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: var(--vp-c-text-3);
 }
 
 /* Header */
@@ -1318,6 +1464,42 @@ onBeforeUnmount(() => {
   background: var(--vp-c-brand-soft);
   color: var(--vp-c-brand-1);
   border-color: var(--vp-c-brand-1);
+}
+
+.pattern-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.pattern-pager-label {
+  font-size: 0.75rem;
+  color: var(--vp-c-text-3);
+  margin-right: 2px;
+}
+
+.pager-btn {
+  padding: 3px 10px;
+  font-family: monospace;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  background: var(--vp-c-bg-mute);
+  border: 1px solid var(--vp-c-divider);
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+}
+
+.pager-btn:hover {
+  border-color: var(--vp-c-brand-1);
+  color: var(--vp-c-brand-1);
+}
+
+.pager-btn.active {
+  background: var(--vp-c-brand-soft);
+  border-color: var(--vp-c-brand-1);
+  color: var(--vp-c-brand-1);
 }
 
 .pattern-canvas {

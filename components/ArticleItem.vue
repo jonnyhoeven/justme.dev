@@ -12,7 +12,12 @@ defineProps<{
 <template>
   <article class="article-detail">
     <h1 v-if="frontmatter && frontmatter.title">{{ frontmatter.title }}</h1>
-    <div v-if="frontmatter" class="container_row">
+    <!-- hideImage: skip the hero image so interactive pages (e.g. the tracker
+         player) start right under the title; image stays for list cards/SEO. -->
+    <div v-if="frontmatter && frontmatter.hideImage" class="compact-badges">
+      <Badges :frontmatter="frontmatter" />
+    </div>
+    <div v-else-if="frontmatter" class="container_row">
       <div class="articleImagebg layerbg"></div>
       <div class="layerimg">
         <img
