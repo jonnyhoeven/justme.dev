@@ -1,10 +1,12 @@
 # SPDX-FileCopyrightText: Jonny van der Hoeven
 # SPDX-License-Identifier: GPL-3.0-or-later
 import logging
+import re
 import textwrap
 from datetime import date
 from pathlib import Path
 from typing import List, Optional, Union
+from urllib.parse import urljoin, urlsplit
 
 import yaml
 from pydantic import BaseModel, HttpUrl
@@ -46,6 +48,33 @@ def get_wrapper_template(post_content: str, readme_content: str) -> str:
     )
 
 
+# Markdown links and images: [text](target "title") / ![alt](target)
+_MD_LINK = re.compile(r'(!?)\[([^\]]*)\]\(\s*([^)\s]+)((?:\s+"[^"]*")?)\s*\)')
+
+
+def absolutize_links(
+    readme: str, user: str, project: str, branch: str, readme_file: str
+) -> str:
+    """Point relative links in a fetched README at the source repository.
+
+    A README links to sibling files (`LICENSE`, `docs/x.md`) relative to its own
+    repo, which are dead links once the text is rendered on this site. Links go
+    to the GitHub blob view, images to raw.githubusercontent.com. Absolute URLs,
+    `#anchors` and site-root paths are left alone.
+    """
+    blob_base = f"https://github.com/{user}/{project}/blob/{branch}/{readme_file}"
+    raw_base = f"https://raw.githubusercontent.com/{user}/{project}/{branch}/{readme_file}"
+
+    def rewrite(match: re.Match[str]) -> str:
+        bang, text, target, title = match.groups()
+        if target.startswith(("#", "/")) or urlsplit(target).scheme:
+            return match.group(0)
+        resolved = urljoin(raw_base if bang else blob_base, target)
+        return f"{bang}[{text}]({resolved}{title})"
+
+    return _MD_LINK.sub(rewrite, readme)
+
+
 class GenerateFiles:
     def __init__(self) -> None:
         self.max_width = 120
@@ -62,7 +91,7 @@ class GenerateFiles:
         try:
             response = requests.get(url, timeout=10)
             response.raise_for_status()
-            return response.text
+            return absolutize_links(response.text, user, project, branch, readme_file)
         except requests.RequestException as e:
             logger.error(f"Failed to fetch README from {url}: {e}")
             return ""

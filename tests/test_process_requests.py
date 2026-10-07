@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
 from process_requests import (
     GenerateFiles,
     ProjectRequest,
+    absolutize_links,
     get_wrapper_template,
 )
 
@@ -144,6 +145,44 @@ class TestGetWrapperTemplate:
     def test_has_script_setup_block(self):
         result = get_wrapper_template("", "")
         assert "<script setup>" in result
+
+
+# ---------------------------------------------------------------------------
+# absolutize_links
+# ---------------------------------------------------------------------------
+
+
+class TestAbsolutizeLinks:
+    BLOB = "https://github.com/foo/bar/blob/main"
+
+    def _run(self, text: str, readme_file: str = "README.md") -> str:
+        return absolutize_links(text, "foo", "bar", "main", readme_file)
+
+    def test_relative_link_points_at_github_blob(self):
+        assert self._run("[License](LICENSE)") == f"[License]({self.BLOB}/LICENSE)"
+
+    def test_dot_slash_and_parent_paths_resolve(self):
+        assert self._run("[a](./docs/a.md)") == f"[a]({self.BLOB}/docs/a.md)"
+        assert (
+            self._run("[b](../b.md)", "docs/README.md") == f"[b]({self.BLOB}/b.md)"
+        )
+
+    def test_image_points_at_raw_content(self):
+        assert self._run("![x](img/x.png)") == (
+            "![x](https://raw.githubusercontent.com/foo/bar/main/img/x.png)"
+        )
+
+    def test_absolute_anchor_and_root_links_untouched(self):
+        for text in (
+            "[a](https://example.com/x)",
+            "[b](#section)",
+            "[c](/site/root)",
+            "[d](mailto:me@example.com)",
+        ):
+            assert self._run(text) == text
+
+    def test_keeps_link_title(self):
+        assert self._run('[a](LICENSE "GPL")') == f'[a]({self.BLOB}/LICENSE "GPL")'
 
 
 # ---------------------------------------------------------------------------
