@@ -755,6 +755,7 @@ const onClick = (e: MouseEvent) => {
   inset: calc(var(--bleed) * -1);
   top: calc((var(--hero-pad-top) + var(--nav-overlap)) * -1);
   bottom: calc(var(--hero-pad-bottom) * -1);
+  overflow: clip;
   z-index: 0;
   pointer-events: none;
 }
