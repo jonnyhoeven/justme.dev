@@ -716,8 +716,11 @@ const onClick = (e: MouseEvent) => {
 
 /* Keep in sync with SITE_CONSTANTS.MOBILE_BREAKPOINT (768) */
 @media (max-width: 767px) {
+  /* In normal flow, so the name and tagline sit below the avatar instead of
+     being painted over it (layout.css drops VitePress' overlap margins). */
   .HeroSplat {
-    margin-top: 24px;
+    position: static;
+    height: auto;
   }
 }
 
@@ -725,13 +728,12 @@ const onClick = (e: MouseEvent) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 7.5rem;
 }
 
 .fallback-image img {
   width: 100%;
-  max-width: 320px;
-  max-height: 320px;
+  max-width: 240px;
+  aspect-ratio: 1;
   object-fit: cover;
   border-radius: 50%;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);

@@ -619,3 +619,44 @@
     background-position: 4% 0;
   }
 }
+
+/**
+ * Mobile refinements (below 640px, where the list cards stack image-on-top)
+ * -------------------------------------------------------------------------- */
+
+@media (max-width: 639px) {
+  /* Stacked image and text: give them air, and drop the desktop nudge that
+     lines the title up with the thumbnail's top edge. */
+  .container_row {
+    row-gap: 16px;
+  }
+
+  .post-title {
+    margin-top: 0 !important;
+    margin-bottom: 0.5rem;
+  }
+
+  .post-intro {
+    margin-bottom: 0.75rem;
+  }
+
+  /* Badges float right on desktop; on a phone they should read left-aligned
+     like the text above them, and wrap with an even gap. */
+  .badge-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+  }
+
+  .shieldButton {
+    float: none;
+    margin: 0;
+  }
+
+  .article-detail .compact-badges {
+    padding: 0;
+    margin-top: 12px;
+  }
+}

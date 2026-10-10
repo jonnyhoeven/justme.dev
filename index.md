@@ -49,7 +49,7 @@ import ArticleList from './components/ArticleList.vue';
   <ArticleList v-for="page of pages.slice(0, 4)" :key="page.url" :page="page"/>
 </div>
 
-<div class="action">
+<div class="home-action">
   <a class="view-all-button flourish" href="/blog">View all posts</a>
 </div>
 

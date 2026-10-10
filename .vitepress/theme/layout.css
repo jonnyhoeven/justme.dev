@@ -135,6 +135,25 @@ h6,
   }
 }
 
+/* Below 768px the hero shows an opaque static avatar. VitePress overlaps the
+   image slot with the text (negative margins, built for a blurred backdrop),
+   which paints the name and tagline over the photo, so stack them instead. */
+@media (max-width: 767px) {
+  .VPHero .image {
+    margin: 0 -24px 24px;
+  }
+
+  .VPHero .image-container {
+    height: auto;
+    margin-top: 24px;
+  }
+
+  /* A "⌘ K" hint is noise on a phone, and it crowds the nav bar. */
+  .VPNavBarSearch .DocSearch-Button-Keys {
+    display: none !important;
+  }
+}
+
 /**
  * Homepage-specific layout and components
  * -------------------------------------------------------------------------- */
@@ -150,7 +169,8 @@ h6,
   margin-top: 3rem;
 }
 
-.action {
+/* Not `.action`: VitePress uses that class for each hero button wrapper. */
+.home-action {
   margin-top: 4rem;
   text-align: center;
 }
@@ -196,4 +216,21 @@ h6,
   margin: 0;
   padding-top: 20px;
   display: block;
+}
+
+/* Mobile: the desktop section gaps (8rem / 4.5rem) leave screens of dead
+   space between short blocks on a phone. */
+@media (max-width: 639px) {
+  .homepage-content {
+    margin-top: 4rem;
+  }
+
+  .recent-posts {
+    gap: 2.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .home-action {
+    margin-top: 2.5rem;
+  }
 }
