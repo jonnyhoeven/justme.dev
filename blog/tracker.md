@@ -9,7 +9,7 @@ intro: |
   An interactive Web Audio FastTracker 2 (.XM) player and live visualizer. Explore 3,000+ tracker songs, watch real-time channel oscilloscopes, inspect scrolling pattern matrixes, and view sample instruments.
 fetchReadme: false
 editLink: true
-image: /images/justme.dev.webp
+image: https://media.justme.dev/images/tracker-player.webp
 hideImage: true
 languages: Web Audio, FastTracker 2, Chiptune
 ---

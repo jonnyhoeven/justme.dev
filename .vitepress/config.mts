@@ -89,7 +89,10 @@ export default defineConfig({
       'Just me. Sharing insights, experiences, and tutorials related to software development and site reliability engineering.';
     const intro = pf.intro ? pf.intro : intro_plh;
     const image_plh = SITE_CONSTANTS.IMAGES.DEFAULT;
-    const image = `${SITE_CONSTANTS.HOSTNAME}${pf.image ? pf.image : image_plh}`;
+    const image_src = pf.image ? pf.image : image_plh;
+    const image = /^https?:\/\//.test(image_src)
+      ? image_src
+      : `${SITE_CONSTANTS.HOSTNAME}${image_src}`;
     const cleanPath = pageData.relativePath
       .replace(/(?:^|\/)index\.md$/, '')
       .replace(/\.md$/, '');

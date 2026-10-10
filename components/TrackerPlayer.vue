@@ -270,9 +270,13 @@ const renderOscilloscopes = () => {
     const scopeData = scopes[ch];
     const midY = y0 + boxH / 2;
 
+    // Brand violet trace with a soft glow. The canvas background is always
+    // black (see .scopes-canvas), so this reads the same in light and dark mode.
     ctx.beginPath();
-    ctx.strokeStyle = isMuted ? '#71717a' : '#10b981';
-    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = isMuted ? '#71717a' : '#a78bfa';
+    ctx.lineWidth = 1.4;
+    ctx.shadowColor = isMuted ? 'transparent' : 'rgba(139, 92, 246, 0.9)';
+    ctx.shadowBlur = isMuted ? 0 : 8;
 
     if (scopeData && scopeData.length > 0 && isPlaying.value && !isMuted) {
       const step = (boxW - 8) / scopeData.length;
@@ -289,6 +293,8 @@ const renderOscilloscopes = () => {
       ctx.lineTo(x0 + boxW - 4, midY);
     }
     ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = 'transparent';
   }
 };
 
@@ -1106,13 +1112,18 @@ onBeforeUnmount(() => {
   font-size: 1.3rem;
   font-weight: 700;
   margin: 0;
+  /* Drop the .vp-doc h2 rule + top padding, which leave a stray hairline and
+     a dead band above the title inside the card. */
+  padding: 0;
+  border-top: none;
   color: var(--vp-c-text-1);
 }
 
 .tracker-filename {
   font-size: 0.85rem;
-  color: var(--vp-c-text-3);
+  color: var(--vp-c-text-2);
   font-family: monospace;
+  overflow-wrap: anywhere;
 }
 
 .tracker-badges-row {
@@ -1417,6 +1428,8 @@ onBeforeUnmount(() => {
 .scopes-header {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2px 12px;
   font-size: 0.85rem;
   font-weight: 600;
   margin-bottom: 8px;
@@ -1425,7 +1438,7 @@ onBeforeUnmount(() => {
 .scopes-hint {
   font-size: 0.75rem;
   font-weight: normal;
-  color: var(--vp-c-text-3);
+  color: var(--vp-c-text-2);
 }
 
 .scopes-canvas {
@@ -1454,6 +1467,17 @@ onBeforeUnmount(() => {
   border: 1px solid transparent;
   color: var(--vp-c-text-2);
   cursor: pointer;
+}
+
+/* Phones: three equal tabs with tighter padding, so the longer labels wrap to
+   two lines at most instead of three. */
+@media (max-width: 480px) {
+  .tab-btn {
+    flex: 1 1 0;
+    padding: 8px 4px;
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
 }
 
 .tab-btn:hover {
