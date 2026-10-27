@@ -6,6 +6,7 @@ select = ["E", "F", "I"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = [".", "scripts"]
 addopts = "--cov=scripts --cov-report=term-missing --cov-fail-under=80"
 
 [tool.coverage.run]

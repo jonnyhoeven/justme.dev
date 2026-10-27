@@ -17,6 +17,13 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
+# Ensure scripts directory and repo root are on sys.path for direct script & test execution
+_scripts_dir = Path(__file__).resolve().parent
+_repo_root = _scripts_dir.parent
+for _p in (str(_repo_root), str(_scripts_dir)):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
 try:
     from scripts.r2_common import (
         compute_file_md5,
