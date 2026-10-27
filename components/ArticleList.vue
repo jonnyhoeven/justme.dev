@@ -4,9 +4,15 @@
 import Badges from './Badges.vue';
 import type { ArticlePage } from '../types/frontmatter';
 
-defineProps<{
-  page?: ArticlePage;
-}>();
+withDefaults(
+  defineProps<{
+    page?: ArticlePage;
+    headingLevel?: 'h2' | 'h3';
+  }>(),
+  {
+    headingLevel: 'h2'
+  }
+);
 </script>
 
 <template>
@@ -27,19 +33,20 @@ defineProps<{
       />
     </div>
     <div v-if="page.frontmatter.title" class="layercontent">
-      <h3 :id="'title-' + page.url.replace(/\//g, '-')" class="post-title">
-        <a :href="page.url" class="nolinkdecor">{{ page.frontmatter.title }}</a>
-      </h3>
+      <component
+        :is="headingLevel"
+        :id="'title-' + page.url.replace(/\//g, '-')"
+        class="post-title"
+      >
+        <a :href="page.url" class="nolinkdecor stretched-link">{{
+          page.frontmatter.title
+        }}</a>
+      </component>
       <div v-if="page.frontmatter.intro" class="post-intro">
         {{ page.frontmatter.intro }}
       </div>
       <Badges :frontmatter="page.frontmatter" />
     </div>
-    <a
-      :href="page.url"
-      class="stretched-link"
-      :aria-label="'Read more about ' + page.frontmatter.title"
-    ></a>
   </article>
 </template>
 

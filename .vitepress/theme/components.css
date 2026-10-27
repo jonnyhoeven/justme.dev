@@ -359,21 +359,25 @@
  * -------------------------------------------------------------------------- */
 
 .badge-bar {
-  margin: 13px 0 27px 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
   position: relative;
-  z-index: 20;
+  z-index: 2;
 }
 
 .shieldButton {
-  margin-top: 16px;
-  margin-right: 5px;
-  float: right;
+  display: inline-flex;
+  align-items: center;
   transition: all var(--duration-normal) var(--ease-smooth);
 }
 
 .shieldButton:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 6px 12px var(--vp-c-brand-1-alpha-20);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 10px var(--vp-c-brand-1-alpha-20);
   border-radius: var(--radius-xs);
 }
 
@@ -397,14 +401,15 @@
   cursor: pointer;
 }
 
-.stretched-link {
-  display: block;
+.stretched-link::after {
+  content: '';
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: 10;
+  z-index: 1;
+  pointer-events: auto;
 }
 
 /* ArticleList: grid layers use CSS-variable positioning */
@@ -450,12 +455,15 @@
   display: block;
   border-radius: var(--radius-sm);
   border: 1px solid var(--vp-c-brand-soft);
-  transition: all 1s ease-in-out;
+  transition:
+    transform var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth);
   padding: var(--ls-listitem-image-padding);
 }
 
 .container_row:hover .listImage {
-  transform: skew(-0deg, -4deg) rotate(2deg) scale(1.08);
+  transform: translateY(-2px) scale(1.02);
+  border-color: var(--vp-c-brand-1);
 }
 
 /* ArticleList: background glow behind list-item image */
@@ -470,13 +478,17 @@
   opacity: 0.25;
   filter: blur(var(--ls-listitem-image-bg-blur));
   z-index: -10;
-  transition: all 0.8s var(--ease-smooth);
+  transition:
+    transform var(--duration-normal) var(--ease-smooth),
+    filter var(--duration-normal) var(--ease-smooth),
+    opacity var(--duration-normal) var(--ease-smooth);
   padding: var(--ls-listitem-image-padding);
 }
 
 .container_row:hover .listImagebg {
-  transform: skew(-1.5deg, -0.5deg) rotate(-0.4deg) scale(1.05);
+  transform: translateY(-1px) scale(1.04);
   filter: blur(var(--ls-listitem-image-bg-blur-hover));
+  opacity: 0.35;
 }
 
 /**
@@ -498,7 +510,6 @@
 }
 
 .article-detail .compact-badges {
-  overflow: hidden; /* contain the floated badges */
   padding: 0 13px;
 }
 
@@ -516,19 +527,24 @@
   object-fit: cover;
   display: block;
   border: 1px solid var(--vp-c-brand-soft);
-  transition: all 1.5s ease-out;
+  transition:
+    transform var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth);
   border-radius: var(--radius-sm);
 }
 
 .container_row:hover .articleImage {
-  transform: skew(-0.5deg, -0.5deg) rotate(-0.4deg) scale(1.04);
+  transform: translateY(-2px) scale(1.01);
+  border-color: var(--vp-c-brand-1);
 }
 
 .articleImagebg {
   width: 100%;
   height: 333px;
   z-index: -10;
-  transition: all 1s ease-in-out;
+  transition:
+    transform var(--duration-normal) var(--ease-smooth),
+    filter var(--duration-normal) var(--ease-smooth);
   background: linear-gradient(
     45deg,
     var(--vp-c-blue-500),
@@ -542,7 +558,7 @@
 }
 
 .container_row:hover .articleImagebg {
-  transform: skew(-1.5deg, -0.5deg) rotate(-0.5deg) scale(1.04);
+  transform: translateY(-1px) scale(1.03);
   filter: blur(var(--ls-listitem-image-bg-blur-hover));
 }
 
@@ -580,19 +596,9 @@
     margin-bottom: 0.75rem;
   }
 
-  /* Badges float right on desktop; on a phone they should read left-aligned
-     like the text above them, and wrap with an even gap. */
   .badge-bar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
     margin: 0;
-  }
-
-  .shieldButton {
-    float: none;
-    margin: 0;
+    padding-top: 8px;
   }
 
   .article-detail .compact-badges {

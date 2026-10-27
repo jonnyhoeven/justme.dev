@@ -46,7 +46,7 @@ import ArticleList from './components/ArticleList.vue';
 ## Recent Posts
 
 <div class="recent-posts">
-  <ArticleList v-for="page of pages.slice(0, 4)" :key="page.url" :page="page"/>
+  <ArticleList v-for="page of pages.slice(0, 4)" :key="page.url" :page="page" heading-level="h3"/>
 </div>
 
 <div class="home-action">

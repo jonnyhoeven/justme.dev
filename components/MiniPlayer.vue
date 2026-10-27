@@ -9,8 +9,7 @@ import {
   computed,
   nextTick
 } from 'vue';
-import { useWindowSize, useVirtualList, useResizeObserver } from '@vueuse/core';
-import { SITE_CONSTANTS } from '../.vitepress/constants';
+import { useVirtualList, useResizeObserver } from '@vueuse/core';
 import useMusic from '../.vitepress/theme/composables/useMusic';
 import type { MusicTrack } from '../data/music.data';
 
@@ -96,11 +95,6 @@ const trackTooltip = computed(() => {
   if (track.tracker) parts.push(track.tracker);
   return parts.join(' | ');
 });
-
-const { width: windowWidth } = useWindowSize();
-const isMobileView = computed(
-  () => windowWidth.value < SITE_CONSTANTS.MOBILE_BREAKPOINT
-);
 
 // Playlist drawer state
 const isPlaylistOpen = ref(false);
@@ -251,11 +245,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div
-    v-if="!isMobileView"
-    ref="containerRef"
-    class="music-mini-player-container"
-  >
+  <div ref="containerRef" class="music-mini-player-container">
     <div class="music-mini-player">
       <div class="mini-controls">
         <!-- Previous Button -->
@@ -663,31 +653,35 @@ onBeforeUnmount(() => {
 <style scoped>
 .music-mini-player-container {
   position: fixed;
-  top: 16px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 100;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   align-items: center;
+  max-width: calc(100vw - 24px);
 }
 
 .music-mini-player {
   display: flex !important;
   align-items: center;
-  gap: 10px;
-  padding: 4px 12px;
-  background: rgba(var(--vp-c-bg-elv-rgb), 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  gap: 8px;
+  padding: 4px 14px;
+  background: rgba(var(--vp-c-bg-elv-rgb), 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--vp-c-divider);
-  border-radius: 20px;
-  height: 32px;
-  width: 440px !important;
-  min-width: 440px !important;
-  flex-shrink: 0 !important;
+  border-radius: var(--radius-full, 9999px);
+  height: 38px;
+  width: 480px;
+  max-width: calc(100vw - 24px);
+  min-width: 0;
+  flex-shrink: 0;
   transition: all var(--duration-normal) ease;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.08);
   /* backdrop-filter makes the bar its own stacking context, so the volume
      popover's z-index only counts inside it; lift the bar above the playlist
      panel (z-index 101) instead. */
@@ -875,15 +869,17 @@ onBeforeUnmount(() => {
 /* Playlist Dropdown Panel */
 .mini-playlist-panel {
   position: absolute;
-  top: calc(100% + 8px);
-  width: 440px;
-  max-width: 90vw;
+  bottom: calc(100% + 10px);
+  top: auto;
+  width: 480px;
+  max-width: calc(100vw - 24px);
+  max-height: 65vh;
   background: rgba(var(--vp-c-bg-elv-rgb), 0.94);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--vp-c-divider);
   border-radius: var(--radius-md, 12px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -1145,6 +1141,33 @@ onBeforeUnmount(() => {
 .panel-pop-enter-from,
 .panel-pop-leave-to {
   opacity: 0;
-  transform: translateY(-8px) scale(0.98);
+  transform: translateY(10px) scale(0.98);
+}
+
+@media (max-width: 767px) {
+  .music-mini-player-container {
+    bottom: 12px;
+    width: calc(100vw - 20px);
+  }
+
+  .music-mini-player {
+    width: 100%;
+    height: 36px;
+    padding: 3px 8px;
+    gap: 4px;
+  }
+
+  .volume-inline {
+    display: none;
+  }
+
+  .mini-btn {
+    padding: 3px;
+  }
+
+  .mini-playlist-panel {
+    width: 100%;
+    max-height: 55vh;
+  }
 }
 </style>

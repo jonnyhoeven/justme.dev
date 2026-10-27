@@ -546,10 +546,14 @@ onBeforeUnmount(() => {
     <div class="tracker-header-card">
       <div class="header-main-info">
         <div class="song-titles-row">
-          <h2 class="tracker-song-title">
+          <h2 class="tracker-song-title" :title="displaySongTitle">
             {{ displaySongTitle }}
           </h2>
-          <span v-if="currentTrack?.filename" class="tracker-filename">
+          <span
+            v-if="currentTrack?.filename"
+            class="tracker-filename"
+            :title="currentTrack.filename"
+          >
             {{ currentTrack.filename }}
           </span>
         </div>
@@ -1039,15 +1043,19 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  flex-wrap: wrap;
-  gap: 12px;
+  gap: 16px;
+}
+
+.header-main-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .song-titles-row {
   display: flex;
   align-items: baseline;
   gap: 10px;
-  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .tracker-song-title {
@@ -1059,13 +1067,22 @@ onBeforeUnmount(() => {
   padding: 0;
   border-top: none;
   color: var(--vp-c-text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .tracker-filename {
   font-size: 0.85rem;
   color: var(--vp-c-text-2);
   font-family: monospace;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex-shrink: 2;
 }
 
 .tracker-badges-row {
@@ -1092,6 +1109,19 @@ onBeforeUnmount(() => {
 .header-actions-row {
   display: flex;
   gap: 8px;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+@media (max-width: 639px) {
+  .tracker-header-card {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .header-actions-row {
+    align-self: flex-end;
+  }
 }
 
 .tracker-btn {

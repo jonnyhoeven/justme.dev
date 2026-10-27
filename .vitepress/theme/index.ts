@@ -12,7 +12,7 @@ export default {
   Layout: () => {
     return h(DefaultTheme.Layout, null, {
       'home-hero-image': () => h(HeroSplat),
-      'nav-bar-content-before': () => h(MiniPlayer)
+      'layout-bottom': () => h(MiniPlayer)
     });
   }
 } satisfies Theme;

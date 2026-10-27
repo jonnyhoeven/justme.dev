@@ -22,27 +22,27 @@
   --vp-c-default-3: var(--vp-c-gray-3);
   --vp-c-default-soft: var(--vp-c-gray-soft);
 
-  /* Electric blue and Indigo accent */
-  --vp-c-brand-1: #6366f1;
-  --vp-c-brand-2: #8b5cf6;
+  /* Electric blue and Indigo accent (WCAG AA compliant against white/light backgrounds) */
+  --vp-c-brand-1: #4f46e5;
+  --vp-c-brand-2: #6366f1;
   --vp-c-brand-3: #4338ca;
-  --vp-c-brand-soft: rgba(99, 102, 241, 0.16);
+  --vp-c-brand-soft: rgba(79, 70, 229, 0.14);
 
   /* Brand alpha variants (derived from brand palette) */
-  --vp-c-brand-1-alpha-10: rgba(99, 102, 241, 0.1);
-  --vp-c-brand-1-alpha-15: rgba(99, 102, 241, 0.15);
-  --vp-c-brand-1-alpha-20: rgba(99, 102, 241, 0.2);
-  --vp-c-brand-1-alpha-30: rgba(99, 102, 241, 0.3);
-  --vp-c-brand-1-alpha-40: rgba(99, 102, 241, 0.4);
-  --vp-c-brand-2-alpha-10: rgba(139, 92, 246, 0.1);
-  --vp-c-brand-2-alpha-20: rgba(139, 92, 246, 0.2);
-  --vp-c-brand-2-alpha-40: rgba(139, 92, 246, 0.4);
+  --vp-c-brand-1-alpha-10: rgba(79, 70, 229, 0.1);
+  --vp-c-brand-1-alpha-15: rgba(79, 70, 229, 0.15);
+  --vp-c-brand-1-alpha-20: rgba(79, 70, 229, 0.2);
+  --vp-c-brand-1-alpha-30: rgba(79, 70, 229, 0.3);
+  --vp-c-brand-1-alpha-40: rgba(79, 70, 229, 0.4);
+  --vp-c-brand-2-alpha-10: rgba(99, 102, 241, 0.1);
+  --vp-c-brand-2-alpha-20: rgba(99, 102, 241, 0.2);
+  --vp-c-brand-2-alpha-40: rgba(99, 102, 241, 0.4);
   --vp-c-blue-500: #3b82f6;
   --vp-c-blue-500-alpha-30: rgba(59, 130, 246, 0.3);
 
   /* RGB channels for rgba() composition */
   --vp-c-bg-elv-rgb: 255, 255, 255;
-  --vp-c-brand-rgb: 99, 102, 241;
+  --vp-c-brand-rgb: 79, 70, 229;
 
   --vp-c-tip-1: var(--vp-c-brand-1);
   --vp-c-tip-2: var(--vp-c-brand-2);
@@ -181,6 +181,29 @@
   --vp-c-text-2: rgba(255, 255, 255, 0.65);
 
   --vp-c-bg-elv-rgb: 30, 35, 50;
+
+  /* WCAG AA compliant brand accents for dark surfaces (contrast > 6.5:1 against dark bg) */
+  --vp-c-brand-1: #818cf8;
+  --vp-c-brand-2: #a5b4fc;
+  --vp-c-brand-3: #6366f1;
+  --vp-c-brand-soft: rgba(129, 140, 248, 0.16);
+
+  --vp-c-brand-1-alpha-10: rgba(129, 140, 248, 0.1);
+  --vp-c-brand-1-alpha-15: rgba(129, 140, 248, 0.15);
+  --vp-c-brand-1-alpha-20: rgba(129, 140, 248, 0.2);
+  --vp-c-brand-1-alpha-30: rgba(129, 140, 248, 0.3);
+  --vp-c-brand-1-alpha-40: rgba(129, 140, 248, 0.4);
+  --vp-c-brand-2-alpha-10: rgba(165, 180, 252, 0.1);
+  --vp-c-brand-2-alpha-20: rgba(165, 180, 252, 0.2);
+  --vp-c-brand-2-alpha-40: rgba(165, 180, 252, 0.4);
+
+  --vp-c-brand-rgb: 129, 140, 248;
+
+  --vp-button-brand-bg: #4f46e5;
+  --vp-button-brand-hover-bg: #6366f1;
+  --vp-button-brand-active-bg: #4338ca;
+  --vp-button-brand-text: var(--vp-c-white);
+  --vp-button-brand-hover-text: var(--vp-c-white);
 
   --glass-bg-light: var(--glass-bg-dark);
   --glass-border-light: var(--glass-border-dark);

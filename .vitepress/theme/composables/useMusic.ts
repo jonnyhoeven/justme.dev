@@ -636,7 +636,7 @@ const musicState = {
   getActivePatternData
 };
 
-// Shared state for the music player easter egg and full tracker page
+// Shared state for the mini player and full tracker page
 export const useMusic = () => musicState;
 
 export default useMusic;

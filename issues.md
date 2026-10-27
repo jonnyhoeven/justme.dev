@@ -6,7 +6,7 @@
 - **Performance:** `backdrop-filter: blur(...)` on the navbar, feature cards and custom blocks may cause scroll jank on low-end phones.
 - **Overflow risk:** blog-post iframes (`.embed-frame`) have no `max-width: 100%`.
 - **Sticky hover on touch:** `.view-all-button`, `.container_row` and `.shieldButton` still apply `:hover` transforms outside `@media (hover: hover)`.
-- **Music easter egg:** unavailable below 768px by design of the `!isMobileView` condition; confirm that is intended.
+- **Music player on phones:** moved to bottom audio dock and enabled on mobile.
 - **Status:** tracked in `todo.md` under "Phone Layout Follow-ups".
 
 ## Open: XM files that failed a quick structural parse (possibly corrupt)

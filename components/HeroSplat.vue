@@ -2,7 +2,11 @@
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue';
-import { useWindowSize, useElementVisibility } from '@vueuse/core';
+import {
+  useWindowSize,
+  useElementVisibility,
+  usePreferredReducedMotion
+} from '@vueuse/core';
 
 import {
   pickRandomAnimation,
@@ -73,6 +77,11 @@ const { width: windowWidth } = useWindowSize();
 const isMobileView = computed(
   () => windowWidth.value < SITE_CONSTANTS.MOBILE_BREAKPOINT
 );
+const preferredReducedMotion = usePreferredReducedMotion();
+const prefersReducedMotion = computed(
+  () => preferredReducedMotion.value === 'reduce'
+);
+let renderStatic = () => {};
 let startTime = performance.now();
 
 // Director: avatar animation -> morph -> full-canvas scene -> morph -> ...
@@ -167,6 +176,10 @@ const resize = () => {
     glow.style.width = glow.style.height = `${glowSize}px`;
     glow.style.left = `${anchorX - glowSize / 2}px`;
     glow.style.top = `${anchorY - glowSize / 2}px`;
+  }
+
+  if (prefersReducedMotion.value) {
+    renderStatic();
   }
 };
 
@@ -286,11 +299,19 @@ onMounted(async () => {
           })
         );
 
-        // Initial scatter across the whole hero; the springs pull them home
-        particles.forEach((p) => {
-          p.x = Math.random() * width;
-          p.y = Math.random() * height;
-        });
+        if (prefersReducedMotion.value) {
+          particles.forEach((p) => {
+            p.x = p.ox * scale + offsetX;
+            p.y = p.oy * scale + offsetY;
+          });
+          renderStatic();
+        } else {
+          // Initial scatter across the whole hero; the springs pull them home
+          particles.forEach((p) => {
+            p.x = Math.random() * width;
+            p.y = Math.random() * height;
+          });
+        }
 
         if (currentAnimation.value) {
           currentAnimation.value.init(particles);
@@ -341,6 +362,28 @@ onMounted(async () => {
 
     brushCache.set(color, c);
     return c;
+  };
+
+  renderStatic = () => {
+    if (!ctx || isMobileView.value || particles.length === 0) return;
+    ctx.clearRect(0, 0, width, height);
+    ctx.globalAlpha = 1;
+    const halfSize = 8 * scale;
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.x = p.ox * scale + offsetX;
+      p.y = p.oy * scale + offsetY;
+      p.vx = 0;
+      p.vy = 0;
+      const brush = getBrush(p.color);
+      ctx.drawImage(
+        brush,
+        p.x - halfSize * 1.2,
+        p.y - halfSize * 1.2,
+        halfSize * 2.4,
+        halfSize * 2.4
+      );
+    }
   };
 
   // 4. Layout & input handlers. Pointer events come from the hero itself
@@ -634,6 +677,10 @@ onMounted(async () => {
   startLoop = () => {
     if (isMobileView.value || !isVisible.value) return;
     if (animationId) cancelAnimationFrame(animationId);
+    if (prefersReducedMotion.value) {
+      renderStatic();
+      return;
+    }
     animationId = requestAnimationFrame(render);
   };
 
@@ -649,6 +696,15 @@ onMounted(async () => {
     },
     { immediate: true }
   );
+
+  watch(prefersReducedMotion, (reduced) => {
+    if (reduced) {
+      stopLoop();
+      renderStatic();
+    } else {
+      startLoop();
+    }
+  });
 
   watch(isMobileView, async (isMobile) => {
     if (!isMobile) {
