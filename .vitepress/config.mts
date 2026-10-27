@@ -1,8 +1,13 @@
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later
+import fs from 'node:fs';
+import path from 'node:path';
 import { defineConfig, HeadConfig } from 'vitepress';
 import transformPage from '../lib/transformPage';
 import { SITE_CONSTANTS } from './constants';
+
+const isProd = process.env.NODE_ENV === 'production';
+const fontBase = isProd ? SITE_CONSTANTS.MEDIA_URL : '';
 
 export default defineConfig({
   lang: SITE_CONSTANTS.LANG,
@@ -23,17 +28,21 @@ export default defineConfig({
   description: SITE_CONSTANTS.DESCRIPTION,
   head: [
     // Fonts live on the R2 media CDN (see theme/fonts.css); preload the latin subsets used above the fold.
-    [
-      'link',
-      { rel: 'preconnect', href: SITE_CONSTANTS.MEDIA_URL, crossorigin: '' }
-    ],
+    ...(isProd
+      ? [
+          [
+            'link',
+            { rel: 'preconnect', href: SITE_CONSTANTS.MEDIA_URL, crossorigin: '' }
+          ] as HeadConfig
+        ]
+      : []),
     ...['inter', 'outfit'].map((family): HeadConfig => [
       'link',
       {
         rel: 'preload',
         as: 'font',
         type: 'font/woff2',
-        href: `${SITE_CONSTANTS.MEDIA_URL}/fonts/${family}/${family}-latin.woff2`,
+        href: `${fontBase}/fonts/${family}/${family}-latin.woff2`,
         crossorigin: ''
       }
     ]),
@@ -238,6 +247,31 @@ export default defineConfig({
     hostname: SITE_CONSTANTS.HOSTNAME
   },
   vite: {
+    plugins: [
+      {
+        name: 'dev-local-fonts',
+        apply: 'serve',
+        configureServer(server) {
+          server.middlewares.use('/fonts', (req, res, next) => {
+            const rawUrl = (req.url || '').split('?')[0];
+            const filePath = path.join(process.cwd(), 'fonts', rawUrl);
+            if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+              res.setHeader('Content-Type', 'font/woff2');
+              res.setHeader('Access-Control-Allow-Origin', '*');
+              res.setHeader('Cache-Control', 'no-cache');
+              fs.createReadStream(filePath).pipe(res);
+              return;
+            }
+            next();
+          });
+        },
+        transform(code, id) {
+          if (id.endsWith('.css') || id.includes('fonts.css')) {
+            return code.replaceAll('https://media.justme.dev/fonts', '/fonts');
+          }
+        }
+      }
+    ],
     build: {
       chunkSizeWarningLimit: 750,
       rollupOptions: {
