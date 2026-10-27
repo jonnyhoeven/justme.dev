@@ -48,8 +48,11 @@ def get_wrapper_template(post_content: str, readme_content: str) -> str:
     )
 
 
-# Markdown links and images: [text](target "title") / ![alt](target)
-_MD_LINK = re.compile(r'(!?)\[([^\]]*)\]\(\s*([^)\s]+)((?:\s+"[^"]*")?)\s*\)')
+# Fenced code blocks (```...``` or ~~~...~~~) and Markdown links/images
+_MD_TOKEN = re.compile(
+    r"(?ms)(?P<fence_block>^[ \t]*(?P<fence>`{3,}|~{3,})[^\n]*\n.*?(?:(?<=\n)[ \t]*(?P=fence)[ \t]*(?:\r?\n|\Z)|\Z))|"
+    r"(?P<md_link>(?P<bang>!?)\[(?P<text>[^\]]*)\]\(\s*(?P<target>[^)\s]+)(?P<title>(?:\s+\"[^\"]*\")?)\s*\))"
+)
 
 
 def absolutize_links(
@@ -60,19 +63,25 @@ def absolutize_links(
     A README links to sibling files (`LICENSE`, `docs/x.md`) relative to its own
     repo, which are dead links once the text is rendered on this site. Links go
     to the GitHub blob view, images to raw.githubusercontent.com. Absolute URLs,
-    `#anchors` and site-root paths are left alone.
+    `#anchors` and site-root paths are left alone. Links inside fenced code blocks
+    are preserved untouched.
     """
     blob_base = f"https://github.com/{user}/{project}/blob/{branch}/{readme_file}"
     raw_base = f"https://raw.githubusercontent.com/{user}/{project}/{branch}/{readme_file}"
 
     def rewrite(match: re.Match[str]) -> str:
-        bang, text, target, title = match.groups()
+        if match.group("fence_block"):
+            return match.group("fence_block")
+        bang = match.group("bang") or ""
+        text = match.group("text") or ""
+        target = match.group("target") or ""
+        title = match.group("title") or ""
         if target.startswith(("#", "/")) or urlsplit(target).scheme:
             return match.group(0)
         resolved = urljoin(raw_base if bang else blob_base, target)
         return f"{bang}[{text}]({resolved}{title})"
 
-    return _MD_LINK.sub(rewrite, readme)
+    return _MD_TOKEN.sub(rewrite, readme)
 
 
 class GenerateFiles:

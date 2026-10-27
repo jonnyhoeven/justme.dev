@@ -35,16 +35,6 @@ export const animations: SplatAnimation[] = [
   spectrumHalo
 ];
 
-/** Total number of available animations */
-export const animationCount = animations.length;
-
-/** Get an animation by index (wraps around) */
-export function getAnimation(index: number): SplatAnimation {
-  return animations[
-    ((index % animations.length) + animations.length) % animations.length
-  ];
-}
-
 /**
  * Pick a uniformly random animation from the registry.
  * Returns the animation and its index so clicking can cycle from there.

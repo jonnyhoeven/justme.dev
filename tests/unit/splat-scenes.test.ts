@@ -4,8 +4,20 @@ import { describe, it, expect } from 'vitest';
 import { FONT, LINES } from '../../lib/splat-scenes/sine-text';
 import { scenes } from '../../lib/splat-scenes';
 import { DIGITS } from '../../lib/splat-scenes/pong';
+import {
+  dotSize,
+  frac,
+  setColor,
+  setHsl,
+  R2_A,
+  R2_B,
+  HUE_START,
+  HUE_SPAN,
+  HUE_SWAY
+} from '../../lib/splat-scenes/utils';
 import type {
   AnimationContext,
+  SceneTarget,
   SplatParticle
 } from '../../lib/splat-animations/types';
 
@@ -103,5 +115,41 @@ describe('rotozoom scene', () => {
 
     // Every particle occupies a unique grid cell, meaning count = rows * cols
     expect(positions.size).toBe(560);
+  });
+});
+
+describe('splat-scenes utils', () => {
+  it('computes fractional parts correctly', () => {
+    expect(frac(1.25)).toBeCloseTo(0.25);
+    expect(frac(3.0)).toBeCloseTo(0);
+    expect(R2_A).toBeGreaterThan(0);
+    expect(R2_B).toBeGreaterThan(0);
+    expect(HUE_START).toBe(0.6);
+    expect(HUE_SPAN).toBe(0.16);
+    expect(HUE_SWAY).toBe(0.03);
+  });
+
+  it('calculates dotSize relative to scale', () => {
+    const mockCtx = { scale: 2 } as unknown as AnimationContext;
+    expect(dotSize(17.6, mockCtx)).toBeCloseTo(1);
+  });
+
+  it('sets RGB color and tint flag', () => {
+    const target = {} as SceneTarget;
+    setColor(target, 100, 150, 200);
+    expect(target).toEqual({ r: 100, g: 150, b: 200, tint: true });
+  });
+
+  it('sets HSL color correctly', () => {
+    const target = {} as SceneTarget;
+    setHsl(target, 0, 1, 0.5); // pure red
+    expect(target.r).toBeCloseTo(255);
+    expect(target.g).toBeCloseTo(0);
+    expect(target.b).toBeCloseTo(0);
+    expect(target.tint).toBe(true);
+
+    // Test with wrap-around hue
+    setHsl(target, 1.333, 1, 0.5); // green with hue > 1
+    expect(target.tint).toBe(true);
   });
 });

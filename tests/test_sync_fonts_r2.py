@@ -98,7 +98,9 @@ def test_main_uploads_new_and_removes_orphans(tmp_path: Path, monkeypatch: pytes
 
     mock_s3.upload_file.assert_called_once()
     assert mock_s3.upload_file.call_args.args[2] == "fonts/inter/inter-latin.woff2"
-    mock_s3.delete_object.assert_called_once_with(Bucket="media", Key="fonts/old/gone.woff2")
+    mock_s3.delete_objects.assert_called_once_with(
+        Bucket="media", Delete={"Objects": [{"Key": "fonts/old/gone.woff2"}]}
+    )
 
 
 def test_main_exits_when_fonts_dir_missing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

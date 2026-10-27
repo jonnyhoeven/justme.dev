@@ -1386,6 +1386,7 @@ function createXMEngine() {
             env_pan_type
           );
           var samp = {
+            sampname,
             len: samplen,
             loop: samploop,
             looplen: samplooplen,
@@ -1703,7 +1704,7 @@ export class XMPlayer {
     this.engine.setCurrentPattern();
   }
 
-  getTrackerState() {
+  getTrackerState(includeSongpats = true) {
     const xm = this.engine.xm || {};
     return {
       curSongPos: this.engine.cur_songpos,
@@ -1712,7 +1713,7 @@ export class XMPlayer {
       bpm: xm.bpm || 125,
       tempo: xm.tempo || 6,
       songlen: xm.songpats ? xm.xm_songlen || xm.songpats.length : 0,
-      songpats: xm.songpats ? [...xm.songpats] : [],
+      songpats: includeSongpats && xm.songpats ? [...xm.songpats] : [],
       numChannels: xm.nchan || 0
     };
   }

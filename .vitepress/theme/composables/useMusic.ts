@@ -5,12 +5,10 @@ import { data as tracks, type MusicTrack } from '../../../data/music.data';
 import type { XMPlayer } from '../../../lib/audio/xm-player';
 
 // Module-scoped reactive refs (shared singleton state)
-const isMusicVisible = ref(true);
 const isPlaying = ref(false);
 
 const audioData = ref<Uint8Array | null>(null);
 const currentTrackIndex = ref(0);
-const currentTime = ref(0);
 const progress = ref(0);
 const volume = ref(0.7);
 const isRepeat = ref(false);
@@ -80,6 +78,73 @@ let dataArray: Uint8Array | null = null;
 let currentLoadedUrl = '';
 let initPromise: Promise<void> | null = null;
 let skipTimeout: ReturnType<typeof setTimeout> | null = null;
+let scopesEnabled = false;
+
+// Favorites & Track deep-linking
+export const FAVORITES_STORAGE_KEY = 'justme_music_favorites';
+const favorites = ref<Set<string>>(new Set());
+
+const loadFavorites = () => {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        favorites.value = new Set(parsed);
+      }
+    }
+  } catch {
+    // Ignore localStorage errors (e.g. private mode or SSR)
+  }
+};
+
+const saveFavorites = () => {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(
+      FAVORITES_STORAGE_KEY,
+      JSON.stringify(Array.from(favorites.value))
+    );
+  } catch {
+    // Ignore storage quota/permission errors
+  }
+};
+
+const isCurrentFavorite = computed(() => {
+  const fn = currentTrack.value?.filename;
+  return fn ? favorites.value.has(fn) : false;
+});
+
+const toggleFavorite = (filename?: string) => {
+  const target = filename || currentTrack.value?.filename;
+  if (!target) return;
+  if (favorites.value.has(target)) {
+    favorites.value.delete(target);
+  } else {
+    favorites.value.add(target);
+  }
+  favorites.value = new Set(favorites.value);
+  saveFavorites();
+};
+
+export const cleanTitle = (track?: MusicTrack, liveTitle?: string): string => {
+  let baseTitle = liveTitle || '';
+  if (!baseTitle && track) {
+    if (track.title) {
+      baseTitle = track.title;
+    } else {
+      const raw = track.url || '';
+      const filename = raw.split('/').pop() || raw;
+      baseTitle = decodeURIComponent(filename)
+        .replace(/\.xm$/i, '')
+        .replace(/^\d+[-_.\s]+/, '')
+        .replace(/^(justme\s*[-—]\s*)/i, '')
+        .replace(/[-_]/g, ' ');
+    }
+  }
+  return baseTitle || 'Unknown Track';
+};
 
 const currentTrack = computed<MusicTrack | undefined>(
   () => tracks[currentTrackIndex.value]
@@ -136,11 +201,53 @@ const runAnalysis = () => {
 
   if (xmPlayer) {
     progress.value = xmPlayer.getProgress();
-    const st = xmPlayer.getTrackerState();
-    trackerState.value = st;
+    const st = xmPlayer.getTrackerState(false);
+    const cur = trackerState.value;
+    if (
+      cur.curSongPos !== st.curSongPos ||
+      cur.curPat !== st.curPat ||
+      cur.curRow !== st.curRow ||
+      cur.bpm !== st.bpm ||
+      cur.tempo !== st.tempo ||
+      cur.songlen !== st.songlen ||
+      cur.numChannels !== st.numChannels
+    ) {
+      trackerState.value = {
+        curSongPos: st.curSongPos,
+        curPat: st.curPat,
+        curRow: st.curRow,
+        bpm: st.bpm,
+        tempo: st.tempo,
+        songlen: st.songlen,
+        songpats:
+          cur.songpats && cur.songpats.length === st.songlen
+            ? cur.songpats
+            : (xmPlayer.getTrackerState(true).songpats ?? []),
+        numChannels: st.numChannels
+      };
+    }
   }
 
   animationFrame = requestAnimationFrame(runAnalysis);
+};
+
+const setScopesEnabled = (enabled: boolean) => {
+  scopesEnabled = enabled;
+  if (!enabled) {
+    channelScopes.value = [];
+  }
+  if (xmPlayer) {
+    xmPlayer.setScopeListener(
+      enabled
+        ? ({ scopes }) => {
+            if (scopes && scopes.length > 0) {
+              channelScopes.value = scopes;
+            }
+          }
+        : null,
+      64
+    );
+  }
 };
 
 const initAudio = () => {
@@ -183,12 +290,14 @@ const doInitAudio = async () => {
     applyVolume(volume.value);
   }
 
-  // Hook oscilloscope capture
-  xmPlayer.setScopeListener(({ scopes }) => {
-    if (scopes && scopes.length > 0) {
-      channelScopes.value = scopes;
-    }
-  }, 64);
+  // Hook oscilloscope capture if enabled
+  if (scopesEnabled) {
+    xmPlayer.setScopeListener(({ scopes }) => {
+      if (scopes && scopes.length > 0) {
+        channelScopes.value = scopes;
+      }
+    }, 64);
+  }
 };
 
 const loadAndPlayTrack = async (url: string) => {
@@ -208,6 +317,7 @@ const loadAndPlayTrack = async (url: string) => {
 
     const nchan = xmPlayer.numChannels;
     channelMutes.value = Array.from({ length: nchan }, () => false);
+    trackerState.value = xmPlayer.getTrackerState(true);
   }
 
   applyVolume(volume.value);
@@ -272,13 +382,11 @@ const nextTrack = () => {
     const nextIdx = shuffleDeck.value.pop();
     if (nextIdx !== undefined) {
       currentTrackIndex.value = nextIdx;
-      currentTime.value = 0;
       return;
     }
   }
 
   currentTrackIndex.value = (currentTrackIndex.value + 1) % tracks.length;
-  currentTime.value = 0;
 };
 
 const prevTrack = () => {
@@ -287,13 +395,11 @@ const prevTrack = () => {
   if (history.value.length > 0) {
     const prevIdx = history.value.pop()!;
     currentTrackIndex.value = prevIdx;
-    currentTime.value = 0;
     return;
   }
 
   currentTrackIndex.value =
     (currentTrackIndex.value - 1 + tracks.length) % tracks.length;
-  currentTime.value = 0;
 };
 
 const handleNext = () => switchTrack(nextTrack);
@@ -302,32 +408,96 @@ const handlePrev = () => switchTrack(prevTrack);
 const setTrackIndex = (index: number) => {
   if (!tracks || tracks.length === 0) return;
   if (index < 0 || index >= tracks.length) return;
+  initialTrackPicked = true;
   if (currentTrackIndex.value !== index) {
     history.value.push(currentTrackIndex.value);
     if (history.value.length > 50) history.value.shift();
   }
   currentTrackIndex.value = index;
-  currentTime.value = 0;
 };
+
+/**
+ * Curated list of XM tracks for the initial load selection.
+ * Keeps the initial music experience to high-quality selections.
+ */
+export const INITIAL_TRACK_FILENAMES: readonly string[] = [
+  'TSRh-Xi-soft-NetXfer-2.55.392-crk.xm',
+  'uCF-Real7ime-Converte-intro.xm',
+  'uCF-TeleportPro-kg.xm',
+  'uCF-ZoneAlarm-Pro-3.0.2.6-kg.xm',
+  'uCF-ZoneAlarm-Pro-3.1.395-kg.xm',
+  'Under-SEH-File-And-Folder-Protector-3.2-crk.xm',
+  'Under-SEH-MediaMonkey-3.2.1.1297-kg.xm',
+  'Under-SEH-Registry-Winner-5.2.4.24-crk.xm',
+  'Under-SEH-ZealotSoft-All-Video-Splitter-4.3.2-crk.xm',
+  'UnderPL-Plato-DVD-Creator-3.39-kg.xm',
+  'UP7-PDF2CAD-6.0-crk.xm',
+  'VORONEZH-Hex-Editor-Neo-6.10-crk.xm',
+  'X.O-Alive-DVD-Ripper-2.2.3.6-serial-fish.xm',
+  'x3chun-Liatro-SWF-Decoder-4.5-kg.xm',
+  'ZWT-RamDisk-Plus-10.0.1-kg.xm'
+];
 
 let initialTrackPicked = false;
 
+const resetInitialTrackPicked = () => {
+  initialTrackPicked = false;
+};
+
 /**
- * Start the session on a random track instead of always the first one.
+ * Start the session on a random track from the curated initial list.
+ * Falls back to full catalog selection if none of the curated tracks are loaded.
  * Runs at most once per page load and only touches state client-side (call it
  * from onMounted, never at module level, or SSR and hydration would disagree).
  */
-const pickRandomInitialTrack = () => {
-  if (initialTrackPicked || isPlaying.value) return;
+const pickRandomInitialTrack = (force = false) => {
+  if ((initialTrackPicked && !force) || isPlaying.value) return;
   initialTrackPicked = true;
   if (!tracks || tracks.length === 0) return;
-  currentTrackIndex.value = Math.floor(Math.random() * tracks.length);
-  currentTime.value = 0;
+
+  const initialSet = new Set(
+    INITIAL_TRACK_FILENAMES.map((f) => f.toLowerCase())
+  );
+  const candidates: number[] = [];
+  for (let i = 0; i < tracks.length; i++) {
+    const filename = tracks[i]?.filename?.toLowerCase();
+    if (filename && initialSet.has(filename)) {
+      candidates.push(i);
+    }
+  }
+
+  if (candidates.length > 0) {
+    const chosenIndex =
+      candidates[Math.floor(Math.random() * candidates.length)];
+    currentTrackIndex.value = chosenIndex;
+  } else {
+    currentTrackIndex.value = Math.floor(Math.random() * tracks.length);
+  }
 };
 
 const selectTrack = (originalIndex: number) => {
+  initialTrackPicked = true;
   if (currentTrackIndex.value === originalIndex && isPlaying.value) return;
   switchTrack(() => setTrackIndex(originalIndex));
+};
+
+const applyTrackQueryParam = (search?: string) => {
+  const queryStr =
+    search ?? (typeof window !== 'undefined' ? window.location.search : '');
+  const params = new URLSearchParams(queryStr);
+  const trackParam = params.get('track');
+  const matchIdx = trackParam
+    ? tracks.findIndex(
+        (t) =>
+          t.filename === trackParam ||
+          t.filename.toLowerCase() === trackParam.toLowerCase()
+      )
+    : -1;
+  if (matchIdx !== -1) {
+    selectTrack(matchIdx);
+  } else {
+    pickRandomInitialTrack();
+  }
 };
 
 const seek = (percent: number) => {
@@ -340,7 +510,7 @@ const seek = (percent: number) => {
 const jumpToOrder = (orderIdx: number) => {
   if (xmPlayer) {
     xmPlayer.jumpToOrder(orderIdx);
-    const st = xmPlayer.getTrackerState();
+    const st = xmPlayer.getTrackerState(true);
     trackerState.value = st;
   }
 };
@@ -372,10 +542,6 @@ const getActivePatternData = () => {
 };
 
 // Actions
-const toggleVisibility = () => {
-  isMusicVisible.value = !isMusicVisible.value;
-};
-
 const setAudioData = (data: Uint8Array | null) => {
   audioData.value = data;
 };
@@ -383,10 +549,6 @@ const setAudioData = (data: Uint8Array | null) => {
 const setPlaying = (val: boolean) => {
   isPlaying.value = val;
   if (!val) audioData.value = null;
-};
-
-const setCurrentTime = (val: number) => {
-  currentTime.value = val;
 };
 
 const setSplatVisible = (val: boolean) => {
@@ -414,13 +576,11 @@ const resetBpm = () => {
 
 const musicState = {
   // Reactive states
-  isMusicVisible,
   isPlaying,
   audioData,
   currentTrackIndex,
   currentTrack,
   currentTrackUrl,
-  currentTime,
   progress,
   volume,
   isRepeat,
@@ -429,6 +589,16 @@ const musicState = {
   isShuffle,
   history,
   liveSongTitle,
+
+  // Favorites & Title
+  FAVORITES_STORAGE_KEY,
+  favorites,
+  loadFavorites,
+  saveFavorites,
+  isCurrentFavorite,
+  toggleFavorite,
+  cleanTitle,
+  applyTrackQueryParam,
 
   // Tracker state
   trackerState,
@@ -439,17 +609,18 @@ const musicState = {
   channelScopes,
 
   // Player controls & actions
+  INITIAL_TRACK_FILENAMES,
+  resetInitialTrackPicked,
   initAudio,
   togglePlay,
-  toggleVisibility,
   toggleShuffle,
   toggleRepeat,
   setVolume,
   setBpm,
   resetBpm,
+  setScopesEnabled,
   setAudioData,
   setPlaying,
-  setCurrentTime,
   setSplatVisible,
   setTrackIndex,
   pickRandomInitialTrack,

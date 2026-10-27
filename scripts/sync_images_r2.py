@@ -10,14 +10,40 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
-import boto3
-import dotenv
+try:
+    from scripts.r2_common import (
+        compute_file_md5,
+        create_s3_client,
+        delete_orphaned_objects,
+        is_up_to_date,
+        list_existing_r2_objects,
+        load_env,
+    )
+except ImportError:
+    from r2_common import (
+        compute_file_md5,
+        create_s3_client,
+        delete_orphaned_objects,
+        is_up_to_date,
+        list_existing_r2_objects,
+        load_env,
+    )
+
+__all__ = [
+    "compute_file_md5",
+    "create_s3_client",
+    "delete_orphaned_objects",
+    "is_up_to_date",
+    "list_existing_r2_objects",
+    "load_env",
+    "main",
+    "upload_single_file",
+]
 
 MIME_TYPES: dict[str, str] = {
     ".webp": "image/webp",
@@ -29,61 +55,6 @@ MIME_TYPES: dict[str, str] = {
     ".ico": "image/x-icon",
     ".avif": "image/avif",
 }
-
-
-def load_env() -> dict[str, str]:
-    """Load configuration from environment and .env file."""
-    dotenv.load_dotenv()
-    required = [
-        "R2_ENDPOINT_URL",
-        "R2_BUCKET_NAME",
-        "R2_ACCESS_KEY_ID",
-        "R2_SECRET_ACCESS_KEY",
-    ]
-    missing = [k for k in required if not os.getenv(k)]
-    if missing:
-        print(f"Error: Missing required environment variables: {', '.join(missing)}", file=sys.stderr)
-        print("Please check your .env file or export them.", file=sys.stderr)
-        sys.exit(1)
-
-    return {
-        "endpoint_url": os.environ["R2_ENDPOINT_URL"],
-        "bucket_name": os.environ["R2_BUCKET_NAME"],
-        "access_key_id": os.environ["R2_ACCESS_KEY_ID"],
-        "secret_access_key": os.environ["R2_SECRET_ACCESS_KEY"],
-        "public_url": os.getenv("R2_PUBLIC_URL", "https://media.justme.dev").rstrip("/"),
-    }
-
-
-def compute_file_md5(filepath: Path) -> str:
-    """Calculate MD5 hash of a local file."""
-    import hashlib
-
-    hasher = hashlib.md5()
-    with open(filepath, "rb") as f:
-        for chunk in iter(lambda: f.read(65536), b""):
-            hasher.update(chunk)
-    return hasher.hexdigest()
-
-
-def list_existing_r2_objects(s3: Any, bucket: str, prefix: str = "") -> dict[str, dict[str, Any]]:
-    """List all objects currently in the R2 bucket under prefix."""
-    print(f"Fetching existing objects from R2 bucket '{bucket}' (prefix: '{prefix}')...")
-    objects: dict[str, dict[str, Any]] = {}
-    paginator = s3.get_paginator("list_objects_v2")
-    kwargs = {"Bucket": bucket}
-    if prefix:
-        kwargs["Prefix"] = prefix
-
-    for page in paginator.paginate(**kwargs):
-        for item in page.get("Contents", []):
-            key = item["Key"]
-            etag = item.get("ETag", "").strip('"')
-            size = item.get("Size", 0)
-            objects[key] = {"etag": etag, "size": size}
-
-    print(f"Found {len(objects)} existing remote objects in R2.")
-    return objects
 
 
 def upload_single_file(
@@ -126,13 +97,7 @@ def main() -> None:
     args = parser.parse_args()
 
     cfg = load_env()
-    s3 = boto3.client(
-        "s3",
-        endpoint_url=cfg["endpoint_url"],
-        aws_access_key_id=cfg["access_key_id"],
-        aws_secret_access_key=cfg["secret_access_key"],
-        region_name="auto",
-    )
+    s3 = create_s3_client(cfg)
 
     images_root = Path("public/images").resolve()
     if not images_root.exists():
@@ -155,41 +120,20 @@ def main() -> None:
 
     existing_objects = list_existing_r2_objects(s3, cfg["bucket_name"], args.prefix)
     local_remote_keys = {rk for _, rk in local_files}
-    orphaned_keys = [k for k in existing_objects if k not in local_remote_keys]
+    orphaned_keys = sorted(k for k in existing_objects if k not in local_remote_keys)
 
-    to_upload: list[tuple[Path, str]] = []
-
-    for local_path, remote_key in local_files:
-        if remote_key in existing_objects:
-            rem = existing_objects[remote_key]
-            local_size = local_path.stat().st_size
-            if rem["size"] == local_size:
-                if rem.get("etag") and "-" not in rem["etag"]:
-                    local_hash = compute_file_md5(local_path)
-                    if local_hash.lower() == rem["etag"].lower():
-                        continue
-                else:
-                    continue
-        to_upload.append((local_path, remote_key))
+    to_upload: list[tuple[Path, str]] = [
+        (lp, rk) for lp, rk in local_files if not is_up_to_date(lp, existing_objects.get(rk))
+    ]
 
     print(f"Images needing upload: {len(to_upload)} / {len(local_files)}")
     print(f"Orphaned remote images to delete: {len(orphaned_keys)}")
 
-    if orphaned_keys:
-        for i in range(0, len(orphaned_keys), 1000):
-            batch = orphaned_keys[i : i + 1000]
-            if args.dry_run:
-                for k in batch:
-                    print(f"[DRY-RUN] Delete remote {k}")
-            else:
-                delete_payload = {"Objects": [{"Key": k} for k in batch]}
-                s3.delete_objects(Bucket=cfg["bucket_name"], Delete=delete_payload)
-                for k in batch:
-                    print(f"Deleted remote {k}")
-        print(f"Cleaned up {len(orphaned_keys)} orphaned remote images from R2.")
+    delete_orphaned_objects(s3, cfg["bucket_name"], orphaned_keys, args.dry_run)
 
     if to_upload:
         completed = 0
+        failed: list[str] = []
         with ThreadPoolExecutor(max_workers=args.concurrency) as executor:
             futures = {
                 executor.submit(
@@ -202,9 +146,20 @@ def main() -> None:
                 ): rk
                 for lp, rk in to_upload
             }
-            for _ in as_completed(futures):
+            for future in as_completed(futures):
+                rk = futures[future]
+                try:
+                    if not future.result():
+                        failed.append(rk)
+                except Exception as exc:
+                    print(f"Upload error for {rk}: {exc}", file=sys.stderr)
+                    failed.append(rk)
                 completed += 1
                 print(f"Progress: {completed}/{len(to_upload)} images uploaded...")
+
+        if failed:
+            print(f"Error: {len(failed)} upload(s) failed", file=sys.stderr)
+            sys.exit(1)
 
     print("Image sync process completed successfully!")
 

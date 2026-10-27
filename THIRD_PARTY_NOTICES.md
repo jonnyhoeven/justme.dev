@@ -32,12 +32,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-## Spleen (BSD 2-Clause)
-
-The bitmap font in [`public/fonts/spleen/`](public/fonts/spleen/) is
-[Spleen](https://github.com/fcambus/spleen) 2.2.0 by Frederic Cambus. Its license text is kept next to the font
-files in [`public/fonts/spleen/LICENSE`](public/fonts/spleen/LICENSE).
-
 ## Inter and Outfit (SIL Open Font License 1.1)
 
 The web fonts in [`fonts/`](fonts/) are served from the Cloudflare R2 media CDN (`media.justme.dev/fonts/`).

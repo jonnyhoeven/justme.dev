@@ -24,7 +24,12 @@ const {
   trackerState,
   defaultBpm,
   instruments,
-
+  favorites,
+  isCurrentFavorite,
+  loadFavorites,
+  toggleFavorite,
+  cleanTitle,
+  applyTrackQueryParam,
   channelMutes,
   channelScopes,
   togglePlay,
@@ -33,6 +38,7 @@ const {
   setVolume,
   setBpm,
   resetBpm,
+  setScopesEnabled,
   selectTrack,
   handleNext,
   handlePrev,
@@ -62,70 +68,6 @@ const activeTab = ref<'pattern' | 'instruments' | 'playlist'>('pattern');
 const copiedNotification = ref(false);
 const searchQuery = ref('');
 const onlyFavorites = ref(false);
-
-const favorites = ref<Set<string>>(new Set());
-
-const FAVORITES_STORAGE_KEY = 'justme_music_favorites';
-
-const loadFavorites = () => {
-  try {
-    const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        favorites.value = new Set(parsed);
-      }
-    }
-  } catch {
-    // Ignore storage issues
-  }
-};
-
-const saveFavorites = () => {
-  try {
-    localStorage.setItem(
-      FAVORITES_STORAGE_KEY,
-      JSON.stringify(Array.from(favorites.value))
-    );
-  } catch {
-    // Ignore
-  }
-};
-
-const isCurrentFavorite = computed(() => {
-  const fn = currentTrack.value?.filename;
-  return fn ? favorites.value.has(fn) : false;
-});
-
-const toggleFavorite = (filename?: string) => {
-  const target = filename || currentTrack.value?.filename;
-  if (!target) return;
-  if (favorites.value.has(target)) {
-    favorites.value.delete(target);
-  } else {
-    favorites.value.add(target);
-  }
-  favorites.value = new Set(favorites.value);
-  saveFavorites();
-};
-
-const cleanTitle = (track?: MusicTrack, liveTitle?: string) => {
-  let baseTitle = liveTitle || '';
-  if (!baseTitle && track) {
-    if (track.title) {
-      baseTitle = track.title;
-    } else {
-      const raw = track.url || '';
-      const filename = raw.split('/').pop() || raw;
-      baseTitle = decodeURIComponent(filename)
-        .replace(/\.xm$/i, '')
-        .replace(/^\d+[-_.\s]+/, '')
-        .replace(/^(justme\s*[-—]\s*)/i, '')
-        .replace(/[-_]/g, ' ');
-    }
-  }
-  return baseTitle || 'Unknown Track';
-};
 
 const displaySongTitle = computed(() => {
   return cleanTitle(currentTrack.value, liveSongTitle.value);
@@ -231,8 +173,16 @@ const renderOscilloscopes = () => {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  const width = canvas.width;
-  const height = canvas.height;
+  const width = canvas.clientWidth || 800;
+  const height = 120;
+  const dpr = window.devicePixelRatio || 1;
+  const bitmapW = Math.round(width * dpr);
+  const bitmapH = Math.round(height * dpr);
+  if (canvas.width !== bitmapW || canvas.height !== bitmapH) {
+    canvas.width = bitmapW;
+    canvas.height = bitmapH;
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, width, height);
 
   const numCh = Math.max(1, trackerState.value.numChannels || 4);
@@ -506,32 +456,39 @@ const animLoop = () => {
 };
 
 // Canvas animations pause off-screen (AGENTS.md rule 4) and resume on return.
-watch(isOnScreen, (visible) => {
-  if (visible && rafId === null) {
-    rafId = requestAnimationFrame(animLoop);
-  } else if (!visible && rafId !== null) {
-    cancelAnimationFrame(rafId);
-    rafId = null;
-  }
-});
+watch(
+  isOnScreen,
+  (visible) => {
+    setScopesEnabled(visible);
+    if (visible && rafId === null) {
+      rafId = requestAnimationFrame(animLoop);
+    } else if (!visible && rafId !== null) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+  },
+  { immediate: true }
+);
 
 // Handle scope canvas clicks to mute/solo
 const handleScopesCanvasClick = (e: MouseEvent) => {
   const canvas = scopesCanvasRef.value;
   if (!canvas) return;
   const rect = canvas.getBoundingClientRect();
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
+  if (!rect.width || !rect.height) return;
 
-  const clickX = (e.clientX - rect.left) * scaleX;
-  const clickY = (e.clientY - rect.top) * scaleY;
+  const clickX = e.clientX - rect.left;
+  const clickY = e.clientY - rect.top;
 
   const numCh = Math.max(1, trackerState.value.numChannels || 4);
   const { rows, rowStart, rowCount } = scopeRowLayout(numCh);
-  const row = Math.min(rows - 1, Math.floor(clickY / (canvas.height / rows)));
+  const row = Math.min(
+    rows - 1,
+    Math.max(0, Math.floor(clickY / (rect.height / rows)))
+  );
   const col = Math.min(
     rowCount(row) - 1,
-    Math.floor(clickX / (canvas.width / rowCount(row)))
+    Math.max(0, Math.floor(clickX / (rect.width / rowCount(row))))
   );
   const chIdx = rowStart(row) + col;
 
@@ -546,26 +503,10 @@ const handleScopesCanvasClick = (e: MouseEvent) => {
 
 onMounted(() => {
   loadFavorites();
-
-  // Read URL query param ?track=
-  if (typeof window !== 'undefined') {
-    const params = new URLSearchParams(window.location.search);
-    const trackParam = params.get('track');
-    if (trackParam) {
-      const matchIdx = tracks.findIndex(
-        (t) =>
-          t.filename === trackParam ||
-          t.filename.toLowerCase() === trackParam.toLowerCase()
-      );
-      if (matchIdx !== -1) {
-        // selectTrack (not setTrackIndex) so audio that is already playing
-        // switches to the linked track instead of drifting out of sync with it.
-        selectTrack(matchIdx);
-      }
-    }
+  applyTrackQueryParam();
+  if (isOnScreen.value && rafId === null) {
+    rafId = requestAnimationFrame(animLoop);
   }
-
-  rafId = requestAnimationFrame(animLoop);
 });
 
 // Keep the active pattern order pill centred in its strip. Scroll the strip
@@ -591,6 +532,7 @@ watch(
 );
 
 onBeforeUnmount(() => {
+  setScopesEnabled(false);
   if (rafId !== null) {
     cancelAnimationFrame(rafId);
     rafId = null;

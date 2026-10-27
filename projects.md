@@ -7,7 +7,7 @@ image: /images/justme.dev.webp
 ---
 
 <script setup>
-import { data as pages} from './data/project.data.js';
+import { data as pages } from './data/project.data';
 import ArticleList from './components/ArticleList.vue';
 </script>
 

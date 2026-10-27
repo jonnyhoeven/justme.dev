@@ -4,6 +4,7 @@ import { describe, it, expect } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import loader from '../../data/music.data';
+import { INITIAL_TRACK_FILENAMES } from '../../.vitepress/theme/composables/useMusic';
 
 describe('music.data loader', () => {
   it('loads tracks at build time from catalog or media bucket', () => {
@@ -44,6 +45,8 @@ describe('music.data loader', () => {
       if (track.bpm !== undefined) {
         expect(track.bpm).toBeGreaterThan(0);
       }
+      expect((track as Record<string, unknown>).path).toBeUndefined();
+      expect((track as Record<string, unknown>).patterns).toBeUndefined();
     }
   });
 
@@ -67,5 +70,19 @@ describe('music.data loader', () => {
       '10_track.xm',
       '20_track.xm'
     ]);
+  });
+
+  it('contains all curated initial tracks in the catalog', () => {
+    const tracks = loader.load();
+    const trackFilenameSet = new Set(
+      tracks.map((t) => t.filename.toLowerCase())
+    );
+
+    for (const filename of INITIAL_TRACK_FILENAMES) {
+      expect(
+        trackFilenameSet.has(filename.toLowerCase()),
+        `Expected ${filename} to exist in music catalog`
+      ).toBe(true);
+    }
   });
 });

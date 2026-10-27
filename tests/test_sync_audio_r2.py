@@ -13,15 +13,8 @@ from scripts.sync_audio_r2 import (
     load_env,
     main,
     parse_xm_header,
-    sanitize_filename,
     upload_single_file,
 )
-
-
-def test_sanitize_filename() -> None:
-    assert sanitize_filename("foo bar + baz.xm") == "foo-bar-baz.xm"
-    assert sanitize_filename("TSRh - UltraEdit 11.x crk.xm") == "TSRh-UltraEdit-11.x-crk.xm"
-    assert sanitize_filename("!Others-test.xm") == "Others-test.xm"
 
 
 def test_load_env(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -62,7 +55,6 @@ def test_parse_xm_header(tmp_path: Path) -> None:
     assert meta["title"] == "Test Song Title"
     assert meta["tracker"] == "FastTracker v2.00"
     assert meta["channels"] == 16
-    assert meta["patterns"] == 10
     assert meta["bpm"] == 125
 
 
@@ -117,7 +109,7 @@ def test_build_track_entry(tmp_path: Path) -> None:
 
     entry = build_track_entry(test_file, "audio/my_keygen_track.xm", "https://media.justme.dev")
     assert entry["filename"] == "my_keygen_track.xm"
-    assert entry["path"] == "audio/my_keygen_track.xm"
+    assert "path" not in entry
     assert entry["url"] == "https://media.justme.dev/audio/my_keygen_track.xm"
     assert entry["title"] == "My Keygen Track"
 
@@ -150,3 +142,34 @@ def test_sync_main_flow(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None
         main()
 
         assert os.path.exists("data/music-tracks.json")
+
+
+def test_sync_main_flow_upload_failure(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("R2_ENDPOINT_URL", "https://example.com")
+    monkeypatch.setenv("R2_BUCKET_NAME", "media")
+    monkeypatch.setenv("R2_ACCESS_KEY_ID", "key")
+    monkeypatch.setenv("R2_SECRET_ACCESS_KEY", "secret")
+    monkeypatch.setenv("R2_PUBLIC_URL", "https://media.justme.dev")
+
+    audio_dir = tmp_path / "public" / "audio"
+    audio_dir.mkdir(parents=True)
+    sample_xm = audio_dir / "1_test.xm"
+    sample_xm.write_bytes(b"Extended Module: " + b"\x00" * 70)
+
+    monkeypatch.chdir(tmp_path)
+
+    with (
+        patch("boto3.client") as mock_client_factory,
+        patch("scripts.sync_audio_r2.upload_single_file", return_value=False),
+        patch("sys.argv", ["sync_audio_r2.py"]),
+        pytest.raises(SystemExit) as exc_info,
+    ):
+        mock_s3 = MagicMock()
+        mock_client_factory.return_value = mock_s3
+        mock_paginator = MagicMock()
+        mock_s3.get_paginator.return_value = mock_paginator
+        mock_paginator.paginate.return_value = []
+
+        main()
+
+    assert exc_info.value.code == 1

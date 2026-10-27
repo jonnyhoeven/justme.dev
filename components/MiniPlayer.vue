@@ -15,7 +15,6 @@ import useMusic from '../.vitepress/theme/composables/useMusic';
 import type { MusicTrack } from '../data/music.data';
 
 const {
-  isMusicVisible,
   isPlaying,
   isShuffle,
   currentTrackIndex,
@@ -25,11 +24,15 @@ const {
   isRepeat,
   tracks,
   liveSongTitle,
+  favorites,
+  isCurrentFavorite,
+  loadFavorites,
+  toggleFavorite,
+  cleanTitle,
+  applyTrackQueryParam,
   togglePlay,
   toggleShuffle,
   toggleRepeat,
-  setTrackIndex,
-  pickRandomInitialTrack,
   selectTrack,
   handleNext,
   handlePrev,
@@ -39,24 +42,6 @@ const {
 } = useMusic();
 
 const currentSongTitle = liveSongTitle;
-
-const cleanTitle = (track?: MusicTrack, liveTitle?: string) => {
-  let baseTitle = liveTitle || '';
-  if (!baseTitle && track) {
-    if (track.title) {
-      baseTitle = track.title;
-    } else {
-      const raw = track.url || '';
-      const filename = raw.split('/').pop() || raw;
-      baseTitle = decodeURIComponent(filename)
-        .replace(/\.xm$/i, '')
-        .replace(/^\d+[-_.\s]+/, '')
-        .replace(/^(justme\s*[-—]\s*)/i, '')
-        .replace(/[-_]/g, ' ');
-    }
-  }
-  return baseTitle || 'Unknown Track';
-};
 
 const formattedTitle = computed(() => {
   const track = currentTrack.value;
@@ -121,52 +106,6 @@ const isMobileView = computed(
 const isPlaylistOpen = ref(false);
 const searchQuery = ref('');
 const onlyFavorites = ref(false);
-const favorites = ref<Set<string>>(new Set());
-
-const FAVORITES_STORAGE_KEY = 'justme_music_favorites';
-
-const loadFavorites = () => {
-  try {
-    const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        favorites.value = new Set(parsed);
-      }
-    }
-  } catch {
-    // Ignore localStorage errors (e.g. private mode or SSR)
-  }
-};
-
-const saveFavorites = () => {
-  try {
-    localStorage.setItem(
-      FAVORITES_STORAGE_KEY,
-      JSON.stringify(Array.from(favorites.value))
-    );
-  } catch {
-    // Ignore storage quota/permission errors
-  }
-};
-
-const isCurrentFavorite = computed(() => {
-  const fn = currentTrack.value?.filename;
-  return fn ? favorites.value.has(fn) : false;
-});
-
-const toggleFavorite = (filename?: string) => {
-  const target = filename || currentTrack.value?.filename;
-  if (!target) return;
-  if (favorites.value.has(target)) {
-    favorites.value.delete(target);
-  } else {
-    favorites.value.add(target);
-  }
-  // Trigger reactivity by creating new Set instance
-  favorites.value = new Set(favorites.value);
-  saveFavorites();
-};
 
 // Filtered tracks for the playlist
 interface FilteredTrackItem {
@@ -300,30 +239,7 @@ onMounted(() => {
   loadFavorites();
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('click', handleDocumentClick);
-
-  if (typeof window !== 'undefined') {
-    const params = new URLSearchParams(window.location.search);
-    const trackParam = params.get('track');
-    const matchIdx = trackParam
-      ? tracks.findIndex(
-          (t) =>
-            t.filename === trackParam ||
-            t.filename.toLowerCase() === trackParam.toLowerCase()
-        )
-      : -1;
-    if (matchIdx !== -1) {
-      setTrackIndex(matchIdx);
-    } else {
-      // No (valid) deep link: start on a random track.
-      pickRandomInitialTrack();
-    }
-  }
-});
-
-watch(isMusicVisible, (visible) => {
-  if (!visible) {
-    isPlaylistOpen.value = false;
-  }
+  applyTrackQueryParam();
 });
 
 onBeforeUnmount(() => {
@@ -472,7 +388,7 @@ onBeforeUnmount(() => {
               fill="currentColor"
             >
               <path
-                d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zM3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"
+                d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"
               />
             </svg>
             <svg
@@ -1221,17 +1137,6 @@ onBeforeUnmount(() => {
 }
 
 /* Transitions */
-.header-slide-enter-active,
-.header-slide-leave-active {
-  transition: all 0.4s var(--ease-standard);
-}
-
-.header-slide-enter-from,
-.header-slide-leave-to {
-  opacity: 0;
-  transform: translateX(20px);
-}
-
 .panel-pop-enter-active,
 .panel-pop-leave-active {
   transition: all var(--duration-normal) var(--ease-standard);

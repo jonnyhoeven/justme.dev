@@ -509,6 +509,7 @@ onMounted(async () => {
     const rRange = repulsionRange;
     const hForce = hoverForce;
     let lastAlpha = -1;
+    let lastFillColor = '';
 
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
@@ -609,7 +610,10 @@ onMounted(async () => {
 
       if (color) {
         // Circular draw for dynamic colors with a slight "bloom" feel
-        ctx.fillStyle = `rgb(${color})`;
+        if (color !== lastFillColor) {
+          ctx.fillStyle = `rgb(${color})`;
+          lastFillColor = color;
+        }
         ctx.beginPath();
         ctx.arc(p.x, p.y, halfSize * dotRadius, 0, Math.PI * 2);
         ctx.fill();
@@ -691,7 +695,7 @@ const onClick = (e: MouseEvent) => {
 <template>
   <div v-show="isMobileView" class="HeroSplat fallback-image">
     <img
-      src="https://media.justme.dev/images/ava.webp"
+      :src="`${SITE_CONSTANTS.MEDIA_URL}/images/ava.webp`"
       alt="Justme.dev Avatar"
     />
   </div>

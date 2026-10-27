@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { defineConfig, HeadConfig } from 'vitepress';
-import transformPageData from './transformPageData';
+import transformPage from '../lib/transformPage';
 import { SITE_CONSTANTS } from './constants';
 
 export default defineConfig({
@@ -40,7 +40,6 @@ export default defineConfig({
     // Static Opengraph stuff
     ['meta', { property: 'og:site_name', content: SITE_CONSTANTS.SITE_NAME }],
     ['meta', { property: 'og:locale', content: SITE_CONSTANTS.LANG }],
-    ['meta', { property: 'og:type', content: 'article' }],
     ['meta', { property: 'article:author', content: SITE_CONSTANTS.AUTHOR }],
     ['meta', { name: 'author', content: SITE_CONSTANTS.AUTHOR }],
     [
@@ -51,8 +50,24 @@ export default defineConfig({
         href: '/apple-touch-icon.png'
       }
     ],
-    ['link', { rel: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' }],
-    ['link', { rel: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' }],
+    [
+      'link',
+      {
+        rel: 'icon',
+        type: 'image/png',
+        sizes: '32x32',
+        href: '/favicon-32x32.png'
+      }
+    ],
+    [
+      'link',
+      {
+        rel: 'icon',
+        type: 'image/png',
+        sizes: '16x16',
+        href: '/favicon-16x16.png'
+      }
+    ],
     ['link', { rel: 'manifest', href: '/site.webmanifest' }],
     [
       'link',
@@ -99,7 +114,6 @@ export default defineConfig({
     const pageUrl = cleanPath
       ? `${SITE_CONSTANTS.HOSTNAME}/${cleanPath}`
       : `${SITE_CONSTANTS.HOSTNAME}/`;
-    const fallbackDate = new Date().toISOString().split('T')[0];
 
     head.push(['link', { rel: 'canonical', href: pageUrl }]);
     head.push([
@@ -133,29 +147,38 @@ export default defineConfig({
         content: image
       }
     ]);
+    if (pf.date) {
+      head.push(['meta', { property: 'og:type', content: 'article' }]);
+      head.push([
+        'meta',
+        {
+          property: 'article:published_time',
+          content: pf.date
+        }
+      ]);
+      head.push([
+        'meta',
+        {
+          property: 'article:modified_time',
+          content: pf.date
+        }
+      ]);
+    } else {
+      head.push(['meta', { property: 'og:type', content: 'website' }]);
+    }
     head.push([
       'meta',
-      {
-        property: 'article:published_time',
-        content: pf.date ? pf.date : fallbackDate
-      }
-    ]);
-    head.push([
-      'meta',
-      {
-        property: 'article:modified_time',
-        content: pf.date ? pf.date : fallbackDate
-      }
+      { name: 'twitter:card', content: 'summary_large_image' }
     ]);
     head.push(['meta', { name: 'twitter:image', content: image }]);
     head.push([
       'meta',
       {
-        property: 'twitter:url',
+        name: 'twitter:url',
         content: pageUrl
       }
     ]);
-    head.push(['meta', { property: 'twitter:description', content: intro }]);
+    head.push(['meta', { name: 'twitter:description', content: intro }]);
     return head;
   },
   base: '/',
@@ -214,5 +237,19 @@ export default defineConfig({
   sitemap: {
     hostname: SITE_CONSTANTS.HOSTNAME
   },
-  transformPageData
+  vite: {
+    build: {
+      chunkSizeWarningLimit: 750,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('music.data')) {
+              return 'music-catalog';
+            }
+          }
+        }
+      }
+    }
+  },
+  transformPageData: transformPage
 });

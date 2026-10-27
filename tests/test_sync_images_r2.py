@@ -97,3 +97,33 @@ def test_sync_images_main_flow(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
         mock_paginator.paginate.return_value = []
 
         main()
+
+
+def test_sync_images_main_flow_upload_failure(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("R2_ENDPOINT_URL", "https://example.com")
+    monkeypatch.setenv("R2_BUCKET_NAME", "media")
+    monkeypatch.setenv("R2_ACCESS_KEY_ID", "key")
+    monkeypatch.setenv("R2_SECRET_ACCESS_KEY", "secret")
+    monkeypatch.setenv("R2_PUBLIC_URL", "https://media.justme.dev")
+
+    img_dir = tmp_path / "public" / "images"
+    img_dir.mkdir(parents=True)
+    (img_dir / "logo.webp").write_bytes(b"fake-image")
+
+    monkeypatch.chdir(tmp_path)
+
+    with (
+        patch("boto3.client") as mock_client_factory,
+        patch("scripts.sync_images_r2.upload_single_file", return_value=False),
+        patch("sys.argv", ["sync_images_r2.py"]),
+        pytest.raises(SystemExit) as exc_info,
+    ):
+        mock_s3 = MagicMock()
+        mock_client_factory.return_value = mock_s3
+        mock_paginator = MagicMock()
+        mock_s3.get_paginator.return_value = mock_paginator
+        mock_paginator.paginate.return_value = []
+
+        main()
+
+    assert exc_info.value.code == 1

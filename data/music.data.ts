@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { defineLoader } from 'vitepress';
+import { decodeCp437Byte } from '../lib/audio/cp437';
 
 export interface MusicTrack {
   filename: string;
@@ -11,11 +12,19 @@ export interface MusicTrack {
   channels?: number;
   bpm?: number;
   tracker?: string;
-  patterns?: number;
 }
 
 declare const data: MusicTrack[];
 export { data };
+
+function decodeCp437Bytes(bytes: Uint8Array): string {
+  const chars: string[] = [];
+  for (const byte of bytes) {
+    if (byte === 0) break;
+    chars.push(decodeCp437Byte(byte));
+  }
+  return chars.join('').trim();
+}
 
 export default defineLoader({
   watch: ['../data/music-tracks.json', '../public/audio/*.xm'],
@@ -26,12 +35,21 @@ export default defineLoader({
         const raw = fs.readFileSync(catalogPath, 'utf-8');
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.sort((a, b) =>
-            a.filename.localeCompare(b.filename, undefined, {
-              numeric: true,
-              sensitivity: 'base'
-            })
-          );
+          return parsed
+            .sort((a, b) =>
+              a.filename.localeCompare(b.filename, undefined, {
+                numeric: true,
+                sensitivity: 'base'
+              })
+            )
+            .map((entry) => ({
+              filename: entry.filename,
+              url: entry.url,
+              title: entry.title,
+              ...(entry.channels ? { channels: entry.channels } : {}),
+              ...(entry.bpm ? { bpm: entry.bpm } : {}),
+              ...(entry.tracker ? { tracker: entry.tracker } : {})
+            }));
         }
       } catch {
         // Fallback to local files if JSON is corrupted or invalid
@@ -51,24 +69,14 @@ export default defineLoader({
         let title = '';
         let tracker = '';
         let channels = 0;
-        let patterns = 0;
         let bpm = 0;
 
         try {
           const buffer = fs.readFileSync(path.join(audioDir, file));
           if (buffer.length >= 80) {
-            title = buffer
-              .subarray(17, 37)
-              .toString('utf-8')
-              .replace(/\0+$/, '')
-              .trim();
-            tracker = buffer
-              .subarray(38, 58)
-              .toString('utf-8')
-              .replace(/\0+$/, '')
-              .trim();
+            title = decodeCp437Bytes(buffer.subarray(17, 37));
+            tracker = decodeCp437Bytes(buffer.subarray(38, 58));
             channels = buffer.readUInt16LE(68);
-            patterns = buffer.readUInt16LE(70);
             bpm = buffer.readUInt16LE(78);
           }
         } catch {
@@ -89,8 +97,7 @@ export default defineLoader({
           title,
           ...(channels > 0 ? { channels } : {}),
           ...(bpm > 0 ? { bpm } : {}),
-          ...(tracker ? { tracker } : {}),
-          ...(patterns > 0 ? { patterns } : {})
+          ...(tracker ? { tracker } : {})
         };
       });
   }

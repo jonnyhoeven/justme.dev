@@ -212,66 +212,6 @@
   background: rgba(0, 0, 0, 0.05) !important;
 }
 
-/**
- * Component: Hero floating avatar
- * -------------------------------------------------------------------------- */
-
-/*noinspection CssUnusedSymbol*/
-.VPImage.image-src {
-  border-radius: var(--radius-full);
-  left: 50%;
-  top: 58%;
-  transform: translate(-50%, -50%);
-  border: 1px solid var(--glass-border-light);
-  box-shadow:
-    0 0 20px var(--vp-c-brand-1-alpha-20),
-    0 0 40px var(--vp-c-brand-2-alpha-10);
-  animation: antigravity-float 6s ease-in-out infinite;
-  backdrop-filter: blur(4px);
-  transition: all 0.5s var(--ease-smooth);
-}
-
-.VPImage.image-src:hover {
-  transform: translate(-50%, -50%) scale(1.05);
-  border-color: rgba(99, 102, 241, 0.5);
-  box-shadow:
-    0 0 30px var(--vp-c-brand-1-alpha-40),
-    0 0 60px var(--vp-c-brand-2-alpha-20);
-}
-
-/*noinspection CssUnusedSymbol*/
-.logo {
-  width: 18px;
-  height: 24px;
-}
-
-@keyframes antigravity-float {
-  0% {
-    box-shadow:
-      0 5px 15px rgba(0, 0, 0, 0.3),
-      0 0 20px var(--vp-c-brand-1-alpha-20);
-    transform: translate(-50%, -50%) translateY(0) rotate(0deg);
-  }
-
-  33% {
-    transform: translate(-50%, -50%) translateY(-10px) rotate(1deg);
-  }
-
-  66% {
-    transform: translate(-50%, -50%) translateY(5px) rotate(-1deg);
-    box-shadow:
-      0 20px 30px rgba(0, 0, 0, 0.2),
-      0 0 40px var(--vp-c-brand-1-alpha-40);
-  }
-
-  100% {
-    box-shadow:
-      0 5px 15px rgba(0, 0, 0, 0.3),
-      0 0 20px var(--vp-c-brand-1-alpha-20);
-    transform: translate(-50%, -50%) translateY(0) rotate(0deg);
-  }
-}
-
 .VPHero {
   padding-top: var(--vp-home-hero-padding-top-mobile) !important;
 }

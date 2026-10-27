@@ -33,6 +33,9 @@ let invTileZoom = 1;
 let sizeMult = 1;
 let midX = 0;
 let midY = 0;
+let lastCount = 0;
+let lastAreaW = 0;
+let lastAreaH = 0;
 
 export const rotozoom: SplatScene = {
   name: 'Rotozoom',
@@ -41,6 +44,7 @@ export const rotozoom: SplatScene = {
 
   init(particles: SplatParticle[]) {
     count = particles.length;
+    lastCount = 0;
     angle = 0;
     // Bin the avatar particles into a small colour texture
     const sum = new Float32Array(TEX * TEX * 4);
@@ -62,32 +66,43 @@ export const rotozoom: SplatScene = {
   },
 
   beforeFrame(elapsed, ctx) {
-    const targetAspect = Math.max(1e-4, ctx.areaW) / Math.max(1e-4, ctx.areaH);
-    let bestRows = 1;
-    let bestCols = count;
-    let bestDiff = Infinity;
-    for (let r = 1; r <= count; r++) {
-      if (count % r === 0) {
-        const c = count / r;
-        const gridAspect = c / r;
-        const diff = Math.abs(Math.log(gridAspect / targetAspect));
-        if (diff < bestDiff) {
-          bestDiff = diff;
-          bestRows = r;
-          bestCols = c;
+    if (
+      count !== lastCount ||
+      ctx.areaW !== lastAreaW ||
+      ctx.areaH !== lastAreaH
+    ) {
+      lastCount = count;
+      lastAreaW = ctx.areaW;
+      lastAreaH = ctx.areaH;
+
+      const targetAspect =
+        Math.max(1e-4, ctx.areaW) / Math.max(1e-4, ctx.areaH);
+      let bestRows = 1;
+      let bestCols = count;
+      let bestDiff = Infinity;
+      for (let r = 1; r <= count; r++) {
+        if (count % r === 0) {
+          const c = count / r;
+          const gridAspect = c / r;
+          const diff = Math.abs(Math.log(gridAspect / targetAspect));
+          if (diff < bestDiff) {
+            bestDiff = diff;
+            bestRows = r;
+            bestCols = c;
+          }
         }
       }
+      rows = bestRows;
+      cols = bestCols;
+      // The particle count only allows a few grid shapes, so stretch the pitch
+      // to fill the area edge to edge instead of leaving empty borders. Dots
+      // stay round, sized by the tighter pitch.
+      pitchX = ctx.areaW / cols;
+      pitchY = ctx.areaH / rows;
+      spacing = Math.min(pitchX, pitchY);
+      gridX = ctx.areaX + pitchX / 2;
+      gridY = ctx.areaY + pitchY / 2;
     }
-    rows = bestRows;
-    cols = bestCols;
-    // The particle count only allows a few grid shapes, so stretch the pitch
-    // to fill the area edge to edge instead of leaving empty borders. Dots
-    // stay round, sized by the tighter pitch.
-    pitchX = ctx.areaW / cols;
-    pitchY = ctx.areaH / rows;
-    spacing = Math.min(pitchX, pitchY);
-    gridX = ctx.areaX + pitchX / 2;
-    gridY = ctx.areaY + pitchY / 2;
 
     const { beat, volume } = ctx.audioLevels;
     angle += ctx.dt * (0.0004 + volume * 0.0012 + beat * 0.0015);

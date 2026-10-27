@@ -36,4 +36,4 @@ Tracker music traces its roots back to the late 1980s and early 1990s on the Com
 2. **Channel Oscilloscopes:** Each track in an XM file is an independent voice. The player renders independent real-time waveform oscillations for each voice. You can click any channel above to mute or solo it in real time.
 3. **Sharing Songs:** You can share any track directly by clicking the **Share** button above, which copies a deep link (e.g. `?track=dead_lock.xm`) that jumps right to that song.
 
-<ArticleFooter />
+<ArticleFooter :frontmatter="$frontmatter" />

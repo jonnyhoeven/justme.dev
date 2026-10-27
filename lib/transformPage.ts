@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later
+import { SITE_CONSTANTS } from '../.vitepress/constants';
 import type { ArticleFrontmatter } from '../types/frontmatter';
 
 export interface PageLike {
@@ -16,7 +17,7 @@ export default function transformPage<T extends PageLike>(
   const defaultImg = '/images/justme.dev.webp';
   let rawImage = (pf.image ? pf.image : defaultImg).trim();
   if (rawImage.startsWith('/images/')) {
-    rawImage = `https://media.justme.dev${rawImage}`;
+    rawImage = `${SITE_CONSTANTS.MEDIA_URL}${rawImage}`;
   }
   pf.image = rawImage;
   pf.externalUrl = pf.gitlink ? `${pf.gitlink}` : pf.externalUrl;

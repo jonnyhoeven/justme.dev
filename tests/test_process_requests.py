@@ -184,6 +184,37 @@ class TestAbsolutizeLinks:
     def test_keeps_link_title(self):
         assert self._run('[a](LICENSE "GPL")') == f'[a]({self.BLOB}/LICENSE "GPL")'
 
+    def test_ignores_links_inside_fenced_code_blocks(self):
+        text = textwrap.dedent("""
+            Outside [link](relative.md) and ![img](image.png).
+
+            ```markdown
+            Inside code block: [link](relative.md) and ![img](image.png).
+            ```
+
+            ~~~
+            Tilde code block: [link2](other.md)
+            ~~~
+
+            After fence [link3](more.md).
+        """).strip()
+
+        expected = textwrap.dedent(f"""
+            Outside [link]({self.BLOB}/relative.md) and ![img](https://raw.githubusercontent.com/foo/bar/main/image.png).
+
+            ```markdown
+            Inside code block: [link](relative.md) and ![img](image.png).
+            ```
+
+            ~~~
+            Tilde code block: [link2](other.md)
+            ~~~
+
+            After fence [link3]({self.BLOB}/more.md).
+        """).strip()
+
+        assert self._run(text) == expected
+
 
 # ---------------------------------------------------------------------------
 # GenerateFiles.get_readme (mocked HTTP)

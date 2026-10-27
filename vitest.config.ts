@@ -10,7 +10,10 @@ export default defineConfig({
       provider: 'v8',
       include: [
         'lib/splat-animations/*-utils.ts',
-        'lib/splat-animations/*-constants.ts'
+        'lib/splat-animations/*-constants.ts',
+        'lib/transformPage.ts',
+        'lib/audio/cp437.ts',
+        'lib/splat-scenes/utils.ts'
       ],
       thresholds: {
         lines: 80,
