@@ -75,8 +75,8 @@ function createXMEngine() {
   function eff_t1_2(ch) {
     // pitch slide down
     if (ch.slidedownspeed !== undefined) {
-      // 1728 is the period for C-1
-      ch.period = Math.min(1728, ch.period + ch.slidedownspeed);
+      const maxPeriod = player.xm.flags & 1 ? 1920 : 6848;
+      ch.period = Math.min(maxPeriod, ch.period + ch.slidedownspeed);
     }
   }
 
@@ -453,6 +453,7 @@ function createXMEngine() {
   ];
 
   player.periodForNote = periodForNote;
+  player.updateChannelPeriod = updateChannelPeriod;
   player.prettify_effect = prettify_effect;
   player.init = init;
   player.load = load;
@@ -531,9 +532,28 @@ function createXMEngine() {
     return [gain, 2 * c, -e * e];
   }
 
+  const AMIGA_PERIOD_TAB = [
+    907, 900, 894, 887, 881, 875, 868, 862, 856, 850, 844, 838, 832, 826, 820,
+    814, 808, 802, 796, 791, 785, 779, 774, 768, 762, 757, 752, 746, 741, 736,
+    730, 725, 720, 715, 709, 704, 699, 694, 689, 684, 678, 675, 670, 665, 660,
+    655, 651, 646, 640, 636, 632, 628, 623, 619, 614, 610, 604, 601, 597, 592,
+    588, 584, 580, 575, 570, 567, 563, 559, 555, 551, 547, 543, 538, 535, 532,
+    528, 524, 520, 516, 513, 508, 505, 502, 498, 494, 491, 487, 484, 480, 477,
+    474, 470, 467, 463, 460, 457
+  ];
+
   function updateChannelPeriod(ch, period) {
-    const freq = 8363 * Math.pow(2, (1152.0 - period) / 192.0);
-    if (isNaN(freq)) {
+    let freq;
+    if (player.xm.flags & 1) {
+      // Linear frequency table
+      freq = 8363 * Math.pow(2, (1152.0 - period) / 192.0);
+    } else {
+      // Amiga frequency table
+      // In FT2: Frequency = 8363 * 1712 / period (where 1712 is C-4 period)
+      // Since periods in jsxm are scaled by 1/4: (8363 * 1712) / (period * 4) = (8363 * 428) / period
+      freq = period > 0 ? (8363.0 * 428.0) / period : 0;
+    }
+    if (isNaN(freq) || freq <= 0) {
       return;
     }
     ch.doff = freq / f_smp;
@@ -543,7 +563,31 @@ function createXMEngine() {
   function periodForNote(ch, note) {
     // channel was silenced (e.g. by a seek) and has no sample yet
     if (!ch.samp) return ch.period;
-    return 1920 - (note + ch.samp.note) * 16 - ch.fine / 8.0;
+
+    if (player.xm.flags & 1) {
+      // Linear frequency table
+      return 1920 - (note + ch.samp.note) * 16 - ch.fine / 8.0;
+    } else {
+      // Amiga frequency table
+      // In FT2: RealNote = PatternNote + RelativeTone (1 = C-0, 49 = C-4)
+      // note in jsxm is 0-indexed (0 = C-0, 48 = C-4)
+      const realNote = Math.max(
+        1,
+        Math.min(118, note + 1 + (ch.samp.note || 0))
+      );
+      const octave = Math.floor((realNote - 1) / 12);
+      const noteMod = realNote % 12; // 1 for C (idx 8), 12 (0) for B (idx 0)
+      const fineTune = ch.fine || 0; // -128..+127
+      const finePos = noteMod * 8 + fineTune / 16.0;
+      const pIdx0 = Math.max(0, Math.min(95, Math.floor(finePos)));
+      const pIdx1 = Math.min(95, pIdx0 + 1);
+      const frac = finePos - Math.floor(finePos);
+      const p0 = AMIGA_PERIOD_TAB[pIdx0];
+      const p1 = pIdx1 < 96 ? AMIGA_PERIOD_TAB[pIdx1] : AMIGA_PERIOD_TAB[0] / 2;
+      const tabVal = p0 * (1 - frac) + p1 * frac;
+      const ft2Period = (tabVal * 32.0) / Math.pow(2, octave);
+      return ft2Period / 4.0;
+    }
   }
 
   function setCurrentPattern() {
@@ -730,6 +774,12 @@ function createXMEngine() {
         if (ch.note) {
           ch.period = periodForNote(ch, ch.note);
         }
+        // Micro-declick (8 samples ~0.18ms) only when retriggering an already-playing voice
+        if (ch.inst && (ch.vL > 0.05 || ch.vR > 0.05)) {
+          ch.ramp = 0.0;
+        } else {
+          ch.ramp = 1.0;
+        }
         // waveforms 0-3 are retriggered on new notes while 4-7 are continuous
         if (ch.vibratotype < 4) {
           ch.vibratopos = 0;
@@ -824,11 +874,15 @@ function createXMEngine() {
       if (Math.abs(s) < 1.526e-5) {
         // == 1/65536.0
         s = 0;
+        ch.vL = 0;
+        ch.vR = 0;
         break;
       }
       dataL[i] += s * ch.vL;
       dataR[i] += s * ch.vR;
       s *= popfilter_alpha;
+      ch.vL *= popfilter_alpha;
+      ch.vR *= popfilter_alpha;
     }
     ch.filterstate[1] = s;
     ch.filterstate[2] = s;
@@ -894,6 +948,9 @@ function createXMEngine() {
     ch.vLprev = volL;
     ch.vRprev = volR;
 
+    let ramp = ch.ramp ?? 1.0;
+    const rampStep = 1.0 / 8.0;
+
     // we can mix up to this many bytes before running into a sample end/loop
     let i = start;
     let failsafe = 100;
@@ -918,6 +975,100 @@ function createXMEngine() {
       // unrolled 8x
       var s, y;
       for (; i + 7 < next_event; i += 8) {
+        if (ramp < 1.0) {
+          s = samp[k | 0];
+          y = (f0 * (s + fs0) + f1 * fs1 + f2 * fs2) * ramp;
+          ramp = Math.min(1.0, ramp + rampStep);
+          fs2 = fs1;
+          fs1 = y;
+          fs0 = s;
+          k += dk;
+          dataL[i] += vL * y;
+          dataR[i] += vR * y;
+          Vrms += (vL + vR) * y * y;
+
+          s = samp[k | 0];
+          y = (f0 * (s + fs0) + f1 * fs1 + f2 * fs2) * ramp;
+          ramp = Math.min(1.0, ramp + rampStep);
+          fs2 = fs1;
+          fs1 = y;
+          fs0 = s;
+          k += dk;
+          dataL[i + 1] += vL * y;
+          dataR[i + 1] += vR * y;
+          Vrms += (vL + vR) * y * y;
+
+          s = samp[k | 0];
+          y = (f0 * (s + fs0) + f1 * fs1 + f2 * fs2) * ramp;
+          ramp = Math.min(1.0, ramp + rampStep);
+          fs2 = fs1;
+          fs1 = y;
+          fs0 = s;
+          k += dk;
+          dataL[i + 2] += vL * y;
+          dataR[i + 2] += vR * y;
+          Vrms += (vL + vR) * y * y;
+
+          s = samp[k | 0];
+          y = (f0 * (s + fs0) + f1 * fs1 + f2 * fs2) * ramp;
+          ramp = Math.min(1.0, ramp + rampStep);
+          fs2 = fs1;
+          fs1 = y;
+          fs0 = s;
+          k += dk;
+          dataL[i + 3] += vL * y;
+          dataR[i + 3] += vR * y;
+          Vrms += (vL + vR) * y * y;
+
+          s = samp[k | 0];
+          y = (f0 * (s + fs0) + f1 * fs1 + f2 * fs2) * ramp;
+          ramp = Math.min(1.0, ramp + rampStep);
+          fs2 = fs1;
+          fs1 = y;
+          fs0 = s;
+          k += dk;
+          dataL[i + 4] += vL * y;
+          dataR[i + 4] += vR * y;
+          Vrms += (vL + vR) * y * y;
+
+          s = samp[k | 0];
+          y = (f0 * (s + fs0) + f1 * fs1 + f2 * fs2) * ramp;
+          ramp = Math.min(1.0, ramp + rampStep);
+          fs2 = fs1;
+          fs1 = y;
+          fs0 = s;
+          k += dk;
+          dataL[i + 5] += vL * y;
+          dataR[i + 5] += vR * y;
+          Vrms += (vL + vR) * y * y;
+
+          s = samp[k | 0];
+          y = (f0 * (s + fs0) + f1 * fs1 + f2 * fs2) * ramp;
+          ramp = Math.min(1.0, ramp + rampStep);
+          fs2 = fs1;
+          fs1 = y;
+          fs0 = s;
+          k += dk;
+          dataL[i + 6] += vL * y;
+          dataR[i + 6] += vR * y;
+          Vrms += (vL + vR) * y * y;
+
+          s = samp[k | 0];
+          y = (f0 * (s + fs0) + f1 * fs1 + f2 * fs2) * ramp;
+          ramp = Math.min(1.0, ramp + rampStep);
+          fs2 = fs1;
+          fs1 = y;
+          fs0 = s;
+          k += dk;
+          dataL[i + 7] += vL * y;
+          dataR[i + 7] += vR * y;
+          Vrms += (vL + vR) * y * y;
+
+          vL = pf_8 * vL + (1 - pf_8) * volL;
+          vR = pf_8 * vR + (1 - pf_8) * volR;
+          continue;
+        }
+
         s = samp[k | 0];
         y = f0 * (s + fs0) + f1 * fs1 + f2 * fs2;
         fs2 = fs1;
@@ -1010,6 +1161,10 @@ function createXMEngine() {
         // brick wall filter, but this is much simpler computationally and
         // sounds fine)
         y = f0 * (s + fs0) + f1 * fs1 + f2 * fs2;
+        if (ramp < 1.0) {
+          y *= ramp;
+          ramp = Math.min(1.0, ramp + rampStep);
+        }
         fs2 = fs1;
         fs1 = y;
         fs0 = s;
@@ -1025,6 +1180,7 @@ function createXMEngine() {
     ch.filterstate[2] = fs2;
     ch.vL = vL;
     ch.vR = vR;
+    ch.ramp = ramp;
     return Vrms * 0.5;
   }
 
@@ -1538,7 +1694,10 @@ function createXMEngine() {
     player.cur_row = 64;
     player.cur_songpos = -1;
     player.cur_ticksamp = 0;
+    player.silenceChannels();
     player.xm.global_volume = player.max_global_volume;
+    player.xm.tempo = player.xm.initial_tempo;
+    player.xm.bpm = player.xm.initial_bpm;
     if (XMView.stop) XMView.stop();
   }
 
@@ -1575,16 +1734,80 @@ function createXMEngine() {
       ch.off = 0;
       ch.retrig = 0;
       ch.periodoffset = 0;
+      ch.ramp = 1.0;
       if (ch.filterstate) {
         ch.filterstate[0] = 0;
         ch.filterstate[1] = 0;
         ch.filterstate[2] = 0;
       }
     }
-    player.xm.global_volume = player.max_global_volume;
     player.xm.global_volumeslide = undefined;
-    player.xm.tempo = player.xm.initial_tempo;
-    player.xm.bpm = player.xm.initial_bpm;
+  };
+
+  // Pre-scan pattern sequence from order 0 to target position/row
+  // to restore active BPM, tempo (ticks/row), and global volume.
+  player.scanSongStateUpTo = function (targetSongPos, targetRow = 0) {
+    let curTempo = player.xm.initial_tempo || 6;
+    let curBpm = player.xm.initial_bpm || 125;
+    let curGlobalVol = player.max_global_volume || 128;
+
+    const songpats = player.xm.songpats || [];
+    const patterns = player.xm.patterns || [];
+    const maxPos = Math.min(targetSongPos, songpats.length - 1);
+
+    for (let pos = 0; pos <= maxPos; pos++) {
+      const patIdx = songpats[pos];
+      const pat = patterns[patIdx];
+      if (!pat) continue;
+
+      const maxRow =
+        pos === targetSongPos ? Math.min(targetRow, pat.length) : pat.length;
+      for (let r = 0; r < maxRow; r++) {
+        const row = pat[r];
+        if (!row) continue;
+        for (let c = 0; c < row.length; c++) {
+          const eff = row[c][3];
+          const param = row[c][4];
+          if (eff === 0x0f) {
+            if (param === 0) {
+              // ignore
+            } else if (param < 0x20) {
+              curTempo = param;
+            } else {
+              curBpm = param;
+            }
+          } else if (eff === 0x10) {
+            if (param <= 0x40) {
+              curGlobalVol = Math.max(0, param * 2);
+            } else {
+              curGlobalVol = player.max_global_volume || 128;
+            }
+          }
+        }
+      }
+    }
+
+    return { tempo: curTempo, bpm: curBpm, globalVolume: curGlobalVol };
+  };
+
+  player.seekToOrder = function (targetIdx) {
+    if (!player.xm || !player.xm.songpats || player.xm.songpats.length === 0)
+      return;
+    const clampedIdx = Math.max(
+      0,
+      Math.min(player.xm.songpats.length - 1, targetIdx)
+    );
+    const state = player.scanSongStateUpTo(clampedIdx, 0);
+    player.silenceChannels();
+    player.xm.tempo = state.tempo;
+    player.xm.bpm = state.bpm;
+    player.xm.global_volume = state.globalVolume;
+    player.cur_songpos = clampedIdx;
+    player.cur_row = 0;
+    player.next_row = 0;
+    player.cur_ticksamp = 0;
+    player.cur_tick = (player.xm.tempo || 6) - 1;
+    player.setCurrentPattern();
   };
 
   player.XMView = XMView;
@@ -1682,26 +1905,13 @@ export class XMPlayer {
     const targetIdx = Math.floor(
       Math.max(0, Math.min(0.999, percent)) * totalPats
     );
-    this.engine.cur_songpos = targetIdx;
-    this.engine.silenceChannels();
-    this.engine.cur_row = 0;
-    this.engine.next_row = 0;
-    this.engine.cur_ticksamp = 0;
-    // start on the last tick so the next one wraps to row 0 and triggers it
-    this.engine.cur_tick = this.engine.xm.tempo - 1;
-    this.engine.setCurrentPattern();
+    this.engine.seekToOrder(targetIdx);
   }
 
   jumpToOrder(orderIdx: number): void {
     if (!this.engine.xm || !this.engine.xm.songpats) return;
     if (orderIdx < 0 || orderIdx >= this.engine.xm.songpats.length) return;
-    this.engine.cur_songpos = orderIdx;
-    this.engine.silenceChannels();
-    this.engine.cur_row = 0;
-    this.engine.next_row = 0;
-    this.engine.cur_ticksamp = 0;
-    this.engine.cur_tick = (this.engine.xm.tempo || 6) - 1;
-    this.engine.setCurrentPattern();
+    this.engine.seekToOrder(orderIdx);
   }
 
   getTrackerState(includeSongpats = true) {

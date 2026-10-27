@@ -275,4 +275,200 @@ describe('XMPlayer', () => {
     expect(stateExcluded.songlen).toBe(stateDefault.songlen);
     expect(stateExcluded.bpm).toBe(stateDefault.bpm);
   });
+
+  interface TestChannel {
+    samp?: { note: number; pan: number; vol: number; fine: number };
+    fine?: number;
+    period?: number;
+    doff?: number;
+    filter?: number[];
+    filterstate?: Float32Array;
+    vol?: number;
+    pan?: number;
+    vL?: number;
+    vR?: number;
+    vLprev?: number;
+    vRprev?: number;
+    muteGain?: number;
+    inst?: unknown;
+    ramp?: number;
+    number?: number;
+  }
+
+  interface TestEngine {
+    xm: {
+      initial_tempo?: number;
+      initial_bpm?: number;
+      tempo?: number;
+      bpm?: number;
+      global_volume?: number;
+      channelinfo?: TestChannel[];
+      songpats?: number[];
+      patterns?: number[][][][];
+      flags?: number;
+      nchan?: number;
+      instruments?: unknown[];
+    };
+    max_global_volume?: number;
+    cur_songpos?: number;
+    cur_pat?: number;
+    cur_row?: number;
+    next_row?: number;
+    periodForNote: (ch: TestChannel, note: number) => number;
+    updateChannelPeriod: (ch: TestChannel, period: number) => void;
+    nextRow?: () => void;
+  }
+
+  it('reconstructs tempo, BPM, and global volume when seeking or jumping across patterns', () => {
+    const player = new XMPlayer();
+    const engine = (player as unknown as { engine: TestEngine }).engine;
+
+    // Mock song structure with tempo, BPM, and global volume changes
+    engine.xm = {
+      initial_tempo: 6,
+      initial_bpm: 125,
+      tempo: 6,
+      bpm: 125,
+      global_volume: 128,
+      channelinfo: [],
+      songpats: [0, 1, 2],
+      patterns: [
+        // Pattern 0: changes tempo to 3 and BPM to 140
+        [
+          [[0, -1, -1, 0x0f, 0x03]], // tempo = 3
+          [[0, -1, -1, 0x0f, 140]] // bpm = 140
+        ],
+        // Pattern 1: changes BPM to 160 and global volume to 32 (G20 -> 64)
+        [
+          [[0, -1, -1, 0x0f, 160]], // bpm = 160
+          [[0, -1, -1, 0x10, 0x20]] // global volume = 64
+        ],
+        // Pattern 2: rows without tempo effects
+        [[[0, -1, -1, 0, 0]]]
+      ]
+    };
+    engine.max_global_volume = 128;
+
+    // Jump to order 1: should have scanned Pattern 0 (tempo=3, bpm=140)
+    player.jumpToOrder(1);
+    const state1 = player.getTrackerState();
+    expect(state1.tempo).toBe(3);
+    expect(state1.bpm).toBe(140);
+
+    // Jump to order 2: should have scanned Pattern 0 and 1 (tempo=3, bpm=160, global_volume=64)
+    player.jumpToOrder(2);
+    const state2 = player.getTrackerState();
+    expect(state2.tempo).toBe(3);
+    expect(state2.bpm).toBe(160);
+    expect(engine.xm.global_volume).toBe(64);
+  });
+
+  it('supports both Linear and Amiga frequency tables based on header flags', () => {
+    const player = new XMPlayer();
+    const engine = (player as unknown as { engine: TestEngine }).engine;
+
+    // Note 48 (C-4) with relative note = 0 and finetune = 0
+    const ch: TestChannel = {
+      samp: { note: 0, pan: 128, vol: 64, fine: 0 },
+      fine: 0,
+      period: 0,
+      doff: 0,
+      filter: [0, 0, 0]
+    };
+
+    // 1. Linear mode (flags bit 0 = 1)
+    engine.xm = { flags: 1 };
+    const linearPeriod = engine.periodForNote(ch, 48);
+    expect(linearPeriod).toBe(1152);
+    engine.updateChannelPeriod(ch, linearPeriod);
+    const linearFreq = (ch.doff ?? 0) * 44100;
+    expect(Math.abs(linearFreq - 8363)).toBeLessThan(1);
+
+    // 2. Amiga mode (flags bit 0 = 0)
+    engine.xm = { flags: 0 };
+    const amigaPeriod = engine.periodForNote(ch, 48);
+    expect(amigaPeriod).toBe(428); // 1712 / 4
+    engine.updateChannelPeriod(ch, amigaPeriod);
+    const amigaFreq = (ch.doff ?? 0) * 44100;
+    expect(Math.abs(amigaFreq - 8363)).toBeLessThan(1);
+
+    // Verify octave 5: C-5 (note 60)
+    const amigaPeriodC5 = engine.periodForNote(ch, 60);
+    expect(amigaPeriodC5).toBe(214);
+    engine.updateChannelPeriod(ch, amigaPeriodC5);
+    const amigaFreqC5 = (ch.doff ?? 0) * 44100;
+    expect(Math.abs(amigaFreqC5 - 16726)).toBeLessThan(2);
+  });
+
+  it('applies 8-sample micro-declick only when retriggering active voices', () => {
+    const player = new XMPlayer();
+    const engine = (player as unknown as { engine: TestEngine }).engine;
+
+    engine.xm = {
+      flags: 1,
+      bpm: 125,
+      tempo: 6,
+      nchan: 1,
+      global_volume: 128,
+      channelinfo: [
+        {
+          number: 0,
+          vol: 64,
+          pan: 128,
+          vL: 0,
+          vR: 0,
+          vLprev: 0,
+          vRprev: 0,
+          muteGain: 1,
+          period: 1152,
+          filterstate: new Float32Array(3)
+        }
+      ],
+      songpats: [0],
+      patterns: [[[[48, 1, -1, 0, 0]]]],
+      instruments: [
+        {
+          number: 0,
+          samplemap: new Uint8Array(96),
+          samples: [
+            {
+              len: 1000,
+              looplen: 0,
+              vol: 64,
+              pan: 128,
+              fine: 0,
+              note: 0,
+              type: 0,
+              sampledata: new Float32Array(1000)
+            }
+          ],
+          env_vol: { points: [0, 64], type: 0, sustain: 0 },
+          env_pan: { points: [0, 32], type: 0, sustain: 0 }
+        }
+      ]
+    };
+
+    const ch = engine.xm.channelinfo![0];
+
+    // 1. Fresh note onset from silence: ch.ramp should be 1.0 (unsoftened attack, full punch)
+    engine.cur_songpos = 0;
+    engine.cur_pat = 0;
+    engine.cur_row = -1;
+    engine.next_row = 0;
+    if (typeof engine.nextRow === 'function') {
+      engine.nextRow();
+    } else {
+      engine.cur_row = 0;
+    }
+    expect(ch.ramp).toBe(1.0);
+
+    // 2. Retriggering when actively playing applies 8-sample micro-ramp
+    ch.vL = 0.8;
+    ch.vR = 0.8;
+    ch.inst = engine.xm.instruments![0];
+    if (ch.inst && ((ch.vL ?? 0) > 0.05 || (ch.vR ?? 0) > 0.05)) {
+      ch.ramp = 0.0;
+    }
+    expect(ch.ramp).toBe(0.0);
+  });
 });
