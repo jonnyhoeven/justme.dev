@@ -360,3 +360,20 @@ class TestProcessRequests:
         assert output.exists()
         content = output.read_text()
         assert "# Full README" in content
+
+    def test_uses_inline_content_and_external_url(self, generator, minimal_yaml_data):
+        minimal_yaml_data["content"] = "## Inline Content\nDirect markdown details."
+        minimal_yaml_data["externalUrl"] = "https://example.com/demo"
+        minimal_yaml_data["externalUrlLabel"] = "Launch Demo"
+        yaml_file = generator.req_path / "inline.yaml"
+        yaml_file.write_text(yaml.dump(minimal_yaml_data))
+
+        generator.process_requests()
+
+        output = generator.dst_dir / "inline.md"
+        assert output.exists()
+        content = output.read_text()
+        assert "## Inline Content" in content
+        assert "Direct markdown details." in content
+        assert "externalUrl: https://example.com/demo" in content
+        assert "externalUrlLabel: Launch Demo" in content

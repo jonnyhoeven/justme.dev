@@ -20,17 +20,19 @@ export default function transformPage<T extends PageLike>(
     rawImage = `${SITE_CONSTANTS.MEDIA_URL}${rawImage}`;
   }
   pf.image = rawImage;
-  pf.externalUrl = pf.gitlink ? `${pf.gitlink}` : pf.externalUrl;
-  pf.externalUrlLabel = pf.gitlink ? 'View on Github' : 'View site';
+  pf.externalUrl = pf.externalUrl ?? (pf.gitlink ? `${pf.gitlink}` : undefined);
+  pf.externalUrlLabel =
+    pf.externalUrlLabel ?? (pf.gitlink ? 'View on Github' : 'View site');
 
   const badgeHost = 'https://img.shields.io/github';
-  pf.watchersUrl = pf.gitlink
+  const hasGithubRepo = Boolean(pf.gitlink && pf.user && pf.project);
+  pf.watchersUrl = hasGithubRepo
     ? `${badgeHost}/watchers/${pf.user}/${pf.project}?style=flat`
     : null;
-  pf.starsUrl = pf.gitlink
+  pf.starsUrl = hasGithubRepo
     ? `${badgeHost}/stars/${pf.user}/${pf.project}?style=flat`
     : null;
-  pf.forksUrl = pf.gitlink
+  pf.forksUrl = hasGithubRepo
     ? `${badgeHost}/forks/${pf.user}/${pf.project}?style=flat`
     : null;
   if (Array.isArray(pf.languages)) {

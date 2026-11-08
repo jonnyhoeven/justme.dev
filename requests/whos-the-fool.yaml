@@ -1,0 +1,55 @@
+---
+title: "Who's the Fool!"
+type: project
+date: 2026-10-31
+image: /images/whos-the-fool.webp
+fetchReadme: false
+gitlink: https://wtf.justme.dev
+externalUrl: https://wtf.justme.dev
+externalUrlLabel: Play Game
+languages: Next.js,TypeScript,Cloudflare Workers,Web Audio,Python
+outline: deep
+intro: |
+  A sarcastic couch-based party trivia game for 2 to 6 players with full narration, inspired by Jackbox Games.
+  One shared screen displays questions, live scoring, and an opinionated AI host, while everyone uses their
+  smartphone as a four-color buzzer. Built on Cloudflare Workers, Durable Objects, WebSockets, and local neural speech synthesis.
+content: |
+  # Who's the Fool! - Couch Trivia with Neural Narration
+
+  ::: tip Live Game Demo
+  Ready to play with friends or test out the game?
+  **[Launch Who's the Fool! at wtf.justme.dev 🎮](https://wtf.justme.dev)**
+  *Open the big screen on a laptop/TV, create a room, and join with your phones via QR code.*
+  :::
+
+  **Who's the Fool!** is a fast-paced, snarky party trivia game designed for 2 to 6 players gathered in the same room. Much like Jackbox Games, gameplay centers around a single shared screen (a TV, laptop, or projector) while each player's smartphone acts as a synchronized controller buzzer.
+
+  There are no account registrations, no apps to install, and no matchmaking queues: players simply scan a room QR code or enter a four-letter code to jump directly into the lobby.
+
+  ---
+
+  ## How It Plays
+
+  1. **Room Creation**: Open [wtf.justme.dev](https://wtf.justme.dev) on the big screen. A custom room code (e.g. `APPLE`) and QR code appear on screen.
+  2. **Phone Controllers**: Players scan the QR code on their phones, choose an avatar and enter their name. Any player in the lobby can tune match settings and start when ready.
+  3. **Three Rounds of 15 Questions**: Each question is read aloud by the narrator. Players have 25 seconds on their phone buzzer to choose between four distinct buttons.
+  4. **Dynamic Speed Scoring**: Correct answers score higher the faster you lock in (`500 * (1 + timeRemaining / totalTime)`), rewarding quick reflexes. Wrong answers cost points, with doubled stakes on the final round.
+  5. **Category Wheel & Podium**: The category wheel spins between rounds, giving the trailing player leverage to pick the next topic. After the final showdown, the top contenders take the podium.
+
+  ---
+
+  ## Key Architecture & Technology
+
+  The project is architected for zero-latency multiplayer synchronization and real-time audio orchestration:
+
+  - **Edge-Native Multiplayer Backend**: Implemented with **Cloudflare Workers** and **Durable Objects**. Each active room runs as an isolated Durable Object handling bidirectional WebSocket connections, game loop alarms, state broadcasting, and anti-cheat validation.
+  - **Static Modern Frontend**: Built with **Next.js (React 19)** and TypeScript, compiled into a static web bundle deployed across Cloudflare's global edge network.
+  - **Zero-Friction Phone Controller**: The buzzer UI is completely decoupled from the questions: phones display responsive tactile buzzers, animations, and haptic feedback without leaking questions or answers across screens.
+  - **Offline-First Neural Voice Pipeline**: Spoken narrator lines and category banter are generated ahead of time using local neural speech cloning (**Chatterbox Turbo**). Spoken durations are indexed in an audio manifest to ensure frame-accurate sync between visual captions and voice playback.
+  - **Procedural Audio & Web Audio API**: Procedural sound effects and Suno-composed dynamic music beds run directly in the browser's audio graph on the big screen.
+
+  ---
+
+  ## Try It Out
+
+  Visit **[wtf.justme.dev](https://wtf.justme.dev)** on your laptop or TV, grab your phone, and discover who the fool really is!

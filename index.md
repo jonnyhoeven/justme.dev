@@ -19,6 +19,11 @@ hero:
       link: /blog
 
 features:
+  - title: "Who's the Fool!"
+    details:
+      Sarcastic couch-based party trivia game for 2 to 6 players with full narration and phone buzzers.
+      Built with Next.js, Cloudflare Workers, WebSockets, and neural speech synthesis.
+    link: /projects/whos-the-fool
   - title: Kubernetes Git-Ops Workshop
     details:
       Build a custom Kubernetes cluster using K3s and ArgoCD. This workshop guides

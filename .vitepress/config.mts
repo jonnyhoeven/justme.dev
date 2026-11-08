@@ -32,7 +32,11 @@ export default defineConfig({
       ? [
           [
             'link',
-            { rel: 'preconnect', href: SITE_CONSTANTS.MEDIA_URL, crossorigin: '' }
+            {
+              rel: 'preconnect',
+              href: SITE_CONSTANTS.MEDIA_URL,
+              crossorigin: ''
+            }
           ] as HeadConfig
         ]
       : []),

@@ -32,6 +32,9 @@ class ProjectRequest(BaseModel):
     languages: Union[str, List[str]]
     outline: str = "deep"
     intro: str
+    content: Optional[str] = None
+    externalUrl: Optional[HttpUrl] = None
+    externalUrlLabel: Optional[str] = None
 
 
 def get_wrapper_template(post_content: str, readme_content: str) -> str:
@@ -139,7 +142,9 @@ class GenerateFiles:
         post = ""
         logger.info(f"Processing project: {request.title} ({basename})")
 
-        if request.fetchReadme:
+        if request.content:
+            readme = request.content
+        elif request.fetchReadme:
             readme = self.get_readme(
                 request.user or "",
                 request.project or "",
@@ -172,6 +177,10 @@ class GenerateFiles:
                 # Convert HttpUrl to string for YAML serialization
                 if "gitlink" in frontmatter:
                     frontmatter["gitlink"] = str(frontmatter["gitlink"])
+                if "externalUrl" in frontmatter:
+                    frontmatter["externalUrl"] = str(frontmatter["externalUrl"])
+                if "content" in frontmatter:
+                    del frontmatter["content"]
 
                 yaml.safe_dump(frontmatter, pst_file, width=120, sort_keys=False)
                 pst_file.write("---\n")

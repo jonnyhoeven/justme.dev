@@ -59,6 +59,32 @@ defineProps<{
         class="shieldButton"
       />
     </a>
+    <a
+      target="_blank"
+      class="textButton"
+      v-if="
+        frontmatter.gitlink &&
+        frontmatter.externalUrl &&
+        frontmatter.gitlink !== frontmatter.externalUrl
+      "
+      :href="frontmatter.gitlink"
+      :aria-label="
+        frontmatter.gitlink.includes('github.com')
+          ? 'View on GitHub'
+          : 'View source repository'
+      "
+      rel="noopener noreferrer"
+    >
+      <Badge
+        :text="
+          frontmatter.gitlink.includes('github.com')
+            ? 'View on Github'
+            : 'View source'
+        "
+        type="info"
+        class="shieldButton"
+      />
+    </a>
   </div>
 </template>
 

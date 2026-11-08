@@ -13,6 +13,15 @@ withDefaults(
     headingLevel: 'h2'
   }
 );
+
+function onImageError(event: Event) {
+  const target = event.target as HTMLImageElement | null;
+  if (!target) return;
+  const mediaPrefix = 'https://media.justme.dev';
+  if (target.src.startsWith(mediaPrefix)) {
+    target.src = target.src.slice(mediaPrefix.length);
+  }
+}
 </script>
 
 <template>
@@ -30,6 +39,7 @@ withDefaults(
         :alt="page.frontmatter.title || 'Article thumbnail'"
         loading="lazy"
         class="listImage"
+        @error="onImageError"
       />
     </div>
     <div v-if="page.frontmatter.title" class="layercontent">

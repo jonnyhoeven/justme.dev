@@ -84,4 +84,21 @@ describe('transformPage', () => {
     expect(result.frontmatter.image).toBe('/custom.png');
     expect(result.frontmatter.intro).toBe('Custom intro text');
   });
+
+  it('preserves explicit externalUrl and externalUrlLabel when provided', () => {
+    const result = transformPage({
+      url: '/game',
+      frontmatter: {
+        gitlink: 'https://git.example.com/org/game',
+        externalUrl: 'https://game.example.com',
+        externalUrlLabel: 'Play Game'
+      }
+    });
+
+    expect(result.frontmatter.externalUrl).toBe('https://game.example.com');
+    expect(result.frontmatter.externalUrlLabel).toBe('Play Game');
+    expect(result.frontmatter.watchersUrl).toBeNull();
+    expect(result.frontmatter.starsUrl).toBeNull();
+    expect(result.frontmatter.forksUrl).toBeNull();
+  });
 });
