@@ -56,6 +56,7 @@ const scopesCanvasRef = ref<HTMLCanvasElement | null>(null);
 const patternCanvasRef = ref<HTMLCanvasElement | null>(null);
 const patternPaneRef = ref<HTMLElement | null>(null);
 const { width: patternPaneWidth } = useElementSize(patternPaneRef);
+const { width: scopesCanvasWidth } = useElementSize(scopesCanvasRef);
 const orderContainerRef = ref<HTMLElement | null>(null);
 const isOrderGridMode = ref(false);
 
@@ -158,6 +159,24 @@ const handleProgressBarClick = (e: MouseEvent) => {
 // ==========================================
 let rafId: number | null = null;
 
+// Dirty flags: the rAF loop only draws a canvas when something it shows has
+// changed (see the watchers above onMounted). Both start dirty so the first
+// frame paints.
+let scopesDirty = true;
+let gridDirty = true;
+
+// getContext('2d') returns the same object every call; look it up once per
+// canvas element (WeakMap so a replaced element is re-fetched, not leaked).
+const ctxCache = new WeakMap<HTMLCanvasElement, CanvasRenderingContext2D>();
+const get2d = (canvas: HTMLCanvasElement) => {
+  let ctx = ctxCache.get(canvas);
+  if (!ctx) {
+    ctx = canvas.getContext('2d') ?? undefined;
+    if (ctx) ctxCache.set(canvas, ctx);
+  }
+  return ctx;
+};
+
 // Split channels into rows of near-equal length (e.g. 22 -> 8/7/7, 21 -> 7/7/7)
 // so no tiles are left empty and every row spans the full canvas width.
 const scopeRowLayout = (numCh: number) => {
@@ -172,7 +191,7 @@ const scopeRowLayout = (numCh: number) => {
 const renderOscilloscopes = () => {
   const canvas = scopesCanvasRef.value;
   if (!canvas) return;
-  const ctx = canvas.getContext('2d');
+  const ctx = get2d(canvas);
   if (!ctx) return;
 
   const width = canvas.clientWidth || 800;
@@ -222,13 +241,11 @@ const renderOscilloscopes = () => {
     const scopeData = scopes[ch];
     const midY = y0 + boxH / 2;
 
-    // Brand violet trace with a soft glow. The canvas background is always
-    // black (see .scopes-canvas), so this reads the same in light and dark mode.
+    // Brand violet trace with a soft glow (a wider, low-alpha stroke under the
+    // trace; shadowBlur is too slow with 32 channels). The canvas background
+    // is always black (see .scopes-canvas), so this reads the same in light
+    // and dark mode.
     ctx.beginPath();
-    ctx.strokeStyle = isMuted ? '#71717a' : '#a78bfa';
-    ctx.lineWidth = 1.4;
-    ctx.shadowColor = isMuted ? 'transparent' : 'rgba(139, 92, 246, 0.9)';
-    ctx.shadowBlur = isMuted ? 0 : 8;
 
     if (scopeData && scopeData.length > 0 && isPlaying.value && !isMuted) {
       const step = (boxW - 8) / scopeData.length;
@@ -244,9 +261,15 @@ const renderOscilloscopes = () => {
       ctx.moveTo(x0 + 4, midY);
       ctx.lineTo(x0 + boxW - 4, midY);
     }
+    if (!isMuted) {
+      ctx.strokeStyle = 'rgba(139, 92, 246, 0.28)';
+      ctx.lineWidth = 4.5;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+    }
+    ctx.strokeStyle = isMuted ? '#71717a' : '#a78bfa';
+    ctx.lineWidth = 1.4;
     ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.shadowColor = 'transparent';
   }
 };
 
@@ -293,7 +316,7 @@ watch(currentTrackIndex, () => {
 const renderPatternGrid = () => {
   const canvas = patternCanvasRef.value;
   if (!canvas) return;
-  const ctx = canvas.getContext('2d');
+  const ctx = get2d(canvas);
   if (!ctx) return;
 
   const patData = getActivePatternData();
@@ -449,12 +472,65 @@ const renderPatternGrid = () => {
   }
 };
 
+// The loop keeps ticking while on-screen but is a no-op unless a flag is set,
+// so paused/idle pages do no drawing work.
 const animLoop = () => {
-  renderOscilloscopes();
-  if (activeTab.value === 'pattern') {
+  if (scopesDirty) {
+    scopesDirty = false;
+    renderOscilloscopes();
+  }
+  if (gridDirty && activeTab.value === 'pattern') {
+    gridDirty = false;
     renderPatternGrid();
   }
   rafId = isOnScreen.value ? requestAnimationFrame(animLoop) : null;
+};
+
+// Scopes: audio tick (channelScopes is a shallowRef re-announced via
+// triggerRef, so a plain watch fires), mutes/solo, play/pause (flat line vs
+// waveform), channel count, canvas width.
+watch(
+  [channelScopes, isPlaying, scopesCanvasWidth, scopesCanvasRef],
+  () => {
+    scopesDirty = true;
+  },
+  { flush: 'sync' }
+);
+watch(
+  channelMutes,
+  () => {
+    scopesDirty = true;
+    gridDirty = true;
+  },
+  { deep: true, flush: 'sync' }
+);
+// Pattern grid: row/pattern/order/channel count (trackerState is replaced on
+// change; curRow/curPat are also watched in case of in-place mutation), page
+// layout and pane width, active tab (canvas is hidden on other tabs), and the
+// canvas element itself.
+watch(
+  [
+    trackerState,
+    () => trackerState.value.curRow,
+    () => trackerState.value.curPat,
+    () => trackerState.value.numChannels,
+    currentTrackIndex,
+    patternPage,
+    patternPages,
+    patternPaneWidth,
+    activeTab,
+    patternCanvasRef
+  ],
+  () => {
+    gridDirty = true;
+    scopesDirty = true;
+  },
+  { flush: 'sync' }
+);
+// Device pixel ratio / window size changes alter the bitmap size.
+const markAllDirty = () => {
+  scopesDirty = true;
+  gridDirty = true;
 };
 
 // Canvas animations pause off-screen (AGENTS.md rule 4) and resume on return.
@@ -462,6 +538,7 @@ watch(
   isOnScreen,
   (visible) => {
     setScopesEnabled(visible);
+    if (visible) markAllDirty();
     if (visible && rafId === null) {
       rafId = requestAnimationFrame(animLoop);
     } else if (!visible && rafId !== null) {
@@ -504,6 +581,7 @@ const handleScopesCanvasClick = (e: MouseEvent) => {
 };
 
 onMounted(() => {
+  window.addEventListener('resize', markAllDirty);
   loadFavorites();
   applyTrackQueryParam();
   if (isOnScreen.value && rafId === null) {
@@ -534,6 +612,7 @@ watch(
 );
 
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', markAllDirty);
   setScopesEnabled(false);
   if (rafId !== null) {
     cancelAnimationFrame(rafId);
