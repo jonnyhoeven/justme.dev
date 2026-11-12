@@ -670,7 +670,7 @@ onBeforeUnmount(() => {
 }
 
 .music-mini-player {
-  display: flex !important;
+  display: flex;
   align-items: center;
   gap: 8px;
   padding: 4px 14px;

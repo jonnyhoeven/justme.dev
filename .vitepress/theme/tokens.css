@@ -124,7 +124,7 @@
   /* ── Home Hero ───────────────────────────────────────────────────────── */
 
   --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: -webkit-linear-gradient(
+  --vp-home-hero-name-background: linear-gradient(
     120deg,
     var(--vp-c-blue-500) 30%,
     var(--vp-c-brand-2)

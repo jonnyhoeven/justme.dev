@@ -8,7 +8,7 @@ Remaining items from the phone layout review. Needs a real-device or emulator ch
 - [x] **Homepage spacing** ([`.vitepress/theme/layout.css`](.vitepress/theme/layout.css)): `.homepage-content { margin-top: 8rem }` and `.recent-posts { gap: 4.5rem }` are the same on every screen. Scale them down, e.g. `clamp(4rem, 10vw, 8rem)`.
 - [ ] **Embeds and touch hover**:
   - [ ] Ensure iframes in blog posts (`.embed-frame`, `.embed-video`) have `max-width: 100%` so they don't overflow phones.
-  - [ ] Wrap the remaining `:hover` transforms (`.view-all-button`, `.container_row:hover`, `.shieldButton:hover`) in `@media (hover: hover)`.
+  - [x] Wrap the remaining `:hover` transforms (`.view-all-button`, `.container_row:hover`, `.shieldButton:hover`) in `@media (hover: hover)`.
 - [x] **Music player on phones**: the mini-player was moved to a floating bottom dock, enabled on mobile devices with touch-friendly layout.
 
 ## Codebase Review (2026-11-12)
@@ -19,8 +19,8 @@ Full read of the components, `lib/`, theme CSS, ETL scripts, CI and docs at comm
 
 - [ ] **A track that fails to load leaves the player "playing" silence** ([`useMusic.ts`](.vitepress/theme/composables/useMusic.ts) `loadAndPlayTrack` / `switchTrack`): `XMPlayer.loadBuffer` returns `false` on a parse error and `loadUrl` throws on HTTP errors, but the result is ignored and nothing catches the throw. After an auto-advance, `isPlaying` stays `true`, the rAF loop keeps running and the rejection is unhandled. `issues.md` already lists 193 files that may not parse. Catch it, set `isPlaying = false` (or skip to the next track after N failures) and show the error in the title area.
 - [ ] **Stale load can win a race** (same function): `currentLoadedUrl` is set after `await xmPlayer.loadUrl(url)`. Skip twice quickly on a slow connection and the older fetch can resolve last, so track A plays while the UI shows track B. Keep a load token (or `AbortController`) and drop results that are no longer current.
-- [ ] **Hero tagline is partly unreadable in light mode** _(from code)_ ([`components.css`](.vitepress/theme/components.css) `.VPHero .tagline`): the gradient's middle stop is a fixed `#cbd5e1`, which is about 1.5:1 on a white background. Use a token that flips with the theme (e.g. `--vp-c-text-2`).
-- [ ] **Custom blocks lose their type colour** _(from code)_ ([`layout.css`](.vitepress/theme/layout.css) `.custom-block`): `background-color: rgba(255,255,255,.5) !important` overrides the tip/warning/danger backgrounds, so `--vp-custom-block-tip-bg` in `tokens.css` is dead and all callouts look alike. Tint per type instead, e.g. `color-mix(in srgb, var(--vp-custom-block-tip-bg) 60%, transparent)`.
+- [x] **Hero tagline is partly unreadable in light mode** _(from code)_ ([`components.css`](.vitepress/theme/components.css) `.VPHero .tagline`): the gradient's middle stop is a fixed `#cbd5e1`, which is about 1.5:1 on a white background. Use a token that flips with the theme (e.g. `--vp-c-text-2`).
+- [x] **Custom blocks lose their type colour** _(from code)_ ([`layout.css`](.vitepress/theme/layout.css) `.custom-block`): `background-color: rgba(255,255,255,.5) !important` overrides the tip/warning/danger backgrounds, so `--vp-custom-block-tip-bg` in `tokens.css` is dead and all callouts look alike. Tint per type instead, e.g. `color-mix(in srgb, var(--vp-custom-block-tip-bg) 60%, transparent)`.
 - [ ] **Deep-link example in the tracker post does not work** ([`blog/tracker.md`](blog/tracker.md)): it shows `?track=dead_lock.xm`; the catalog filename is `0_deadlock.xm` and `applyTrackQueryParam` only matches exact filenames.
 - [ ] **Hero physics is frame-rate dependent** ([`HeroSplat.vue`](components/HeroSplat.vue) render loop): spring, damping (`* 0.8`), the kick punch and `glowLevel += … * 0.08` are applied per frame, so on a 120 Hz display the cloud is stiffer and settles twice as fast as on 60 Hz. `ctx.dt` already exists; scale forces by `dt / 16.67` and use `Math.pow(damp, dt / 16.67)`.
 - [ ] **Phase timers use wall time across pauses** (same file): `phaseStart` and `startTime` are not shifted when the loop stops off-screen, so scrolling back to the hero usually triggers an immediate morph and animations jump. Accumulate active time from `dt` instead.
@@ -82,7 +82,7 @@ Full read of the components, `lib/`, theme CSS, ETL scripts, CI and docs at comm
 - [ ] **Brand consistency in the browser chrome**: `theme-color` and the manifest are `#ffffff` in dark mode too, the Safari mask icon is green (`#16673c`) while the brand is indigo, and `apple-touch-icon.png` is 76x76 (should be 180x180). Add light/dark `theme-color` media variants and regenerate the icon set.
 - [ ] **Contrast spot checks** _(from code)_: white on `#6366f1` (brand button hover, light and dark) is about 4.47:1, just under AA; `.VPFooter .message/.copyright` at `opacity: 0.7` on `--vp-c-text-2` is lower still. The "WCAG AA compliant" comments in `tokens.css` should be backed by a check.
 - [ ] **Hero avatar source is 307px** but shown at up to 240 CSS px, so it is soft on 2x phones. Export a 480px version.
-- [ ] **Legacy syntax**: `-webkit-linear-gradient` for `--vp-home-hero-name-background`, `-webkit-mask-composite: source-in`, `transition: all` in about twenty places (animates layout properties by accident), and `display: flex !important` on `.music-mini-player`.
+- [x] **Legacy syntax**: `-webkit-linear-gradient` for `--vp-home-hero-name-background`, `-webkit-mask-composite: source-in`, `transition: all` in about twenty places (animates layout properties by accident), and `display: flex !important` on `.music-mini-player`.
 
 ### 6. Accessibility
 

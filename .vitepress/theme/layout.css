@@ -67,13 +67,43 @@ h6,
 .custom-block {
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
-  background-color: rgba(255, 255, 255, 0.5) !important;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
 }
 
-.dark .custom-block {
-  background-color: rgba(255, 255, 255, 0.03) !important;
-  border: 1px solid var(--glass-border-dark) !important;
+.custom-block.tip {
+  background-color: color-mix(
+    in srgb,
+    var(--vp-custom-block-tip-bg) 60%,
+    transparent
+  ) !important;
+}
+.custom-block.info {
+  background-color: color-mix(
+    in srgb,
+    var(--vp-custom-block-info-bg) 60%,
+    transparent
+  ) !important;
+}
+.custom-block.warning {
+  background-color: color-mix(
+    in srgb,
+    var(--vp-custom-block-warning-bg) 60%,
+    transparent
+  ) !important;
+}
+.custom-block.danger {
+  background-color: color-mix(
+    in srgb,
+    var(--vp-custom-block-danger-bg) 60%,
+    transparent
+  ) !important;
+}
+.custom-block.details {
+  background-color: color-mix(
+    in srgb,
+    var(--vp-custom-block-details-bg) 60%,
+    transparent
+  ) !important;
 }
 
 /* --- Layout Touches --- */
@@ -189,11 +219,13 @@ h6,
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.view-all-button:hover {
-  background-color: var(--vp-c-brand-2);
-  transform: translateY(-4px) scale(1.03);
-  box-shadow: var(--shadow-brand-md);
-  text-decoration: none !important;
+@media (hover: hover) {
+  .view-all-button:hover {
+    background-color: var(--vp-c-brand-2);
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: var(--shadow-brand-md);
+    text-decoration: none !important;
+  }
 }
 
 .view-all-button:active {

@@ -252,7 +252,7 @@
   background: linear-gradient(
     135deg,
     var(--vp-c-text-1) 0%,
-    #cbd5e1 50%,
+    var(--vp-c-text-2) 50%,
     var(--vp-c-brand-1) 100%
   );
   -webkit-background-clip: text;
@@ -375,10 +375,12 @@
   transition: all var(--duration-normal) var(--ease-smooth);
 }
 
-.shieldButton:hover {
-  transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 4px 10px var(--vp-c-brand-1-alpha-20);
-  border-radius: var(--radius-xs);
+@media (hover: hover) {
+  .shieldButton:hover {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 4px 10px var(--vp-c-brand-1-alpha-20);
+    border-radius: var(--radius-xs);
+  }
 }
 
 /**
@@ -461,9 +463,11 @@
   padding: var(--ls-listitem-image-padding);
 }
 
-.container_row:hover .listImage {
-  transform: translateY(-2px) scale(1.02);
-  border-color: var(--vp-c-brand-1);
+@media (hover: hover) {
+  .container_row:hover .listImage {
+    transform: translateY(-2px) scale(1.02);
+    border-color: var(--vp-c-brand-1);
+  }
 }
 
 /* ArticleList: background glow behind list-item image */
@@ -485,10 +489,12 @@
   padding: var(--ls-listitem-image-padding);
 }
 
-.container_row:hover .listImagebg {
-  transform: translateY(-1px) scale(1.04);
-  filter: blur(var(--ls-listitem-image-bg-blur-hover));
-  opacity: 0.35;
+@media (hover: hover) {
+  .container_row:hover .listImagebg {
+    transform: translateY(-1px) scale(1.04);
+    filter: blur(var(--ls-listitem-image-bg-blur-hover));
+    opacity: 0.35;
+  }
 }
 
 /**
@@ -533,9 +539,11 @@
   border-radius: var(--radius-sm);
 }
 
-.container_row:hover .articleImage {
-  transform: translateY(-2px) scale(1.01);
-  border-color: var(--vp-c-brand-1);
+@media (hover: hover) {
+  .container_row:hover .articleImage {
+    transform: translateY(-2px) scale(1.01);
+    border-color: var(--vp-c-brand-1);
+  }
 }
 
 .articleImagebg {
@@ -557,9 +565,11 @@
   animation: glow 20s ease infinite;
 }
 
-.container_row:hover .articleImagebg {
-  transform: translateY(-1px) scale(1.03);
-  filter: blur(var(--ls-listitem-image-bg-blur-hover));
+@media (hover: hover) {
+  .container_row:hover .articleImagebg {
+    transform: translateY(-1px) scale(1.03);
+    filter: blur(var(--ls-listitem-image-bg-blur-hover));
+  }
 }
 
 @keyframes glow {
