@@ -116,8 +116,10 @@ export const quantumEntanglement: SplatAnimation = {
   apply(
     p: SplatParticle,
     elapsed: number,
-    ctx: AnimationContext
-  ): AnimationEffect {
+    ctx: AnimationContext,
+    _particles: SplatParticle[],
+    out: AnimationEffect
+  ): void {
     const { scale } = ctx;
     const levels = ctx.audioLevels;
 
@@ -157,11 +159,9 @@ export const quantumEntanglement: SplatAnimation = {
       Math.min(SIZE_MAX, 1.0 + totalZ / SIZE_Z_DIVISOR)
     );
 
-    return {
-      dx: (sdx + jdx) * scale + qdx,
-      dy: (sdy + jdy) * scale + qdy,
-      sizeMult: sizeMult,
-      springScale: SPRING_BASE - levels.bass * BASS_SPRING_MULT // Looser on bass drops
-    };
+    out.dx = (sdx + jdx) * scale + qdx;
+    out.dy = (sdy + jdy) * scale + qdy;
+    out.sizeMult = sizeMult;
+    out.springScale = SPRING_BASE - levels.bass * BASS_SPRING_MULT; // Looser on bass drops
   }
 };

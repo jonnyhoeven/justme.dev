@@ -106,8 +106,10 @@ export const dimensionalPortal: SplatAnimation = {
   apply(
     p: SplatParticle,
     elapsed: number,
-    ctx: AnimationContext
-  ): AnimationEffect {
+    ctx: AnimationContext,
+    _particles: SplatParticle[],
+    out: AnimationEffect
+  ): void {
     const { cx, cy, cz } = p.animState;
     // Treble makes the cube's skin shimmer along its normal-ish depth axis
     const shimmer =
@@ -121,11 +123,9 @@ export const dimensionalPortal: SplatAnimation = {
 
     const perspective = CAMERA_DISTANCE / (CAMERA_DISTANCE + z2 - zoom);
 
-    return {
-      dx: (CENTER_X + x1 * perspective - p.ox) * ctx.scale,
-      dy: (CENTER_Y + y2 * perspective - p.oy) * ctx.scale,
-      springScale: SPRING_SCALE,
-      sizeMult: Math.min(MAX_SIZE, Math.max(MIN_SIZE, perspective))
-    };
+    out.dx = (CENTER_X + x1 * perspective - p.ox) * ctx.scale;
+    out.dy = (CENTER_Y + y2 * perspective - p.oy) * ctx.scale;
+    out.springScale = SPRING_SCALE;
+    out.sizeMult = Math.min(MAX_SIZE, Math.max(MIN_SIZE, perspective));
   }
 };

@@ -95,8 +95,10 @@ export const floatingOutliers: SplatAnimation = {
   apply(
     p: SplatParticle,
     elapsed: number,
-    ctx: AnimationContext
-  ): AnimationEffect {
+    ctx: AnimationContext,
+    _particles: SplatParticle[],
+    out: AnimationEffect
+  ): void {
     const { scale } = ctx;
 
     // ---- Outlier behavior: Active Wandering Satellite ----
@@ -125,14 +127,13 @@ export const floatingOutliers: SplatAnimation = {
       const distPhase = Math.sin(elapsed * SIZE_DIST_PHASE_TIME_MULT + phase);
       const sizeMult = bassSize + distPhase * DIST_PHASE_SIZE_MULT;
 
-      return {
-        dx: dx * scale,
-        dy: dy * scale,
-        springScale,
-        nudgeVx,
-        nudgeVy,
-        sizeMult
-      };
+      out.dx = dx * scale;
+      out.dy = dy * scale;
+      out.springScale = springScale;
+      out.nudgeVx = nudgeVx;
+      out.nudgeVy = nudgeVy;
+      out.sizeMult = sizeMult;
+      return;
     }
 
     // ---- Core behavior: Subtle Shiver/Wobble driven by Treble ----
@@ -145,11 +146,9 @@ export const floatingOutliers: SplatAnimation = {
     // Subtle depth pulse for core particles
     const sizeMult = coreBaseSize + (p.animState.pz ?? 0) / CORE_Z_SIZE_DIVISOR;
 
-    return {
-      dx: wobbleX * scale,
-      dy: wobbleY * scale,
-      sizeMult,
-      springScale: CORE_SPRING_SCALE
-    };
+    out.dx = wobbleX * scale;
+    out.dy = wobbleY * scale;
+    out.sizeMult = sizeMult;
+    out.springScale = CORE_SPRING_SCALE;
   }
 };

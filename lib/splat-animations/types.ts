@@ -34,21 +34,29 @@ export interface SplatParticle {
   animState: Record<string, any>;
 }
 
+/**
+ * Out-parameter for `SplatAnimation.apply`. HeroSplat owns one instance and
+ * resets it (see `resetEffect`) before every call, so `apply` only writes the
+ * fields it wants to change and never allocates.
+ */
 export interface AnimationEffect {
-  /** Screen-space offset added to the spring target X */
+  /** Screen-space offset added to the spring target X (default 0) */
   dx: number;
-  /** Screen-space offset added to the spring target Y */
+  /** Screen-space offset added to the spring target Y (default 0) */
   dy: number;
   /** Multiplier for the spring constant (default 1) */
-  springScale?: number;
-  /** Replacement colour string "r, g, b" for the brush cache */
-  colorOverride?: string;
-  /** One-shot velocity nudge X (added directly to vx) */
-  nudgeVx?: number;
-  /** One-shot velocity nudge Y (added directly to vy) */
-  nudgeVy?: number;
+  springScale: number;
+  /** One-shot velocity nudge X (added directly to vx, default 0) */
+  nudgeVx: number;
+  /** One-shot velocity nudge Y (added directly to vy, default 0) */
+  nudgeVy: number;
   /** Size multiplier for depth effects (default 1.0) */
-  sizeMult?: number;
+  sizeMult: number;
+  /** True draws the particle as a flat dot in `r`, `g`, `b` (0-255) instead of its avatar brush (default false) */
+  tint: boolean;
+  r: number;
+  g: number;
+  b: number;
 }
 
 export interface AnimationContext {
@@ -96,17 +104,21 @@ export interface SplatAnimation {
    */
   glow?(elapsed: number, ctx: AnimationContext): number;
   /**
-   * Per-particle, per-frame effect.
+   * Per-particle, per-frame effect. Write into `out` (already reset to the
+   * defaults) instead of returning a new object: this runs 500+ times a frame.
    * @param particle  The particle to animate
    * @param elapsed   Milliseconds since the animation started
    * @param ctx       Current viewport / mouse state
+   * @param particles All particles
+   * @param out       Shared effect to fill in
    */
   apply(
     particle: SplatParticle,
     elapsed: number,
     ctx: AnimationContext,
-    particles: SplatParticle[]
-  ): AnimationEffect;
+    particles: SplatParticle[],
+    out: AnimationEffect
+  ): void;
 }
 
 /** Absolute canvas-space target for one particle in a full-canvas scene. */

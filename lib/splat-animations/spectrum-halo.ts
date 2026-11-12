@@ -114,8 +114,10 @@ export const spectrumHalo: SplatAnimation = {
   apply(
     p: SplatParticle,
     elapsed: number,
-    ctx: AnimationContext
-  ): AnimationEffect {
+    ctx: AnimationContext,
+    _particles: SplatParticle[],
+    out: AnimationEffect
+  ): void {
     const s = p.animState;
     const { scale, audioData, audioLevels: levels } = ctx;
 
@@ -149,10 +151,8 @@ export const spectrumHalo: SplatAnimation = {
     const jx = jitter ? (Math.random() - 0.5) * jitter : 0;
     const jy = jitter ? (Math.random() - 0.5) * jitter : 0;
 
-    return {
-      dx: (s.shNx * push + jx) * scale,
-      dy: (s.shNy * push + jy) * scale,
-      springScale: SPRING_SCALE
-    };
+    out.dx = (s.shNx * push + jx) * scale;
+    out.dy = (s.shNy * push + jy) * scale;
+    out.springScale = SPRING_SCALE;
   }
 };

@@ -109,8 +109,10 @@ export const ferrofluid: SplatAnimation = {
   apply(
     p: SplatParticle,
     elapsed: number,
-    ctx: AnimationContext
-  ): AnimationEffect {
+    ctx: AnimationContext,
+    _particles: SplatParticle[],
+    out: AnimationEffect
+  ): void {
     const { scale, offsetX, offsetY } = ctx;
     const levels = ctx.audioLevels;
 
@@ -120,8 +122,10 @@ export const ferrofluid: SplatAnimation = {
     const dyMag = p.oy * scale + offsetY - frameCache.targetY;
     const distMag = Math.sqrt(dxMag * dxMag + dyMag * dyMag);
 
-    if (distMag < MIN_DIST_MAG)
-      return { dx: 0, dy: 0, springScale: IDLE_SPRING_SCALE };
+    if (distMag < MIN_DIST_MAG) {
+      out.springScale = IDLE_SPRING_SCALE;
+      return;
+    }
 
     const angle = Math.atan2(dyMag, dxMag);
 
@@ -166,10 +170,8 @@ export const ferrofluid: SplatAnimation = {
     const springScale =
       BASE_SPRING_SCALE + intensity * INTENSITY_SPRING_MULT + levels.bass;
 
-    return {
-      dx: (spikeDx + shiver * 0.5) * scale,
-      dy: (spikeDy + shiver * 0.5) * scale,
-      springScale
-    };
+    out.dx = (spikeDx + shiver * 0.5) * scale;
+    out.dy = (spikeDy + shiver * 0.5) * scale;
+    out.springScale = springScale;
   }
 };

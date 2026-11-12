@@ -16,6 +16,8 @@ import {
   type SplatAnimation
 } from '../lib/splat-animations';
 import { scenes } from '../lib/splat-scenes';
+import { fillStyleFor } from '../lib/splat-scenes/fill-cache';
+import { createEffect, resetEffect } from '../lib/splat-animations/effect';
 import type {
   GlowRect,
   SceneTarget,
@@ -109,7 +111,7 @@ let lastFrameTime = -1;
 const MORPH_STAGGER = 0.35;
 // Scenes track their targets more tightly than the soft avatar spring
 const SCENE_SPRING_SCALE = 2.5;
-const ZERO_EFFECT = Object.freeze({ dx: 0, dy: 0 });
+const animEffect = createEffect();
 const audioTracker = new AudioTracker();
 // Every kick pumps the whole cloud outwards from its centre (px per frame at beat = 1)
 const BEAT_PUNCH = 2.5;
@@ -125,16 +127,6 @@ const sceneOut: SceneTarget = {
   g: 0,
   b: 0,
   tint: false
-};
-const colorOut = [0, 0, 0];
-/** Parses an animation's "r, g, b" override into the shared `colorOut`. */
-const parseRgb = (rgb: string) => {
-  const a = rgb.indexOf(',');
-  const b = rgb.indexOf(',', a + 1);
-  colorOut[0] = +rgb.slice(0, a);
-  colorOut[1] = +rgb.slice(a + 1, b);
-  colorOut[2] = +rgb.slice(b + 1);
-  return colorOut;
 };
 const smoothstep = (t: number) => {
   const c = Math.min(1, Math.max(0, t));
@@ -573,6 +565,7 @@ onMounted(async () => {
     const hForce = hoverForce;
     let lastAlpha = -1;
     let lastFillColor = '';
+    const effect = animEffect;
 
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
@@ -581,13 +574,16 @@ onMounted(async () => {
         anchorPx.x + (p.ox * scale + offsetX - anchorPx.x) * swell;
       const baseTargetOy =
         anchorPx.y + (p.oy * scale + offsetY - anchorPx.y) * swell;
-      const effect =
-        morph < 1 ? anim.apply(p, elapsed, animCtx, particles) : ZERO_EFFECT;
+      resetEffect(effect);
+      if (morph < 1) anim.apply(p, elapsed, animCtx, particles, effect);
       let targetOx = baseTargetOx + effect.dx;
       let targetOy = baseTargetOy + effect.dy;
-      let springMul = effect.springScale ?? 1;
-      let sMult = (effect.sizeMult ?? 1.0) * (1 + beat * BEAT_SIZE_PUMP);
-      let color = effect.colorOverride;
+      let springMul = effect.springScale;
+      let sMult = effect.sizeMult * (1 + beat * BEAT_SIZE_PUMP);
+      let tinted = effect.tint;
+      let tintR = effect.r;
+      let tintG = effect.g;
+      let tintB = effect.b;
       let dotRadius = 1.1;
       let alpha = 1;
 
@@ -607,16 +603,13 @@ onMounted(async () => {
           if (sceneOut.tint) {
             // Fade each splat from its avatar colour to the scene colour (and
             // back again), rather than keeping the avatar's skin tones
-            const base = color ? parseRgb(color) : colorOut;
-            if (!color) {
-              base[0] = p.cr;
-              base[1] = p.cg;
-              base[2] = p.cb;
-            }
-            const r = base[0] + (sceneOut.r - base[0]) * m;
-            const g = base[1] + (sceneOut.g - base[1]) * m;
-            const b = base[2] + (sceneOut.b - base[2]) * m;
-            color = `${r | 0}, ${g | 0}, ${b | 0}`;
+            const baseR = tinted ? tintR : p.cr;
+            const baseG = tinted ? tintG : p.cg;
+            const baseB = tinted ? tintB : p.cb;
+            tintR = baseR + (sceneOut.r - baseR) * m;
+            tintG = baseG + (sceneOut.g - baseG) * m;
+            tintB = baseB + (sceneOut.b - baseB) * m;
+            tinted = true;
             // The avatar brush is a bit smaller than a plain dot of the same size
             dotRadius = 0.88 + 0.22 * m;
           }
@@ -671,11 +664,12 @@ onMounted(async () => {
       }
       const halfSize = 8 * scale * sMult; // 8 = brushSize(16) / 2
 
-      if (color) {
+      if (tinted) {
         // Circular draw for dynamic colors with a slight "bloom" feel
-        if (color !== lastFillColor) {
-          ctx.fillStyle = `rgb(${color})`;
-          lastFillColor = color;
+        const fill = fillStyleFor(tintR, tintG, tintB);
+        if (fill !== lastFillColor) {
+          ctx.fillStyle = fill;
+          lastFillColor = fill;
         }
         ctx.beginPath();
         ctx.arc(p.x, p.y, halfSize * dotRadius, 0, Math.PI * 2);

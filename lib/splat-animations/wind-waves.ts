@@ -62,8 +62,10 @@ export const windWaves: SplatAnimation = {
   apply(
     p: SplatParticle,
     elapsed: number,
-    ctx: AnimationContext
-  ): AnimationEffect {
+    ctx: AnimationContext,
+    _particles: SplatParticle[],
+    out: AnimationEffect
+  ): void {
     const phase = p.animState.wavePhaseOffset ?? 0;
     const ampMult = p.animState.breathAmpMult ?? 1;
     const { scale } = ctx;
@@ -92,9 +94,7 @@ export const windWaves: SplatAnimation = {
 
     const waveX = windGust + interference;
 
-    return {
-      dx: waveX * scale,
-      dy: (waveY + interference * INTERFERENCE_Y_WEIGHT) * scale
-    };
+    out.dx = waveX * scale;
+    out.dy = (waveY + interference * INTERFERENCE_Y_WEIGHT) * scale;
   }
 };

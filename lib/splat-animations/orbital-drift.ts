@@ -81,8 +81,10 @@ export const orbitalDrift: SplatAnimation = {
   apply(
     p: SplatParticle,
     elapsed: number,
-    ctx: AnimationContext
-  ): AnimationEffect {
+    ctx: AnimationContext,
+    _particles: SplatParticle[],
+    out: AnimationEffect
+  ): void {
     const cx = p.animState.orbitCx ?? CENTER_X;
     const cy = p.animState.orbitCy ?? CENTER_Y;
     const { scale } = ctx;
@@ -106,10 +108,8 @@ export const orbitalDrift: SplatAnimation = {
       baseSizeBoost +
       Math.sin(elapsed * 0.001 + p.ox * 0.01) * SIZE_OSCILLATION_AMP;
 
-    return {
-      dx: (newOx - p.ox) * scale,
-      dy: (newOy - p.oy) * scale,
-      sizeMult
-    };
+    out.dx = (newOx - p.ox) * scale;
+    out.dy = (newOy - p.oy) * scale;
+    out.sizeMult = sizeMult;
   }
 };
