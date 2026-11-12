@@ -8,9 +8,12 @@ export interface ArticleFrontmatter {
   intro?: string;
   model?: string;
   date?: string;
-  watchersUrl?: string | null;
-  starsUrl?: string | null;
-  forksUrl?: string | null;
+  /** Repository stats written by the ETL (`scripts/process_requests.py`). */
+  stars?: number;
+  forks?: number;
+  watchers?: number;
+  /** ISO date the stats were fetched. */
+  statsFetched?: string;
   langArr?: string[];
   languages?: string | string[];
   externalUrl?: string;

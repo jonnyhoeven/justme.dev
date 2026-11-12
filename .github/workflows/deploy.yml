@@ -69,6 +69,8 @@ jobs:
 
       - name: Generate content
         run: nix develop .#ci --command python3 scripts/process_requests.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build with VitePress
         run: nix develop .#ci --command pnpm run docs:build

@@ -19,14 +19,11 @@ describe('transformPage', () => {
       'https://media.justme.dev/images/justme.dev.webp'
     );
     expect(result.frontmatter.externalUrlLabel).toBe('View site');
-    expect(result.frontmatter.watchersUrl).toBeNull();
-    expect(result.frontmatter.starsUrl).toBeNull();
-    expect(result.frontmatter.forksUrl).toBeNull();
     expect(result.frontmatter.langArr).toEqual([]);
     expect(result.url).toBe('/test');
   });
 
-  it('generates GitHub badge URLs and externalUrl when gitlink is present', () => {
+  it('derives externalUrl from gitlink', () => {
     const result = transformPage({
       url: '/project',
       frontmatter: {
@@ -40,35 +37,6 @@ describe('transformPage', () => {
       'https://github.com/myuser/myproject'
     );
     expect(result.frontmatter.externalUrlLabel).toBe('View on Github');
-    expect(result.frontmatter.watchersUrl).toBe(
-      'https://img.shields.io/github/watchers/myuser/myproject?style=flat'
-    );
-    expect(result.frontmatter.starsUrl).toBe(
-      'https://img.shields.io/github/stars/myuser/myproject?style=flat'
-    );
-    expect(result.frontmatter.forksUrl).toBe(
-      'https://img.shields.io/github/forks/myuser/myproject?style=flat'
-    );
-  });
-
-  it('generates GitHub badge URLs from user and project even when gitlink is absent', () => {
-    const result = transformPage({
-      url: '/project',
-      frontmatter: {
-        user: 'myuser',
-        project: 'myproject'
-      }
-    });
-
-    expect(result.frontmatter.watchersUrl).toBe(
-      'https://img.shields.io/github/watchers/myuser/myproject?style=flat'
-    );
-    expect(result.frontmatter.starsUrl).toBe(
-      'https://img.shields.io/github/stars/myuser/myproject?style=flat'
-    );
-    expect(result.frontmatter.forksUrl).toBe(
-      'https://img.shields.io/github/forks/myuser/myproject?style=flat'
-    );
   });
 
   it('parses languages as comma-separated string or array', () => {
@@ -121,8 +89,5 @@ describe('transformPage', () => {
 
     expect(result.frontmatter.externalUrl).toBe('https://game.example.com');
     expect(result.frontmatter.externalUrlLabel).toBe('Play Game');
-    expect(result.frontmatter.watchersUrl).toBeNull();
-    expect(result.frontmatter.starsUrl).toBeNull();
-    expect(result.frontmatter.forksUrl).toBeNull();
   });
 });

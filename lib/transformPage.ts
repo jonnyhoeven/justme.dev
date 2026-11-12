@@ -30,17 +30,6 @@ export default function transformPage<T extends PageLike>(
     'Just me. Sharing insights, experiences, and tutorials related to software development and site reliability engineering.';
   pageData.description = description;
 
-  const badgeHost = 'https://img.shields.io/github';
-  const hasGithubRepo = Boolean(pf.user && pf.project);
-  pf.watchersUrl = hasGithubRepo
-    ? `${badgeHost}/watchers/${pf.user}/${pf.project}?style=flat`
-    : null;
-  pf.starsUrl = hasGithubRepo
-    ? `${badgeHost}/stars/${pf.user}/${pf.project}?style=flat`
-    : null;
-  pf.forksUrl = hasGithubRepo
-    ? `${badgeHost}/forks/${pf.user}/${pf.project}?style=flat`
-    : null;
   if (Array.isArray(pf.languages)) {
     pf.langArr = pf.languages;
   } else if (

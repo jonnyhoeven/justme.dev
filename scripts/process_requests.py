@@ -1,11 +1,13 @@
 # SPDX-FileCopyrightText: Jonny van der Hoeven
 # SPDX-License-Identifier: GPL-3.0-or-later
+import json
 import logging
+import os
 import re
 import sys
 import urllib.error
 import urllib.request
-from datetime import date
+from datetime import UTC, date, datetime
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 
@@ -46,6 +48,49 @@ def fetch_text(url: str, timeout: float = 10) -> str:
         raise FetchError(f"Timed out after {timeout}s for url: {url}") from e
     except (LookupError, UnicodeDecodeError) as e:
         raise FetchError(f"Cannot decode response from {url}: {e}") from e
+
+
+GITHUB_API = "https://api.github.com"
+
+
+def fetch_repo_stats(
+    user: str, project: str, token: str | None = None, timeout: float = 10
+) -> dict[str, int]:
+    """Fetch star, fork and watcher counts for a GitHub repository.
+
+    Returns a dict with `stars`, `forks` and `watchers` (GitHub's
+    `subscribers_count`; omitted when the API does not report it).
+
+    Raises:
+        FetchError: on HTTP errors (a 403/429 with no quota left is reported as
+            a rate limit), network errors, timeouts, or an unexpected body.
+    """
+    url = f"{GITHUB_API}/repos/{user}/{project}"
+    headers = {
+        "User-Agent": USER_AGENT,
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    request = urllib.request.Request(url, headers=headers)
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            data = json.loads(response.read().decode("utf-8"))
+        stats = {"stars": int(data["stargazers_count"]), "forks": int(data["forks_count"])}
+        if data.get("subscribers_count") is not None:
+            stats["watchers"] = int(data["subscribers_count"])
+        return stats
+    except urllib.error.HTTPError as e:
+        if e.code in (403, 429) and e.headers is not None and e.headers.get("X-RateLimit-Remaining") == "0":
+            raise FetchError(f"GitHub API rate limit exceeded (HTTP {e.code}) for url: {url}") from e
+        raise FetchError(f"HTTP {e.code} for url: {url}") from e
+    except urllib.error.URLError as e:
+        raise FetchError(f"{e.reason} for url: {url}") from e
+    except TimeoutError as e:
+        raise FetchError(f"Timed out after {timeout}s for url: {url}") from e
+    except (ValueError, KeyError, TypeError, AttributeError) as e:
+        raise FetchError(f"Unexpected response from {url}: {e}") from e
 
 
 class ProjectRequest(BaseModel):
@@ -198,13 +243,33 @@ class GenerateFiles:
                     f"Failed to fetch README for {request.title}"
                 )
 
-        self.save_post(request, dst_path, readme)
+        self.save_post(request, dst_path, readme, self.get_stats(request))
+
+    @staticmethod
+    def get_stats(request: ProjectRequest) -> dict[str, int | str]:
+        """Fetch repository stats for the badges; never fails the build.
+
+        Returns an empty dict when the repo is unknown or the fetch fails.
+        """
+        if not request.user or not request.project:
+            return {}
+        token = os.environ.get("GITHUB_TOKEN") or None
+        if not token:
+            logger.info("GITHUB_TOKEN not set; fetching repo stats unauthenticated (60 requests/hour)")
+        try:
+            stats: dict[str, int | str] = dict(fetch_repo_stats(request.user, request.project, token))
+        except FetchError as e:
+            logger.warning("Could not fetch repo stats for %s/%s: %s", request.user, request.project, e)
+            return {}
+        stats["statsFetched"] = datetime.now(UTC).date().isoformat()
+        return stats
 
     @staticmethod
     def save_post(
         request: ProjectRequest,
         dst_path: Path,
         readme: str,
+        stats: dict[str, int | str] | None = None,
     ) -> None:
         """Save the generated content to a markdown file."""
         dst_path.parent.mkdir(parents=True, exist_ok=True)
@@ -224,6 +289,8 @@ class GenerateFiles:
                     frontmatter["externalUrl"] = str(frontmatter["externalUrl"])
                 if "content" in frontmatter:
                     del frontmatter["content"]
+                if stats:
+                    frontmatter.update(stats)
 
                 yaml.safe_dump(frontmatter, pst_file, width=120, sort_keys=False)
                 pst_file.write("---\n")

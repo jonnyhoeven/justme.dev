@@ -9,9 +9,11 @@ avoid touching the real filesystem or the network.
 
 # Make the scripts directory importable
 import io
+import json
 import sys
 import textwrap
 import urllib.error
+from datetime import UTC, datetime
 from email.message import Message
 from pathlib import Path
 from unittest.mock import patch
@@ -27,6 +29,7 @@ from process_requests import (
     GenerateFiles,
     ProjectRequest,
     absolutize_links,
+    fetch_repo_stats,
     fetch_text,
     get_wrapper_template,
 )
@@ -497,3 +500,112 @@ class TestProcessRequests:
         assert "Direct markdown details." in content
         assert "externalUrl: https://example.com/demo" in content
         assert "externalUrlLabel: Launch Demo" in content
+
+
+# ---------------------------------------------------------------------------
+# fetch_repo_stats
+# ---------------------------------------------------------------------------
+
+REPO_JSON = {"stargazers_count": 1234, "forks_count": 34, "subscribers_count": 7}
+
+
+def api_ok(payload: dict | None = None) -> FakeResponse:
+    return ok(json.dumps(REPO_JSON if payload is None else payload))
+
+
+class TestFetchRepoStats:
+    def test_success(self):
+        with patch(URLOPEN, return_value=api_ok()) as m:
+            stats = fetch_repo_stats("foo", "bar")
+        assert stats == {"stars": 1234, "forks": 34, "watchers": 7}
+        request = m.call_args.args[0]
+        assert request.full_url == "https://api.github.com/repos/foo/bar"
+        assert request.get_header("Accept") == "application/vnd.github+json"
+        assert request.get_header("X-github-api-version") == "2022-11-28"
+
+    def test_watchers_omitted_when_missing(self):
+        with patch(URLOPEN, return_value=api_ok({"stargazers_count": 1, "forks_count": 2})):
+            assert fetch_repo_stats("foo", "bar") == {"stars": 1, "forks": 2}
+
+    def test_token_header_present(self):
+        with patch(URLOPEN, return_value=api_ok()) as m:
+            fetch_repo_stats("foo", "bar", token="secret")
+        assert m.call_args.args[0].get_header("Authorization") == "Bearer secret"
+
+    def test_token_header_absent(self):
+        with patch(URLOPEN, return_value=api_ok()) as m:
+            fetch_repo_stats("foo", "bar")
+        assert m.call_args.args[0].get_header("Authorization") is None
+
+    def test_404(self):
+        with patch(URLOPEN, side_effect=http_error(404)), pytest.raises(FetchError, match="HTTP 404"):
+            fetch_repo_stats("foo", "bar")
+
+    def test_rate_limit_403(self):
+        headers = Message()
+        headers["X-RateLimit-Remaining"] = "0"
+        err = urllib.error.HTTPError("http://x", 403, "forbidden", headers, io.BytesIO(b""))
+        with patch(URLOPEN, side_effect=err), pytest.raises(FetchError, match="rate limit"):
+            fetch_repo_stats("foo", "bar")
+
+    def test_plain_403_is_not_rate_limit(self):
+        with patch(URLOPEN, side_effect=http_error(403)), pytest.raises(FetchError, match="HTTP 403"):
+            fetch_repo_stats("foo", "bar")
+
+    def test_network_error(self):
+        with patch(URLOPEN, side_effect=urllib.error.URLError("boom")), pytest.raises(FetchError, match="boom"):
+            fetch_repo_stats("foo", "bar")
+
+    def test_timeout(self):
+        with patch(URLOPEN, side_effect=TimeoutError()), pytest.raises(FetchError, match="Timed out"):
+            fetch_repo_stats("foo", "bar")
+
+    def test_malformed_body(self):
+        with patch(URLOPEN, return_value=ok("not json")), pytest.raises(FetchError, match="Unexpected"):
+            fetch_repo_stats("foo", "bar")
+
+    def test_missing_fields(self):
+        with patch(URLOPEN, return_value=api_ok({"forks_count": 1})), pytest.raises(FetchError):
+            fetch_repo_stats("foo", "bar")
+
+
+class TestStatsFrontmatter:
+    def _write(self, generator, data):
+        (generator.req_path / "p.yaml").write_text(yaml.dump(data))
+
+    def _frontmatter(self, generator) -> dict:
+        text = (generator.dst_dir / "p.md").read_text()
+        return yaml.safe_load(text.split("---\n")[1])
+
+    def test_stats_written_to_frontmatter(self, generator, full_yaml_data, monkeypatch):
+        monkeypatch.setenv("GITHUB_TOKEN", "tok")
+        full_yaml_data["fetchReadme"] = False
+        self._write(generator, full_yaml_data)
+        with patch(URLOPEN, return_value=api_ok()) as m:
+            assert generator.process_requests() is True
+        assert m.call_args.args[0].get_header("Authorization") == "Bearer tok"
+        fm = self._frontmatter(generator)
+        assert (fm["stars"], fm["forks"], fm["watchers"]) == (1234, 34, 7)
+        assert fm["statsFetched"] == datetime.now(UTC).date().isoformat()
+
+    def test_stats_failure_does_not_fail_build(self, generator, full_yaml_data, monkeypatch, caplog):
+        monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+        full_yaml_data["fetchReadme"] = False
+        self._write(generator, full_yaml_data)
+        with patch(URLOPEN, side_effect=http_error(403)):
+            assert generator.process_requests() is True
+        fm = self._frontmatter(generator)
+        assert not {"stars", "forks", "watchers", "statsFetched"} & fm.keys()
+        assert "Could not fetch repo stats" in caplog.text
+
+    def test_no_request_without_user_and_project(self, generator, minimal_yaml_data):
+        self._write(generator, minimal_yaml_data)
+        with patch(URLOPEN) as m:
+            assert generator.process_requests() is True
+        m.assert_not_called()
+        assert "stars" not in self._frontmatter(generator)
+
+    def test_readme_failure_still_fails_build(self, generator, full_yaml_data):
+        self._write(generator, full_yaml_data)
+        with patch(URLOPEN, side_effect=http_error(404)):
+            assert generator.process_requests() is False
