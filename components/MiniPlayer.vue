@@ -902,7 +902,7 @@ onBeforeUnmount(() => {
   right: 6px;
   background: none;
   border: none;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--vp-c-text-3);
   cursor: pointer;
   padding: 2px 4px;
@@ -920,7 +920,7 @@ onBeforeUnmount(() => {
   color: var(--vp-c-text-2);
   border-radius: 12px;
   padding: 2px 6px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--duration-fast) ease;
@@ -933,7 +933,7 @@ onBeforeUnmount(() => {
 }
 
 .track-count-badge {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   color: var(--vp-c-text-3);
 }
@@ -1084,7 +1084,7 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--vp-c-text-2);
   width: 100%;
 }
@@ -1094,7 +1094,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--vp-c-text-2);
-  font-size: 9.5px;
+  font-size: 11px;
   flex: 1;
   min-width: 0;
 }
@@ -1103,7 +1103,7 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  font-size: 8.5px;
+  font-size: 11px;
   padding: 0 4px;
   height: 16px;
   line-height: 16px;
@@ -1151,6 +1151,18 @@ onBeforeUnmount(() => {
   .panel-pop-enter-from,
   .panel-pop-leave-to {
     transform: none;
+  }
+}
+
+/* Narrow viewports: drop the filename column (it repeats the row's title
+   attribute) so the tracker tag keeps the room it needs at 11px. */
+@media (max-width: 479.98px) {
+  .meta-filename {
+    display: none;
+  }
+
+  .item-row-meta {
+    justify-content: flex-end;
   }
 }
 

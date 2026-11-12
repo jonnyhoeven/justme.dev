@@ -119,6 +119,24 @@ h6,
   color: var(--vp-c-brand-1) !important;
 }
 
+/* Floating audio dock (MiniPlayer): fixed at the bottom on every page, so
+   reserve its height + bottom offset + a 16px gap at the end of the layout.
+   Keep in sync with MiniPlayer.vue (38px bar, 20px offset; 36px / 12px below
+   768px). */
+:root {
+  --audio-dock-space: calc(38px + 20px + 16px);
+}
+
+@media (max-width: 767px) {
+  :root {
+    --audio-dock-space: calc(36px + 12px + 16px);
+  }
+}
+
+.Layout {
+  padding-bottom: var(--audio-dock-space);
+}
+
 /* Make Footer Smaller and Sleeker */
 .VPFooter {
   font-size: 13px !important;

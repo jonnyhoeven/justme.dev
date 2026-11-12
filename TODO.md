@@ -83,8 +83,8 @@ Full read of the components, `lib/`, theme CSS, ETL scripts, CI and docs at comm
 
 ### 5. Design and layout
 
-- [ ] **The audio dock covers page content** _(from code)_ ([`MiniPlayer.vue`](components/MiniPlayer.vue)): it is `position: fixed` at the bottom centre on every page with no bottom padding reserved, so it sits on top of the footer and the prev/next links at the end of a post. Reserve space (`padding-bottom` on `.VPContent`/footer), and add a collapse or close control whose state persists.
-- [ ] **Text sizes below 11px in the player**: `8.5px`, `9.5px` and `10px` are used for tags, filenames and counts (`.meta-tag`, `.meta-filename`, `.track-count-badge`). Set a 11 to 12px floor and drop a column on narrow widths instead.
+- [x] **The audio dock covers page content** _(from code)_ ([`MiniPlayer.vue`](components/MiniPlayer.vue)): it is `position: fixed` at the bottom centre on every page with no bottom padding reserved, so it sits on top of the footer and the prev/next links at the end of a post. Reserve space (`padding-bottom` on `.VPContent`/footer), and add a collapse or close control whose state persists. (Owner chose padding only; no collapse control.)
+- [x] **Text sizes below 11px in the player**: `8.5px`, `9.5px` and `10px` are used for tags, filenames and counts (`.meta-tag`, `.meta-filename`, `.track-count-badge`). Set a 11 to 12px floor and drop a column on narrow widths instead.
 - [ ] **Too much motion, and no reduced-motion guard on most of it**: buttons, feature cards, list cards, badges and search results all lift/scale on hover, brand buttons shimmer, and every doc block fades in. Only `HeroSplat` and the marquee respect `prefers-reduced-motion`. Pick one hover idiom, and add a global `@media (prefers-reduced-motion: reduce)` block for `fadeInUp`, `glow`, the `.flourish` sweep and hover transforms.
   - [x] Reduced-motion guard added (`motion.css`, scoped blocks in `MiniPlayer.vue`, instant order-strip scroll in `TrackerPlayer.vue`).
   - [ ] Pick one hover idiom (waiting on a decision).
