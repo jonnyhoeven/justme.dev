@@ -3,6 +3,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { defineConfig, HeadConfig } from 'vitepress';
+import { createArticleLoader } from '../data/articleLoader';
+import { buildRssFeed } from '../lib/rss';
 import { buildStructuredData, serializeJsonLd } from '../lib/structured-data';
 import transformPage from '../lib/transformPage';
 import { SITE_CONSTANTS } from './constants';
@@ -83,6 +85,15 @@ export default defineConfig({
       }
     ],
     ['link', { rel: 'manifest', href: '/site.webmanifest' }],
+    [
+      'link',
+      {
+        rel: 'alternate',
+        type: 'application/rss+xml',
+        title: `${SITE_CONSTANTS.SITE_NAME} blog`,
+        href: '/feed.xml'
+      }
+    ],
     [
       'link',
       {
@@ -321,5 +332,24 @@ export default defineConfig({
       }
     }
   },
-  transformPageData: transformPage
+  transformPageData: transformPage,
+  // RSS 2.0 feed of exactly what /blog lists (blog/*.md, via the shared loader).
+  async buildEnd(siteConfig) {
+    const posts = await createArticleLoader('blog/*.md').load();
+    const feed = buildRssFeed(
+      posts.map((post) => ({
+        title: String(post.frontmatter.title ?? ''),
+        url: `${SITE_CONSTANTS.HOSTNAME}${post.url}`,
+        date: post.frontmatter.date,
+        description: post.frontmatter.intro
+      })),
+      {
+        title: `${SITE_CONSTANTS.SITE_NAME} blog`,
+        link: `${SITE_CONSTANTS.HOSTNAME}/blog`,
+        description: SITE_CONSTANTS.DESCRIPTION,
+        feedUrl: `${SITE_CONSTANTS.HOSTNAME}/feed.xml`
+      }
+    );
+    fs.writeFileSync(path.join(siteConfig.outDir, 'feed.xml'), feed);
+  }
 });
