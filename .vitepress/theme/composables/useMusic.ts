@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later
-import { ref, computed } from 'vue';
+import { ref, computed, shallowRef, triggerRef } from 'vue';
 import { data as tracks, type MusicTrack } from '../../../data/music.data';
 import type { XMPlayer } from '../../../lib/audio/xm-player';
 
@@ -64,7 +64,9 @@ const defaultBpm = ref(125);
 const customBpm = ref(125);
 const instruments = ref<InstrumentInfo[]>([]);
 const channelMutes = ref<boolean[]>([]);
-const channelScopes = ref<Float32Array[]>([]);
+// shallowRef: the engine reuses the same array/buffers every tick, so changes
+// are announced with triggerRef instead of by assigning a new value.
+const channelScopes = shallowRef<Float32Array[]>([]);
 const liveSongTitle = ref('');
 
 // Web Audio & Engine references
@@ -232,6 +234,11 @@ const runAnalysis = () => {
   animationFrame = requestAnimationFrame(runAnalysis);
 };
 
+const publishScopes = (scopes: Float32Array[]) => {
+  if (channelScopes.value === scopes) triggerRef(channelScopes);
+  else channelScopes.value = scopes;
+};
+
 const setScopesEnabled = (enabled: boolean) => {
   scopesEnabled = enabled;
   if (!enabled) {
@@ -242,7 +249,7 @@ const setScopesEnabled = (enabled: boolean) => {
       enabled
         ? ({ scopes }) => {
             if (scopes && scopes.length > 0) {
-              channelScopes.value = scopes;
+              publishScopes(scopes);
             }
           }
         : null,
@@ -295,7 +302,7 @@ const doInitAudio = async () => {
   if (scopesEnabled) {
     xmPlayer.setScopeListener(({ scopes }) => {
       if (scopes && scopes.length > 0) {
-        channelScopes.value = scopes;
+        publishScopes(scopes);
       }
     }, 64);
   }

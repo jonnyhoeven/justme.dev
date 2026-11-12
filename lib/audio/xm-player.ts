@@ -1177,6 +1177,20 @@ function createXMEngine() {
     return Vrms * 0.5;
   }
 
+  // Buffers handed to the scope listener are reused across ticks and only
+  // reallocated when the channel count or scope width changes.
+  let vuBuf = new Float32Array(0);
+  let scopeBufs = [];
+  let scopeBufsWidth = -1;
+  const scopeEvent = {
+    t: 0,
+    vu: vuBuf,
+    scopes: undefined,
+    songpos: 0,
+    pat: 0,
+    row: 0
+  };
+
   function audio_cb(e) {
     f_smp = player.audioctx.sampleRate;
     let time_sound_started;
@@ -1200,12 +1214,23 @@ function createXMEngine() {
         player.cur_ticksamp -= ticklen;
       }
       const tickduration = Math.min(buflen, ticklen - player.cur_ticksamp);
-      const VU = new Float32Array(player.xm.nchan);
-      let scopes = undefined;
+      const nchan = player.xm.nchan;
+      if (vuBuf.length !== nchan) vuBuf = new Float32Array(nchan);
+      const VU = vuBuf;
+      const wantScopes = tickduration >= 4 * scopewidth;
+      if (
+        wantScopes &&
+        (scopeBufsWidth !== scopewidth || scopeBufs.length !== nchan)
+      ) {
+        scopeBufs = [];
+        for (j = 0; j < nchan; j++)
+          scopeBufs.push(new Float32Array(scopewidth));
+        scopeBufsWidth = scopewidth;
+      }
       for (j = 0; j < player.xm.nchan; j++) {
         var scope;
-        if (tickduration >= 4 * scopewidth) {
-          scope = new Float32Array(scopewidth);
+        if (wantScopes) {
+          scope = scopeBufs[j];
           for (k = 0; k < scopewidth; k++) {
             scope[k] = -dataL[offset + k * 4] - dataR[offset + k * 4];
           }
@@ -1220,23 +1245,20 @@ function createXMEngine() {
             dataR
           ) / tickduration;
 
-        if (tickduration >= 4 * scopewidth) {
+        if (wantScopes) {
           for (k = 0; k < scopewidth; k++) {
             scope[k] += dataL[offset + k * 4] + dataR[offset + k * 4];
           }
-          if (scopes === undefined) scopes = [];
-          scopes.push(scope);
         }
       }
       if (XMView.pushEvent) {
-        XMView.pushEvent({
-          t: e.playbackTime + (0.0 + offset) / f_smp,
-          vu: VU,
-          scopes: scopes,
-          songpos: player.cur_songpos,
-          pat: player.cur_pat,
-          row: player.cur_row
-        });
+        scopeEvent.t = e.playbackTime + (0.0 + offset) / f_smp;
+        scopeEvent.vu = VU;
+        scopeEvent.scopes = wantScopes && nchan > 0 ? scopeBufs : undefined;
+        scopeEvent.songpos = player.cur_songpos;
+        scopeEvent.pat = player.cur_pat;
+        scopeEvent.row = player.cur_row;
+        XMView.pushEvent(scopeEvent);
       }
       offset += tickduration;
       player.cur_ticksamp += tickduration;
@@ -1916,9 +1938,15 @@ export class XMPlayer {
   ): void {
     if (!this.engine.XMView) return;
     this.engine.XMView.scope_width = listener ? width : 0;
+    // One payload object is reused for every tick (no per-tick allocation).
+    const payload: { vu: Float32Array; scopes?: Float32Array[] } = {
+      vu: new Float32Array(0)
+    };
     this.engine.XMView.pushEvent = listener
       ? (event: any) => {
-          listener({ vu: event.vu, scopes: event.scopes });
+          payload.vu = event.vu;
+          payload.scopes = event.scopes;
+          listener(payload);
         }
       : null;
   }

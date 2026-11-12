@@ -523,4 +523,80 @@ describe('XMPlayer', () => {
     expect(player.totalRows).toBe(128);
     expect(player.orderOffsets).toEqual([0, 64]);
   });
+
+  it('reuses scope and VU buffers across ticks and reallocates on width change', () => {
+    let processCallback: ((e: unknown) => void) | null = null;
+    const mockAudioContext = {
+      sampleRate: 44100,
+      createGain: () => ({ gain: { value: 1.0 }, connect: () => {} }),
+      createScriptProcessor: () => ({
+        connect: () => {},
+        disconnect: () => {},
+        set onaudioprocess(cb: (e: unknown) => void) {
+          processCallback = cb;
+        }
+      }),
+      destination: {}
+    } as unknown as AudioContext;
+
+    const player = new XMPlayer();
+    player.init(mockAudioContext);
+    player.loadBuffer(getSampleBuffer());
+    player.play();
+
+    const buflen = 4096;
+    const mockEvent = {
+      playbackTime: 0,
+      outputBuffer: {
+        length: buflen,
+        getChannelData: () => new Float32Array(buflen)
+      }
+    };
+
+    const seen: {
+      payload: object;
+      vu: Float32Array;
+      scopes: Float32Array[];
+    }[] = [];
+    player.setScopeListener((data) => {
+      if (data.scopes) {
+        seen.push({
+          payload: data,
+          vu: data.vu,
+          scopes: data.scopes
+        });
+      }
+    }, 64);
+
+    for (let i = 0; i < 5; i++) processCallback!(mockEvent);
+
+    expect(seen.length).toBeGreaterThan(2);
+    const first = seen[0];
+    expect(first.scopes.length).toBe(player.numChannels);
+    expect(first.vu.length).toBe(player.numChannels);
+    for (const s of first.scopes) expect(s.length).toBe(64);
+    for (const s of seen) {
+      expect(s.payload).toBe(first.payload);
+      expect(s.vu).toBe(first.vu);
+      expect(s.scopes).toBe(first.scopes);
+      s.scopes.forEach((buf, i) => expect(buf).toBe(first.scopes[i]));
+    }
+    for (const v of first.vu) expect(Number.isFinite(v)).toBe(true);
+    for (const buf of first.scopes)
+      for (const v of buf) expect(Number.isFinite(v)).toBe(true);
+
+    // Changing the width reallocates, then buffers are stable again.
+    const before = first.scopes;
+    seen.length = 0;
+    player.setScopeListener((data) => {
+      if (data.scopes) {
+        seen.push({ payload: data, vu: data.vu, scopes: data.scopes });
+      }
+    }, 32);
+    for (let i = 0; i < 3; i++) processCallback!(mockEvent);
+    expect(seen.length).toBeGreaterThan(0);
+    expect(seen[0].scopes).not.toBe(before);
+    for (const s of seen[0].scopes) expect(s.length).toBe(32);
+    for (const s of seen) expect(s.scopes).toBe(seen[0].scopes);
+  });
 });
