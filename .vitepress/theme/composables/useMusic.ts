@@ -79,6 +79,7 @@ let currentLoadedUrl = '';
 let initPromise: Promise<void> | null = null;
 let skipTimeout: ReturnType<typeof setTimeout> | null = null;
 let scopesEnabled = false;
+let loadSeq = 0;
 
 // Favorites & Track deep-linking
 export const FAVORITES_STORAGE_KEY = 'justme_music_favorites';
@@ -300,33 +301,86 @@ const doInitAudio = async () => {
   }
 };
 
-const loadAndPlayTrack = async (url: string) => {
-  await initAudio();
-  if (audioContext?.state === 'suspended') {
-    await audioContext.resume();
+export const loadAndPlayTrack = async (url: string) => {
+  const thisSeq = ++loadSeq;
+  try {
+    await initAudio();
+    if (thisSeq !== loadSeq) return;
+
+    if (audioContext?.state === 'suspended') {
+      await audioContext.resume();
+    }
+    if (thisSeq !== loadSeq) return;
+
+    if (!xmPlayer) return;
+
+    if (currentLoadedUrl !== url) {
+      const ok = await xmPlayer.loadUrl(url);
+      if (thisSeq !== loadSeq) return;
+      if (!ok) {
+        throw new Error('Failed to parse XM file');
+      }
+      currentLoadedUrl = url;
+      liveSongTitle.value = xmPlayer.songTitle;
+      instruments.value = xmPlayer.getInstruments();
+      defaultBpm.value = xmPlayer.defaultBpm;
+      customBpm.value = xmPlayer.defaultBpm;
+
+      const nchan = xmPlayer.numChannels;
+      channelMutes.value = Array.from({ length: nchan }, () => false);
+      trackerState.value = xmPlayer.getTrackerState(true);
+    }
+
+    if (thisSeq !== loadSeq) return;
+
+    applyVolume(volume.value);
+    xmPlayer.play();
+    isPlaying.value = true;
+
+    if (
+      animationFrame === null &&
+      typeof requestAnimationFrame === 'function'
+    ) {
+      animationFrame = requestAnimationFrame(runAnalysis);
+    }
+  } catch {
+    if (thisSeq !== loadSeq) return;
+    isPlaying.value = false;
+    audioData.value = null;
+    if (animationFrame !== null) {
+      if (typeof cancelAnimationFrame === 'function') {
+        cancelAnimationFrame(animationFrame);
+      }
+      animationFrame = null;
+    }
+    liveSongTitle.value = 'Failed to load track';
+    currentLoadedUrl = '';
   }
-  if (!xmPlayer) return;
+};
 
-  if (currentLoadedUrl !== url) {
-    await xmPlayer.loadUrl(url);
-    currentLoadedUrl = url;
-    liveSongTitle.value = xmPlayer.songTitle;
-    instruments.value = xmPlayer.getInstruments();
-    defaultBpm.value = xmPlayer.defaultBpm;
-    customBpm.value = xmPlayer.defaultBpm;
-
-    const nchan = xmPlayer.numChannels;
-    channelMutes.value = Array.from({ length: nchan }, () => false);
-    trackerState.value = xmPlayer.getTrackerState(true);
+export const resetAudio = () => {
+  if (animationFrame !== null) {
+    if (typeof cancelAnimationFrame === 'function') {
+      cancelAnimationFrame(animationFrame);
+    }
+    animationFrame = null;
   }
-
-  applyVolume(volume.value);
-  xmPlayer.play();
-  isPlaying.value = true;
-
-  if (animationFrame === null) {
-    animationFrame = requestAnimationFrame(runAnalysis);
+  if (xmPlayer?.isPlaying) {
+    try {
+      xmPlayer.stop();
+    } catch {
+      // Ignore errors when stopping
+    }
   }
+  audioContext = null;
+  analyser = null;
+  animationGain = null;
+  outputGain = null;
+  xmPlayer = null;
+  dataArray = null;
+  currentLoadedUrl = '';
+  initPromise = null;
+  loadSeq = 0;
 };
 
 const togglePlay = async () => {
@@ -611,6 +665,8 @@ const musicState = {
   // Player controls & actions
   INITIAL_TRACK_FILENAMES,
   resetInitialTrackPicked,
+  resetAudio,
+  loadAndPlayTrack,
   initAudio,
   togglePlay,
   toggleShuffle,

@@ -471,4 +471,56 @@ describe('XMPlayer', () => {
     }
     expect(ch.ramp).toBe(0.0);
   });
+
+  it('correctly calculates getProgress for patterns with non-64 rows', () => {
+    const player = new XMPlayer();
+    const engine = (player as unknown as { engine: TestEngine }).engine;
+
+    // Pattern 0 has 32 rows, Pattern 1 has 128 rows (total 160 rows)
+    const pat0 = Array.from({ length: 32 }, () => []);
+    const pat1 = Array.from({ length: 128 }, () => []);
+
+    engine.xm = {
+      songpats: [0, 1],
+      patterns: [pat0, pat1]
+    };
+    player.orderOffsets = [0, 32];
+    player.totalRows = 160;
+
+    // When stopped or before playback (cur_songpos = -1)
+    engine.cur_songpos = -1;
+    engine.cur_row = 0;
+    expect(player.getProgress()).toBe(0);
+
+    // At order 0, row 0: (0 / 160) * 100 = 0%
+    engine.cur_songpos = 0;
+    engine.cur_row = 0;
+    expect(player.getProgress()).toBe(0);
+
+    // At order 0, row 16: (16 / 160) * 100 = 10%
+    engine.cur_row = 16;
+    expect(player.getProgress()).toBe(10);
+
+    // At order 1, row 0: (32 / 160) * 100 = 20%
+    engine.cur_songpos = 1;
+    engine.cur_row = 0;
+    expect(player.getProgress()).toBe(20);
+
+    // At order 1, row 64: (32 + 64) / 160 * 100 = 60%
+    engine.cur_row = 64;
+    expect(player.getProgress()).toBe(60);
+
+    // At order 1, row 127: (32 + 127) / 160 * 100 = 99.375%
+    engine.cur_row = 127;
+    expect(player.getProgress()).toBeCloseTo(99.375);
+  });
+
+  it('precomputes orderOffsets and totalRows during loadBuffer', () => {
+    const player = new XMPlayer();
+    const ok = player.loadBuffer(getSampleBuffer());
+    expect(ok).toBe(true);
+    // getSampleBuffer contains 2 patterns of 64 rows each
+    expect(player.totalRows).toBe(128);
+    expect(player.orderOffsets).toEqual([0, 64]);
+  });
 });

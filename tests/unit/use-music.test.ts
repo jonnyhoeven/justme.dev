@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 vi.mock('../../data/music.data', () => ({
   data: [
@@ -20,11 +20,13 @@ import defaultUseMusic, {
   cleanTitle,
   useMusic
 } from '../../.vitepress/theme/composables/useMusic';
+import { XMPlayer } from '../../lib/audio/xm-player';
 
 describe('useMusic composable', () => {
   beforeEach(() => {
     const music = useMusic();
     music.resetInitialTrackPicked();
+    music.resetAudio();
     music.setPlaying(false);
     music.currentTrackIndex.value = 0;
     music.setSplatVisible(false);
@@ -308,6 +310,177 @@ describe('useMusic composable', () => {
 
       setScopesEnabled(true);
       expect(channelScopes.value.length).toBe(0);
+    });
+  });
+
+  describe('loadAndPlayTrack error handling and race prevention', () => {
+    let mockCancelAnimationFrame: ReturnType<typeof vi.fn>;
+    let mockRequestAnimationFrame: ReturnType<typeof vi.fn>;
+
+    class MockAudioContext {
+      state = 'running';
+      destination = {};
+      sampleRate = 44100;
+      createAnalyser() {
+        return {
+          fftSize: 1024,
+          smoothingTimeConstant: 0.55,
+          frequencyBinCount: 512,
+          getByteFrequencyData: vi.fn()
+        };
+      }
+      createGain() {
+        return {
+          gain: { value: 1 },
+          connect: vi.fn(),
+          disconnect: vi.fn()
+        };
+      }
+      createScriptProcessor() {
+        return {
+          connect: vi.fn(),
+          disconnect: vi.fn()
+        };
+      }
+      resume = vi.fn().mockResolvedValue(undefined);
+    }
+
+    beforeEach(() => {
+      mockCancelAnimationFrame = vi.fn();
+      mockRequestAnimationFrame = vi.fn(() => 42);
+      vi.stubGlobal('window', {
+        AudioContext: MockAudioContext,
+        requestAnimationFrame: mockRequestAnimationFrame,
+        cancelAnimationFrame: mockCancelAnimationFrame
+      });
+      vi.stubGlobal('requestAnimationFrame', mockRequestAnimationFrame);
+      vi.stubGlobal('cancelAnimationFrame', mockCancelAnimationFrame);
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+      vi.unstubAllGlobals();
+      const { resetAudio } = useMusic();
+      resetAudio();
+    });
+
+    it('handles load failure when loadUrl returns false (Item 20)', async () => {
+      const { loadAndPlayTrack, isPlaying, liveSongTitle, audioData } =
+        useMusic();
+      vi.spyOn(XMPlayer.prototype, 'loadUrl').mockResolvedValue(false);
+
+      isPlaying.value = true;
+      audioData.value = new Uint8Array([1, 2, 3]);
+
+      await loadAndPlayTrack('/audio/corrupted.xm');
+
+      expect(isPlaying.value).toBe(false);
+      expect(audioData.value).toBeNull();
+      expect(liveSongTitle.value).toBe('Failed to load track');
+    });
+
+    it('handles load failure when loadUrl throws an error (Item 20)', async () => {
+      const { loadAndPlayTrack, isPlaying, liveSongTitle, audioData } =
+        useMusic();
+      vi.spyOn(XMPlayer.prototype, 'loadUrl').mockRejectedValue(
+        new Error('Failed to load XM file: HTTP 404')
+      );
+
+      isPlaying.value = true;
+      audioData.value = new Uint8Array([4, 5, 6]);
+
+      await loadAndPlayTrack('/audio/missing.xm');
+
+      expect(isPlaying.value).toBe(false);
+      expect(audioData.value).toBeNull();
+      expect(liveSongTitle.value).toBe('Failed to load track');
+    });
+
+    it('cancels active animationFrame on load failure (Item 20)', async () => {
+      const { loadAndPlayTrack } = useMusic();
+      vi.spyOn(XMPlayer.prototype, 'loadUrl').mockResolvedValue(false);
+
+      await loadAndPlayTrack('/audio/bad.xm');
+
+      expect(useMusic().isPlaying.value).toBe(false);
+    });
+
+    it('prevents stale slower track load from overwriting faster newer load (Item 21)', async () => {
+      const { loadAndPlayTrack, liveSongTitle, isPlaying } = useMusic();
+
+      let resolveSlow!: (val: boolean) => void;
+      const slowPromise = new Promise<boolean>((resolve) => {
+        resolveSlow = resolve;
+      });
+
+      const playSpy = vi
+        .spyOn(XMPlayer.prototype, 'play')
+        .mockImplementation(() => {});
+      vi.spyOn(XMPlayer.prototype, 'songTitle', 'get').mockReturnValue(
+        'Track Fast'
+      );
+
+      vi.spyOn(XMPlayer.prototype, 'loadUrl').mockImplementation(
+        async (url: string) => {
+          if (url.includes('slow.xm')) {
+            return slowPromise;
+          }
+          return true;
+        }
+      );
+
+      // Start loading slow track
+      const slowLoad = loadAndPlayTrack('/audio/slow.xm');
+
+      // Rapidly switch to fast track while slow track is still fetching
+      const fastLoad = loadAndPlayTrack('/audio/fast.xm');
+
+      await fastLoad;
+      expect(liveSongTitle.value).toBe('Track Fast');
+      expect(isPlaying.value).toBe(true);
+
+      // Now slow track finishes
+      resolveSlow(true);
+      await slowLoad;
+
+      // Fast track must still remain current and slow track must not override state
+      expect(liveSongTitle.value).toBe('Track Fast');
+      expect(playSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('prevents stale failed load from overwriting a newer successful load (Item 21)', async () => {
+      const { loadAndPlayTrack, liveSongTitle } = useMusic();
+
+      let rejectSlow!: (err: Error) => void;
+      const slowPromise = new Promise<boolean>((_, reject) => {
+        rejectSlow = reject;
+      });
+      slowPromise.catch(() => {});
+
+      vi.spyOn(XMPlayer.prototype, 'songTitle', 'get').mockReturnValue(
+        'Fast Track'
+      );
+      vi.spyOn(XMPlayer.prototype, 'loadUrl').mockImplementation(
+        async (url: string) => {
+          if (url.includes('slow.xm')) {
+            return slowPromise;
+          }
+          return true;
+        }
+      );
+
+      const slowLoad = loadAndPlayTrack('/audio/slow.xm');
+      const fastLoad = loadAndPlayTrack('/audio/fast.xm');
+
+      await fastLoad;
+      expect(liveSongTitle.value).toBe('Fast Track');
+
+      // Now slow track fails
+      rejectSlow(new Error('Slow load failed'));
+      await slowLoad;
+
+      // State remains Fast Track, not 'Failed to load track'
+      expect(liveSongTitle.value).toBe('Fast Track');
     });
   });
 });

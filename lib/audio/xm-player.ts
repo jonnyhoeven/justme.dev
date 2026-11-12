@@ -1821,6 +1821,8 @@ export class XMPlayer {
   public outputNode: GainNode | null = null;
   private bufferSize: number;
   public onEnded?: () => void;
+  public orderOffsets: number[] = [];
+  public totalRows: number = 0;
 
   constructor(options?: XMPlayerOptions) {
     this.bufferSize = options?.bufferSize || 4096;
@@ -1862,8 +1864,27 @@ export class XMPlayer {
   loadBuffer(buf: ArrayBuffer): boolean {
     this.stop();
     try {
-      return this.engine.load(buf);
+      const ok = this.engine.load(buf);
+      if (!ok) {
+        this.orderOffsets = [];
+        this.totalRows = 0;
+        return false;
+      }
+      const songpats = this.engine.xm?.songpats || [];
+      const patterns = this.engine.xm?.patterns || [];
+      this.orderOffsets = [];
+      let total = 0;
+      for (let i = 0; i < songpats.length; i++) {
+        this.orderOffsets.push(total);
+        const patIdx = songpats[i];
+        const patRows = patterns[patIdx] ? patterns[patIdx].length : 64;
+        total += patRows;
+      }
+      this.totalRows = total;
+      return true;
     } catch {
+      this.orderOffsets = [];
+      this.totalRows = 0;
       return false;
     }
   }
@@ -1888,13 +1909,18 @@ export class XMPlayer {
   }
 
   getProgress(): number {
-    if (!this.engine.xm || !this.engine.xm.songpats) return 0;
+    if (!this.engine.xm || !this.engine.xm.songpats || this.totalRows === 0)
+      return 0;
     if (this.engine.cur_songpos < 0) return 0;
-    const totalPats = this.engine.xm.songpats.length;
-    if (totalPats === 0) return 0;
-    const curPos = Math.max(0, this.engine.cur_songpos);
-    const curRow = Math.max(0, Math.min(63, this.engine.cur_row));
-    const progress = ((curPos * 64 + curRow) / (totalPats * 64)) * 100;
+    const curPos = Math.max(
+      0,
+      Math.min(this.engine.xm.songpats.length - 1, this.engine.cur_songpos)
+    );
+    const patIdx = this.engine.xm.songpats[curPos];
+    const patRows = this.engine.xm.patterns?.[patIdx]?.length || 64;
+    const curRow = Math.max(0, Math.min(patRows - 1, this.engine.cur_row));
+    const currentTotalRows = (this.orderOffsets[curPos] || 0) + curRow;
+    const progress = (currentTotalRows / this.totalRows) * 100;
     return Math.min(100, Math.max(0, progress));
   }
 

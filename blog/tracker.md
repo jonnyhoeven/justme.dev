@@ -34,6 +34,6 @@ Tracker music traces its roots back to the late 1980s and early 1990s on the Com
 
 1. **Patterns & Rows:** Music is arranged vertically in channels (columns) and rows (usually 64 rows per pattern). As playback advances, rows trigger notes, instrument triggers, volume envelopes, and arpeggios.
 2. **Channel Oscilloscopes:** Each track in an XM file is an independent voice. The player renders independent real-time waveform oscillations for each voice. You can click any channel above to mute or solo it in real time.
-3. **Sharing Songs:** You can share any track directly by clicking the **Share** button above, which copies a deep link (e.g. `?track=dead_lock.xm`) that jumps right to that song.
+3. **Sharing Songs:** You can share any track directly by clicking the **Share** button above, which copies a deep link (e.g. `?track=0_deadlock.xm`) that jumps right to that song.
 
 <ArticleFooter :frontmatter="$frontmatter" />
