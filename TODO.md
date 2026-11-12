@@ -93,7 +93,7 @@ Full read of the components, `lib/`, theme CSS, ETL scripts, CI and docs at comm
 
 ### 6. Accessibility
 
-- [ ] **Player controls that are not reachable by keyboard**: playlist rows and the per-row favourite toggle are clickable `<div>`s; the track title, both seek bars and the scope canvas (mute/solo) are click-only. Use `<button>`s, give the seek bars `role="slider"` with arrow-key handling, and add a mute/solo button row for channels (Shift+click does not exist on touch either).
+- [x] **Player controls that are not reachable by keyboard**: playlist rows and the per-row favourite toggle are clickable `<div>`s; the track title, both seek bars and the scope canvas (mute/solo) are click-only. Use `<button>`s, give the seek bars `role="slider"` with arrow-key handling, and add a mute/solo button row for channels (Shift+click does not exist on touch either).
 - [x] **Missing names and states**: the playlist search input, the clear button (`✕`), the tracker volume and BPM sliders have no label; the tracker tabs lack `role="tablist"` / `aria-selected`; favourite buttons lack `aria-pressed`; `outline: none` removes the focus ring on the search inputs.
 - [x] **Virtual list keys by position** ([`MiniPlayer.vue`](components/MiniPlayer.vue), `:key="index"`): key by `item.originalIndex` so rows are not reused across filter changes.
 - [x] **Canvas label says "3D"** ([`HeroSplat.vue`](components/HeroSplat.vue)): it is a decorative 2D particle effect; mark it `aria-hidden` and keep the alt text on the fallback image.

@@ -8,6 +8,7 @@ import { XMPlayer } from '../lib/audio/xm-player';
 import usePlaylist from '../.vitepress/theme/composables/usePlaylist';
 import IconHeart from './icons/IconHeart.vue';
 import IconTransport from './icons/IconTransport.vue';
+import { seekKeyStep, isChannelSoloed } from '../lib/player-a11y';
 
 const {
   isPlaying,
@@ -107,6 +108,17 @@ const handleProgressBarClick = (e: MouseEvent) => {
   const rect = bar.getBoundingClientRect();
   const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
   seekPlayer(pct);
+};
+
+const canSeek = computed(() => !!currentTrack.value);
+const seekPercent = computed(() => Math.round(progress.value));
+
+const handleProgressKeydown = (e: KeyboardEvent) => {
+  if (!canSeek.value || e.altKey || e.ctrlKey || e.metaKey) return;
+  const next = seekKeyStep(e.key, progress.value);
+  if (next === null) return;
+  e.preventDefault();
+  seekPlayer(next / 100);
 };
 
 // ==========================================
@@ -788,7 +800,19 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- Seek Progress Bar -->
-      <div class="progress-wrap" @click="handleProgressBarClick">
+      <div
+        class="progress-wrap"
+        role="slider"
+        :tabindex="canSeek ? 0 : -1"
+        aria-label="Seek"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        :aria-valuenow="seekPercent"
+        :aria-valuetext="`${seekPercent} percent`"
+        :aria-disabled="!canSeek"
+        @click="handleProgressBarClick"
+        @keydown="handleProgressKeydown"
+      >
         <div class="progress-bar-fill" :style="{ width: `${progress}%` }"></div>
       </div>
 
@@ -912,7 +936,8 @@ onBeforeUnmount(() => {
       <div class="scopes-header">
         <span>Channel Waveforms</span>
         <span class="scopes-hint"
-          >Click channel to mute / Shift+Click to solo</span
+          >Click channel to mute / Shift+Click to solo, or use the buttons
+          below</span
         >
       </div>
       <canvas
@@ -920,8 +945,47 @@ onBeforeUnmount(() => {
         width="800"
         height="120"
         class="scopes-canvas"
+        aria-hidden="true"
         @click="handleScopesCanvasClick"
       ></canvas>
+      <div
+        v-if="channelMutes.length > 0"
+        class="channel-toggles"
+        role="group"
+        aria-label="Channels"
+      >
+        <span
+          v-for="(muted, chIdx) in channelMutes"
+          :key="chIdx"
+          class="channel-toggle"
+        >
+          <span class="channel-toggle-num" aria-hidden="true">{{
+            chIdx + 1
+          }}</span>
+          <button
+            type="button"
+            class="channel-btn channel-btn-mute"
+            :class="{ active: muted }"
+            :aria-pressed="muted"
+            :aria-label="`Mute channel ${chIdx + 1}`"
+            :title="`Mute channel ${chIdx + 1}`"
+            @click="toggleChannelMute(chIdx)"
+          >
+            M
+          </button>
+          <button
+            type="button"
+            class="channel-btn channel-btn-solo"
+            :class="{ active: isChannelSoloed(channelMutes, chIdx) }"
+            :aria-pressed="isChannelSoloed(channelMutes, chIdx)"
+            :aria-label="`Solo channel ${chIdx + 1}`"
+            :title="`Solo channel ${chIdx + 1}`"
+            @click="soloChannel(chIdx)"
+          >
+            S
+          </button>
+        </span>
+      </div>
     </div>
 
     <!-- Tabs Navigation: Pattern Matrix vs Instruments vs Playlist -->
@@ -1073,14 +1137,17 @@ onBeforeUnmount(() => {
               :key="index"
               class="archive-item"
               :class="{ active: item.originalIndex === currentTrackIndex }"
-              @click="selectTrack(item.originalIndex)"
             >
               <button
                 type="button"
                 class="archive-item-fav"
                 @click.stop="toggleFavorite(item.track.filename)"
                 :aria-pressed="favorites.has(item.track.filename)"
-                aria-label="Toggle favorite"
+                :aria-label="
+                  favorites.has(item.track.filename)
+                    ? `Remove ${item.displayTitle} from favourites`
+                    : `Add ${item.displayTitle} to favourites`
+                "
                 :title="
                   favorites.has(item.track.filename)
                     ? 'Remove from Favorites'
@@ -1089,10 +1156,19 @@ onBeforeUnmount(() => {
               >
                 {{ favorites.has(item.track.filename) ? '❤️' : '🤍' }}
               </button>
-              <span class="archive-item-title">{{ item.displayTitle }}</span>
-              <span class="archive-item-meta"
-                >{{ item.track.channels || '?' }}ch</span
+              <button
+                type="button"
+                class="archive-item-select"
+                :aria-current="
+                  item.originalIndex === currentTrackIndex ? 'true' : undefined
+                "
+                @click="selectTrack(item.originalIndex)"
               >
+                <span class="archive-item-title">{{ item.displayTitle }}</span>
+                <span class="archive-item-meta"
+                  >{{ item.track.channels || '?' }}ch</span
+                >
+              </button>
             </div>
           </div>
         </div>
@@ -1330,6 +1406,15 @@ onBeforeUnmount(() => {
   position: relative;
 }
 
+.progress-wrap[aria-disabled='true'] {
+  cursor: default;
+}
+
+.progress-wrap:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 2px;
+}
+
 .progress-bar-fill {
   height: 100%;
   background: var(--vp-c-brand-1);
@@ -1543,6 +1628,66 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 
+/* Per-channel mute / solo toggles (keyboard and touch twin of the canvas) */
+.channel-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-top: 10px;
+}
+
+.channel-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.channel-toggle-num {
+  min-width: 1.4em;
+  font-size: 0.7rem;
+  font-family: monospace;
+  text-align: right;
+  color: var(--vp-c-text-2);
+}
+
+.channel-btn {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--vp-c-text-2);
+  background: var(--vp-c-bg-mute);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.channel-btn:hover {
+  color: var(--vp-c-brand-1);
+  border-color: var(--vp-c-brand-1);
+}
+
+.channel-btn.active[aria-pressed='true'] {
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-soft);
+  border-color: var(--vp-c-brand-1);
+}
+
+.channel-btn-mute.active[aria-pressed='true'] {
+  color: var(--tracker-muted);
+  background: color-mix(in srgb, var(--tracker-muted) 15%, transparent);
+  border-color: var(--tracker-muted);
+}
+
+.channel-btn:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 2px;
+}
+
 /* Tabs */
 .tracker-tab-buttons {
   display: flex;
@@ -1733,8 +1878,35 @@ onBeforeUnmount(() => {
   font-weight: 600;
 }
 
+.archive-item-select {
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-weight: inherit;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.archive-item-select:focus-visible,
+.archive-item-fav:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+
 .archive-item-title {
   flex: 1;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

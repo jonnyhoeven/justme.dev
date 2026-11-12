@@ -14,6 +14,7 @@ import useMusic from '../.vitepress/theme/composables/useMusic';
 import usePlaylist from '../.vitepress/theme/composables/usePlaylist';
 import IconHeart from './icons/IconHeart.vue';
 import IconTransport from './icons/IconTransport.vue';
+import { seekKeyStep } from '../lib/player-a11y';
 
 const {
   isPlaying,
@@ -169,6 +170,18 @@ const seek = (e: MouseEvent) => {
   seekPlayer(percent);
 };
 
+const canSeek = computed(() => !!currentTrack.value);
+const seekPercent = computed(() => Math.round(progress.value));
+
+const seekByKey = (e: KeyboardEvent) => {
+  if (!canSeek.value || e.altKey || e.ctrlKey || e.metaKey) return;
+  const next = seekKeyStep(e.key, progress.value);
+  if (next === null) return;
+  e.preventDefault();
+  e.stopPropagation();
+  seekPlayer(next / 100);
+};
+
 // Close playlist on click outside or Escape
 const containerRef = ref<HTMLElement | null>(null);
 
@@ -311,24 +324,27 @@ onBeforeUnmount(() => {
         <!-- Track Info Area always visible -->
         <div class="mini-info">
           <div class="track-meta">
-            <div
-              ref="nameWrapRef"
-              class="track-name-mini-wrap"
-              @click.stop="scrollToCurrentTrack"
-              title="Click to scroll to track in playlist"
-            >
-              <span
-                ref="nameRef"
-                class="track-name-mini clickable"
-                :class="{
-                  'is-scrolling': marqueeShift > 0,
-                  'is-paused': !isPlaying
-                }"
-                :style="marqueeStyle"
-                :title="trackTooltip"
+            <div ref="nameWrapRef" class="track-name-mini-wrap">
+              <button
+                type="button"
+                class="track-name-mini-btn"
+                @click.stop="scrollToCurrentTrack"
+                title="Show current track in playlist"
+                :aria-label="`Show ${formattedTitle || 'current track'} in playlist`"
               >
-                {{ formattedTitle }}
-              </span>
+                <span
+                  ref="nameRef"
+                  class="track-name-mini clickable"
+                  :class="{
+                    'is-scrolling': marqueeShift > 0,
+                    'is-paused': !isPlaying
+                  }"
+                  :style="marqueeStyle"
+                  :title="trackTooltip"
+                >
+                  {{ formattedTitle }}
+                </span>
+              </button>
             </div>
 
             <!-- Playlist Dropdown Toggle Button (Right side) -->
@@ -351,7 +367,19 @@ onBeforeUnmount(() => {
               </svg>
             </button>
           </div>
-          <div class="mini-progress-wrap" @click.stop="seek">
+          <div
+            class="mini-progress-wrap"
+            role="slider"
+            :tabindex="canSeek ? 0 : -1"
+            aria-label="Seek"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            :aria-valuenow="seekPercent"
+            :aria-valuetext="`${seekPercent} percent`"
+            :aria-disabled="!canSeek"
+            @click.stop="seek"
+            @keydown="seekByKey"
+          >
             <div
               class="mini-progress-bar"
               :style="{ width: `${progress}%` }"
@@ -447,14 +475,17 @@ onBeforeUnmount(() => {
               :class="{
                 'is-active': item.originalIndex === currentTrackIndex
               }"
-              @click="selectTrack(item.originalIndex)"
             >
               <button
                 type="button"
                 class="item-fav-col"
                 @click.stop="toggleFavorite(item.track.filename)"
                 :aria-pressed="favorites.has(item.track.filename)"
-                aria-label="Toggle favorite"
+                :aria-label="
+                  favorites.has(item.track.filename)
+                    ? `Remove ${item.displayTitle} from favourites`
+                    : `Add ${item.displayTitle} to favourites`
+                "
                 :title="
                   favorites.has(item.track.filename)
                     ? 'Remove from Favorites'
@@ -469,56 +500,65 @@ onBeforeUnmount(() => {
                 />
               </button>
 
-              <div class="item-content-col">
-                <div class="item-row-top">
-                  <span class="item-title" :title="item.track.filename">
-                    {{ item.displayTitle }}
-                  </span>
+              <button
+                type="button"
+                class="item-select-btn"
+                :aria-current="
+                  item.originalIndex === currentTrackIndex ? 'true' : undefined
+                "
+                @click="selectTrack(item.originalIndex)"
+              >
+                <span class="item-content-col">
+                  <span class="item-row-top">
+                    <span class="item-title" :title="item.track.filename">
+                      {{ item.displayTitle }}
+                    </span>
 
-                  <div class="item-badges-right">
-                    <!-- Channels badge with audio channel icon -->
-                    <span
-                      v-if="item.track.channels"
-                      class="meta-tag channels-tag"
-                      :title="`${item.track.channels} channels`"
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        width="9"
-                        height="9"
-                        fill="currentColor"
+                    <span class="item-badges-right">
+                      <!-- Channels badge with audio channel icon -->
+                      <span
+                        v-if="item.track.channels"
+                        class="meta-tag channels-tag"
+                        :title="`${item.track.channels} channels`"
                       >
-                        <path
-                          d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"
-                        />
-                      </svg>
-                      {{ item.track.channels }}ch
-                    </span>
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="9"
+                          height="9"
+                          fill="currentColor"
+                        >
+                          <path
+                            d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"
+                          />
+                        </svg>
+                        {{ item.track.channels }}ch
+                      </span>
 
-                    <!-- BPM pill badge (3 numbers small) -->
+                      <!-- BPM pill badge (3 numbers small) -->
+                      <span
+                        v-if="item.track.bpm"
+                        class="meta-tag bpm-tag"
+                        :title="`${item.track.bpm} BPM`"
+                      >
+                        {{ item.track.bpm }} BPM
+                      </span>
+                    </span>
+                  </span>
+
+                  <span class="item-row-meta">
+                    <span class="meta-filename" :title="item.track.filename">
+                      {{ item.track.filename }}
+                    </span>
                     <span
-                      v-if="item.track.bpm"
-                      class="meta-tag bpm-tag"
-                      :title="`${item.track.bpm} BPM`"
+                      v-if="item.track.tracker"
+                      class="meta-tag tracker-tag"
+                      :title="item.track.tracker"
                     >
-                      {{ item.track.bpm }} BPM
+                      {{ item.track.tracker }}
                     </span>
-                  </div>
-                </div>
-
-                <div class="item-row-meta">
-                  <span class="meta-filename" :title="item.track.filename">
-                    {{ item.track.filename }}
                   </span>
-                  <span
-                    v-if="item.track.tracker"
-                    class="meta-tag tracker-tag"
-                    :title="item.track.tracker"
-                  >
-                    {{ item.track.tracker }}
-                  </span>
-                </div>
-              </div>
+                </span>
+              </button>
             </div>
 
             <div
@@ -685,7 +725,6 @@ onBeforeUnmount(() => {
 .track-name-mini-wrap {
   flex: 1;
   overflow: hidden;
-  cursor: pointer;
   mask-image: linear-gradient(
     to right,
     transparent,
@@ -702,8 +741,37 @@ onBeforeUnmount(() => {
   );
 }
 
-.track-name-mini-wrap:hover .track-name-mini {
+.track-name-mini-btn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.track-name-mini-btn:hover .track-name-mini,
+.track-name-mini-btn:focus-visible .track-name-mini {
   color: var(--vp-c-brand);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Hold the marquee still while the title is being pointed at or focused. */
+.track-name-mini-btn:hover .track-name-mini.is-scrolling,
+.track-name-mini-btn:focus-visible .track-name-mini.is-scrolling {
+  animation-play-state: paused;
+}
+
+/* Inset so the edge-fade mask on the wrapper does not clip the ring. */
+.track-name-mini-btn:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: -2px;
 }
 
 .track-name-mini {
@@ -749,6 +817,15 @@ onBeforeUnmount(() => {
   border-radius: 1px;
   cursor: pointer;
   overflow: hidden;
+}
+
+.mini-progress-wrap[aria-disabled='true'] {
+  cursor: default;
+}
+
+.mini-progress-wrap:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 2px;
 }
 
 .mini-progress-bar {
@@ -906,6 +983,30 @@ onBeforeUnmount(() => {
 .playlist-item.is-active {
   background: color-mix(in srgb, var(--vp-c-brand-1) 12%, transparent);
   border-left-color: var(--vp-c-brand);
+}
+
+.item-select-btn {
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.item-select-btn:focus-visible,
+.item-fav-col:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: -2px;
+  border-radius: 4px;
 }
 
 .item-fav-col {
