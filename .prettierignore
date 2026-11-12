@@ -6,3 +6,4 @@ coverage
 .pytest_cache
 .ruff_cache
 data/music-tracks.json
+public/data/splats.json

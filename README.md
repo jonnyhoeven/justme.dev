@@ -45,7 +45,7 @@ direnv allow
 
 The environment will automatically load:
 
-- **Node.js 22**
+- **Node.js 24**
 - **Python 3** (pre-configured with `pyyaml` and `requests`)
 - **ImageMagick** (for local image processing)
 - **Ruff** (for linting)

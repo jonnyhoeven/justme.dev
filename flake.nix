@@ -16,8 +16,8 @@
 
         # Base packages needed for both local dev and CI
         basePackages = with pkgs; [
-          nodejs_22
-          corepack_22
+          nodejs_24
+          corepack_24
           (python3.withPackages (ps: with ps; [
             pyyaml
             requests

@@ -28,7 +28,6 @@ coverage/
 
 # Generated Content
 /projects/*.md
-/public/data/splats.json
 /public/projects-cache/
 
 # Audio library (synced to Cloudflare R2; keep initial demo tracks tracked)
