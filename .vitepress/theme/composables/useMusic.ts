@@ -616,6 +616,33 @@ const applyTrackQueryParam = async (search?: string) => {
   }
 };
 
+// One-time client init shared by every component that mounts the player:
+// restore favourites and honour a ?track= deep link. Idempotent, so the mini
+// player and the tracker page can both call it from onMounted.
+let musicInitialized = false;
+let lastAppliedSearch: string | null = null;
+/**
+ * Called from each player's onMounted. Favourites load once; the `?track=`
+ * deep link is re-applied only when the query string changed, so two players
+ * mounting on the same page apply it once, but a client-side navigation to a
+ * new `?track=` link still works.
+ */
+const initMusicOnce = () => {
+  if (!musicInitialized) {
+    musicInitialized = true;
+    loadFavorites();
+  }
+  const search = typeof window !== 'undefined' ? window.location.search : '';
+  if (search === lastAppliedSearch) return;
+  lastAppliedSearch = search;
+  void applyTrackQueryParam(search);
+};
+
+const resetMusicInit = () => {
+  musicInitialized = false;
+  lastAppliedSearch = null;
+};
+
 const seek = (percent: number) => {
   if (xmPlayer) {
     xmPlayer.seek(percent);
@@ -719,6 +746,8 @@ const musicState = {
   toggleFavorite,
   cleanTitle,
   applyTrackQueryParam,
+  initMusicOnce,
+  resetMusicInit,
 
   // Tracker state
   trackerState,

@@ -1,0 +1,89 @@
+// SPDX-FileCopyrightText: Jonny van der Hoeven
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { ref, computed, watch } from 'vue';
+import { useVirtualList } from '@vueuse/core';
+import useMusic from './useMusic';
+import type { MusicTrack } from '../../../lib/music-catalog';
+
+export interface PlaylistItem {
+  track: MusicTrack;
+  originalIndex: number;
+  displayTitle: string;
+}
+
+export interface PlaylistOptions {
+  /** Row height in px for the virtual list. */
+  itemHeight: number;
+  /** Extra rows rendered outside the viewport (default 10). */
+  overscan?: number;
+}
+
+/**
+ * Search + favourites filtering and a virtualised list over the shared track
+ * catalog. State (query, filter) is per call; tracks/favourites are shared.
+ */
+export const usePlaylist = ({ itemHeight, overscan = 10 }: PlaylistOptions) => {
+  const { tracks, favorites, cleanTitle } = useMusic();
+
+  const searchQuery = ref('');
+  const onlyFavorites = ref(false);
+
+  const indexedTracks = computed<PlaylistItem[]>(() =>
+    tracks.value.map((track, originalIndex) => ({
+      track,
+      originalIndex,
+      displayTitle: cleanTitle(track)
+    }))
+  );
+
+  const filteredTracks = computed<PlaylistItem[]>(() => {
+    const query = searchQuery.value.trim().toLowerCase();
+    const favOnly = onlyFavorites.value;
+
+    if (!query && !favOnly) {
+      return indexedTracks.value;
+    }
+
+    return indexedTracks.value.filter(({ track, displayTitle }) => {
+      if (favOnly && !favorites.value.has(track.filename)) {
+        return false;
+      }
+      if (!query) return true;
+
+      // Match title, cleaned title and filename
+      const matchTitle = (track.title || '').toLowerCase().includes(query);
+      const matchDisplay = displayTitle.toLowerCase().includes(query);
+      const matchFile = (track.filename || '').toLowerCase().includes(query);
+      return matchTitle || matchDisplay || matchFile;
+    });
+  });
+
+  // Virtualized list for 3000+ items
+  const {
+    list: virtualList,
+    containerProps,
+    wrapperProps,
+    scrollTo
+  } = useVirtualList(filteredTracks, { itemHeight, overscan });
+
+  // Reset the scroll position when the filter changes so top items render
+  watch([searchQuery, onlyFavorites], () => {
+    if (containerProps.ref.value) {
+      containerProps.ref.value.scrollTop = 0;
+    }
+    scrollTo(0);
+  });
+
+  return {
+    searchQuery,
+    onlyFavorites,
+    indexedTracks,
+    filteredTracks,
+    virtualList,
+    containerProps,
+    wrapperProps,
+    scrollTo
+  };
+};
+
+export default usePlaylist;

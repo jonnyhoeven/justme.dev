@@ -9,9 +9,11 @@ import {
   computed,
   nextTick
 } from 'vue';
-import { useVirtualList, useResizeObserver } from '@vueuse/core';
+import { useResizeObserver } from '@vueuse/core';
 import useMusic from '../.vitepress/theme/composables/useMusic';
-import type { MusicTrack } from '../data/music.data';
+import usePlaylist from '../.vitepress/theme/composables/usePlaylist';
+import IconHeart from './icons/IconHeart.vue';
+import IconTransport from './icons/IconTransport.vue';
 
 const {
   isPlaying,
@@ -21,17 +23,15 @@ const {
   progress,
   volume,
   isRepeat,
-  tracks,
   catalogLoaded,
   catalogFailed,
   ensureCatalog,
   liveSongTitle,
   favorites,
   isCurrentFavorite,
-  loadFavorites,
+  initMusicOnce,
   toggleFavorite,
   cleanTitle,
-  applyTrackQueryParam,
   togglePlay,
   toggleShuffle,
   toggleRepeat,
@@ -101,64 +101,17 @@ const trackTooltip = computed(() => {
 
 // Playlist drawer state
 const isPlaylistOpen = ref(false);
-const searchQuery = ref('');
-const onlyFavorites = ref(false);
 
-// Filtered tracks for the playlist
-interface FilteredTrackItem {
-  track: MusicTrack;
-  originalIndex: number;
-  displayTitle: string;
-}
-
-const indexedTracks = computed<FilteredTrackItem[]>(() => {
-  return tracks.value.map((track, originalIndex) => ({
-    track,
-    originalIndex,
-    displayTitle: cleanTitle(track)
-  }));
-});
-
-const filteredTracks = computed<FilteredTrackItem[]>(() => {
-  const query = searchQuery.value.trim().toLowerCase();
-  const favOnly = onlyFavorites.value;
-
-  if (!query && !favOnly) {
-    return indexedTracks.value;
-  }
-
-  return indexedTracks.value.filter(({ track, displayTitle }) => {
-    if (favOnly && !favorites.value.has(track.filename)) {
-      return false;
-    }
-    if (!query) return true;
-
-    // Fast search matching title, filename, and clean title
-    const matchTitle = (track.title || '').toLowerCase().includes(query);
-    const matchDisplay = displayTitle.toLowerCase().includes(query);
-    const matchFile = (track.filename || '').toLowerCase().includes(query);
-    return matchTitle || matchDisplay || matchFile;
-  });
-});
-
-// Virtualized list for 3000+ items
+// Filtered tracks + virtualized list for 3000+ items
 const {
-  list: virtualList,
+  searchQuery,
+  onlyFavorites,
+  filteredTracks,
+  virtualList,
   containerProps,
   wrapperProps,
   scrollTo
-} = useVirtualList(filteredTracks, {
-  itemHeight: 48,
-  overscan: 10
-});
-
-// When search query or favorites filter changes, reset scroll position so top items are rendered
-watch([searchQuery, onlyFavorites], () => {
-  if (containerProps.ref.value) {
-    containerProps.ref.value.scrollTop = 0;
-  }
-  scrollTo(0);
-});
+} = usePlaylist({ itemHeight: 48, overscan: 10 });
 
 const scrollToCurrentTrack = () => {
   if (!isPlaylistOpen.value) {
@@ -235,10 +188,9 @@ const handleDocumentClick = (e: MouseEvent) => {
 
 // Check for deep-linked ?track= query parameter on mount
 onMounted(() => {
-  loadFavorites();
+  initMusicOnce();
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('click', handleDocumentClick);
-  void applyTrackQueryParam();
 });
 
 onBeforeUnmount(() => {
@@ -260,9 +212,7 @@ onBeforeUnmount(() => {
           type="button"
           title="Previous"
         >
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-            <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" />
-          </svg>
+          <IconTransport name="prev" :size="14" />
         </button>
 
         <!-- Play / Pause Button -->
@@ -273,24 +223,7 @@ onBeforeUnmount(() => {
           type="button"
           :title="isPlaying ? 'Pause' : 'Play'"
         >
-          <svg
-            v-if="!isPlaying"
-            viewBox="0 0 24 24"
-            width="18"
-            height="18"
-            fill="currentColor"
-          >
-            <path d="M8 5v14l11-7z" />
-          </svg>
-          <svg
-            v-else
-            viewBox="0 0 24 24"
-            width="18"
-            height="18"
-            fill="currentColor"
-          >
-            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-          </svg>
+          <IconTransport :name="isPlaying ? 'pause' : 'play'" :size="18" />
         </button>
 
         <!-- Next Button -->
@@ -300,9 +233,7 @@ onBeforeUnmount(() => {
           type="button"
           title="Next"
         >
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-            <path d="M16 6h2v12h-2zm-10.5 12 8.5-6-8.5-6z" />
-          </svg>
+          <IconTransport name="next" :size="14" />
         </button>
 
         <!-- Shuffle Toggle -->
@@ -314,11 +245,7 @@ onBeforeUnmount(() => {
           :title="isShuffle ? 'Shuffle: On' : 'Shuffle: Off'"
           :aria-pressed="isShuffle"
         >
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-            <path
-              d="M10.59 9.17 5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.42-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.12z"
-            />
-          </svg>
+          <IconTransport name="shuffle" :size="14" />
         </button>
 
         <!-- Repeat Toggle -->
@@ -330,11 +257,7 @@ onBeforeUnmount(() => {
           :title="isRepeat ? 'Repeat: on' : 'Repeat: off'"
           :aria-pressed="isRepeat"
         >
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-            <path
-              d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"
-            />
-          </svg>
+          <IconTransport name="repeat" :size="14" />
         </button>
 
         <!-- Favorite Toggle Button -->
@@ -346,25 +269,11 @@ onBeforeUnmount(() => {
           :title="isCurrentFavorite ? 'Favorited' : 'Add to Favorites'"
           :aria-pressed="isCurrentFavorite"
         >
-          <svg
-            viewBox="0 0 24 24"
-            width="13"
-            height="13"
-            :fill="isCurrentFavorite ? 'currentColor' : 'none'"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-            />
-            <!-- Not yet a favorite: "+" inside the heart signals "add". The
-                 playlist rows keep the plain heart. -->
-            <path
-              v-if="!isCurrentFavorite"
-              d="M12 8.5v6M9 11.5h6"
-              stroke-linecap="round"
-            />
-          </svg>
+          <IconHeart
+            :filled="isCurrentFavorite"
+            :plus="!isCurrentFavorite"
+            :size="13"
+          />
         </button>
 
         <!-- Inline volume: speaker button mutes/unmutes, slider sets level -->
@@ -376,28 +285,10 @@ onBeforeUnmount(() => {
             :title="volume === 0 ? 'Unmute' : 'Mute'"
             :aria-pressed="volume === 0"
           >
-            <svg
-              v-if="volume === 0"
-              viewBox="0 0 24 24"
-              width="14"
-              height="14"
-              fill="currentColor"
-            >
-              <path
-                d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"
-              />
-            </svg>
-            <svg
-              v-else
-              viewBox="0 0 24 24"
-              width="14"
-              height="14"
-              fill="currentColor"
-            >
-              <path
-                d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
-              />
-            </svg>
+            <IconTransport
+              :name="volume === 0 ? 'mute' : 'volume'"
+              :size="14"
+            />
           </button>
           <input
             type="range"
@@ -513,22 +404,12 @@ onBeforeUnmount(() => {
               type="button"
               :title="onlyFavorites ? 'Show all tracks' : 'Show favorites only'"
             >
-              <svg
-                viewBox="0 0 24 24"
-                width="12"
-                height="12"
-                :fill="onlyFavorites ? 'currentColor' : 'none'"
-                stroke="currentColor"
-                :style="
-                  onlyFavorites ? { color: 'var(--c-favorite)' } : undefined
-                "
-                stroke-width="2"
+              <IconHeart
+                :filled="onlyFavorites"
+                accent
+                :size="12"
                 class="filter-heart-icon"
-              >
-                <path
-                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                />
-              </svg>
+              />
             </button>
             <span class="track-count-badge">
               {{ filteredTracks.length }}
@@ -580,28 +461,12 @@ onBeforeUnmount(() => {
                     : 'Add to Favorites'
                 "
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  width="13"
-                  height="13"
-                  :fill="
-                    favorites.has(item.track.filename)
-                      ? 'var(--c-favorite)'
-                      : 'none'
-                  "
-                  :stroke="
-                    favorites.has(item.track.filename)
-                      ? 'var(--c-favorite)'
-                      : 'var(--vp-c-text-3)'
-                  "
-                  stroke-width="2"
+                <IconHeart
+                  :filled="favorites.has(item.track.filename)"
+                  :size="13"
                   class="item-heart"
                   :class="{ starred: favorites.has(item.track.filename) }"
-                >
-                  <path
-                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                  />
-                </svg>
+                />
               </button>
 
               <div class="item-content-col">
@@ -1057,6 +922,7 @@ onBeforeUnmount(() => {
 }
 
 .item-heart {
+  color: var(--vp-c-text-3);
   transition: all var(--duration-fast) ease;
 }
 
