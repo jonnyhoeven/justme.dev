@@ -28,6 +28,12 @@ import {
 import { setDarkTheme } from '../lib/splat-animations/color-utils';
 import useMusic from '../.vitepress/theme/composables/useMusic';
 import { SITE_CONSTANTS } from '../.vitepress/constants';
+import {
+  REFERENCE_FRAME_MS,
+  dampFactor,
+  easeRate,
+  frameScale
+} from '../lib/splat-animations/timestep';
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const layerRef = ref<HTMLElement | null>(null);
@@ -82,7 +88,10 @@ const prefersReducedMotion = computed(
   () => preferredReducedMotion.value === 'reduce'
 );
 let renderStatic = () => {};
-let startTime = performance.now();
+// Active clock (ms): advances only by rendered frames, so pauses (hidden tab,
+// off-screen, mobile view) do not shift animation or director timers.
+let activeTime = 0;
+let startTime = 0;
 
 // Director: avatar animation -> morph -> full-canvas scene -> morph -> ...
 type Phase = 'avatar' | 'toScene' | 'scene' | 'toAvatar';
@@ -94,7 +103,8 @@ let currentScene: SplatScene | null = null;
 let skipRequested = false;
 let morphLinear = 0;
 let fastMorph = false;
-let lastFrameTime = 0;
+// rAF timestamp of the previous frame; -1 = loop (re)started, no previous frame
+let lastFrameTime = -1;
 // Heavier (darker) particles lag behind during a morph, by up to this much
 const MORPH_STAGGER = 0.35;
 // Scenes track their targets more tightly than the soft avatar spring
@@ -190,9 +200,10 @@ const updateGlow = (
   target: number,
   morph: number,
   scene: SplatScene | null,
-  sceneCtx: AnimationContext
+  sceneCtx: AnimationContext,
+  dt: number
 ) => {
-  glowLevel += (target - glowLevel) * 0.08;
+  glowLevel += (target - glowLevel) * easeRate(0.08, dt);
   glowRef.value?.classList.toggle(
     'splat-glow--rect',
     scene?.glowShape === 'rect'
@@ -245,7 +256,7 @@ const nextAnimation = () => {
   currentAnimation.value = animation;
   if (layerRef.value) layerRef.value.dataset.animation = animation.name;
   logActive('avatar', animation.name);
-  startTime = performance.now();
+  startTime = activeTime;
 };
 
 onMounted(async () => {
@@ -404,7 +415,7 @@ onMounted(async () => {
     currentAnimation.value.init(particles);
     if (layerRef.value) layerRef.value.dataset.animation = firstAnim.name;
     logActive('avatar', firstIndex + ' ' + firstAnim.name);
-    startTime = performance.now();
+    startTime = activeTime;
   }
 
   // 6. Physics Render Loop
@@ -425,13 +436,13 @@ onMounted(async () => {
     dt: 16
   };
 
-  const setPhase = (next: Phase, time: number) => {
+  const setPhase = (next: Phase, now: number) => {
     phase = next;
-    phaseStart = time;
+    phaseStart = now;
     if (layerRef.value) layerRef.value.dataset.phase = next;
     if (next === 'toScene') {
       currentScene = scenes[++sceneCounter % scenes.length];
-      sceneStart = time;
+      sceneStart = now;
       if (layerRef.value) layerRef.value.dataset.scene = currentScene.name;
       logActive('scene', currentScene.name);
       currentScene.init(particles, animCtx);
@@ -443,13 +454,12 @@ onMounted(async () => {
   const render = (time: number) => {
     if (isMobileView.value || !isVisible.value) {
       animationId = 0;
+      lastFrameTime = -1;
       return;
     }
 
     if (!ctx) return;
     ctx.clearRect(0, 0, width, height);
-
-    const elapsed = time - startTime;
 
     animCtx.width = width;
     animCtx.height = height;
@@ -464,8 +474,16 @@ onMounted(async () => {
     animCtx.areaH = height;
     animCtxAreaCenter.x = animCtx.areaX + animCtx.areaW / 2;
     animCtxAreaCenter.y = height / 2;
-    const dt = Math.min(100, time - lastFrameTime);
+    // First frame after a (re)start has no previous frame: assume 60 Hz
+    const dt =
+      lastFrameTime < 0
+        ? REFERENCE_FRAME_MS
+        : Math.min(100, Math.max(0, time - lastFrameTime));
     lastFrameTime = time;
+    activeTime += dt;
+    const elapsed = activeTime - startTime;
+    const k = frameScale(dt);
+    const damping = dampFactor(damp, dt);
     animCtx.dt = dt;
     animCtx.audioData = audioData.value || undefined;
     animCtx.audioLevels = audioTracker.update(animCtx.audioData, dt);
@@ -477,10 +495,10 @@ onMounted(async () => {
     // --- Director: a click (or the timer) always moves to the *other* kind
     // of item next: a1 -> s1 -> a2 -> s2 ... Clicks mid-morph reverse it
     // smoothly, since the morph value eases towards its target.
-    if (phaseStart === 0) phaseStart = time;
+    if (phaseStart === 0) phaseStart = activeTime;
     const skip = skipRequested;
     skipRequested = false;
-    const phaseT = time - phaseStart;
+    const phaseT = activeTime - phaseStart;
     if (skip) {
       fastMorph = true;
       // Instant feedback: a small random burst before the morph pulls in
@@ -490,14 +508,14 @@ onMounted(async () => {
       }
       setPhase(
         phase === 'avatar' || phase === 'toAvatar' ? 'toScene' : 'toAvatar',
-        time
+        activeTime
       );
     } else if (phase === 'avatar' && phaseT > SITE_CONSTANTS.SPLAT_CYCLE_TIME) {
       fastMorph = false;
-      setPhase('toScene', time);
+      setPhase('toScene', activeTime);
     } else if (phase === 'scene' && phaseT > SITE_CONSTANTS.SPLAT_SCENE_TIME) {
       fastMorph = false;
-      setPhase('toAvatar', time);
+      setPhase('toAvatar', activeTime);
     }
 
     const towardsScene = phase === 'toScene' || phase === 'scene';
@@ -512,15 +530,16 @@ onMounted(async () => {
               : SITE_CONSTANTS.SPLAT_MORPH_TIME)
       )
     );
-    if (phase === 'toScene' && morphLinear >= 1) setPhase('scene', time);
-    else if (phase === 'toAvatar' && morphLinear <= 0) setPhase('avatar', time);
+    if (phase === 'toScene' && morphLinear >= 1) setPhase('scene', activeTime);
+    else if (phase === 'toAvatar' && morphLinear <= 0)
+      setPhase('avatar', activeTime);
     // Clicks use an ease-out (moves immediately); the timer a gentle ease-in-out
     const morph = fastMorph
       ? 1 - (1 - morphLinear) * (1 - morphLinear)
       : smoothstep(morphLinear);
     const stagger = fastMorph ? MORPH_STAGGER * 0.5 : MORPH_STAGGER;
     const scene = morph > 0 ? currentScene : null;
-    const sceneElapsed = time - sceneStart;
+    const sceneElapsed = activeTime - sceneStart;
 
     if (morph < 1 && anim.beforeFrame) {
       anim.beforeFrame(particles, elapsed, animCtx);
@@ -537,7 +556,8 @@ onMounted(async () => {
       // Scenes without a glow (text) fade it out in place instead of drifting it
       scene?.glow === 0 ? 0 : morph,
       scene,
-      animCtx
+      animCtx,
+      dt
     );
 
     // Kick punch: radiates from the avatar centre, drifting to the scene centre
@@ -640,10 +660,10 @@ onMounted(async () => {
       if (effect.nudgeVx) fx += effect.nudgeVx;
       if (effect.nudgeVy) fy += effect.nudgeVy;
 
-      p.vx = (p.vx + fx) * damp;
-      p.vy = (p.vy + fy) * damp;
-      p.x += p.vx;
-      p.y += p.vy;
+      p.vx = (p.vx + fx * k) * damping;
+      p.vy = (p.vy + fy * k) * damping;
+      p.x += p.vx * k;
+      p.y += p.vy * k;
 
       if (alpha !== lastAlpha) {
         ctx.globalAlpha = alpha;
@@ -681,6 +701,7 @@ onMounted(async () => {
       renderStatic();
       return;
     }
+    lastFrameTime = -1;
     animationId = requestAnimationFrame(render);
   };
 
