@@ -22,7 +22,6 @@ export default defineConfig({
     '**/CLAUDE.md',
     '**/GEMINI.md',
     '**/gemini.md',
-    '**/issues.md',
     '!(index|blog|projects).md',
     'venv/**',
     '.direnv/**',
