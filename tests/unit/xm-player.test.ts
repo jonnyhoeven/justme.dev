@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { describe, it, expect, beforeAll } from 'vitest';
 import { XMPlayer } from '../../lib/audio/xm-player';
+import type { InstrumentInfo } from '../../.vitepress/theme/composables/useMusic';
 
 export function buildSampleXMBuffer(): ArrayBuffer {
   const totalSize = 1235;
@@ -158,7 +159,7 @@ describe('XMPlayer', () => {
     expect(player.isPlaying).toBe(false);
     expect(player.songTitle).toBeTruthy();
 
-    const instruments = player.getInstruments();
+    const instruments: InstrumentInfo[] = player.getInstruments();
     expect(instruments.length).toBeGreaterThan(0);
     expect(instruments.some((inst) => inst.name.length > 0)).toBe(true);
     const instWithNamedSample = instruments.find(

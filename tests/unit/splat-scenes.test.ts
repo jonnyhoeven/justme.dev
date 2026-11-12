@@ -107,7 +107,16 @@ describe('rotozoom scene', () => {
     rotozoom.beforeFrame?.(0, mockCtx);
 
     const positions = new Set<string>();
-    const out = { x: 0, y: 0, sizeMult: 1, alpha: 1 };
+    const out: SceneTarget = {
+      x: 0,
+      y: 0,
+      sizeMult: 1,
+      alpha: 1,
+      r: 0,
+      g: 0,
+      b: 0,
+      tint: false
+    };
     for (let i = 0; i < dummyParticles.length; i++) {
       rotozoom.target(dummyParticles[i], i, 0, mockCtx, out);
       positions.add(`${Math.round(out.x)},${Math.round(out.y)}`);

@@ -31,6 +31,7 @@ generated_artifacts: projects/*.md, public/projects-cache/
 | Sync all media     | `pnpm run media:sync`                                            |
 | Build / preview    | `pnpm run docs:build` / `docs:preview`                           |
 | Lint / format (JS) | `pnpm run lint` / `pnpm run format`                              |
+| Type check         | `pnpm run typecheck` (`vue-tsc`, strict; CI runs it)             |
 | Lint (Python)      | `ruff check . --fix`                                             |
 | Tests              | `pnpm test` (Vitest, `tests/unit/`), `pnpm run test:py` (pytest) |
 | All hooks          | `pre-commit run --all-files`                                     |

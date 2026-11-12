@@ -5,12 +5,12 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import loader from '../../data/music.data';
 import initialLoader from '../../data/music-initial.data';
-import { expandCatalog } from '../../lib/music-catalog';
+import { expandCatalog, type CompactTrack } from '../../lib/music-catalog';
 import { INITIAL_TRACK_FILENAMES } from '../../data/initial-tracks';
 
 describe('music.data loader', () => {
   it('loads tracks at build time from catalog or media bucket', () => {
-    const tracks = expandCatalog(loader.load());
+    const tracks = expandCatalog(loader.load([]));
 
     expect(Array.isArray(tracks)).toBe(true);
     expect(tracks.length).toBeGreaterThan(0);
@@ -30,7 +30,7 @@ describe('music.data loader', () => {
   });
 
   it('lists tracks from catalog with tracker metadata', () => {
-    const tracks = expandCatalog(loader.load());
+    const tracks = expandCatalog(loader.load([]));
     const catalogPath = path.resolve(__dirname, '../../data/music-tracks.json');
 
     if (fs.existsSync(catalogPath)) {
@@ -48,13 +48,17 @@ describe('music.data loader', () => {
       if (track.bpm !== undefined) {
         expect(track.bpm).toBeGreaterThan(0);
       }
-      expect((track as Record<string, unknown>).path).toBeUndefined();
-      expect((track as Record<string, unknown>).patterns).toBeUndefined();
+      expect(
+        (track as unknown as Record<string, unknown>).path
+      ).toBeUndefined();
+      expect(
+        (track as unknown as Record<string, unknown>).patterns
+      ).toBeUndefined();
     }
   });
 
   it('sorts tracks naturally using numeric ordering', () => {
-    const tracks = expandCatalog(loader.load());
+    const tracks = expandCatalog(loader.load([]));
     const filenames = tracks.map((t) => t.filename);
     const sorted = [...filenames].sort((a, b) =>
       a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
@@ -76,7 +80,7 @@ describe('music.data loader', () => {
   });
 
   it('contains all curated initial tracks in the catalog', () => {
-    const tracks = expandCatalog(loader.load());
+    const tracks = expandCatalog(loader.load([]));
     const trackFilenameSet = new Set(
       tracks.map((t) => t.filename.toLowerCase())
     );
@@ -90,7 +94,7 @@ describe('music.data loader', () => {
   });
 
   it('ships a compact payload with a tracker table and no urls', () => {
-    const data = loader.load();
+    const data = loader.load([]);
     const json = JSON.stringify(data);
     expect(json).not.toContain('https://');
     expect(Array.isArray(data.trackers)).toBe(true);
@@ -101,8 +105,8 @@ describe('music.data loader', () => {
   });
 
   it('initial loader returns a compact subset of the catalog', () => {
-    const full = new Set(loader.load().tracks.map((t) => t[0]));
-    const initial = initialLoader.load();
+    const full = new Set(loader.load([]).tracks.map((t: CompactTrack) => t[0]));
+    const initial = initialLoader.load([]);
     expect(initial.tracks.length).toBeGreaterThan(0);
     for (const row of initial.tracks) expect(full.has(row[0])).toBe(true);
   });

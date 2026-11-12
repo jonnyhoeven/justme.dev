@@ -5,12 +5,12 @@ import type { ArticleFrontmatter } from '../types/frontmatter';
 
 export interface PageLike {
   frontmatter?: Record<string, unknown> | ArticleFrontmatter;
-  [key: string]: unknown;
+  description?: unknown;
 }
 
 export default function transformPage<T extends PageLike>(
   pageData: T
-): T & { frontmatter: ArticleFrontmatter } {
+): T & { description: string; frontmatter: ArticleFrontmatter } {
   const pf: ArticleFrontmatter = { ...pageData.frontmatter };
   pf.title = pf.title ? pf.title : 'Justme.dev';
   pf.intro = pf.intro ? pf.intro : '';
@@ -24,10 +24,11 @@ export default function transformPage<T extends PageLike>(
   pf.externalUrlLabel =
     pf.externalUrlLabel ?? (pf.gitlink ? 'View on Github' : 'View site');
 
-  pageData.description =
+  const description: string =
     pf.intro ||
     (pageData.description as string) ||
     'Just me. Sharing insights, experiences, and tutorials related to software development and site reliability engineering.';
+  pageData.description = description;
 
   const badgeHost = 'https://img.shields.io/github';
   const hasGithubRepo = Boolean(pf.user && pf.project);
@@ -53,6 +54,7 @@ export default function transformPage<T extends PageLike>(
 
   return {
     ...pageData,
+    description,
     frontmatter: pf
   };
 }

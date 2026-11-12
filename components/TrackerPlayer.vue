@@ -730,7 +730,7 @@ onBeforeUnmount(() => {
             type="text"
             readonly
             :value="copyFailedUrl"
-            @focus="$event.target.select()"
+            @focus="($event.target as HTMLInputElement).select()"
           />
           <button type="button" @click="copyFailedUrl = null">✕</button>
         </div>

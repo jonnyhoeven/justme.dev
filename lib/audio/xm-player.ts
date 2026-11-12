@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2015 Andy Sloane <andy@a1k0n.net> (jsxm, MIT License)
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later AND MIT
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, no-var */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, @typescript-eslint/ban-ts-comment, no-var */
+// @ts-nocheck -- untyped jsxm port (113 strict errors, mostly implicit any); typing it is a separate item. Remove once the engine is typed.
 /**
  * FastTracker 2 (.XM) Player for Web Audio API.
  * Adapted from Andy Sloane's jsxm for modern TypeScript / ES Module environments.
