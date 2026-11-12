@@ -126,6 +126,7 @@ watch([searchQuery, onlyFavorites], () => {
 });
 
 // Deep-link copying
+const copyFailedUrl = ref<string | null>(null);
 const copyDeepLink = async () => {
   if (typeof window === 'undefined') return;
   const fn = currentTrack.value?.filename;
@@ -135,12 +136,13 @@ const copyDeepLink = async () => {
   url.searchParams.set('track', fn);
   try {
     await navigator.clipboard.writeText(url.toString());
+    copyFailedUrl.value = null;
     copiedNotification.value = true;
     setTimeout(() => {
       copiedNotification.value = false;
     }, 2000);
   } catch {
-    // Fallback if clipboard API restricted
+    copyFailedUrl.value = url.toString();
   }
 };
 
@@ -608,12 +610,28 @@ onBeforeUnmount(() => {
           <span>{{ copiedNotification ? 'Copied!' : 'Share' }}</span>
         </button>
 
+        <div class="sr-only" aria-live="polite">
+          {{ copiedNotification ? 'Link copied to clipboard' : '' }}
+        </div>
+
+        <div v-if="copyFailedUrl" class="copy-fallback-banner">
+          <span>Copy failed. Select and copy URL:</span>
+          <input
+            type="text"
+            readonly
+            :value="copyFailedUrl"
+            @focus="$event.target.select()"
+          />
+          <button type="button" @click="copyFailedUrl = null">✕</button>
+        </div>
+
         <button
           class="tracker-btn fav-btn"
           :class="{ active: isCurrentFavorite }"
           @click="toggleFavorite()"
           type="button"
           :title="isCurrentFavorite ? 'Remove Favorite' : 'Save Favorite'"
+          :aria-pressed="isCurrentFavorite"
         >
           <svg
             viewBox="0 0 24 24"
@@ -737,6 +755,7 @@ onBeforeUnmount(() => {
           :value="volume"
           @input="setVolume(Number(($event.target as HTMLInputElement).value))"
           class="volume-slider"
+          aria-label="Master volume"
         />
         <span class="vol-text">{{ Math.round(volume * 100) }}%</span>
       </div>
@@ -753,6 +772,7 @@ onBeforeUnmount(() => {
           @input="setBpm(Number(($event.target as HTMLInputElement).value))"
           class="bpm-slider"
           title="Adjust song tempo/BPM"
+          aria-label="Playback BPM"
         />
         <input
           type="number"
@@ -858,9 +878,15 @@ onBeforeUnmount(() => {
 
     <!-- Tabs Navigation: Pattern Matrix vs Instruments vs Playlist -->
     <div class="tracker-tabs-card">
-      <div class="tracker-tab-buttons">
+      <div
+        class="tracker-tab-buttons"
+        role="tablist"
+        aria-label="Tracker views"
+      >
         <button
           class="tab-btn"
+          role="tab"
+          :aria-selected="activeTab === 'pattern'"
           :class="{ active: activeTab === 'pattern' }"
           @click="activeTab = 'pattern'"
           type="button"
@@ -869,6 +895,8 @@ onBeforeUnmount(() => {
         </button>
         <button
           class="tab-btn"
+          role="tab"
+          :aria-selected="activeTab === 'instruments'"
           :class="{ active: activeTab === 'instruments' }"
           @click="activeTab = 'instruments'"
           type="button"
@@ -877,6 +905,8 @@ onBeforeUnmount(() => {
         </button>
         <button
           class="tab-btn"
+          role="tab"
+          :aria-selected="activeTab === 'playlist'"
           :class="{ active: activeTab === 'playlist' }"
           @click="activeTab = 'playlist'"
           type="button"
@@ -968,12 +998,14 @@ onBeforeUnmount(() => {
             v-model="searchQuery"
             placeholder="Search tracks by name, file..."
             class="playlist-search-box"
+            aria-label="Search track archive"
           />
           <button
             class="filter-fav-btn"
             :class="{ active: onlyFavorites }"
             @click="onlyFavorites = !onlyFavorites"
             type="button"
+            :aria-pressed="onlyFavorites"
           >
             {{ onlyFavorites ? '★ Favorites Only' : '☆ All' }}
           </button>
@@ -988,12 +1020,20 @@ onBeforeUnmount(() => {
               :class="{ active: item.originalIndex === currentTrackIndex }"
               @click="selectTrack(item.originalIndex)"
             >
-              <span
+              <button
+                type="button"
                 class="archive-item-fav"
                 @click.stop="toggleFavorite(item.track.filename)"
+                :aria-pressed="favorites.has(item.track.filename)"
+                aria-label="Toggle favorite"
+                :title="
+                  favorites.has(item.track.filename)
+                    ? 'Remove from Favorites'
+                    : 'Add to Favorites'
+                "
               >
                 {{ favorites.has(item.track.filename) ? '❤️' : '🤍' }}
-              </span>
+              </button>
               <span class="archive-item-title">{{ item.displayTitle }}</span>
               <span class="archive-item-meta"
                 >{{ item.track.channels || '?' }}ch</span
@@ -1575,6 +1615,14 @@ onBeforeUnmount(() => {
   padding: 6px 12px;
   color: var(--vp-c-text-1);
   font-size: 0.85rem;
+  outline: none;
+}
+
+.playlist-search-box:focus,
+.playlist-search-box:focus-visible {
+  border-color: var(--vp-c-brand-1, #6366f1);
+  outline: 2px solid var(--vp-c-brand-1, #6366f1);
+  outline-offset: 1px;
 }
 
 .archive-items-container {
@@ -1622,5 +1670,48 @@ onBeforeUnmount(() => {
   padding: 24px;
   color: var(--vp-c-text-3);
   font-size: 0.9rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.copy-fallback-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--vp-c-bg-mute);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  margin-top: 8px;
+  font-size: 0.85rem;
+}
+
+.copy-fallback-banner input {
+  flex: 1;
+  background: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-divider);
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: var(--vp-c-text-1);
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+.copy-fallback-banner button {
+  background: none;
+  border: none;
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+  padding: 4px;
 }
 </style>

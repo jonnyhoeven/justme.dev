@@ -339,6 +339,7 @@ onBeforeUnmount(() => {
           @click.stop="toggleFavorite()"
           type="button"
           :title="isCurrentFavorite ? 'Favorited' : 'Add to Favorites'"
+          :aria-pressed="isCurrentFavorite"
         >
           <svg
             viewBox="0 0 24 24"
@@ -486,12 +487,14 @@ onBeforeUnmount(() => {
               v-model="searchQuery"
               placeholder="Search title, filename..."
               class="playlist-search-input"
+              aria-label="Search playlist"
             />
             <button
               v-if="searchQuery"
               class="clear-search-btn"
               @click="searchQuery = ''"
               type="button"
+              aria-label="Clear search"
             >
               ✕
             </button>
@@ -549,17 +552,20 @@ onBeforeUnmount(() => {
         <div v-bind="containerProps" class="playlist-items-container">
           <div v-bind="wrapperProps">
             <div
-              v-for="{ data: item, index } in virtualList"
-              :key="index"
+              v-for="{ data: item } in virtualList"
+              :key="item.originalIndex"
               class="playlist-item"
               :class="{
                 'is-active': item.originalIndex === currentTrackIndex
               }"
               @click="selectTrack(item.originalIndex)"
             >
-              <div
+              <button
+                type="button"
                 class="item-fav-col"
                 @click.stop="toggleFavorite(item.track.filename)"
+                :aria-pressed="favorites.has(item.track.filename)"
+                aria-label="Toggle favorite"
                 :title="
                   favorites.has(item.track.filename)
                     ? 'Remove from Favorites'
@@ -586,7 +592,7 @@ onBeforeUnmount(() => {
                     d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
                   />
                 </svg>
-              </div>
+              </button>
 
               <div class="item-content-col">
                 <div class="item-row-top">
@@ -922,8 +928,11 @@ onBeforeUnmount(() => {
   transition: border-color var(--duration-fast) ease;
 }
 
-.playlist-search-input:focus {
+.playlist-search-input:focus,
+.playlist-search-input:focus-visible {
   border-color: var(--vp-c-brand);
+  outline: 2px solid var(--vp-c-brand-1, #6366f1);
+  outline-offset: 1px;
 }
 
 .clear-search-btn {

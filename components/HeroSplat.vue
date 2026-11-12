@@ -759,11 +759,7 @@ const onClick = (e: MouseEvent) => {
        and buttons sit above it via VitePress' own z-index on .main. -->
   <div v-show="!isMobileView" ref="layerRef" class="splat-layer">
     <div ref="glowRef" class="splat-glow" aria-hidden="true"></div>
-    <canvas
-      ref="canvasRef"
-      role="img"
-      aria-label="Interactive 3D particle simulation of avatar"
-    ></canvas>
+    <canvas ref="canvasRef" aria-hidden="true"></canvas>
   </div>
 </template>
 
