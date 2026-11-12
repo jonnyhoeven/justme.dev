@@ -749,15 +749,18 @@ const onClick = (e: MouseEvent) => {
 </script>
 
 <template>
-  <div v-show="isMobileView" class="HeroSplat fallback-image">
+  <div class="HeroSplat fallback-image">
     <img
       :src="`${SITE_CONSTANTS.MEDIA_URL}/images/ava.webp`"
       alt="Justme.dev Avatar"
+      width="240"
+      height="240"
+      fetchpriority="high"
     />
   </div>
   <!-- Full-hero background layer: glow (back) -> canvas (front). The hero text
        and buttons sit above it via VitePress' own z-index on .main. -->
-  <div v-show="!isMobileView" ref="layerRef" class="splat-layer">
+  <div ref="layerRef" class="splat-layer">
     <div ref="glowRef" class="splat-glow" aria-hidden="true"></div>
     <canvas ref="canvasRef" aria-hidden="true"></canvas>
   </div>
@@ -768,6 +771,17 @@ const onClick = (e: MouseEvent) => {
   width: 100%;
   height: 100%;
   position: absolute;
+}
+
+@media (max-width: 767px) {
+  .splat-layer {
+    display: none !important;
+  }
+}
+@media (min-width: 768px) {
+  .fallback-image {
+    display: none !important;
+  }
 }
 
 /* Keep in sync with SITE_CONSTANTS.MOBILE_BREAKPOINT (768) */

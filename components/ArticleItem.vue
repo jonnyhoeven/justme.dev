@@ -33,7 +33,8 @@ function onImageError(event: Event) {
           v-if="frontmatter.image"
           :src="frontmatter.image"
           :alt="frontmatter.title || 'Article image'"
-          loading="lazy"
+          width="653"
+          height="378"
           class="articleImage"
           @error="onImageError"
         />

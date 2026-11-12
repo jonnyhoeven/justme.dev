@@ -38,6 +38,8 @@ function onImageError(event: Event) {
         :src="page.frontmatter.image"
         :alt="page.frontmatter.title || 'Article thumbnail'"
         loading="lazy"
+        width="653"
+        height="378"
         class="listImage"
         @error="onImageError"
       />
