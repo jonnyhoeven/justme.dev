@@ -23,10 +23,6 @@ languages: Go, Java, Python, JavaScript, C++, Rust
 ---
 
 <!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->
-<script setup>
- import ArticleItem from '/components/ArticleItem.vue';
- import ArticleFooter from '/components/ArticleFooter.vue';
-</script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
 ## The Challenge: "Observability Fatigue"

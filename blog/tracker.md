@@ -15,8 +15,6 @@ languages: Web Audio, FastTracker 2, Chiptune
 <!--suppress ALL, CheckEmptyScriptTag, HtmlUnknownAttribute -->
 
 <script setup>
-import ArticleItem from '/components/ArticleItem.vue';
-import ArticleFooter from '/components/ArticleFooter.vue';
 import TrackerPlayer from '/components/TrackerPlayer.vue';
 </script>
 

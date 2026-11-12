@@ -23,10 +23,6 @@ externalUrl: https://min.io/
 ---
 
 <!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->
-<script setup>
- import ArticleItem from '/components/ArticleItem.vue';
- import ArticleFooter from '/components/ArticleFooter.vue';
-</script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
 ## The Challenge: The Ransomware Threat to Public Safety

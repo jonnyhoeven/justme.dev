@@ -45,10 +45,6 @@ class ProjectRequest(BaseModel):
 def get_wrapper_template(readme_content: str) -> str:
     """Returns the Vue component wrapper for the post."""
     return (
-        f"<script setup>\n"
-        f" import ArticleItem from '/components/ArticleItem.vue';\n"
-        f" import ArticleFooter from '/components/ArticleFooter.vue';\n"
-        f"</script>\n\n"
         f'<ArticleItem :frontmatter="$frontmatter"/>\n\n'
         f"{readme_content}\n\n"
         f'<ArticleFooter :frontmatter="$frontmatter"/>\n'

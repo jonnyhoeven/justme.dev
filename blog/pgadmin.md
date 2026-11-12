@@ -21,10 +21,6 @@ languages: Python, JavaScript, PLpgSQL, Shell, TypeScript, CSS, Other
 ---
 
 <!--suppress CheckEmptyScriptTag, CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->
-<script setup>
- import ArticleItem from '/components/ArticleItem.vue';
- import ArticleFooter from '/components/ArticleFooter.vue';
-</script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
 ## The Challenge: The "Port-Forwarding" Security Gap

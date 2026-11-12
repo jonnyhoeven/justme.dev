@@ -15,10 +15,6 @@ languages: Python, Jinja, Shell, Dockerfile
 
 <!--suppress ALL, CheckEmptyScriptTag, HtmlUnknownAttribute -->
 
-<script setup>
- import ArticleItem from '/components/ArticleItem.vue';
- import ArticleFooter from '/components/ArticleFooter.vue';
-</script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
 ## The Problem: Database Sprawl and Configuration Drift

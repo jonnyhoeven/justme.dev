@@ -20,10 +20,6 @@ languages: Go, TypeScript
 ---
 
 <!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->
-<script setup>
- import ArticleItem from '/components/ArticleItem.vue';
- import ArticleFooter from '/components/ArticleFooter.vue';
-</script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
 ## The Scaling Challenge of Prometheus

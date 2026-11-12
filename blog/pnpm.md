@@ -22,10 +22,6 @@ externalUrl: https://pnpm.io/
 ---
 
 <!--suppress ALL, CheckEmptyScriptTag, HtmlUnknownAttribute -->
-<script setup>
- import ArticleItem from '/components/ArticleItem.vue';
- import ArticleFooter from '/components/ArticleFooter.vue';
-</script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
 ## The Push for a Better Package Manager

@@ -16,10 +16,6 @@ externalUrl: https://sre.google/books/
 ---
 
 <!--suppress CheckEmptyScriptTag, HtmlUnknownAttribute, ES6UnusedImports -->
-<script setup>
- import ArticleItem from '/components/ArticleItem.vue';
- import ArticleFooter from '/components/ArticleFooter.vue';
-</script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
 ## The Challenge: Moving from Firefighting to Reliability Engineering

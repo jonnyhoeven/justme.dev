@@ -6,9 +6,15 @@ import DefaultTheme from 'vitepress/theme-without-fonts';
 import './style.css';
 import HeroSplat from '../../components/HeroSplat.vue';
 import MiniPlayer from '../../components/MiniPlayer.vue';
+import ArticleItem from '../../components/ArticleItem.vue';
+import ArticleFooter from '../../components/ArticleFooter.vue';
 
 export default {
   extends: DefaultTheme,
+  enhanceApp({ app }) {
+    app.component('ArticleItem', ArticleItem);
+    app.component('ArticleFooter', ArticleFooter);
+  },
   Layout: () => {
     return h(DefaultTheme.Layout, null, {
       'home-hero-image': () => h(HeroSplat),

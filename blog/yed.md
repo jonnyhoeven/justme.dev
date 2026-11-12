@@ -18,10 +18,6 @@ externalUrl: https://www.yworks.com/products/yed
 
 <!--suppress ALL, CheckEmptyScriptTag, HtmlUnknownAttribute -->
 
-<script setup>
- import ArticleItem from '/components/ArticleItem.vue';
- import ArticleFooter from '/components/ArticleFooter.vue';
-</script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
 ## The Challenge: Managing the "Spaghetti" of Decades-Old Systems

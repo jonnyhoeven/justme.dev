@@ -22,10 +22,6 @@ languages: Python, PlantUML, Shell
 
 <!--suppress ALL, CheckEmptyScriptTag, HtmlUnknownAttribute -->
 
-<script setup>
- import ArticleItem from '/components/ArticleItem.vue';
- import ArticleFooter from '/components/ArticleFooter.vue';
-</script>
 <ArticleItem :frontmatter="$frontmatter"/>
 
 ## The Challenge: The "Black Box" of Kubernetes Complexity

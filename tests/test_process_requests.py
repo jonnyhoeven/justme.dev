@@ -134,19 +134,21 @@ class TestProjectRequest:
 class TestGetWrapperTemplate:
     def test_contains_article_item(self):
         result = get_wrapper_template("readme")
-        assert "ArticleItem" in result
+        assert '<ArticleItem :frontmatter="$frontmatter"/>' in result
 
     def test_contains_article_footer(self):
         result = get_wrapper_template("readme")
-        assert "ArticleFooter" in result
+        assert '<ArticleFooter :frontmatter="$frontmatter"/>' in result
 
     def test_embeds_readme_content(self):
         result = get_wrapper_template("MY README CONTENT")
         assert "MY README CONTENT" in result
 
-    def test_has_script_setup_block(self):
+    def test_has_no_script_setup_block(self):
+        # ArticleItem / ArticleFooter are registered globally in the theme
         result = get_wrapper_template("")
-        assert "<script setup>" in result
+        assert "<script" not in result
+        assert "import " not in result
 
 
 # ---------------------------------------------------------------------------
