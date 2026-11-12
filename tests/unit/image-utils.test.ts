@@ -36,4 +36,14 @@ describe('image-utils onImageError', () => {
 
     expect(() => onImageError(event)).not.toThrow();
   });
+
+  it('removes srcset so a failed small variant falls back to src', () => {
+    const attrs: string[] = [];
+    const img = {
+      src: `${SITE_CONSTANTS.MEDIA_URL}/images/test.webp`,
+      removeAttribute: (n: string) => attrs.push(n)
+    };
+    onImageError({ target: img } as unknown as Event);
+    expect(attrs).toContain('srcset');
+  });
 });

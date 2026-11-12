@@ -4,6 +4,7 @@
 import Badges from './Badges.vue';
 import type { ArticlePage } from '../types/frontmatter';
 import { onImageError } from '../lib/image-utils';
+import { thumbVariantUrl } from '../lib/thumb-variant';
 
 withDefaults(
   defineProps<{
@@ -28,6 +29,12 @@ withDefaults(
       <img
         v-if="page.frontmatter.image"
         :src="page.frontmatter.image"
+        :srcset="
+          thumbVariantUrl(page.frontmatter.image)
+            ? `${thumbVariantUrl(page.frontmatter.image)} 266w, ${page.frontmatter.image} 653w`
+            : undefined
+        "
+        :sizes="thumbVariantUrl(page.frontmatter.image) ? '133px' : undefined"
         :alt="page.frontmatter.title || 'Article thumbnail'"
         loading="lazy"
         width="653"
