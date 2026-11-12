@@ -8,8 +8,6 @@ readmeFile: README.md
 type: blog
 title: 'Migrating from npm to pnpm: Securing the Supply Chain'
 date: 2026-05-16
-year: 2026
-month: May
 outline: deep
 summary: Why we migrated to pnpm, how it prevents phantom dependencies, and implementing a 24-hour minimum release age to protect against compromised packages.
 intro: |

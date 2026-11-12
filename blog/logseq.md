@@ -8,8 +8,6 @@ readmeFile: README.md
 type: blog
 title: 'The SRE Knowledge Graph: Building a Second Brain for Mission-Critical Operations'
 date: 2021-08-01
-year: 2021
-month: Aug
 outline: deep
 intro: |
   In an SRE career spanning 26 years, the most valuable asset isn't just the code—it's

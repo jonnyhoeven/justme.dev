@@ -8,8 +8,6 @@ readmeFile: README.md
 type: blog
 title: 'Visual Systems Thinking: Mapping Complex Kubernetes Architectures'
 date: 2025-05-20
-year: 2025
-month: May
 outline: deep
 intro: |
   In complex distributed systems, YAML is not a substitute for a mental model.

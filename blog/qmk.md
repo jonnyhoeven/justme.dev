@@ -8,8 +8,6 @@ readmeFile: README.md
 type: blog
 title: 'The Developer Interface: Optimizing the Physical-to-Digital Bridge with QMK'
 date: 2023-04-14
-year: 2023
-month: Apr
 outline: deep
 intro: |
   As an SRE, the most important tool isn't the terminal—it's the interface that

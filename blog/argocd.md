@@ -8,8 +8,6 @@ readmeFile: README.md
 type: blog
 title: 'Scaling GitOps: Automating Mission-Critical Deployments with ArgoCD'
 date: 2024-11-20
-year: 2024
-month: Nov
 outline: deep
 summary: Scaling GitOps in public safety environments by automating deployments with ArgoCD for absolute auditability and self-healing.
 intro: |

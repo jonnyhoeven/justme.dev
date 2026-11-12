@@ -7,7 +7,7 @@
 - **Overflow risk:** blog-post iframes (`.embed-frame`) have no `max-width: 100%`.
 - **Sticky hover on touch:** `.view-all-button`, `.container_row` and `.shieldButton` still apply `:hover` transforms outside `@media (hover: hover)`.
 - **Music player on phones:** moved to bottom audio dock and enabled on mobile.
-- **Status:** tracked in `todo.md` under "Phone Layout Follow-ups".
+- **Status:** tracked in `TODO.md` under "Phone Layout Follow-ups".
 
 ## Open: XM files that failed a quick structural parse (possibly corrupt)
 

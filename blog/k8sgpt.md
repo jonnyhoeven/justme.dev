@@ -8,8 +8,6 @@ readmeFile: README.md
 type: blog
 title: 'AI-Assisted SRE: Spearheading Triage with K8sGPT and Local Inference'
 date: 2024-11-01
-year: 2024
-month: Nov
 outline: deep
 intro: |
   As critical infrastructure migrates to Kubernetes, the integration of

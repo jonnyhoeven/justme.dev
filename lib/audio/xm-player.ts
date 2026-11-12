@@ -14,8 +14,6 @@ export interface XMPlayerOptions {
   onEnded?: () => void;
 }
 
-function debugLog(..._args: any[]) {}
-
 function createXMEngine() {
   const player: any = {
     cur_songpos: -1,
@@ -32,10 +30,7 @@ function createXMEngine() {
 
   const XMView: any = {
     scope_width: 0,
-    pushEvent: null,
-    resume: null,
-    pause: null,
-    stop: null
+    pushEvent: null
   };
 
   var jsNode: any = null;
@@ -662,8 +657,6 @@ function createXMEngine() {
             ch.pan = ch.samp.pan;
             ch.fine = ch.samp.fine;
           }
-        } else {
-          // debugLog("invalid inst", r[i][1], instruments.length);
         }
       }
 
@@ -1304,14 +1297,6 @@ function createXMEngine() {
         }
       }
     }
-    debugLog(
-      'unrolled sample loop; looplen',
-      samp.looplen,
-      'x',
-      nloops,
-      ' = ',
-      samplesiz
-    );
     samp.sampledata = data;
     samp.looplen = nloops * samp.looplen;
     samp.type = 1;
@@ -1359,28 +1344,11 @@ function createXMEngine() {
         vibratotype: 0
       });
     }
-    debugLog('header len ' + hlen);
-
-    debugLog(
-      'songlen %d, %d channels, %d patterns, %d instruments',
-      songlen,
-      player.xm.nchan,
-      npat,
-      ninst
-    );
-    debugLog('loop @%d', player.xm.song_looppos);
-    debugLog(
-      'flags=%d tempo %d bpm %d',
-      player.xm.flags,
-      player.xm.tempo,
-      player.xm.bpm
-    );
 
     player.xm.songpats = [];
     for (i = 0; i < songlen; i++) {
       player.xm.songpats.push(dv.getUint8(0x50 + i));
     }
-    debugLog('song patterns: ', player.xm.songpats);
 
     let idx = hlen;
     player.xm.patterns = [];
@@ -1389,7 +1357,6 @@ function createXMEngine() {
       const patheaderlen = dv.getUint32(idx, true);
       const patrows = dv.getUint16(idx + 5, true);
       const patsize = dv.getUint16(idx + 7, true);
-      debugLog('pattern %d: %d bytes, %d rows', i, patsize, patrows);
       idx += 9;
       for (j = 0; patsize > 0 && j < patrows; j++) {
         const row = [];
@@ -1478,14 +1445,6 @@ function createXMEngine() {
         // FIXME: ignoring keymaps for now and assuming 1 sample / instrument
         // var keymap = getarray(dv, idx+0x21);
         const samphdrsiz = dv.getUint32(idx + 0x1d, true);
-        debugLog(
-          "hdrsiz %d; instrument %s: '%s' %d samples, samphdrsiz %d",
-          hdrsiz,
-          (i + 1).toString(16),
-          instname,
-          nsamp,
-          samphdrsiz
-        );
         idx += hdrsiz;
         let totalsamples = 0;
         const samps = [];
@@ -1503,44 +1462,6 @@ function createXMEngine() {
           if (samplooplen === 0) {
             samptype &= ~3;
           }
-          debugLog(
-            "sample %d: len %d name '%s' loop %d/%d vol %d offset %s",
-            j,
-            samplen,
-            sampname,
-            samploop,
-            samplooplen,
-            sampvol,
-            sampleoffset.toString(16)
-          );
-          debugLog(
-            '           type %d note %s(%d) finetune %d pan %d',
-            samptype,
-            prettify_note(sampnote + 12 * 4),
-            sampnote,
-            sampfinetune,
-            samppan
-          );
-          debugLog(
-            '           vol env',
-            env_vol,
-            env_vol_sustain,
-            env_vol_loop_start,
-            env_vol_loop_end,
-            'type',
-            env_vol_type,
-            'fadeout',
-            vol_fadeout
-          );
-          debugLog(
-            '           pan env',
-            env_pan,
-            env_pan_sustain,
-            env_pan_loop_start,
-            env_pan_loop_end,
-            'type',
-            env_pan_type
-          );
           var samp = {
             sampname,
             len: samplen,
@@ -1619,12 +1540,10 @@ function createXMEngine() {
         }
       } else {
         idx += hdrsiz;
-        debugLog('empty instrument', i, hdrsiz, idx);
       }
       player.xm.instruments.push(inst);
     }
 
-    debugLog('loaded "' + player.xm.songname + '"');
     return true;
   }
 
@@ -1633,7 +1552,7 @@ function createXMEngine() {
     if (existingCtx) {
       player.audioctx = existingCtx;
     } else if (!player.audioctx && typeof window !== 'undefined') {
-      const audioContext = window.AudioContext || window.webkitAudioContext;
+      const audioContext = window.AudioContext;
       if (audioContext) player.audioctx = new audioContext();
     }
     if (!player.audioctx) return null;
@@ -1641,11 +1560,7 @@ function createXMEngine() {
     const bSize = bufferSize || 4096;
     gainNode = player.audioctx.createGain();
     gainNode.gain.value = 1.0;
-    if (player.audioctx.createScriptProcessor === undefined) {
-      jsNode = player.audioctx.createJavaScriptNode(bSize, 0, 2);
-    } else {
-      jsNode = player.audioctx.createScriptProcessor(bSize, 0, 2);
-    }
+    jsNode = player.audioctx.createScriptProcessor(bSize, 0, 2);
     jsNode.onaudioprocess = audio_cb;
     return gainNode;
   }
@@ -1653,8 +1568,6 @@ function createXMEngine() {
   player.playing = false;
   function play() {
     if (!player.playing) {
-      // put paused events back into action, if any
-      if (XMView.resume) XMView.resume();
       // start playing
       jsNode.connect(gainNode);
 
@@ -1676,7 +1589,6 @@ function createXMEngine() {
   function pause() {
     if (player.playing) {
       jsNode.disconnect(gainNode);
-      if (XMView.pause) XMView.pause();
     }
     player.playing = false;
   }
@@ -1698,7 +1610,6 @@ function createXMEngine() {
     player.xm.global_volume = player.max_global_volume;
     player.xm.tempo = player.xm.initial_tempo;
     player.xm.bpm = player.xm.initial_bpm;
-    if (XMView.stop) XMView.stop();
   }
 
   player.getGainNode = function () {
@@ -1981,16 +1892,6 @@ export class XMPlayer {
     if (this.engine.xm.channelinfo[channelIdx]) {
       this.engine.xm.channelinfo[channelIdx].mute = mute ? 1 : 0;
     }
-  }
-
-  isChannelMuted(channelIdx: number): boolean {
-    if (!this.engine.xm?.channelinfo) return false;
-    return !!this.engine.xm.channelinfo[channelIdx]?.mute;
-  }
-
-  getChannelInfo(channelIdx: number) {
-    if (!this.engine.xm?.channelinfo) return null;
-    return this.engine.xm.channelinfo[channelIdx] || null;
   }
 
   setBpm(bpm: number): void {

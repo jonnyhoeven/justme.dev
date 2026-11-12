@@ -3,8 +3,8 @@
 /**
  * Splat Animation System — barrel export + random picker.
  *
- * On each page load one animation is chosen at random and
- * applied to the HeroSplat canvas particles.
+ * HeroSplat runs an animation director that rotates through avatar
+ * animations and full-canvas scenes on the canvas particles.
  */
 
 import { orbitalDrift } from './orbital-drift';

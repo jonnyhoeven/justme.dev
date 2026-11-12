@@ -133,23 +133,19 @@ class TestProjectRequest:
 
 class TestGetWrapperTemplate:
     def test_contains_article_item(self):
-        result = get_wrapper_template("post", "readme")
+        result = get_wrapper_template("readme")
         assert "ArticleItem" in result
 
     def test_contains_article_footer(self):
-        result = get_wrapper_template("post", "readme")
+        result = get_wrapper_template("readme")
         assert "ArticleFooter" in result
 
-    def test_embeds_post_content(self):
-        result = get_wrapper_template("MY POST CONTENT", "")
-        assert "MY POST CONTENT" in result
-
     def test_embeds_readme_content(self):
-        result = get_wrapper_template("", "MY README CONTENT")
+        result = get_wrapper_template("MY README CONTENT")
         assert "MY README CONTENT" in result
 
     def test_has_script_setup_block(self):
-        result = get_wrapper_template("", "")
+        result = get_wrapper_template("")
         assert "<script setup>" in result
 
 
@@ -281,16 +277,14 @@ class TestSavePost:
     def test_creates_markdown_file(self, generator, minimal_yaml_data, tmp_path):
         req = ProjectRequest(**minimal_yaml_data)
         dst = generator.dst_dir / "test-project.md"
-        wrapper = textwrap.TextWrapper(width=120)
-        GenerateFiles.save_post(req, dst, "", "", wrapper)
+        GenerateFiles.save_post(req, dst, "")
 
         assert dst.exists()
 
     def test_markdown_file_has_frontmatter(self, generator, minimal_yaml_data, tmp_path):
         req = ProjectRequest(**minimal_yaml_data)
         dst = generator.dst_dir / "test-project.md"
-        wrapper = textwrap.TextWrapper(width=120)
-        GenerateFiles.save_post(req, dst, "", "", wrapper)
+        GenerateFiles.save_post(req, dst, "")
 
         content = dst.read_text()
         assert content.startswith("---\n")
@@ -299,8 +293,7 @@ class TestSavePost:
     def test_gitlink_serialized_as_string(self, generator, minimal_yaml_data, tmp_path):
         req = ProjectRequest(**minimal_yaml_data)
         dst = generator.dst_dir / "test-project.md"
-        wrapper = textwrap.TextWrapper(width=120)
-        GenerateFiles.save_post(req, dst, "", "", wrapper)
+        GenerateFiles.save_post(req, dst, "")
 
         content = dst.read_text()
         # gitlink must be a plain URL string, not a Pydantic HttpUrl repr
@@ -310,8 +303,7 @@ class TestSavePost:
         del minimal_yaml_data["gitlink"]
         req = ProjectRequest(**minimal_yaml_data)
         dst = generator.dst_dir / "test-project-no-git.md"
-        wrapper = textwrap.TextWrapper(width=120)
-        GenerateFiles.save_post(req, dst, "", "", wrapper)
+        GenerateFiles.save_post(req, dst, "")
 
         content = dst.read_text()
         assert "gitlink:" not in content
@@ -319,8 +311,7 @@ class TestSavePost:
     def test_creates_parent_directories(self, generator, minimal_yaml_data, tmp_path):
         req = ProjectRequest(**minimal_yaml_data)
         dst = tmp_path / "deep" / "nested" / "output.md"
-        wrapper = textwrap.TextWrapper(width=120)
-        GenerateFiles.save_post(req, dst, "", "", wrapper)
+        GenerateFiles.save_post(req, dst, "")
 
         assert dst.exists()
 

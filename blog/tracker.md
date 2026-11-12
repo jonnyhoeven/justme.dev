@@ -2,8 +2,6 @@
 type: blog
 title: 'FastTracker II & Chiptune Music Archive'
 date: 2026-10-05
-year: 2026
-month: Oct
 outline: deep
 intro: |
   An interactive Web Audio FastTracker 2 (.XM) player and live visualizer. Explore 3,000+ tracker songs, watch real-time channel oscilloscopes, inspect scrolling pattern matrixes, and view sample instruments.

@@ -2,8 +2,6 @@
 type: blog
 title: 'Beyond the Theory: Implementing Google SRE Principles in High-Stakes Environments'
 date: 2024-10-23
-year: 2024
-month: Oct
 outline: deep
 intro: |
   Google's SRE principles provide the blueprint, but real-world execution is a cultural

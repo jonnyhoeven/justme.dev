@@ -8,8 +8,6 @@ readmeFile: README.md
 type: blog
 title: 'Unifying Observability: Eliminating Monitoring Silos with OpenTelemetry'
 date: 2026-03-17
-year: 2026
-month: Mar
 outline: deep
 intro: |
   In mission-critical systems, fragmented monitoring is a liability.

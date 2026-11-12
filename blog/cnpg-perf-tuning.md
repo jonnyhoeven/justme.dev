@@ -8,8 +8,6 @@ readmeFile: README.md
 type: blog
 title: 'Database Performance at Scale: Tuning CloudNativePG for High-Throughput Workloads'
 date: 2024-12-28
-year: 2024
-month: Dec
 outline: deep
 intro: |
   Moving mission-critical databases to Kubernetes is only half the battle.

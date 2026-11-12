@@ -2,8 +2,6 @@
 type: blog
 title: 'Secure AI Adoption: Local LLMs with Ollama for Enterprise Privacy'
 date: 2025-02-02
-year: 2025
-month: Feb
 outline: deep
 intro: |
   GenAI offers a 10x productivity boost, but for mission-critical SRE and development, public

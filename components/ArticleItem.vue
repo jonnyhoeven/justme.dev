@@ -3,19 +3,11 @@
 <script setup lang="ts">
 import Badges from './Badges.vue';
 import type { ArticleFrontmatter } from '../types/frontmatter';
+import { onImageError } from '../lib/image-utils';
 
 defineProps<{
   frontmatter?: ArticleFrontmatter;
 }>();
-
-function onImageError(event: Event) {
-  const target = event.target as HTMLImageElement | null;
-  if (!target) return;
-  const mediaPrefix = 'https://media.justme.dev';
-  if (target.src.startsWith(mediaPrefix)) {
-    target.src = target.src.slice(mediaPrefix.length);
-  }
-}
 </script>
 
 <template>

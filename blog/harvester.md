@@ -8,8 +8,6 @@ readmeFile: README.md
 type: blog
 title: 'Converged Reliability: Strategic Hybrid Cloud with Harvester and Rancher'
 date: 2023-04-13
-year: 2023
-month: Apr
 outline: deep
 intro: |
   Cloud-Native doesn't always mean "In the Cloud." During recent

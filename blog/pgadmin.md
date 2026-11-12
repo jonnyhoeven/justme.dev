@@ -8,8 +8,6 @@ readmeFile: README.md
 type: blog
 title: 'Secure Data Governance: Scalable Database Management with pgAdmin and OAuth2'
 date: 2024-04-18
-year: 2024
-month: Apr
 outline: deep
 intro: |
   Granting developers access to production data shouldn't mean compromising on security.

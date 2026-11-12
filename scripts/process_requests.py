@@ -3,7 +3,6 @@
 import logging
 import re
 import sys
-import textwrap
 from datetime import date
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
@@ -43,7 +42,7 @@ class ProjectRequest(BaseModel):
         return self
 
 
-def get_wrapper_template(post_content: str, readme_content: str) -> str:
+def get_wrapper_template(readme_content: str) -> str:
     """Returns the Vue component wrapper for the post."""
     return (
         f"<script setup>\n"
@@ -51,7 +50,6 @@ def get_wrapper_template(post_content: str, readme_content: str) -> str:
         f" import ArticleFooter from '/components/ArticleFooter.vue';\n"
         f"</script>\n\n"
         f'<ArticleItem :frontmatter="$frontmatter"/>\n\n'
-        f"{post_content}\n"
         f"{readme_content}\n\n"
         f'<ArticleFooter :frontmatter="$frontmatter"/>\n'
     )
@@ -95,7 +93,6 @@ def absolutize_links(
 
 class GenerateFiles:
     def __init__(self) -> None:
-        self.max_width = 120
         self.req_path = Path("requests")
         self.dst_dir = Path("projects")
 
@@ -155,12 +152,10 @@ class GenerateFiles:
 
     def process_request(self, request: ProjectRequest, req_file: Path) -> None:
         """Process a single request and generate the markdown file."""
-        my_wrap = textwrap.TextWrapper(width=self.max_width)
         basename = req_file.stem
         dst_path = self.dst_dir / f"{basename}.md"
 
         readme = ""
-        post = ""
         logger.info("Processing project: %s (%s)", request.title, basename)
 
         if request.content:
@@ -177,22 +172,19 @@ class GenerateFiles:
                     f"Failed to fetch README for {request.title}"
                 )
 
-        self.save_post(request, dst_path, post, readme, my_wrap)
+        self.save_post(request, dst_path, readme)
 
     @staticmethod
     def save_post(
         request: ProjectRequest,
         dst_path: Path,
-        post: str,
         readme: str,
-        my_wrap: textwrap.TextWrapper,
     ) -> None:
         """Save the generated content to a markdown file."""
         dst_path.parent.mkdir(parents=True, exist_ok=True)
         logger.info("Saving to %s", dst_path)
 
-        wrapped_post = my_wrap.fill(post)
-        content_template = get_wrapper_template(wrapped_post, readme)
+        content_template = get_wrapper_template(readme)
 
         try:
             with dst_path.open("w") as pst_file:

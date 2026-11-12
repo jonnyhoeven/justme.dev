@@ -8,8 +8,6 @@ readmeFile: README.md
 type: blog
 title: 'Infrastructure as Data: Building a Self-Service Platform with Crossplane'
 date: 2026-03-12
-year: 2026
-month: Mar
 outline: deep
 intro: |
   As mission-critical infrastructure moves to Kubernetes,

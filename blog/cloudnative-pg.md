@@ -8,8 +8,6 @@ readmeFile: README.md
 type: blog
 title: 'Enterprise PostgreSQL on Kubernetes: Achieving High Availability with CloudNativePG'
 date: 2024-04-15
-year: 2024
-month: Apr
 outline: deep
 intro: |
   Managing stateful workloads on Kubernetes is a Tier-1 SRE challenge.

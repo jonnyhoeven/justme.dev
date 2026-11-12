@@ -7,6 +7,7 @@ image: /images/ava.webp
 hero:
   name: 'Justme.dev'
   tagline: Just make it!
+  # hero.image ensures VitePress renders .has-image layout classes
   image:
     src: /images/ava.webp
     alt: Justme.dev

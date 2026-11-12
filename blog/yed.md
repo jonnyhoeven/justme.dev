@@ -2,8 +2,6 @@
 type: blog
 title: 'Mapping the Monolith: Visualizing 26 Years of Systems Integration with yEd'
 date: 2021-08-01
-year: 2021
-month: Aug
 outline: deep
 intro: |
   In an era of browser-based tools, yEd remains the SRE's secret weapon for mapping

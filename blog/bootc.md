@@ -8,8 +8,6 @@ readmeFile: README.md
 type: blog
 title: 'The Image is the OS: Scaling Immutable Infrastructure with Bootable Containers (bootc)'
 date: 2026-03-17
-year: 2026
-month: Mar
 outline: deep
 intro: |
   The future of the operating system involves bootc (Bootable Containers),

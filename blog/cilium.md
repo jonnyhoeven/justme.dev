@@ -8,8 +8,6 @@ readmeFile: README.md
 type: blog
 title: 'Modernizing Public Safety Networking: Spearheading eBPF with Cilium'
 date: 2026-04-28
-year: 2026
-month: Apr
 outline: deep
 intro: |
   As part of the current move to Kubernetes, the adoption of Cilium and eBPF is

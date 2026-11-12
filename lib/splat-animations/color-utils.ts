@@ -6,7 +6,7 @@
 
 let darkTheme = true;
 
-/** Set by HeroSplat each frame from the page's colour scheme. */
+/** Updated by HeroSplat via MutationObserver on .dark class changes. */
 export function setDarkTheme(dark: boolean): void {
   darkTheme = dark;
 }

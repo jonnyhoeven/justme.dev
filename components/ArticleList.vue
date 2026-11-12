@@ -3,6 +3,7 @@
 <script setup lang="ts">
 import Badges from './Badges.vue';
 import type { ArticlePage } from '../types/frontmatter';
+import { onImageError } from '../lib/image-utils';
 
 withDefaults(
   defineProps<{
@@ -13,15 +14,6 @@ withDefaults(
     headingLevel: 'h2'
   }
 );
-
-function onImageError(event: Event) {
-  const target = event.target as HTMLImageElement | null;
-  if (!target) return;
-  const mediaPrefix = 'https://media.justme.dev';
-  if (target.src.startsWith(mediaPrefix)) {
-    target.src = target.src.slice(mediaPrefix.length);
-  }
-}
 </script>
 
 <template>

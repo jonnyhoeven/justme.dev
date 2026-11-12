@@ -8,8 +8,6 @@ readmeFile: README.md
 type: blog
 title: 'Ransomware-Proof Infrastructure: Immutable Backups with MinIO and S3 Object Lock'
 date: 2024-10-23
-year: 2024
-month: Oct
 outline: deep
 intro: |
   In mission-critical SRE, "having a backup" is no longer enough.
