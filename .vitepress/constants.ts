@@ -14,8 +14,9 @@ export const SITE_CONSTANTS = {
     LOGO_LIGHT: 'https://media.justme.dev/images/logo.webp',
     LOGO_DARK: 'https://media.justme.dev/images/logo_dark.webp',
     GOOGLE_ICON: 'https://media.justme.dev/images/google.webp',
-    FAVICON_MASK_COLOR: '#16673c',
-    THEME_COLOR: '#ffffff'
+    FAVICON_MASK_COLOR: '#4f46e5',
+    THEME_COLOR_LIGHT: '#ffffff',
+    THEME_COLOR_DARK: '#14181f'
   },
   SOCIAL_LINKS: {
     GITHUB: 'https://github.com/jonnyhoeven/',

@@ -59,7 +59,7 @@ export default defineConfig({
       'link',
       {
         rel: 'apple-touch-icon',
-        sizes: '76x76',
+        sizes: '180x180',
         href: '/apple-touch-icon.png'
       }
     ],
@@ -107,7 +107,19 @@ export default defineConfig({
     ],
     [
       'meta',
-      { name: 'theme-color', content: SITE_CONSTANTS.IMAGES.THEME_COLOR }
+      {
+        name: 'theme-color',
+        media: '(prefers-color-scheme: light)',
+        content: SITE_CONSTANTS.IMAGES.THEME_COLOR_LIGHT
+      }
+    ],
+    [
+      'meta',
+      {
+        name: 'theme-color',
+        media: '(prefers-color-scheme: dark)',
+        content: SITE_CONSTANTS.IMAGES.THEME_COLOR_DARK
+      }
     ]
   ],
   transformHead: ({ pageData }) => {
