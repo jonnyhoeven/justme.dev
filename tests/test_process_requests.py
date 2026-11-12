@@ -3,28 +3,63 @@
 """
 Tests for scripts/process_requests.py
 
-Uses `responses` to mock HTTP calls and a `tmp_path` fixture to avoid
-touching the real filesystem.
+Mocks `urlopen` with small fake responses and uses a `tmp_path` fixture to
+avoid touching the real filesystem or the network.
 """
 
 # Make the scripts directory importable
+import io
 import sys
 import textwrap
+import urllib.error
+from email.message import Message
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
-import responses as rsps_lib
 import yaml
 from pydantic import ValidationError
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
 
 from process_requests import (
+    FetchError,
     GenerateFiles,
     ProjectRequest,
     absolutize_links,
+    fetch_text,
     get_wrapper_template,
 )
+
+URLOPEN = "process_requests.urllib.request.urlopen"
+
+
+class FakeResponse:
+    """Minimal stand-in for the object returned by urlopen()."""
+
+    def __init__(self, body: bytes = b"", status: int = 200, content_type: str | None = None):
+        self._body = body
+        self.status = status
+        self.headers = Message()
+        if content_type:
+            self.headers["Content-Type"] = content_type
+
+    def read(self) -> bytes:
+        return self._body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+def ok(text: str) -> FakeResponse:
+    return FakeResponse(text.encode("utf-8"))
+
+
+def http_error(code: int) -> urllib.error.HTTPError:
+    return urllib.error.HTTPError("http://x", code, "err", Message(), io.BytesIO(b""))
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -221,36 +256,88 @@ class TestAbsolutizeLinks:
 
 
 # ---------------------------------------------------------------------------
+# fetch_text (mocked urlopen)
+# ---------------------------------------------------------------------------
+
+
+class TestFetchText:
+    def test_returns_decoded_body(self):
+        with patch(URLOPEN, return_value=ok("héllo")):
+            assert fetch_text("https://example.com/x") == "héllo"
+
+    def test_sends_user_agent_and_timeout(self):
+        with patch(URLOPEN, return_value=ok("x")) as m:
+            fetch_text("https://example.com/x", timeout=3)
+        request = m.call_args.args[0]
+        assert request.full_url == "https://example.com/x"
+        assert request.get_header("User-agent") == "justme.dev-etl"
+        assert m.call_args.kwargs["timeout"] == 3
+
+    def test_respects_charset_header(self):
+        body = "café".encode("latin-1")
+        resp = FakeResponse(body, content_type="text/plain; charset=latin-1")
+        with patch(URLOPEN, return_value=resp):
+            assert fetch_text("https://example.com/x") == "café"
+
+    def test_http_error_includes_status(self):
+        with (
+            patch(URLOPEN, side_effect=http_error(404)),
+            pytest.raises(FetchError, match="404"),
+        ):
+            fetch_text("https://example.com/x")
+
+    def test_url_error_becomes_fetch_error(self):
+        with (
+            patch(URLOPEN, side_effect=urllib.error.URLError("boom")),
+            pytest.raises(FetchError, match="boom"),
+        ):
+            fetch_text("https://example.com/x")
+
+    def test_timeout_becomes_fetch_error(self):
+        with (
+            patch(URLOPEN, side_effect=TimeoutError("timed out")),
+            pytest.raises(FetchError, match="Timed out"),
+        ):
+            fetch_text("https://example.com/x")
+
+    def test_non_2xx_becomes_fetch_error(self):
+        with (
+            patch(URLOPEN, return_value=FakeResponse(b"", status=304)),
+            pytest.raises(FetchError, match="304"),
+        ):
+            fetch_text("https://example.com/x")
+
+    def test_undecodable_body_becomes_fetch_error(self):
+        with (
+            patch(URLOPEN, return_value=FakeResponse(b"\xff\xfe\xfa")),
+            pytest.raises(FetchError, match="decode"),
+        ):
+            fetch_text("https://example.com/x")
+
+
+# ---------------------------------------------------------------------------
 # GenerateFiles.get_readme (mocked HTTP)
 # ---------------------------------------------------------------------------
 
 
 class TestGetReadme:
-    @rsps_lib.activate
     def test_fetches_readme_successfully(self, generator):
-        url = "https://raw.githubusercontent.com/foo/bar/main/README.md"
-        rsps_lib.add(rsps_lib.GET, url, body="# Hello World", status=200)
-
-        result = generator.get_readme("foo", "bar", "main", "README.md")
+        with patch(URLOPEN, return_value=ok("# Hello World")) as m:
+            result = generator.get_readme("foo", "bar", "main", "README.md")
         assert result == "# Hello World"
+        assert (
+            m.call_args.args[0].full_url
+            == "https://raw.githubusercontent.com/foo/bar/main/README.md"
+        )
 
-    @rsps_lib.activate
     def test_returns_empty_on_404(self, generator):
-        url = "https://raw.githubusercontent.com/foo/bar/main/README.md"
-        rsps_lib.add(rsps_lib.GET, url, status=404)
-
-        result = generator.get_readme("foo", "bar", "main", "README.md")
+        with patch(URLOPEN, side_effect=http_error(404)):
+            result = generator.get_readme("foo", "bar", "main", "README.md")
         assert result == ""
 
-    @rsps_lib.activate
     def test_returns_empty_on_connection_error(self, generator):
-
-        import requests as req_lib
-
-        url = "https://raw.githubusercontent.com/foo/bar/main/README.md"
-        rsps_lib.add(rsps_lib.GET, url, body=req_lib.ConnectionError("Network error"))
-
-        result = generator.get_readme("foo", "bar", "main", "README.md")
+        with patch(URLOPEN, side_effect=urllib.error.URLError("Network error")):
+            result = generator.get_readme("foo", "bar", "main", "README.md")
         assert result == ""
 
     def test_returns_empty_when_user_missing(self, generator):
@@ -261,13 +348,14 @@ class TestGetReadme:
         result = generator.get_readme("foo", "", "main", "README.md")
         assert result == ""
 
-    @rsps_lib.activate
     def test_respects_custom_branch_and_readme_file(self, generator):
-        url = "https://raw.githubusercontent.com/foo/bar/develop/DOCS.md"
-        rsps_lib.add(rsps_lib.GET, url, body="# Docs", status=200)
-
-        result = generator.get_readme("foo", "bar", "develop", "DOCS.md")
+        with patch(URLOPEN, return_value=ok("# Docs")) as m:
+            result = generator.get_readme("foo", "bar", "develop", "DOCS.md")
         assert result == "# Docs"
+        assert (
+            m.call_args.args[0].full_url
+            == "https://raw.githubusercontent.com/foo/bar/develop/DOCS.md"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -359,30 +447,24 @@ class TestProcessRequests:
         generator.req_path = Path("/nonexistent/path/requests")
         assert generator.process_requests() is False
 
-    @rsps_lib.activate
     def test_fetches_readme_when_flag_set(self, generator, full_yaml_data):
-        url = "https://raw.githubusercontent.com/foo/full/main/README.md"
-        rsps_lib.add(rsps_lib.GET, url, body="# Full README", status=200)
-
         yaml_file = generator.req_path / "full.yaml"
         yaml_file.write_text(yaml.dump(full_yaml_data))
 
-        assert generator.process_requests() is True
+        with patch(URLOPEN, return_value=ok("# Full README")):
+            assert generator.process_requests() is True
 
         output = generator.dst_dir / "full.md"
         assert output.exists()
         content = output.read_text()
         assert "# Full README" in content
 
-    @rsps_lib.activate
     def test_fails_on_readme_network_error(self, generator, full_yaml_data):
-        url = "https://raw.githubusercontent.com/foo/full/main/README.md"
-        rsps_lib.add(rsps_lib.GET, url, status=404)
-
         yaml_file = generator.req_path / "full.yaml"
         yaml_file.write_text(yaml.dump(full_yaml_data))
 
-        assert generator.process_requests() is False
+        with patch(URLOPEN, side_effect=http_error(404)):
+            assert generator.process_requests() is False
         assert not (generator.dst_dir / "full.md").exists()
 
     def test_fails_on_io_error_writing_post(self, generator, minimal_yaml_data, monkeypatch):

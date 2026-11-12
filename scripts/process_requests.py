@@ -3,6 +3,8 @@
 import logging
 import re
 import sys
+import urllib.error
+import urllib.request
 from datetime import date
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
@@ -10,11 +12,40 @@ from urllib.parse import urljoin, urlsplit
 import yaml
 from pydantic import BaseModel, HttpUrl, ValidationError, model_validator
 
-import requests
-
 # Set up logging
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
+
+USER_AGENT = "justme.dev-etl"
+
+
+class FetchError(Exception):
+    """Raised when a remote text resource cannot be fetched."""
+
+
+def fetch_text(url: str, timeout: float = 10) -> str:
+    """GET `url` and return the body decoded as text (UTF-8 unless the headers say otherwise).
+
+    Raises:
+        FetchError: on HTTP errors (message includes the status code), network
+            errors, timeouts, non-2xx responses, or an undecodable body.
+    """
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            status = response.status
+            if not 200 <= status < 300:
+                raise FetchError(f"HTTP {status} for url: {url}")
+            charset = response.headers.get_content_charset() or "utf-8"
+            return response.read().decode(charset)
+    except urllib.error.HTTPError as e:
+        raise FetchError(f"HTTP {e.code} for url: {url}") from e
+    except urllib.error.URLError as e:
+        raise FetchError(f"{e.reason} for url: {url}") from e
+    except TimeoutError as e:
+        raise FetchError(f"Timed out after {timeout}s for url: {url}") from e
+    except (LookupError, UnicodeDecodeError) as e:
+        raise FetchError(f"Cannot decode response from {url}: {e}") from e
 
 
 class ProjectRequest(BaseModel):
@@ -100,10 +131,9 @@ class GenerateFiles:
 
         url = f"https://raw.githubusercontent.com/{user}/{project}/{branch}/{readme_file}"
         try:
-            response = requests.get(url, timeout=10)
-            response.raise_for_status()
-            return absolutize_links(response.text, user, project, branch, readme_file)
-        except requests.RequestException as e:
+            text = fetch_text(url, timeout=10)
+            return absolutize_links(text, user, project, branch, readme_file)
+        except FetchError as e:
             logger.error("Failed to fetch README from %s: %s", url, e)
             return ""
 
@@ -137,7 +167,7 @@ class GenerateFiles:
             except ValidationError as e:
                 error_count += 1
                 logger.error("Validation error for %s: %s", req_file, e)
-            except requests.RequestException as e:
+            except FetchError as e:
                 error_count += 1
                 logger.error("Network error fetching README for %s: %s", req_file, e)
             except OSError as e:
@@ -164,7 +194,7 @@ class GenerateFiles:
                 request.readmeFile,
             )
             if not readme:
-                raise requests.RequestException(
+                raise FetchError(
                     f"Failed to fetch README for {request.title}"
                 )
 

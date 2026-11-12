@@ -20,12 +20,10 @@
           corepack_24
           (python3.withPackages (ps: with ps; [
             pyyaml
-            requests
             pydantic
             pillow
             pytest
             pytest-cov
-            responses
             boto3
             python-dotenv
           ]))
