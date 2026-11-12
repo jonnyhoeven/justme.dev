@@ -22,7 +22,8 @@
   --vp-c-default-3: var(--vp-c-gray-3);
   --vp-c-default-soft: var(--vp-c-gray-soft);
 
-  /* Electric blue and Indigo accent (WCAG AA compliant against white/light backgrounds) */
+  /* Electric blue and Indigo accent (WCAG AA compliant against white/light
+     backgrounds; verified by tests/unit/contrast.test.ts) */
   --vp-c-brand-1: #4f46e5;
   --vp-c-brand-2: #6366f1;
   --vp-c-brand-3: #4338ca;
@@ -144,10 +145,10 @@
   --vp-button-brand-bg: var(--vp-c-brand-3);
   --vp-button-brand-hover-border: transparent;
   --vp-button-brand-hover-text: var(--vp-c-white);
-  --vp-button-brand-hover-bg: var(--vp-c-brand-2);
+  --vp-button-brand-hover-bg: #4f46e5;
   --vp-button-brand-active-border: transparent;
   --vp-button-brand-active-text: var(--vp-c-white);
-  --vp-button-brand-active-bg: var(--vp-c-brand-1);
+  --vp-button-brand-active-bg: #3730a3;
 
   /* ── Custom Block ────────────────────────────────────────────────────── */
 
@@ -215,15 +216,16 @@
   --vp-c-text-1: rgba(255, 255, 255, 0.9);
   --vp-c-text-2: rgba(255, 255, 255, 0.65);
 
-  /* WCAG AA compliant brand accents for dark surfaces (contrast > 6.5:1 against dark bg) */
+  /* WCAG AA compliant brand accents for dark surfaces (verified by
+     tests/unit/contrast.test.ts) */
   --vp-c-brand-1: #818cf8;
   --vp-c-brand-2: #a5b4fc;
   --vp-c-brand-3: #6366f1;
   --vp-c-brand-soft: rgba(129, 140, 248, 0.16);
 
   --vp-button-brand-bg: #4f46e5;
-  --vp-button-brand-hover-bg: #6366f1;
-  --vp-button-brand-active-bg: #4338ca;
+  --vp-button-brand-hover-bg: #4338ca;
+  --vp-button-brand-active-bg: #3730a3;
   --vp-button-brand-text: var(--vp-c-white);
   --vp-button-brand-hover-text: var(--vp-c-white);
 
