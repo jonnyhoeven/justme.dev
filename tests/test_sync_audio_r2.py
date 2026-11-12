@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: Jonny van der Hoeven
 # SPDX-License-Identifier: GPL-3.0-or-later
+import json
 import os
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -13,7 +14,10 @@ from scripts.sync_audio_r2 import (
     load_env,
     main,
     parse_xm_header,
+    read_catalog,
+    read_catalog_trackers,
     upload_single_file,
+    write_catalog,
 )
 
 
@@ -173,3 +177,47 @@ def test_sync_main_flow_upload_failure(tmp_path: Path, monkeypatch: pytest.Monke
         main()
 
     assert exc_info.value.code == 1
+
+
+def test_catalog_roundtrip_and_format(tmp_path: Path) -> None:
+    path = tmp_path / "data" / "music-tracks.json"
+    tracks = [
+        {"filename": "a.xm", "url": "x/a.xm", "title": "A", "channels": 8, "bpm": 125, "tracker": "FT2"},
+        {"filename": "b.xm", "url": "x/b.xm", "title": "B", "tracker": "MT"},
+        {"filename": "c.xm", "url": "x/c.xm", "title": "Caf\u00e9"},
+    ]
+    write_catalog(tracks, path)
+
+    text = path.read_text(encoding="utf-8")
+    data = json.loads(text)
+    assert data["version"] == 2
+    assert data["trackers"] == ["FT2", "MT"]
+    assert data["tracks"] == [["a.xm", "A", 8, 125, 0], ["b.xm", "B", None, None, 1], ["c.xm", "Caf\u00e9"]]
+    assert "url" not in text
+    # One track per line keeps git diffs per-track.
+    assert '["a.xm","A",8,125,0],\n["b.xm","B",null,null,1],\n["c.xm","Caf\u00e9"]\n' in text
+
+    assert read_catalog(path) == [{k: v for k, v in t.items() if k != "url"} for t in tracks]
+
+
+def test_catalog_keeps_tracker_indices_stable(tmp_path: Path) -> None:
+    path = tmp_path / "music-tracks.json"
+    write_catalog([{"filename": "b.xm", "title": "B", "tracker": "Z"}], path)
+    write_catalog(
+        [
+            {"filename": "a.xm", "title": "A", "tracker": "A-tracker"},
+            {"filename": "b.xm", "title": "B", "tracker": "Z"},
+        ],
+        path,
+    )
+    assert read_catalog_trackers(path) == ["Z", "A-tracker"]
+
+
+def test_read_catalog_rejects_unknown_format(tmp_path: Path) -> None:
+    path = tmp_path / "music-tracks.json"
+    path.write_text("[]", encoding="utf-8")
+    assert read_catalog_trackers(path) == []
+    assert read_catalog_trackers(tmp_path / "missing.json") == []
+    path.write_text(json.dumps({"version": 1}), encoding="utf-8")
+    with pytest.raises(ValueError):
+        read_catalog(path)

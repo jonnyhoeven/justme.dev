@@ -3,7 +3,7 @@
 import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('../../data/music-initial.data', () => ({
-  data: [{ filename: 'a.xm', url: '/audio/a.xm', title: 'A' }]
+  data: { trackers: [], tracks: [['a.xm', 'A']] }
 }));
 vi.mock('../../data/music.data', () => {
   throw new Error('network');

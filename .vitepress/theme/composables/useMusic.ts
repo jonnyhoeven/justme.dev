@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { ref, computed, shallowRef, triggerRef } from 'vue';
-import { data as initialTracks } from '../../../data/music-initial.data';
+import { data as initialCatalog } from '../../../data/music-initial.data';
 import { INITIAL_TRACK_FILENAMES } from '../../../data/initial-tracks';
-import type { MusicTrack } from '../../../data/music.data';
+import { expandCatalog, type MusicTrack } from '../../../lib/music-catalog';
 export { INITIAL_TRACK_FILENAMES };
 import type { XMPlayer } from '../../../lib/audio/xm-player';
 
@@ -18,6 +18,7 @@ const currentTrackIndex = ref(0);
  * with every page) and is swapped for the full catalog by `ensureCatalog()`,
  * which loads the big `music.data` chunk on demand.
  */
+const initialTracks = expandCatalog(initialCatalog);
 const tracks = shallowRef<MusicTrack[]>(initialTracks);
 const catalogLoaded = ref(false);
 const catalogFailed = ref(false);
@@ -193,7 +194,8 @@ let catalogPromise: Promise<void> | null = null;
  */
 const ensureCatalog = (): Promise<void> => {
   catalogPromise ??= import('../../../data/music.data').then(
-    ({ data: full }) => {
+    ({ data }) => {
+      const full = expandCatalog(data);
       const old = tracks.value;
       const currentName = old[currentTrackIndex.value]?.filename;
       const byName = new Map(full.map((t, i) => [t.filename, i]));

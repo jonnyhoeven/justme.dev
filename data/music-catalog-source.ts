@@ -2,44 +2,43 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import fs from 'node:fs';
 import path from 'node:path';
+import {
+  CATALOG_FIELDS,
+  type CompactCatalog,
+  type CompactTrack,
+  type MusicTrack
+} from '../lib/music-catalog';
 
-export interface MusicTrack {
-  filename: string;
-  url: string;
-  title: string;
-  channels?: number;
-  bpm?: number;
-  tracker?: string;
-}
+export type { MusicTrack };
 
-/** Read `music-tracks.json`, sorted by filename; empty when missing/invalid. */
-export function loadSortedCatalog(): MusicTrack[] {
+const byFilename = (a: CompactTrack, b: CompactTrack) =>
+  a[0].localeCompare(b[0], undefined, { numeric: true, sensitivity: 'base' });
+
+/**
+ * Read `music-tracks.json` (format v2, see `scripts/sync_audio_r2.py`) as a
+ * compact catalog sorted by filename; empty when missing/invalid.
+ */
+export function loadCompactCatalog(): CompactCatalog {
+  const empty: CompactCatalog = { trackers: [], tracks: [] };
   const catalogPath = path.resolve(__dirname, '../data/music-tracks.json');
-  if (!fs.existsSync(catalogPath)) return [];
+  if (!fs.existsSync(catalogPath)) return empty;
 
   try {
-    const raw = fs.readFileSync(catalogPath, 'utf-8');
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed
-        .sort((a, b) =>
-          a.filename.localeCompare(b.filename, undefined, {
-            numeric: true,
-            sensitivity: 'base'
-          })
-        )
-        .map((entry) => ({
-          filename: entry.filename,
-          url: entry.url,
-          title: entry.title,
-          ...(entry.channels ? { channels: entry.channels } : {}),
-          ...(entry.bpm ? { bpm: entry.bpm } : {}),
-          ...(entry.tracker ? { tracker: entry.tracker } : {})
-        }));
+    const parsed = JSON.parse(fs.readFileSync(catalogPath, 'utf-8'));
+    if (
+      parsed?.version === 2 &&
+      Array.isArray(parsed.trackers) &&
+      Array.isArray(parsed.tracks) &&
+      JSON.stringify(parsed.fields) === JSON.stringify(CATALOG_FIELDS)
+    ) {
+      return {
+        trackers: parsed.trackers,
+        tracks: [...(parsed.tracks as CompactTrack[])].sort(byFilename)
+      };
     }
   } catch {
-    // Fallback to empty array if JSON is corrupted or invalid
+    // Fallback to empty catalog if JSON is corrupted or invalid
   }
 
-  return [];
+  return empty;
 }

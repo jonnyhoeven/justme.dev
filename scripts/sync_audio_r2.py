@@ -153,6 +153,86 @@ def build_track_entry(
     return entry
 
 
+CATALOG_VERSION = 2
+CATALOG_FIELDS = ["filename", "title", "channels", "bpm", "tracker"]
+
+
+def read_catalog_trackers(path: Path) -> list[str]:
+    """Return the tracker lookup table of an existing v2 catalog (else empty)."""
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        trackers = data["trackers"]
+        if data.get("version") == CATALOG_VERSION and all(isinstance(t, str) for t in trackers):
+            return list(trackers)
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    return []
+
+
+def write_catalog(tracks: list[dict[str, Any]], path: Path) -> None:
+    """Write the compact v2 catalog: tracker lookup table + one tuple per line.
+
+    ``url`` is not stored (it is ``MEDIA_URL/audio/<filename>``). Tracker
+    indices of an existing catalog are kept stable and new trackers appended,
+    so a sync only touches the lines of tracks that changed.
+    """
+    trackers = read_catalog_trackers(path)
+    for t in tracks:
+        name = t.get("tracker")
+        if name and name not in trackers:
+            trackers.append(name)
+    index = {name: i for i, name in enumerate(trackers)}
+
+    def dumps(value: Any) -> str:
+        return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+
+    rows: list[str] = []
+    for t in tracks:
+        row: list[Any] = [
+            t["filename"],
+            t.get("title", ""),
+            t.get("channels"),
+            t.get("bpm"),
+            index.get(t.get("tracker", "")),
+        ]
+        while len(row) > 2 and row[-1] is None:
+            row.pop()
+        rows.append(dumps(row))
+
+    lines = [
+        "{",
+        f'"version":{CATALOG_VERSION},',
+        f'"fields":{dumps(CATALOG_FIELDS)},',
+        f'"trackers":{dumps(trackers)},',
+        '"tracks":[',
+        ",\n".join(rows),
+        "]",
+        "}",
+    ]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def read_catalog(path: Path) -> list[dict[str, Any]]:
+    """Read a v2 catalog back into track dicts (without ``url``)."""
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if data.get("version") != CATALOG_VERSION or data.get("fields") != CATALOG_FIELDS:
+        raise ValueError(f"Unsupported catalog format in {path}")
+    out: list[dict[str, Any]] = []
+    for row in data["tracks"]:
+        row = list(row) + [None] * (len(CATALOG_FIELDS) - len(row))
+        filename, title, channels, bpm, tracker = row
+        entry: dict[str, Any] = {"filename": filename, "title": title}
+        if channels:
+            entry["channels"] = channels
+        if bpm:
+            entry["bpm"] = bpm
+        if tracker is not None:
+            entry["tracker"] = data["trackers"][tracker]
+        out.append(entry)
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Sync audio library to Cloudflare R2")
     parser.add_argument("--dry-run", action="store_true", help="Simulate uploads without executing")
@@ -255,10 +335,7 @@ def main() -> None:
 
     # Write catalog JSON to data/music-tracks.json
     output_catalog = Path("data/music-tracks.json")
-    output_catalog.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_catalog, "w", encoding="utf-8") as f:
-        json.dump(tracks, f, indent=2)
-        f.write("\n")
+    write_catalog(tracks, output_catalog)
 
     print(f"Wrote {len(tracks)} tracks to {output_catalog}")
     print("Sync process completed successfully!")

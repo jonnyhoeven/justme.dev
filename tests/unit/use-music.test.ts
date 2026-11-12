@@ -5,27 +5,28 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 const { catalogImports, INITIAL_MOCK } = vi.hoisted(() => ({
   catalogImports: { count: 0 },
   INITIAL_MOCK: [
-    { filename: 'track1.xm', url: '/audio/track1.xm', title: 'Track 1' },
-    { filename: 'track2.xm', url: '/audio/track2.xm', title: 'Track 2' },
-    {
-      filename: 'uCF-TeleportPro-kg.xm',
-      url: '/audio/uCF-TeleportPro-kg.xm',
-      title: 'Toilet Story 5'
-    }
+    ['track1.xm', 'Track 1'],
+    ['track2.xm', 'Track 2'],
+    ['uCF-TeleportPro-kg.xm', 'Toilet Story 5']
   ]
 }));
 
-vi.mock('../../data/music-initial.data', () => ({ data: INITIAL_MOCK }));
+vi.mock('../../data/music-initial.data', () => ({
+  data: { trackers: [], tracks: INITIAL_MOCK }
+}));
 
 // Full catalog: extra entries before/after so indices shift when it is swapped in.
 vi.mock('../../data/music.data', () => {
   catalogImports.count++;
   return {
-    data: [
-      { filename: 'aaa-extra.xm', url: '/audio/aaa-extra.xm', title: 'AAA' },
-      ...INITIAL_MOCK,
-      { filename: 'zzz-extra.xm', url: '/audio/zzz-extra.xm', title: 'ZZZ' }
-    ]
+    data: {
+      trackers: [],
+      tracks: [
+        ['aaa-extra.xm', 'AAA'],
+        ...INITIAL_MOCK,
+        ['zzz-extra.xm', 'ZZZ']
+      ]
+    }
   };
 });
 
