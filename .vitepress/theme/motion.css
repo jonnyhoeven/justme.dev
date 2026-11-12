@@ -1,0 +1,51 @@
+/* SPDX-FileCopyrightText: Jonny van der Hoeven */
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/**
+ * Reduced motion
+ * --------------------------------------------------------------------------
+ * Loaded last from style.css. Every selector below repeats the specificity of
+ * the rule it overrides, so source order decides; `!important` is used only
+ * where the original rule is itself `!important`. Colour, shadow and opacity
+ * changes on hover are kept, only movement (lift, scale, slide, sweep and
+ * entrance animations) is removed. Scoped component styles carry their own
+ * reduced-motion blocks (MiniPlayer, HeroSplat).
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Entrance animations (fadeInUp): render in the final state at once. */
+  .VPHero .name,
+  .VPHero .text,
+  .VPHero .tagline,
+  .VPHero .actions,
+  .VPFeatures {
+    animation: none;
+  }
+
+  /* Brand button / .flourish shimmer sweep: keep the sweep parked off-box. */
+  .VPButton.brand:hover::after,
+  .flourish:hover::after {
+    left: -100%;
+    transition: none;
+  }
+
+  /* Hover and press movement: buttons, cards, badges, list images. */
+  .VPFeature:hover,
+  .view-all-button:hover,
+  .view-all-button:active,
+  .shieldButton:hover,
+  .container_row:hover .listImage,
+  .container_row:hover .listImagebg,
+  .container_row:hover .articleImage {
+    transform: none;
+  }
+
+  /* The originals below use !important, so these must as well. */
+  .VPButton:hover,
+  .VPButton:active,
+  .VPSearchButton:hover,
+  .DocSearch-Button:hover,
+  .VPLocalSearchBox .result.selected,
+  .VPLocalSearchBox .result:hover:not(.selected) {
+    transform: none !important;
+  }
+}

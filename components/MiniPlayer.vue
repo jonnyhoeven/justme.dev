@@ -921,6 +921,13 @@ onBeforeUnmount(() => {
   transform: scale(1.15);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .item-fav-col:hover,
+  .volume-range::-webkit-slider-thumb:hover {
+    transform: none;
+  }
+}
+
 .item-heart {
   color: var(--vp-c-text-3);
   transition: all var(--duration-fast) ease;
@@ -1037,6 +1044,13 @@ onBeforeUnmount(() => {
 .panel-pop-leave-to {
   opacity: 0;
   transform: translateY(10px) scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-pop-enter-from,
+  .panel-pop-leave-to {
+    transform: none;
+  }
 }
 
 @media (max-width: 767px) {

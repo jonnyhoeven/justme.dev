@@ -623,7 +623,9 @@ watch(
     container.scrollTo({
       left:
         container.scrollLeft + (el.left - c.left) - (c.width - el.width) / 2,
-      behavior: 'smooth'
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'auto'
+        : 'smooth'
     });
   }
 );
