@@ -8,6 +8,8 @@ on:
       - 'AGENTS.md'
       - 'CLAUDE.md'
       - 'GEMINI.md'
+      - 'TODO.md'
+      - 'issues.md'
   pull_request:
     branches: [main]
     paths-ignore:
@@ -15,6 +17,10 @@ on:
       - 'AGENTS.md'
       - 'CLAUDE.md'
       - 'GEMINI.md'
+      - 'TODO.md'
+      - 'issues.md'
+  schedule:
+    - cron: '0 3 * * 1' # Weekly on Monday at 03:00 UTC
   workflow_dispatch:
 
 # Scoped concurrency: cancel running PR builds but allow main branch builds to complete.
@@ -46,14 +52,17 @@ jobs:
       - name: Install dependencies
         run: nix develop .#ci --command pnpm install --frozen-lockfile
 
-      - name: Lint
-        run: nix develop .#ci --command pnpm run lint
+      - name: Lint JS/TS
+        run: nix develop .#ci --command pnpm run lint:check
+
+      - name: Check formatting
+        run: nix develop .#ci --command pnpm run format:check
 
       - name: Lint Python
         run: nix develop .#ci --command ruff check .
 
-      - name: Audit production dependencies
-        run: nix develop .#ci --command pnpm audit --prod
+      - name: Audit dependencies
+        run: nix develop .#ci --command pnpm audit
 
       - name: Run all tests
         run: nix develop .#ci --command pnpm run test:all

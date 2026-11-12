@@ -11,6 +11,9 @@ const __dirname = path.dirname(__filename);
 const gitignorePath = path.resolve(__dirname, '.gitignore');
 
 export default [
+  {
+    ignores: ['.vitepress/cache/**', '.vitepress/dist/**', 'dist/**']
+  },
   includeIgnoreFile(gitignorePath),
   ...pluginVue.configs['flat/essential'],
   ...vueTsEslintConfig(),
