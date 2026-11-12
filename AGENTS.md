@@ -12,7 +12,7 @@ generated_artifacts: projects/*.md, public/projects-cache/
 
 # AGENTS.md
 
-**justme.dev** aggregates content from GitHub repositories with a Python ETL pipeline (`requests/*.yaml` → `scripts/process_requests.py` → `projects/*.md`), builds it with VitePress, and deploys a static site to GitHub Pages via `.github/workflows/deploy.yml`.
+**justme.dev** aggregates content from GitHub repositories with a Python ETL pipeline (`requests/*.yaml` → `scripts/process_requests.py` → `projects/*.md`), builds it with VitePress, and deploys a static site to GitHub Pages via `.github/workflows/deploy.yml`. `.github/workflows/update-flake-lock.yml` opens a weekly PR updating `flake.lock` (`DeterminateSystems/update-flake-lock`); Dependabot covers npm and Actions. Python dependencies live in `flake.nix` and are mirrored in `pyproject.toml` (`[project]`, `[dependency-groups]`); keep both in sync.
 
 ## Environment
 

@@ -1,3 +1,23 @@
+# The Nix flake (`flake.nix`, `python3.withPackages`) is the source of truth for the dev shell.
+# This table only mirrors it so tooling and bots can see the Python dependencies; it is not installable.
+[project]
+name = "justme-dev-scripts"
+version = "0.0.0"
+requires-python = ">=3.13"
+dependencies = [
+  "boto3>=1.42",
+  "pillow>=12.1",
+  "pydantic>=2.12",
+  "python-dotenv>=1.2",
+  "pyyaml>=6.0",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=9.0",
+  "pytest-cov>=7.0",
+]
+
 [tool.ruff]
 line-length = 120
 

@@ -57,7 +57,7 @@ Full read of the components, `lib/`, theme CSS, ETL scripts, CI and docs at comm
   - [ ] Plan the VitePress 2 move.
 - [x] **Node 22 is in maintenance** ([`flake.nix`](flake.nix)): move to `nodejs_24` (or 26), update the README, and check whether `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` in the workflow is still needed.
 - [x] **Minor updates available**: `vue` 3.5.45, `vitest` and `@vitest/coverage-v8` 5.1.0, `eslint` 10.14.0, `eslint-plugin-vue` 10.12.1; `pre-commit-hooks` is on v5.0.0.
-- [ ] **Dependabot covers only npm and Actions**: add a weekly `nix flake update` job (or Renovate with the `nix` manager) and declare the Python dependencies somewhere a bot can see them.
+- [x] **Dependabot covers only npm and Actions**: add a weekly `nix flake update` job (or Renovate with the `nix` manager) and declare the Python dependencies somewhere a bot can see them.
 - [x] **Coverage numbers are misleading** ([`vitest.config.ts`](vitest.config.ts)): "100%" covers six small files (127 statements). `xm-player.ts`, `useMusic.ts` and the scenes have tests but are excluded from `coverage.include`. Include them with realistic per-file thresholds.
 - [ ] **No end-to-end smoke test**: `data-animation` / `data-scene` / `data-phase` were added for testing but nothing uses them. Add one Playwright test: the home page hydrates without console errors, the director advances on click, and play/next works with a fixture `.xm`.
 - [x] **Add a `.prettierignore` and explicit ESLint ignores**: both tools rely on `.gitignore`. The uncommitted `.gitignore` edit in the working tree (drops `.vitepress/cache` and `.vitepress/dist`) makes `eslint .` report 288 errors from the Vite cache and would make `pnpm run format` rewrite it.
