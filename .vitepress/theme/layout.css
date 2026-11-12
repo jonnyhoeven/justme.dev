@@ -25,13 +25,6 @@ h6,
   border-bottom: 1px solid var(--glass-border-light) !important;
 }
 
-.dark .VPNavBar {
-  background-color: var(--glass-bg-dark) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  border-bottom: 1px solid var(--glass-border-dark) !important;
-}
-
 .VPFeature {
   background-color: var(--glass-bg-light) !important;
   backdrop-filter: blur(10px) !important;

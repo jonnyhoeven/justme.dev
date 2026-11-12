@@ -168,6 +168,49 @@ let rafId: number | null = null;
 let scopesDirty = true;
 let gridDirty = true;
 
+// Canvas palette: the --tracker-* custom properties on .tracker-player-wrap,
+// read once on mount (canvases cannot use var()). The values are the same in
+// light and dark mode, so no re-read on theme change is needed.
+const TRACKER_PALETTE_KEYS = [
+  'bg',
+  'header-bg',
+  'divider',
+  'header-rule',
+  'label',
+  'header-label',
+  'muted',
+  'row-highlight',
+  'row-highlight-line',
+  'row-num',
+  'row-num-current',
+  'empty',
+  'note',
+  'note-current',
+  'instrument',
+  'instrument-current',
+  'volume',
+  'effect',
+  'scope-tile-bg',
+  'scope-tile-border',
+  'scope-tile-muted-bg',
+  'scope-tile-muted-border',
+  'scope-glow',
+  'scope-trace',
+  'scope-trace-muted'
+] as const;
+type TrackerPalette = Record<(typeof TRACKER_PALETTE_KEYS)[number], string>;
+let palette = {} as TrackerPalette;
+const readPalette = () => {
+  const el = playerRootRef.value;
+  if (!el) return;
+  const cs = getComputedStyle(el);
+  const next = {} as TrackerPalette;
+  for (const key of TRACKER_PALETTE_KEYS) {
+    next[key] = cs.getPropertyValue(`--tracker-${key}`).trim();
+  }
+  palette = next;
+};
+
 // getContext('2d') returns the same object every call; look it up once per
 // canvas element (WeakMap so a replaced element is re-fetched, not leaked).
 const ctxCache = new WeakMap<HTMLCanvasElement, CanvasRenderingContext2D>();
@@ -225,18 +268,20 @@ const renderOscilloscopes = () => {
     const isMuted = mutes[ch];
 
     // Background tile
-    ctx.fillStyle = isMuted ? 'rgba(255, 0, 0, 0.05)' : 'rgba(0, 0, 0, 0.2)';
+    ctx.fillStyle = isMuted
+      ? palette['scope-tile-muted-bg']
+      : palette['scope-tile-bg'];
     ctx.fillRect(x0 + 1, y0 + 1, boxW - 2, boxH - 2);
 
     // Border
     ctx.strokeStyle = isMuted
-      ? 'rgba(239, 68, 68, 0.3)'
-      : 'rgba(255, 255, 255, 0.08)';
+      ? palette['scope-tile-muted-border']
+      : palette['scope-tile-border'];
     ctx.lineWidth = 1;
     ctx.strokeRect(x0 + 1, y0 + 1, boxW - 2, boxH - 2);
 
     // Channel label
-    ctx.fillStyle = isMuted ? '#ef4444' : 'rgba(255, 255, 255, 0.5)';
+    ctx.fillStyle = isMuted ? palette.muted : palette.label;
     ctx.font = '10px monospace';
     ctx.fillText(`CH${ch + 1}${isMuted ? ' (M)' : ''}`, x0 + 4, y0 + 12);
 
@@ -265,12 +310,14 @@ const renderOscilloscopes = () => {
       ctx.lineTo(x0 + boxW - 4, midY);
     }
     if (!isMuted) {
-      ctx.strokeStyle = 'rgba(139, 92, 246, 0.28)';
+      ctx.strokeStyle = palette['scope-glow'];
       ctx.lineWidth = 4.5;
       ctx.lineJoin = 'round';
       ctx.stroke();
     }
-    ctx.strokeStyle = isMuted ? '#71717a' : '#a78bfa';
+    ctx.strokeStyle = isMuted
+      ? palette['scope-trace-muted']
+      : palette['scope-trace'];
     ctx.lineWidth = 1.4;
     ctx.stroke();
   }
@@ -361,13 +408,13 @@ const renderPatternGrid = () => {
   const chWidth = (width - rowNumWidth) / pageChannels;
 
   // Background
-  ctx.fillStyle = '#090a0f';
+  ctx.fillStyle = palette.bg;
   ctx.fillRect(0, 0, width, height);
 
   // Active playing row highlight bar
-  ctx.fillStyle = 'rgba(59, 130, 246, 0.25)';
+  ctx.fillStyle = palette['row-highlight'];
   ctx.fillRect(0, centerRowY, width, rowHeight);
-  ctx.strokeStyle = '#3b82f6';
+  ctx.strokeStyle = palette['row-highlight-line'];
   ctx.lineWidth = 1;
   ctx.strokeRect(0, centerRowY, width, rowHeight);
 
@@ -384,7 +431,8 @@ const renderPatternGrid = () => {
     const isValidRow = rowIdx >= 0 && rowIdx < numRows;
 
     // Row number column
-    ctx.fillStyle = rowIdx === curRow ? '#60a5fa' : '#52525b';
+    ctx.fillStyle =
+      rowIdx === curRow ? palette['row-num-current'] : palette['row-num'];
     const hexRow = isValidRow
       ? (rowIdx < 16 ? '0' : '') + rowIdx.toString(16).toUpperCase()
       : '··';
@@ -403,7 +451,7 @@ const renderPatternGrid = () => {
       if (dim) ctx.globalAlpha = 0.35;
 
       if (!cell) {
-        ctx.fillStyle = '#3f3f46';
+        ctx.fillStyle = palette.empty;
         ctx.fillText('··· ·· ·· ···', cx + 4, yPos + 14);
         ctx.globalAlpha = 1;
         continue;
@@ -418,7 +466,11 @@ const renderPatternGrid = () => {
       // Note text
       const noteStr = XMPlayer.prettifyNote(note);
       ctx.fillStyle =
-        note >= 0 ? (rowIdx === curRow ? '#38bdf8' : '#0284c7') : '#52525b';
+        note >= 0
+          ? rowIdx === curRow
+            ? palette['note-current']
+            : palette.note
+          : palette['row-num'];
       ctx.fillText(noteStr, cx + 2, yPos + 14);
 
       // Instrument
@@ -427,18 +479,22 @@ const renderPatternGrid = () => {
           ? (inst < 16 ? '0' : '') + inst.toString(16).toUpperCase()
           : '··';
       ctx.fillStyle =
-        inst > 0 ? (rowIdx === curRow ? '#fbbf24' : '#d97706') : '#3f3f46';
+        inst > 0
+          ? rowIdx === curRow
+            ? palette['instrument-current']
+            : palette.instrument
+          : palette.empty;
       ctx.fillText(instStr, cx + 30, yPos + 14);
 
       // Volume
       const volStr =
         vol > 0 ? vol.toString(16).toUpperCase().padStart(2, '0') : '··';
-      ctx.fillStyle = vol > 0 ? '#10b981' : '#3f3f46';
+      ctx.fillStyle = vol > 0 ? palette.volume : palette.empty;
       ctx.fillText(volStr, cx + 48, yPos + 14);
 
       // Effect
       const effStr = XMPlayer.prettifyEffect(eff, param);
-      ctx.fillStyle = effStr !== '···' ? '#f43f5e' : '#3f3f46';
+      ctx.fillStyle = effStr !== '···' ? palette.effect : palette.empty;
       ctx.fillText(effStr, cx + 66, yPos + 14);
 
       ctx.globalAlpha = 1;
@@ -446,7 +502,7 @@ const renderPatternGrid = () => {
   }
 
   // Draw vertical dividers between channels
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+  ctx.strokeStyle = palette.divider;
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(rowNumWidth, 0);
@@ -460,9 +516,9 @@ const renderPatternGrid = () => {
 
   // Sticky channel header, so the columns stay identifiable (and match the
   // CHn tiles in the waveform grid above) while the rows scroll underneath.
-  ctx.fillStyle = 'rgba(9, 10, 15, 0.94)';
+  ctx.fillStyle = palette['header-bg'];
   ctx.fillRect(0, 0, width, PATTERN_HEADER_HEIGHT);
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+  ctx.strokeStyle = palette['header-rule'];
   ctx.beginPath();
   ctx.moveTo(0, PATTERN_HEADER_HEIGHT - 0.5);
   ctx.lineTo(width, PATTERN_HEADER_HEIGHT - 0.5);
@@ -470,7 +526,7 @@ const renderPatternGrid = () => {
   ctx.font = '10px monospace';
   for (let c = chStart; c < chEnd; c++) {
     const isMuted = mutes[c];
-    ctx.fillStyle = isMuted ? '#ef4444' : 'rgba(255, 255, 255, 0.55)';
+    ctx.fillStyle = isMuted ? palette.muted : palette['header-label'];
     ctx.fillText(
       `CH${c + 1}${isMuted ? ' (M)' : ''}`,
       rowNumWidth + (c - chStart) * chWidth + 4,
@@ -588,6 +644,8 @@ const handleScopesCanvasClick = (e: MouseEvent) => {
 };
 
 onMounted(() => {
+  readPalette();
+  markAllDirty();
   window.addEventListener('resize', markAllDirty);
   loadFavorites();
   void ensureCatalog();
@@ -724,8 +782,11 @@ onBeforeUnmount(() => {
             viewBox="0 0 24 24"
             width="14"
             height="14"
-            :fill="isCurrentFavorite ? '#ef4444' : 'none'"
-            :stroke="isCurrentFavorite ? '#ef4444' : 'currentColor'"
+            :fill="isCurrentFavorite ? 'currentColor' : 'none'"
+            stroke="currentColor"
+            :style="
+              isCurrentFavorite ? { color: 'var(--c-favorite)' } : undefined
+            "
             stroke-width="2"
           >
             <path
@@ -1147,6 +1208,33 @@ onBeforeUnmount(() => {
   gap: 16px;
   margin: 1.5rem 0 2.5rem 0;
   font-family: inherit;
+
+  /* Canvas palette (read once by readPalette(); same in light and dark) */
+  --tracker-bg: #090a0f;
+  --tracker-header-bg: rgba(9, 10, 15, 0.94);
+  --tracker-divider: rgba(255, 255, 255, 0.05);
+  --tracker-header-rule: rgba(255, 255, 255, 0.12);
+  --tracker-label: rgba(255, 255, 255, 0.5);
+  --tracker-header-label: rgba(255, 255, 255, 0.55);
+  --tracker-muted: var(--c-favorite);
+  --tracker-row-highlight: rgba(59, 130, 246, 0.25);
+  --tracker-row-highlight-line: #3b82f6;
+  --tracker-row-num: #52525b;
+  --tracker-row-num-current: #60a5fa;
+  --tracker-empty: #3f3f46;
+  --tracker-note: #0284c7;
+  --tracker-note-current: #38bdf8;
+  --tracker-instrument: #d97706;
+  --tracker-instrument-current: #fbbf24;
+  --tracker-volume: #10b981;
+  --tracker-effect: #f43f5e;
+  --tracker-scope-tile-bg: rgba(0, 0, 0, 0.2);
+  --tracker-scope-tile-border: rgba(255, 255, 255, 0.08);
+  --tracker-scope-tile-muted-bg: rgba(255, 0, 0, 0.05);
+  --tracker-scope-tile-muted-border: rgba(239, 68, 68, 0.3);
+  --tracker-scope-glow: rgba(139, 92, 246, 0.28);
+  --tracker-scope-trace: #a78bfa;
+  --tracker-scope-trace-muted: #71717a;
 }
 
 /* Cards */
@@ -1280,8 +1368,8 @@ onBeforeUnmount(() => {
 }
 
 .tracker-btn.fav-btn.active {
-  background: rgba(239, 68, 68, 0.15);
-  border-color: #ef4444;
+  background: color-mix(in srgb, var(--c-favorite) 15%, transparent);
+  border-color: var(--c-favorite);
 }
 
 /* Transport */

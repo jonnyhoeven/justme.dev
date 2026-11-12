@@ -19,7 +19,11 @@
   margin-top: 2px !important;
   display: flex !important;
   align-items: center !important;
-  background-color: rgba(var(--vp-c-bg-elv-rgb), 0.4) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--vp-c-bg-elv) 40%,
+    transparent
+  ) !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -48,7 +52,11 @@
 @media (hover: hover) {
   .VPSearchButton:hover,
   .DocSearch-Button:hover {
-    background-color: rgba(var(--vp-c-bg-elv-rgb), 0.6) !important;
+    background-color: color-mix(
+      in srgb,
+      var(--vp-c-bg-elv) 60%,
+      transparent
+    ) !important;
     transform: translateY(-2px) scale(1.02) !important;
     box-shadow: 0 8px 16px var(--vp-c-brand-1-alpha-15) !important;
     border-color: var(--vp-c-brand-2) !important;
@@ -134,7 +142,11 @@
 }
 
 .VPLocalSearchBox .search-bar:focus-within {
-  background: rgba(var(--vp-c-brand-rgb), 0.05) !important;
+  background: color-mix(
+    in srgb,
+    var(--vp-c-brand-1) 5%,
+    transparent
+  ) !important;
   border-bottom-color: var(--vp-c-brand-1) !important;
 }
 

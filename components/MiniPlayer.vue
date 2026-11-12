@@ -517,8 +517,11 @@ onBeforeUnmount(() => {
                 viewBox="0 0 24 24"
                 width="12"
                 height="12"
-                :fill="onlyFavorites ? '#ef4444' : 'none'"
-                :stroke="onlyFavorites ? '#ef4444' : 'currentColor'"
+                :fill="onlyFavorites ? 'currentColor' : 'none'"
+                stroke="currentColor"
+                :style="
+                  onlyFavorites ? { color: 'var(--c-favorite)' } : undefined
+                "
                 stroke-width="2"
                 class="filter-heart-icon"
               >
@@ -582,11 +585,13 @@ onBeforeUnmount(() => {
                   width="13"
                   height="13"
                   :fill="
-                    favorites.has(item.track.filename) ? '#ef4444' : 'none'
+                    favorites.has(item.track.filename)
+                      ? 'var(--c-favorite)'
+                      : 'none'
                   "
                   :stroke="
                     favorites.has(item.track.filename)
-                      ? '#ef4444'
+                      ? 'var(--c-favorite)'
                       : 'var(--vp-c-text-3)'
                   "
                   stroke-width="2"
@@ -689,7 +694,7 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 8px;
   padding: 4px 14px;
-  background: rgba(var(--vp-c-bg-elv-rgb), 0.85);
+  background: color-mix(in srgb, var(--vp-c-bg-elv) 85%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--vp-c-divider);
@@ -736,7 +741,7 @@ onBeforeUnmount(() => {
 }
 
 .mini-btn.fav-toggle.active {
-  color: #ef4444;
+  color: var(--c-favorite);
 }
 
 .mini-btn.play {
@@ -895,7 +900,7 @@ onBeforeUnmount(() => {
   width: 480px;
   max-width: calc(100vw - 24px);
   max-height: 65vh;
-  background: rgba(var(--vp-c-bg-elv-rgb), 0.94);
+  background: color-mix(in srgb, var(--vp-c-bg-elv) 94%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--vp-c-divider);
@@ -980,9 +985,9 @@ onBeforeUnmount(() => {
 }
 
 .filter-fav-btn.active {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-  border-color: #ef4444;
+  background: color-mix(in srgb, var(--c-favorite) 15%, transparent);
+  color: var(--c-favorite);
+  border-color: var(--c-favorite);
 }
 
 .track-count-badge {
@@ -1034,7 +1039,7 @@ onBeforeUnmount(() => {
 }
 
 .playlist-item.is-active {
-  background: rgba(var(--vp-c-brand-rgb), 0.12);
+  background: color-mix(in srgb, var(--vp-c-brand-1) 12%, transparent);
   border-left-color: var(--vp-c-brand);
 }
 
@@ -1056,7 +1061,7 @@ onBeforeUnmount(() => {
 }
 
 .item-heart.starred {
-  color: #ef4444;
+  color: var(--c-favorite);
 }
 
 .item-content-col {
