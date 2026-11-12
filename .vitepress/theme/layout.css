@@ -30,7 +30,11 @@ h6,
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px) !important;
   border: 1px solid rgba(0, 0, 0, 0.05) !important;
-  transition: all var(--duration-normal) var(--ease-smooth) !important;
+  transition:
+    color var(--duration-normal) var(--ease-smooth),
+    background-color var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth) !important;
   text-decoration: none !important;
   color: inherit !important;
 }
@@ -47,12 +51,10 @@ h6,
 
 @media (hover: hover) {
   .VPFeature:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-brand-lg) !important;
+    border-color: var(--vp-c-brand-1-alpha-40) !important;
   }
 
   .dark .VPFeature:hover {
-    box-shadow: 0 10px 24px rgba(99, 102, 241, 0.25) !important;
     border-color: var(--vp-c-brand-1-alpha-40) !important;
   }
 }
@@ -216,7 +218,7 @@ h6,
   text-align: center;
 }
 
-/* Styled as a .VPButton.brand variant with the .flourish sweep */
+/* Styled as a .VPButton.brand variant (.flourish: no extra styling now) */
 .view-all-button {
   display: inline-block;
   padding: 0.8rem 2.2rem;
@@ -226,21 +228,19 @@ h6,
   font-weight: 600;
   text-decoration: none !important;
   font-family: var(--vp-font-family-heading);
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition:
+    color var(--duration-normal) var(--ease-smooth),
+    background-color var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 @media (hover: hover) {
   .view-all-button:hover {
     background-color: var(--vp-c-brand-2);
-    transform: translateY(-4px) scale(1.03);
-    box-shadow: var(--shadow-brand-md);
     text-decoration: none !important;
   }
-}
-
-.view-all-button:active {
-  transform: translateY(0) scale(0.98);
 }
 
 /* Mobile: the desktop section gaps (8rem / 4.5rem) leave screens of dead
