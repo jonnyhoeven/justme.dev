@@ -11,6 +11,7 @@ export const SITE_CONSTANTS = {
     'Personal Portfolio, justme.dev, SRE, Kubernetes, Infrastructure as Code',
   IMAGES: {
     DEFAULT: 'https://media.justme.dev/images/justme.dev.webp',
+    AVATAR: 'https://media.justme.dev/images/ava.webp',
     LOGO_LIGHT: 'https://media.justme.dev/images/logo.webp',
     LOGO_DARK: 'https://media.justme.dev/images/logo_dark.webp',
     GOOGLE_ICON: 'https://media.justme.dev/images/google.webp',

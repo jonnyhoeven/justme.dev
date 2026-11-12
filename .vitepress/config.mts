@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { defineConfig, HeadConfig } from 'vitepress';
+import { buildStructuredData, serializeJsonLd } from '../lib/structured-data';
 import transformPage from '../lib/transformPage';
 import { SITE_CONSTANTS } from './constants';
 
@@ -214,6 +215,21 @@ export default defineConfig({
       }
     ]);
     head.push(['meta', { name: 'twitter:description', content: intro }]);
+    const jsonLd = buildStructuredData({
+      relativePath: pageData.relativePath,
+      frontmatter: pf,
+      lastUpdated: pageData.lastUpdated,
+      pageUrl,
+      image,
+      description: intro
+    });
+    if (jsonLd) {
+      head.push([
+        'script',
+        { type: 'application/ld+json' },
+        serializeJsonLd(jsonLd)
+      ]);
+    }
     return head;
   },
   base: '/',
