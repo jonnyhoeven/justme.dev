@@ -94,9 +94,9 @@ Full read of the components, `lib/`, theme CSS, ETL scripts, CI and docs at comm
 
 ### 7. SEO and metadata ([`config.mts`](.vitepress/config.mts))
 
-- [ ] **Duplicate and malformed meta tags**: `transformHead` emits `<meta name="description" property="og:description">` in addition to VitePress' own description tag (two descriptions per page), and `name="title" property="og:title"` in one tag. Emit separate `og:*` tags and set the page `description` from `intro` in `transformPageData`.
-- [ ] **`og:locale` is `en-US`**; Open Graph expects `en_US`. Add `og:image:width/height/alt`, and drop `meta keywords`.
-- [ ] **`article:modified_time` is just the publish date**: use the git `lastUpdated` timestamp VitePress already computes.
+- [x] **Duplicate and malformed meta tags**: `transformHead` emits `<meta name="description" property="og:description">` in addition to VitePress' own description tag (two descriptions per page), and `name="title" property="og:title"` in one tag. Emit separate `og:*` tags and set the page `description` from `intro` in `transformPageData`.
+- [x] **`og:locale` is `en-US`**; Open Graph expects `en_US`. Add `og:image:width/height/alt`, and drop `meta keywords`.
+- [x] **`article:modified_time` is just the publish date**: use the git `lastUpdated` timestamp VitePress already computes.
 - [ ] **No RSS/Atom feed for the blog**: generate one in `buildEnd` from the existing content loader and link it in `<head>`.
 - [ ] **No structured data**: add `BlogPosting` JSON-LD for posts and `Person`/`WebSite` for the home page.
 

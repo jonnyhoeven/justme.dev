@@ -52,7 +52,7 @@ export default defineConfig({
     ]),
     // Static Opengraph stuff
     ['meta', { property: 'og:site_name', content: SITE_CONSTANTS.SITE_NAME }],
-    ['meta', { property: 'og:locale', content: SITE_CONSTANTS.LANG }],
+    ['meta', { property: 'og:locale', content: 'en_US' }],
     ['meta', { property: 'article:author', content: SITE_CONSTANTS.AUTHOR }],
     ['meta', { name: 'author', content: SITE_CONSTANTS.AUTHOR }],
     [
@@ -132,7 +132,6 @@ export default defineConfig({
     head.push([
       'meta',
       {
-        name: 'title',
         property: 'og:title',
         content: pf.title ? pf.title : 'Just make it!'
       }
@@ -140,12 +139,10 @@ export default defineConfig({
     head.push([
       'meta',
       {
-        name: 'description',
         property: 'og:description',
         content: intro
       }
     ]);
-    head.push(['meta', { name: 'keywords', content: SITE_CONSTANTS.KEYWORDS }]);
     head.push([
       'meta',
       {
@@ -160,6 +157,15 @@ export default defineConfig({
         content: image
       }
     ]);
+    head.push(['meta', { property: 'og:image:width', content: '1200' }]);
+    head.push(['meta', { property: 'og:image:height', content: '630' }]);
+    head.push([
+      'meta',
+      {
+        property: 'og:image:alt',
+        content: pf.title ? String(pf.title) : SITE_CONSTANTS.SITE_NAME
+      }
+    ]);
     if (pf.date) {
       head.push(['meta', { property: 'og:type', content: 'article' }]);
       head.push([
@@ -169,11 +175,15 @@ export default defineConfig({
           content: pf.date
         }
       ]);
+      const modifiedTime =
+        typeof pageData.lastUpdated === 'number' && pageData.lastUpdated > 0
+          ? new Date(pageData.lastUpdated).toISOString()
+          : String(pf.date);
       head.push([
         'meta',
         {
           property: 'article:modified_time',
-          content: pf.date
+          content: modifiedTime
         }
       ]);
     } else {

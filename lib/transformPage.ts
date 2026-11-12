@@ -24,6 +24,11 @@ export default function transformPage<T extends PageLike>(
   pf.externalUrlLabel =
     pf.externalUrlLabel ?? (pf.gitlink ? 'View on Github' : 'View site');
 
+  pageData.description =
+    pf.intro ||
+    (pageData.description as string) ||
+    'Just me. Sharing insights, experiences, and tutorials related to software development and site reliability engineering.';
+
   const badgeHost = 'https://img.shields.io/github';
   const hasGithubRepo = Boolean(pf.gitlink && pf.user && pf.project);
   pf.watchersUrl = hasGithubRepo

@@ -10,6 +10,9 @@ describe('transformPage', () => {
       frontmatter: {}
     });
 
+    expect(result.description).toBe(
+      'Just me. Sharing insights, experiences, and tutorials related to software development and site reliability engineering.'
+    );
     expect(result.frontmatter.title).toBe('Justme.dev');
     expect(result.frontmatter.intro).toBe('');
     expect(result.frontmatter.image).toBe(
@@ -83,6 +86,7 @@ describe('transformPage', () => {
     expect(result.frontmatter.title).toBe('Custom Title');
     expect(result.frontmatter.image).toBe('/custom.png');
     expect(result.frontmatter.intro).toBe('Custom intro text');
+    expect(result.description).toBe('Custom intro text');
   });
 
   it('preserves explicit externalUrl and externalUrlLabel when provided', () => {
