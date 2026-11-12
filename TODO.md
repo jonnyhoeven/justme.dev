@@ -77,6 +77,9 @@ Full read of the components, `lib/`, theme CSS, ETL scripts, CI and docs at comm
 - [ ] **Remove leftovers from the working tree**: untracked `src/fonts.css` and a root `dist/` (a different build, 713 KB bundle from 8 Nov) do not belong to the VitePress site.
 - [x] **`gitlink` is required even for non-git projects** ([`process_requests.py`](scripts/process_requests.py), [`whos-the-fool.yaml`](requests/whos-the-fool.yaml)): the manifest has to pass the game URL as `gitlink`. Make it optional and derive the GitHub badges from `user`/`project` only.
 
+- [ ] **Out-of-range keymap entry gives an undefined sample** _(from code)_ ([`xm-player.ts`](lib/audio/xm-player.ts) `nextRow`): `inst.samples[inst.samplemap[note]]` is not bounds-checked, so a malformed instrument could make the mixer read `undefined`. Guard it, and drop the stale `TODO: implement pingpong looping` / `FIXME: ignoring keymaps` comments.
+- [ ] **`ArticleFooter` renders nothing on any post** ([`ArticleFooter.vue`](components/ArticleFooter.vue)): it only shows when frontmatter `model` is set, and no post sets it. Either use it or remove it.
+
 ### 5. Design and layout
 
 - [ ] **The audio dock covers page content** _(from code)_ ([`MiniPlayer.vue`](components/MiniPlayer.vue)): it is `position: fixed` at the bottom centre on every page with no bottom padding reserved, so it sits on top of the footer and the prev/next links at the end of a post. Reserve space (`padding-bottom` on `.VPContent`/footer), and add a collapse or close control whose state persists.
