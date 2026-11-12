@@ -19,10 +19,7 @@ def generate_splats(image_path: Path | str | None = None, out_path: Path | None 
     base_dir = Path(__file__).parent.parent
     if image_path is None:
         local_candidate = base_dir / "public" / "images" / "ava.webp"
-        if local_candidate.exists():
-            image_path = local_candidate
-        else:
-            image_path = "https://media.justme.dev/images/ava.webp"
+        image_path = local_candidate if local_candidate.exists() else "https://media.justme.dev/images/ava.webp"
     if out_path is None:
         out_path = base_dir / "public" / "data" / "splats.json"
 
@@ -31,7 +28,7 @@ def generate_splats(image_path: Path | str | None = None, out_path: Path | None 
             import io
             import urllib.request
 
-            logger.info(f"Downloading image from CDN: {image_path}")
+            logger.info("Downloading image from CDN: %s", image_path)
             req = urllib.request.Request(image_path, headers={"User-Agent": "Mozilla/5.0"})
             with urllib.request.urlopen(req, timeout=10) as resp:
                 data = resp.read()
@@ -39,12 +36,12 @@ def generate_splats(image_path: Path | str | None = None, out_path: Path | None 
         else:
             image_path = Path(image_path)
             if not image_path.exists():
-                logger.error(f"Image not found: {image_path}")
+                logger.error("Image not found: %s", image_path)
                 sys.exit(1)
-            logger.info(f"Loading image: {image_path}")
+            logger.info("Loading image: %s", image_path)
             img = Image.open(image_path).convert("RGBA")
-    except Exception as e:
-        logger.error(f"Failed to open image {image_path}: {e}")
+    except Exception as e:  # noqa: BLE001
+        logger.error("Failed to open image %s: %s", image_path, e)
         sys.exit(1)
 
     TARGET_SIZE = 27
@@ -104,13 +101,13 @@ def generate_splats(image_path: Path | str | None = None, out_path: Path | None 
 
     try:
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        logger.info(f"Generated {len(compact_splats)} particles. Centering and saving...")
+        logger.info("Generated %d particles. Centering and saving...", len(compact_splats))
         with open(out_path, "w") as f:
             json.dump(compact_splats, f, separators=(",", ":"))
-        logger.info(f"Successfully saved optimized splats to {out_path}")
+        logger.info("Successfully saved optimized splats to %s", out_path)
         return compact_splats
-    except Exception as e:
-        logger.error(f"Failed to save splats to {out_path}: {e}")
+    except Exception as e:  # noqa: BLE001
+        logger.error("Failed to save splats to %s: %s", out_path, e)
         sys.exit(1)
 
 

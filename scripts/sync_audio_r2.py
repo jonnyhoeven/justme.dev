@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import struct
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -93,7 +94,7 @@ def parse_xm_header(filepath: Path) -> dict[str, Any]:
                 if bpm > 0:
                     res["bpm"] = bpm
                 return res
-    except Exception:
+    except (struct.error, OSError):
         pass
     return {}
 
@@ -119,7 +120,7 @@ def upload_single_file(
         }
         s3.upload_file(str(local_path), bucket, remote_key, ExtraArgs=extra_args)
         return True
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         print(f"Failed to upload {remote_key}: {exc}", file=sys.stderr)
         return False
 
@@ -241,7 +242,7 @@ def main() -> None:
                 try:
                     if not future.result():
                         failed.append(rk)
-                except Exception as exc:
+                except Exception as exc:  # noqa: BLE001
                     print(f"Upload error for {rk}: {exc}", file=sys.stderr)
                     failed.append(rk)
                 completed += 1

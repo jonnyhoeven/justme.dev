@@ -25,7 +25,7 @@ Full read of the components, `lib/`, theme CSS, ETL scripts, CI and docs at comm
 - [ ] **Hero physics is frame-rate dependent** ([`HeroSplat.vue`](components/HeroSplat.vue) render loop): spring, damping (`* 0.8`), the kick punch and `glowLevel += … * 0.08` are applied per frame, so on a 120 Hz display the cloud is stiffer and settles twice as fast as on 60 Hz. `ctx.dt` already exists; scale forces by `dt / 16.67` and use `Math.pow(damp, dt / 16.67)`.
 - [ ] **Phase timers use wall time across pauses** (same file): `phaseStart` and `startTime` are not shifted when the loop stops off-screen, so scrolling back to the hero usually triggers an immediate morph and animations jump. Accumulate active time from `dt` instead.
 - [x] **Progress bar assumes 64-row patterns** ([`xm-player.ts`](lib/audio/xm-player.ts) `getProgress`): patterns can have 1 to 256 rows, so the bar jumps or stalls on such songs. Precompute cumulative row counts per order at load.
-- [ ] **ETL failures do not fail the build** ([`process_requests.py`](scripts/process_requests.py)): a failed README fetch or an invalid manifest is logged and the script exits 0, so CI can deploy a project page with an empty body or drop the page. Exit non-zero when any manifest fails (and label YAML/validation/network errors separately; the broad `except Exception` calls them all "Validation error").
+- [x] **ETL failures do not fail the build** ([`process_requests.py`](scripts/process_requests.py)): a failed README fetch or an invalid manifest is logged and the script exits 0, so CI can deploy a project page with an empty body or drop the page. Exit non-zero when any manifest fails (and label YAML/validation/network errors separately; the broad `except Exception` calls them all "Validation error").
 
 ### 2. Performance
 
@@ -59,7 +59,7 @@ Full read of the components, `lib/`, theme CSS, ETL scripts, CI and docs at comm
 - [ ] **`public/data/splats.json` is both tracked and git-ignored**: pick one. Either generate it in CI (needs Pillow and the avatar) or remove the ignore rule.
 - [x] **Rebuild on a schedule**: project READMEs are fetched at build time, so they are only refreshed when something is pushed. Add a weekly `schedule:` trigger, and add `TODO.md` / `issues.md` to `paths-ignore`.
 - [ ] **The `requests/` folder shadows the `requests` library name** ([`process_requests.py`](scripts/process_requests.py)): the import only resolves to the library because the folder has no `__init__.py`, and Ruff already sorts it as first-party. Rename the folder (e.g. `manifests/`) or drop the library for `urllib.request`.
-- [ ] **Widen Ruff's rule set** ([`pyproject.toml`](pyproject.toml)): only `E`, `F`, `I` are on. Add `B`, `UP`, `SIM`, `BLE` (flags the bare `except Exception: pass` in `parse_xm_header`) and `G` (f-strings in `logger` calls).
+- [x] **Widen Ruff's rule set** ([`pyproject.toml`](pyproject.toml)): only `E`, `F`, `I` are on. Add `B`, `UP`, `SIM`, `BLE` (flags the bare `except Exception: pass` in `parse_xm_header`) and `G` (f-strings in `logger` calls).
 
 ### 4. Dead code and duplication
 
@@ -70,7 +70,7 @@ Full read of the components, `lib/`, theme CSS, ETL scripts, CI and docs at comm
 - [ ] **`onImageError` is copy-pasted** in `ArticleItem.vue` and `ArticleList.vue` with a hardcoded `https://media.justme.dev`. Move it to one helper using `SITE_CONSTANTS.MEDIA_URL`, and make it dev-only (the local `/images` path does not exist in production because `public/images` is git-ignored).
 - [ ] **Hand-maintained alpha tokens** ([`tokens.css`](.vitepress/theme/tokens.css)): 16 `--vp-c-brand-*-alpha-*` values and two `*-rgb` triples are duplicated for light and dark and must be kept in sync by hand. Replace with `color-mix(in srgb, var(--vp-c-brand-1) 20%, transparent)` (already used in `HeroSplat.vue`). `.dark .VPNavBar` in `layout.css` is also redundant, since the glass tokens already flip under `.dark`.
 - [ ] **Remove leftovers from the working tree**: untracked `src/fonts.css` and a root `dist/` (a different build, 713 KB bundle from 8 Nov) do not belong to the VitePress site.
-- [ ] **`gitlink` is required even for non-git projects** ([`process_requests.py`](scripts/process_requests.py), [`whos-the-fool.yaml`](requests/whos-the-fool.yaml)): the manifest has to pass the game URL as `gitlink`. Make it optional and derive the GitHub badges from `user`/`project` only.
+- [x] **`gitlink` is required even for non-git projects** ([`process_requests.py`](scripts/process_requests.py), [`whos-the-fool.yaml`](requests/whos-the-fool.yaml)): the manifest has to pass the game URL as `gitlink`. Make it optional and derive the GitHub badges from `user`/`project` only.
 
 ### 5. Design and layout
 

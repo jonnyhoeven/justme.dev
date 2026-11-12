@@ -51,6 +51,26 @@ describe('transformPage', () => {
     );
   });
 
+  it('generates GitHub badge URLs from user and project even when gitlink is absent', () => {
+    const result = transformPage({
+      url: '/project',
+      frontmatter: {
+        user: 'myuser',
+        project: 'myproject'
+      }
+    });
+
+    expect(result.frontmatter.watchersUrl).toBe(
+      'https://img.shields.io/github/watchers/myuser/myproject?style=flat'
+    );
+    expect(result.frontmatter.starsUrl).toBe(
+      'https://img.shields.io/github/stars/myuser/myproject?style=flat'
+    );
+    expect(result.frontmatter.forksUrl).toBe(
+      'https://img.shields.io/github/forks/myuser/myproject?style=flat'
+    );
+  });
+
   it('parses languages as comma-separated string or array', () => {
     const stringResult = transformPage({
       url: '/post1',

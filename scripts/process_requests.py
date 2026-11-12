@@ -2,14 +2,14 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 import logging
 import re
+import sys
 import textwrap
 from datetime import date
 from pathlib import Path
-from typing import List, Optional, Union
 from urllib.parse import urljoin, urlsplit
 
 import yaml
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, HttpUrl, ValidationError, model_validator
 
 import requests
 
@@ -21,20 +21,26 @@ logger = logging.getLogger(__name__)
 class ProjectRequest(BaseModel):
     title: str
     type: str = "project"
-    date: Union[date, str]
+    date: date | str
     image: str
     fetchReadme: bool = False
-    gitlink: HttpUrl
-    user: Optional[str] = None
-    project: Optional[str] = None
+    gitlink: HttpUrl | None = None
+    user: str | None = None
+    project: str | None = None
     branch: str = "main"
     readmeFile: str = "README.md"
-    languages: Union[str, List[str]]
+    languages: str | list[str]
     outline: str = "deep"
     intro: str
-    content: Optional[str] = None
-    externalUrl: Optional[HttpUrl] = None
-    externalUrlLabel: Optional[str] = None
+    content: str | None = None
+    externalUrl: HttpUrl | None = None
+    externalUrlLabel: str | None = None
+
+    @model_validator(mode="after")
+    def check_readme_requirements(self) -> "ProjectRequest":
+        if self.fetchReadme and (not self.user or not self.project):
+            raise ValueError("user and project are required when fetchReadme is True")
+        return self
 
 
 def get_wrapper_template(post_content: str, readme_content: str) -> str:
@@ -96,7 +102,7 @@ class GenerateFiles:
     def get_readme(self, user: str, project: str, branch: str, readme_file: str) -> str:
         """Fetch README content from GitHub."""
         if not all([user, project, readme_file]):
-            logger.warning(f"Missing user, project, or readme_file: {user}/{project}")
+            logger.warning("Missing user, project, or readme_file: %s/%s", user, project)
             return ""
 
         url = f"https://raw.githubusercontent.com/{user}/{project}/{branch}/{readme_file}"
@@ -105,22 +111,27 @@ class GenerateFiles:
             response.raise_for_status()
             return absolutize_links(response.text, user, project, branch, readme_file)
         except requests.RequestException as e:
-            logger.error(f"Failed to fetch README from {url}: {e}")
+            logger.error("Failed to fetch README from %s: %s", url, e)
             return ""
 
-    def process_requests(self) -> None:
-        """Process all request YAML files in the requests directory."""
-        if not self.req_path.exists():
-            logger.error(f"Requests directory {self.req_path} does not exist.")
-            return
+    def process_requests(self) -> bool:
+        """Process all request YAML files in the requests directory.
 
-        for req_file in self.req_path.glob("*.yaml"):
+        Returns:
+            True if all manifests were processed successfully, False otherwise.
+        """
+        if not self.req_path.exists():
+            logger.error("Requests directory %s does not exist.", self.req_path)
+            return False
+
+        error_count = 0
+        for req_file in sorted(self.req_path.glob("*.yaml")):
             try:
                 with req_file.open("r") as file:
                     data = yaml.safe_load(file)
 
                 if data is None:
-                    logger.warning(f"Skipping empty request file: {req_file}")
+                    logger.warning("Skipping empty request file: %s", req_file)
                     continue
 
                 # Validate with Pydantic
@@ -128,9 +139,19 @@ class GenerateFiles:
                 self.process_request(request, req_file)
 
             except yaml.YAMLError as e:
-                logger.error(f"Error parsing YAML in {req_file}: {e}")
-            except Exception as e:
-                logger.error(f"Validation error for {req_file}: {e}")
+                error_count += 1
+                logger.error("Error parsing YAML in %s: %s", req_file, e)
+            except ValidationError as e:
+                error_count += 1
+                logger.error("Validation error for %s: %s", req_file, e)
+            except requests.RequestException as e:
+                error_count += 1
+                logger.error("Network error fetching README for %s: %s", req_file, e)
+            except OSError as e:
+                error_count += 1
+                logger.error("File I/O error for %s: %s", req_file, e)
+
+        return error_count == 0
 
     def process_request(self, request: ProjectRequest, req_file: Path) -> None:
         """Process a single request and generate the markdown file."""
@@ -140,7 +161,7 @@ class GenerateFiles:
 
         readme = ""
         post = ""
-        logger.info(f"Processing project: {request.title} ({basename})")
+        logger.info("Processing project: %s (%s)", request.title, basename)
 
         if request.content:
             readme = request.content
@@ -151,6 +172,10 @@ class GenerateFiles:
                 request.branch,
                 request.readmeFile,
             )
+            if not readme:
+                raise requests.RequestException(
+                    f"Failed to fetch README for {request.title}"
+                )
 
         self.save_post(request, dst_path, post, readme, my_wrap)
 
@@ -164,7 +189,7 @@ class GenerateFiles:
     ) -> None:
         """Save the generated content to a markdown file."""
         dst_path.parent.mkdir(parents=True, exist_ok=True)
-        logger.info(f"Saving to {dst_path}")
+        logger.info("Saving to %s", dst_path)
 
         wrapped_post = my_wrap.fill(post)
         content_template = get_wrapper_template(wrapped_post, readme)
@@ -185,10 +210,12 @@ class GenerateFiles:
                 yaml.safe_dump(frontmatter, pst_file, width=120, sort_keys=False)
                 pst_file.write("---\n")
                 pst_file.write(content_template)
-        except IOError as e:
-            logger.error(f"Error writing to {dst_path}: {e}")
+        except OSError as e:
+            logger.error("Error writing to %s: %s", dst_path, e)
+            raise
 
 
 if __name__ == "__main__":
     handler = GenerateFiles()
-    handler.process_requests()
+    if not handler.process_requests():
+        sys.exit(1)

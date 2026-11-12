@@ -2,7 +2,7 @@
 line-length = 120
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
+select = ["E", "F", "I", "B", "UP", "SIM", "BLE", "G"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

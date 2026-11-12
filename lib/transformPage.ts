@@ -30,7 +30,7 @@ export default function transformPage<T extends PageLike>(
     'Just me. Sharing insights, experiences, and tutorials related to software development and site reliability engineering.';
 
   const badgeHost = 'https://img.shields.io/github';
-  const hasGithubRepo = Boolean(pf.gitlink && pf.user && pf.project);
+  const hasGithubRepo = Boolean(pf.user && pf.project);
   pf.watchersUrl = hasGithubRepo
     ? `${badgeHost}/watchers/${pf.user}/${pf.project}?style=flat`
     : null;

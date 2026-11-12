@@ -94,7 +94,7 @@ def upload_single_file(s3: Any, bucket: str, local_path: Path, remote_key: str, 
         s3.upload_file(str(local_path), bucket, remote_key, ExtraArgs=extra_args)
         print(f"Uploaded {remote_key}")
         return True
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         print(f"Failed to upload {remote_key}: {exc}", file=sys.stderr)
         return False
 

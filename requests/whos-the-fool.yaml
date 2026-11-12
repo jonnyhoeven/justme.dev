@@ -4,7 +4,6 @@ type: project
 date: 2026-10-31
 image: /images/whos-the-fool.webp
 fetchReadme: false
-gitlink: https://wtf.justme.dev
 externalUrl: https://wtf.justme.dev
 externalUrlLabel: Play Game
 languages: Next.js,TypeScript,Cloudflare Workers,Web Audio,Python

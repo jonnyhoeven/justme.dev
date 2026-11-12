@@ -15,6 +15,7 @@ from pathlib import Path
 import pytest
 import responses as rsps_lib
 import yaml
+from pydantic import ValidationError
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
 
@@ -84,24 +85,29 @@ class TestProjectRequest:
         assert req.fetchReadme is False
         assert req.branch == "main"
 
-    def test_gitlink_is_required(self, minimal_yaml_data):
+    def test_gitlink_is_optional(self, minimal_yaml_data):
         del minimal_yaml_data["gitlink"]
-        with pytest.raises(Exception):
-            ProjectRequest(**minimal_yaml_data)
+        req = ProjectRequest(**minimal_yaml_data)
+        assert req.gitlink is None
 
     def test_title_is_required(self, minimal_yaml_data):
         del minimal_yaml_data["title"]
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             ProjectRequest(**minimal_yaml_data)
 
     def test_intro_is_required(self, minimal_yaml_data):
         del minimal_yaml_data["intro"]
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             ProjectRequest(**minimal_yaml_data)
 
     def test_invalid_gitlink_raises(self, minimal_yaml_data):
         minimal_yaml_data["gitlink"] = "not-a-url"
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
+            ProjectRequest(**minimal_yaml_data)
+
+    def test_fetch_readme_requires_user_and_project(self, minimal_yaml_data):
+        minimal_yaml_data["fetchReadme"] = True
+        with pytest.raises(ValidationError):
             ProjectRequest(**minimal_yaml_data)
 
     def test_languages_can_be_list(self, minimal_yaml_data):
@@ -300,6 +306,16 @@ class TestSavePost:
         # gitlink must be a plain URL string, not a Pydantic HttpUrl repr
         assert "https://github.com/foo/bar" in content
 
+    def test_gitlink_omitted_when_none(self, generator, minimal_yaml_data, tmp_path):
+        del minimal_yaml_data["gitlink"]
+        req = ProjectRequest(**minimal_yaml_data)
+        dst = generator.dst_dir / "test-project-no-git.md"
+        wrapper = textwrap.TextWrapper(width=120)
+        GenerateFiles.save_post(req, dst, "", "", wrapper)
+
+        content = dst.read_text()
+        assert "gitlink:" not in content
+
     def test_creates_parent_directories(self, generator, minimal_yaml_data, tmp_path):
         req = ProjectRequest(**minimal_yaml_data)
         dst = tmp_path / "deep" / "nested" / "output.md"
@@ -319,7 +335,7 @@ class TestProcessRequests:
         yaml_file = generator.req_path / "myproject.yaml"
         yaml_file.write_text(yaml.dump(minimal_yaml_data))
 
-        generator.process_requests()
+        assert generator.process_requests() is True
 
         output = generator.dst_dir / "myproject.md"
         assert output.exists()
@@ -330,21 +346,25 @@ class TestProcessRequests:
         yaml_file = generator.req_path / "empty.yaml"
         yaml_file.write_text("")
 
-        # Should not raise
-        generator.process_requests()
+        assert generator.process_requests() is True
         assert not (generator.dst_dir / "empty.md").exists()
 
-    def test_handles_invalid_yaml_gracefully(self, generator):
+    def test_handles_invalid_yaml_returns_failure(self, generator):
         yaml_file = generator.req_path / "bad.yaml"
         yaml_file.write_text("title: [unclosed")
 
-        # Should not raise — logs an error and continues
-        generator.process_requests()
+        assert generator.process_requests() is False
+
+    def test_handles_validation_error_returns_failure(self, generator, minimal_yaml_data):
+        del minimal_yaml_data["title"]
+        yaml_file = generator.req_path / "invalid.yaml"
+        yaml_file.write_text(yaml.dump(minimal_yaml_data))
+
+        assert generator.process_requests() is False
 
     def test_handles_missing_requests_dir(self, generator):
         generator.req_path = Path("/nonexistent/path/requests")
-        # Should not raise
-        generator.process_requests()
+        assert generator.process_requests() is False
 
     @rsps_lib.activate
     def test_fetches_readme_when_flag_set(self, generator, full_yaml_data):
@@ -354,12 +374,37 @@ class TestProcessRequests:
         yaml_file = generator.req_path / "full.yaml"
         yaml_file.write_text(yaml.dump(full_yaml_data))
 
-        generator.process_requests()
+        assert generator.process_requests() is True
 
         output = generator.dst_dir / "full.md"
         assert output.exists()
         content = output.read_text()
         assert "# Full README" in content
+
+    @rsps_lib.activate
+    def test_fails_on_readme_network_error(self, generator, full_yaml_data):
+        url = "https://raw.githubusercontent.com/foo/full/main/README.md"
+        rsps_lib.add(rsps_lib.GET, url, status=404)
+
+        yaml_file = generator.req_path / "full.yaml"
+        yaml_file.write_text(yaml.dump(full_yaml_data))
+
+        assert generator.process_requests() is False
+        assert not (generator.dst_dir / "full.md").exists()
+
+    def test_fails_on_io_error_writing_post(self, generator, minimal_yaml_data, monkeypatch):
+        yaml_file = generator.req_path / "myproject.yaml"
+        yaml_file.write_text(yaml.dump(minimal_yaml_data))
+
+        original_open = Path.open
+
+        def mock_open(self, mode="r", *args, **kwargs):
+            if "w" in mode and str(self).endswith(".md"):
+                raise OSError("Disk full")
+            return original_open(self, mode, *args, **kwargs)
+
+        monkeypatch.setattr(Path, "open", mock_open)
+        assert generator.process_requests() is False
 
     def test_uses_inline_content_and_external_url(self, generator, minimal_yaml_data):
         minimal_yaml_data["content"] = "## Inline Content\nDirect markdown details."
@@ -368,7 +413,7 @@ class TestProcessRequests:
         yaml_file = generator.req_path / "inline.yaml"
         yaml_file.write_text(yaml.dump(minimal_yaml_data))
 
-        generator.process_requests()
+        assert generator.process_requests() is True
 
         output = generator.dst_dir / "inline.md"
         assert output.exists()
