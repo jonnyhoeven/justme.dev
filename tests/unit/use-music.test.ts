@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-vi.mock('../../data/music.data', () => ({
-  data: [
+const { catalogImports, INITIAL_MOCK } = vi.hoisted(() => ({
+  catalogImports: { count: 0 },
+  INITIAL_MOCK: [
     { filename: 'track1.xm', url: '/audio/track1.xm', title: 'Track 1' },
     { filename: 'track2.xm', url: '/audio/track2.xm', title: 'Track 2' },
     {
@@ -13,6 +14,20 @@ vi.mock('../../data/music.data', () => ({
     }
   ]
 }));
+
+vi.mock('../../data/music-initial.data', () => ({ data: INITIAL_MOCK }));
+
+// Full catalog: extra entries before/after so indices shift when it is swapped in.
+vi.mock('../../data/music.data', () => {
+  catalogImports.count++;
+  return {
+    data: [
+      { filename: 'aaa-extra.xm', url: '/audio/aaa-extra.xm', title: 'AAA' },
+      ...INITIAL_MOCK,
+      { filename: 'zzz-extra.xm', url: '/audio/zzz-extra.xm', title: 'ZZZ' }
+    ]
+  };
+});
 
 import defaultUseMusic, {
   INITIAL_TRACK_FILENAMES,
@@ -27,6 +42,7 @@ describe('useMusic composable', () => {
     const music = useMusic();
     music.resetInitialTrackPicked();
     music.resetAudio();
+    music.resetCatalog();
     music.setPlaying(false);
     music.currentTrackIndex.value = 0;
     music.setSplatVisible(false);
@@ -71,7 +87,7 @@ describe('useMusic composable', () => {
     const { nextTrack, prevTrack, currentTrackIndex, tracks } = useMusic();
 
     expect(currentTrackIndex.value).toBe(0);
-    expect(tracks.length).toBe(3);
+    expect(tracks.value.length).toBe(3);
 
     nextTrack();
     expect(currentTrackIndex.value).toBe(1);
@@ -269,17 +285,30 @@ describe('useMusic composable', () => {
   });
 
   describe('applyTrackQueryParam', () => {
-    it('selects track matching ?track= parameter case-insensitively', () => {
-      const { applyTrackQueryParam, currentTrackIndex } = useMusic();
+    it('selects track matching ?track= parameter case-insensitively', async () => {
+      const { applyTrackQueryParam, currentTrackIndex, catalogLoaded } =
+        useMusic();
 
-      applyTrackQueryParam('?track=track2.xm');
+      await applyTrackQueryParam('?track=track2.xm');
       expect(currentTrackIndex.value).toBe(1);
 
-      applyTrackQueryParam('?track=TRACK1.XM');
+      await applyTrackQueryParam('?track=TRACK1.XM');
       expect(currentTrackIndex.value).toBe(0);
+      // Tracks in the initial set do not need the full catalog.
+      expect(catalogLoaded.value).toBe(false);
     });
 
-    it('falls back to pickRandomInitialTrack when query param is absent or invalid', () => {
+    it('loads the catalog for a ?track= deep link outside the initial set', async () => {
+      const { applyTrackQueryParam, currentTrackIndex, currentTrack, tracks } =
+        useMusic();
+
+      await applyTrackQueryParam('?track=ZZZ-extra.xm');
+      expect(tracks.value.length).toBe(5);
+      expect(currentTrack.value?.filename).toBe('zzz-extra.xm');
+      expect(currentTrackIndex.value).toBe(4);
+    });
+
+    it('falls back to pickRandomInitialTrack when query param is absent or invalid', async () => {
       const {
         applyTrackQueryParam,
         currentTrackIndex,
@@ -287,14 +316,72 @@ describe('useMusic composable', () => {
       } = useMusic();
 
       // Absent query param -> picks curated track (uCF-TeleportPro-kg.xm = index 2)
-      applyTrackQueryParam('');
+      await applyTrackQueryParam('');
       expect(currentTrackIndex.value).toBe(2);
 
       // Reset and try invalid track name
       resetInitialTrackPicked();
       currentTrackIndex.value = 0;
-      applyTrackQueryParam('?track=nonexistent.xm');
-      expect(currentTrackIndex.value).toBe(2);
+      await applyTrackQueryParam('?track=nonexistent.xm');
+      // Catalog is now loaded, so the curated track sits one slot later.
+      expect(currentTrackIndex.value).toBe(3);
+    });
+  });
+
+  describe('lazy catalog', () => {
+    it('starts with the initial set and imports the catalog only once', async () => {
+      const { tracks, catalogLoaded, ensureCatalog } = useMusic();
+
+      expect(tracks.value.length).toBe(3);
+      expect(catalogLoaded.value).toBe(false);
+
+      const first = ensureCatalog();
+      expect(ensureCatalog()).toBe(first);
+      await first;
+      await ensureCatalog();
+
+      expect(catalogLoaded.value).toBe(true);
+      expect(tracks.value.length).toBe(5);
+      expect(catalogImports.count).toBe(1);
+    });
+
+    it('remaps current index, history and shuffle deck by filename on swap', async () => {
+      const {
+        tracks,
+        currentTrack,
+        currentTrackIndex,
+        history,
+        isShuffle,
+        ensureCatalog
+      } = useMusic();
+
+      currentTrackIndex.value = 2; // uCF-TeleportPro-kg.xm
+      history.value = [0, 1]; // track1, track2
+      isShuffle.value = true;
+      await ensureCatalog();
+
+      expect(currentTrackIndex.value).toBe(3);
+      expect(currentTrack.value?.filename).toBe('uCF-TeleportPro-kg.xm');
+      expect(history.value).toEqual([1, 2]);
+      expect(tracks.value[history.value[0]].filename).toBe('track1.xm');
+    });
+
+    it('triggers a catalog load on togglePlay and shuffle', async () => {
+      const { toggleShuffle, catalogLoaded, ensureCatalog } = useMusic();
+      toggleShuffle();
+      await ensureCatalog();
+      expect(catalogLoaded.value).toBe(true);
+      toggleShuffle();
+    });
+
+    it('handleNext waits for the catalog and then advances in the full list', async () => {
+      const { handleNext, currentTrack, currentTrackIndex } = useMusic();
+      currentTrackIndex.value = 2; // last of the initial set
+
+      await handleNext();
+
+      // Full list continues with zzz-extra.xm instead of wrapping to track1.
+      expect(currentTrack.value?.filename).toBe('zzz-extra.xm');
     });
   });
 

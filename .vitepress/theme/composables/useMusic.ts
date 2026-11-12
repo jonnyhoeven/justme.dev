@@ -1,7 +1,10 @@
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { ref, computed, shallowRef, triggerRef } from 'vue';
-import { data as tracks, type MusicTrack } from '../../../data/music.data';
+import { data as initialTracks } from '../../../data/music-initial.data';
+import { INITIAL_TRACK_FILENAMES } from '../../../data/initial-tracks';
+import type { MusicTrack } from '../../../data/music.data';
+export { INITIAL_TRACK_FILENAMES };
 import type { XMPlayer } from '../../../lib/audio/xm-player';
 
 // Module-scoped reactive refs (shared singleton state)
@@ -9,6 +12,15 @@ const isPlaying = ref(false);
 
 const audioData = ref<Uint8Array | null>(null);
 const currentTrackIndex = ref(0);
+
+/**
+ * The playable list. Starts as the small curated set (the only part shipped
+ * with every page) and is swapped for the full catalog by `ensureCatalog()`,
+ * which loads the big `music.data` chunk on demand.
+ */
+const tracks = shallowRef<MusicTrack[]>(initialTracks);
+const catalogLoaded = ref(false);
+const catalogFailed = ref(false);
 const progress = ref(0);
 const volume = ref(0.7);
 const isRepeat = ref(false);
@@ -150,17 +162,18 @@ export const cleanTitle = (track?: MusicTrack, liveTitle?: string): string => {
 };
 
 const currentTrack = computed<MusicTrack | undefined>(
-  () => tracks[currentTrackIndex.value]
+  () => tracks.value[currentTrackIndex.value]
 );
 
 const currentTrackUrl = computed(() => currentTrack.value?.url || '');
 
 /** Fisher-Yates shuffle array of indices excluding a specific index if provided */
 const generateShuffleDeck = (excludeIndex?: number) => {
-  if (!tracks || tracks.length === 0) return [];
-  const indices = Array.from({ length: tracks.length }, (_, i) => i);
+  const list = tracks.value;
+  if (!list || list.length === 0) return [];
+  const indices = Array.from({ length: list.length }, (_, i) => i);
   let pool = indices;
-  if (excludeIndex !== undefined && tracks.length > 1) {
+  if (excludeIndex !== undefined && list.length > 1) {
     pool = indices.filter((i) => i !== excludeIndex);
   }
   for (let i = pool.length - 1; i > 0; i--) {
@@ -170,8 +183,50 @@ const generateShuffleDeck = (excludeIndex?: number) => {
   return pool;
 };
 
+let catalogPromise: Promise<void> | null = null;
+
+/**
+ * Load the full catalog (once) and swap it in. The current track, the history
+ * and the shuffle deck are remapped by filename so playback and UI do not
+ * jump. Never rejects: on failure the initial set stays and `catalogFailed`
+ * is set (a later call retries).
+ */
+const ensureCatalog = (): Promise<void> => {
+  catalogPromise ??= import('../../../data/music.data').then(
+    ({ data: full }) => {
+      const old = tracks.value;
+      const currentName = old[currentTrackIndex.value]?.filename;
+      const byName = new Map(full.map((t, i) => [t.filename, i]));
+      tracks.value = full;
+      currentTrackIndex.value = byName.get(currentName ?? '') ?? 0;
+      history.value = history.value
+        .map((i) => byName.get(old[i]?.filename ?? '') ?? -1)
+        .filter((i) => i >= 0);
+      shuffleDeck.value = isShuffle.value
+        ? generateShuffleDeck(currentTrackIndex.value)
+        : [];
+      catalogLoaded.value = true;
+      catalogFailed.value = false;
+    },
+    () => {
+      catalogPromise = null;
+      catalogFailed.value = true;
+    }
+  );
+  return catalogPromise;
+};
+
+/** Test helper: drop the loaded catalog and go back to the initial set. */
+const resetCatalog = () => {
+  catalogPromise = null;
+  tracks.value = initialTracks;
+  catalogLoaded.value = false;
+  catalogFailed.value = false;
+};
+
 const toggleShuffle = () => {
   isShuffle.value = !isShuffle.value;
+  if (isShuffle.value) void ensureCatalog();
   if (isShuffle.value) {
     shuffleDeck.value = generateShuffleDeck(currentTrackIndex.value);
   } else {
@@ -391,6 +446,9 @@ export const resetAudio = () => {
 };
 
 const togglePlay = async () => {
+  // First interaction: fetch the full catalog in the background. Playback may
+  // start on the initial set; the index is remapped when the swap lands.
+  void ensureCatalog();
   await initAudio();
   if (audioContext?.state === 'suspended') {
     await audioContext.resume();
@@ -431,7 +489,8 @@ const switchTrack = (advanceFn: () => void) => {
 };
 
 const nextTrack = () => {
-  if (!tracks || tracks.length === 0) return;
+  const list = tracks.value;
+  if (!list || list.length === 0) return;
 
   history.value.push(currentTrackIndex.value);
   if (history.value.length > 50) history.value.shift();
@@ -447,11 +506,12 @@ const nextTrack = () => {
     }
   }
 
-  currentTrackIndex.value = (currentTrackIndex.value + 1) % tracks.length;
+  currentTrackIndex.value = (currentTrackIndex.value + 1) % list.length;
 };
 
 const prevTrack = () => {
-  if (!tracks || tracks.length === 0) return;
+  const list = tracks.value;
+  if (!list || list.length === 0) return;
 
   if (history.value.length > 0) {
     const prevIdx = history.value.pop()!;
@@ -460,15 +520,23 @@ const prevTrack = () => {
   }
 
   currentTrackIndex.value =
-    (currentTrackIndex.value - 1 + tracks.length) % tracks.length;
+    (currentTrackIndex.value - 1 + list.length) % list.length;
 };
 
-const handleNext = () => switchTrack(nextTrack);
-const handlePrev = () => switchTrack(prevTrack);
+// Navigation must pick from the full catalog, so wait for it on first use.
+const handleNext = () =>
+  catalogLoaded.value
+    ? switchTrack(nextTrack)
+    : ensureCatalog().then(() => switchTrack(nextTrack));
+const handlePrev = () =>
+  catalogLoaded.value
+    ? switchTrack(prevTrack)
+    : ensureCatalog().then(() => switchTrack(prevTrack));
 
 const setTrackIndex = (index: number) => {
-  if (!tracks || tracks.length === 0) return;
-  if (index < 0 || index >= tracks.length) return;
+  const list = tracks.value;
+  if (!list || list.length === 0) return;
+  if (index < 0 || index >= list.length) return;
   initialTrackPicked = true;
   if (currentTrackIndex.value !== index) {
     history.value.push(currentTrackIndex.value);
@@ -476,28 +544,6 @@ const setTrackIndex = (index: number) => {
   }
   currentTrackIndex.value = index;
 };
-
-/**
- * Curated list of XM tracks for the initial load selection.
- * Keeps the initial music experience to high-quality selections.
- */
-export const INITIAL_TRACK_FILENAMES: readonly string[] = [
-  'TSRh-Xi-soft-NetXfer-2.55.392-crk.xm',
-  'uCF-Real7ime-Converte-intro.xm',
-  'uCF-TeleportPro-kg.xm',
-  'uCF-ZoneAlarm-Pro-3.0.2.6-kg.xm',
-  'uCF-ZoneAlarm-Pro-3.1.395-kg.xm',
-  'Under-SEH-File-And-Folder-Protector-3.2-crk.xm',
-  'Under-SEH-MediaMonkey-3.2.1.1297-kg.xm',
-  'Under-SEH-Registry-Winner-5.2.4.24-crk.xm',
-  'Under-SEH-ZealotSoft-All-Video-Splitter-4.3.2-crk.xm',
-  'UnderPL-Plato-DVD-Creator-3.39-kg.xm',
-  'UP7-PDF2CAD-6.0-crk.xm',
-  'VORONEZH-Hex-Editor-Neo-6.10-crk.xm',
-  'X.O-Alive-DVD-Ripper-2.2.3.6-serial-fish.xm',
-  'x3chun-Liatro-SWF-Decoder-4.5-kg.xm',
-  'ZWT-RamDisk-Plus-10.0.1-kg.xm'
-];
 
 let initialTrackPicked = false;
 
@@ -514,14 +560,15 @@ const resetInitialTrackPicked = () => {
 const pickRandomInitialTrack = (force = false) => {
   if ((initialTrackPicked && !force) || isPlaying.value) return;
   initialTrackPicked = true;
-  if (!tracks || tracks.length === 0) return;
+  const list = tracks.value;
+  if (!list || list.length === 0) return;
 
   const initialSet = new Set(
     INITIAL_TRACK_FILENAMES.map((f) => f.toLowerCase())
   );
   const candidates: number[] = [];
-  for (let i = 0; i < tracks.length; i++) {
-    const filename = tracks[i]?.filename?.toLowerCase();
+  for (let i = 0; i < list.length; i++) {
+    const filename = list[i]?.filename?.toLowerCase();
     if (filename && initialSet.has(filename)) {
       candidates.push(i);
     }
@@ -532,7 +579,7 @@ const pickRandomInitialTrack = (force = false) => {
       candidates[Math.floor(Math.random() * candidates.length)];
     currentTrackIndex.value = chosenIndex;
   } else {
-    currentTrackIndex.value = Math.floor(Math.random() * tracks.length);
+    currentTrackIndex.value = Math.floor(Math.random() * list.length);
   }
 };
 
@@ -542,18 +589,24 @@ const selectTrack = (originalIndex: number) => {
   switchTrack(() => setTrackIndex(originalIndex));
 };
 
-const applyTrackQueryParam = (search?: string) => {
+const findTrackIndex = (name: string) => {
+  const lower = name.toLowerCase();
+  return tracks.value.findIndex(
+    (t) => t.filename === name || t.filename.toLowerCase() === lower
+  );
+};
+
+const applyTrackQueryParam = async (search?: string) => {
   const queryStr =
     search ?? (typeof window !== 'undefined' ? window.location.search : '');
   const params = new URLSearchParams(queryStr);
   const trackParam = params.get('track');
-  const matchIdx = trackParam
-    ? tracks.findIndex(
-        (t) =>
-          t.filename === trackParam ||
-          t.filename.toLowerCase() === trackParam.toLowerCase()
-      )
-    : -1;
+  let matchIdx = trackParam ? findTrackIndex(trackParam) : -1;
+  if (trackParam && matchIdx === -1 && !catalogLoaded.value) {
+    // Deep link to a track outside the initial set: needs the full catalog.
+    await ensureCatalog();
+    matchIdx = findTrackIndex(trackParam);
+  }
   if (matchIdx !== -1) {
     selectTrack(matchIdx);
   } else {
@@ -646,6 +699,10 @@ const musicState = {
   volume,
   isRepeat,
   tracks,
+  catalogLoaded,
+  catalogFailed,
+  ensureCatalog,
+  resetCatalog,
   isSplatVisible,
   isShuffle,
   history,

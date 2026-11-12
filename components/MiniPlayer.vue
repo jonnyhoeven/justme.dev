@@ -22,6 +22,9 @@ const {
   volume,
   isRepeat,
   tracks,
+  catalogLoaded,
+  catalogFailed,
+  ensureCatalog,
   liveSongTitle,
   favorites,
   isCurrentFavorite,
@@ -109,7 +112,7 @@ interface FilteredTrackItem {
 }
 
 const indexedTracks = computed<FilteredTrackItem[]>(() => {
-  return tracks.map((track, originalIndex) => ({
+  return tracks.value.map((track, originalIndex) => ({
     track,
     originalIndex,
     displayTitle: cleanTitle(track)
@@ -184,6 +187,8 @@ const scrollToCurrentTrack = () => {
 // The panel is v-if'd, so its list remounts at the top on every open. While
 // playing, jump to the current track (e.g. the random one picked on load).
 watch(isPlaylistOpen, (open) => {
+  // The full catalog is lazy: fetch it the first time the playlist opens.
+  if (open) void ensureCatalog();
   if (open && isPlaying.value) scrollToCurrentTrack();
 });
 
@@ -233,7 +238,7 @@ onMounted(() => {
   loadFavorites();
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('click', handleDocumentClick);
-  applyTrackQueryParam();
+  void applyTrackQueryParam();
 });
 
 onBeforeUnmount(() => {
@@ -646,7 +651,17 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <div v-if="filteredTracks.length === 0" class="empty-search-state">
+            <div
+              v-if="!catalogLoaded && !catalogFailed"
+              class="empty-search-state catalog-loading"
+              role="status"
+            >
+              Loading catalog…
+            </div>
+            <div
+              v-else-if="filteredTracks.length === 0"
+              class="empty-search-state"
+            >
               No matching tracks found
             </div>
           </div>

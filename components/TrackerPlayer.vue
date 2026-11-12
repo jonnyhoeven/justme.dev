@@ -30,6 +30,9 @@ const {
   toggleFavorite,
   cleanTitle,
   applyTrackQueryParam,
+  catalogLoaded,
+  catalogFailed,
+  ensureCatalog,
   channelMutes,
   channelScopes,
   togglePlay,
@@ -82,7 +85,7 @@ interface FilteredItem {
 }
 
 const indexedTracks = computed<FilteredItem[]>(() => {
-  return tracks.map((track, originalIndex) => ({
+  return tracks.value.map((track, originalIndex) => ({
     track,
     originalIndex,
     displayTitle: cleanTitle(track)
@@ -309,9 +312,13 @@ const activePatternPage = computed(() =>
   Math.min(patternPage.value, patternPages.value.length - 1)
 );
 
-watch(currentTrackIndex, () => {
-  patternPage.value = 0;
-});
+// Keyed by filename: the catalog swap renumbers indices without changing track
+watch(
+  () => currentTrack.value?.filename,
+  () => {
+    patternPage.value = 0;
+  }
+);
 
 const renderPatternGrid = () => {
   const canvas = patternCanvasRef.value;
@@ -583,7 +590,8 @@ const handleScopesCanvasClick = (e: MouseEvent) => {
 onMounted(() => {
   window.addEventListener('resize', markAllDirty);
   loadFavorites();
-  applyTrackQueryParam();
+  void ensureCatalog();
+  void applyTrackQueryParam();
   if (isOnScreen.value && rafId === null) {
     rafId = requestAnimationFrame(animLoop);
   }
@@ -1090,6 +1098,13 @@ onBeforeUnmount(() => {
           </button>
         </div>
 
+        <div
+          v-if="!catalogLoaded && !catalogFailed"
+          class="archive-loading"
+          role="status"
+        >
+          Loading catalog…
+        </div>
         <div v-bind="containerProps" class="archive-items-container">
           <div v-bind="wrapperProps">
             <div
@@ -1792,5 +1807,12 @@ onBeforeUnmount(() => {
   color: var(--vp-c-text-2);
   cursor: pointer;
   padding: 4px;
+}
+
+.archive-loading {
+  padding: 12px 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--vp-c-text-2);
 }
 </style>
