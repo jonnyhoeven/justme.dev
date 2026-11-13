@@ -42,12 +42,12 @@ derived by reading the source and have not been checked in a browser. Ordered by
       `R2_PUBLIC_URL` writes a catalog whose URLs no longer resolve. Refuse or warn in that case.
 - [x] **Junk bytes in tracker names** ([`sync_audio_r2.py`](scripts/sync_audio_r2.py) `parse_xm_header`): several
       catalog trackers read as e.g. `MadTracker 2.0\u0000\u0019%Õó`. Cut the field at the first NUL and trim.
-- [ ] when in http://localhost:5173/projects and i click on a item in the list sometimes it does not change
+- [x] when in http://localhost:5173/projects and i click on a item in the list sometimes it does not change
       pages/register the click. sometimes it does but it takes about 2 seconds to change the page
-  - CSS stretched-link containment and `.badge-bar` pointer-events fix committed; live browser check still needed for click response and 2s navigation timing.
-- [ ] the music player does not seem to start on one of the random "suggested" starting song on page load, to prevent
+  - Verified in live browser against `vitepress preview`: clicking inside a project card body away from the title navigates immediately via the stretched link.
+- [x] the music player does not seem to start on one of the random "suggested" starting song on page load, to prevent
       user from being introduced to the player with bad sounding music.
-  - Scroll playlist to active initial track on open even while paused (`MiniPlayer.vue`, `TrackerPlayer.vue`) and added 5-star ratings (`localStorage` + `data/music-ratings.json` export, sort/filter); live browser check of initial track selection pending.
+  - Verified in live browser against `vitepress preview`: MiniPlayer starts on a curated initial track and scrolls the active track into view when opening the playlist drawer; 5-star ratings, `Sort ★`, and `Export ★` work on `/blog/tracker`.
 - [x] the code language pills need to be rounded
 - [x] The icons used for git watchers/forks/stars are unclear, too small, ugly dingbat fonts. they don't really match
       the icons used by github.
@@ -101,6 +101,7 @@ derived by reading the source and have not been checked in a browser. Ordered by
 - [ ] **No end-to-end smoke test**: `data-animation` / `data-scene` / `data-phase` were added for testing but nothing
       uses them. Add one Playwright test: the home page hydrates without console errors, the director advances on click, and
       play/next works with a fixture `.xm`.
+  - Checked 2026-11-13: `playwright` / `@playwright/test` is not in `package.json` or the Nix shell (adding new dependencies was skipped without an explicit request); verified home hydration, `.VPHero` director advance (`data-phase` / `data-scene`), footer workflow badges, `/projects`, `/blog/cilium`, and `/blog/tracker` in a live browser against `vitepress preview` (without playing audio).
 
 ### 5. Dead code and duplication
 
