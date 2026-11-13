@@ -1,7 +1,10 @@
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { describe, it, expect } from 'vitest';
-import transformPage from '../../lib/transformPage';
+import transformPage, {
+  applyBlogStats,
+  loadBlogStats
+} from '../../lib/transformPage';
 
 describe('transformPage', () => {
   it('supplies defaults when frontmatter is empty', () => {
@@ -102,5 +105,106 @@ describe('transformPage', () => {
 
     expect(result.frontmatter.externalUrl).toBe('https://game.example.com');
     expect(result.frontmatter.externalUrlLabel).toBe('Play Game');
+  });
+});
+
+describe('applyBlogStats', () => {
+  it('merges stats when user and project match and stars is unset', () => {
+    const pf = { user: 'cilium', project: 'cilium' };
+    const statsMap = {
+      'cilium/cilium': {
+        stars: 19000,
+        forks: 3000,
+        watchers: 450,
+        statsFetched: '2026-11-13'
+      }
+    };
+
+    const result = applyBlogStats(pf, statsMap);
+    expect(result.stars).toBe(19000);
+    expect(result.forks).toBe(3000);
+    expect(result.watchers).toBe(450);
+    expect(result.statsFetched).toBe('2026-11-13');
+  });
+
+  it('does not overwrite explicit stars', () => {
+    const pf = { user: 'cilium', project: 'cilium', stars: 99999 };
+    const statsMap = {
+      'cilium/cilium': {
+        stars: 19000,
+        forks: 3000,
+        watchers: 450,
+        statsFetched: '2026-11-13'
+      }
+    };
+
+    const result = applyBlogStats(pf, statsMap);
+    expect(result.stars).toBe(99999);
+    expect(result.forks).toBeUndefined();
+    expect(result.watchers).toBeUndefined();
+  });
+
+  it('does not overwrite other explicit frontmatter fields when stars is unset', () => {
+    const pf = {
+      user: 'cilium',
+      project: 'cilium',
+      forks: 123,
+      watchers: 45,
+      statsFetched: '2026-01-01'
+    };
+    const statsMap = {
+      'cilium/cilium': {
+        stars: 19000,
+        forks: 3000,
+        watchers: 450,
+        statsFetched: '2026-11-13'
+      }
+    };
+
+    const result = applyBlogStats(pf, statsMap);
+    expect(result.stars).toBe(19000);
+    expect(result.forks).toBe(123);
+    expect(result.watchers).toBe(45);
+    expect(result.statsFetched).toBe('2026-01-01');
+  });
+
+  it('handles missing entry in statsMap cleanly', () => {
+    const pf = { user: 'unknown-user', project: 'unknown-repo' };
+    const statsMap = {
+      'cilium/cilium': { stars: 100 }
+    };
+
+    const result = applyBlogStats(pf, statsMap);
+    expect(result.stars).toBeUndefined();
+    expect(result).toBe(pf);
+  });
+
+  it('handles missing or non-string user/project cleanly', () => {
+    const statsMap = { 'foo/bar': { stars: 100 } };
+
+    expect(
+      applyBlogStats({ user: '', project: 'bar' }, statsMap).stars
+    ).toBeUndefined();
+    expect(
+      applyBlogStats({ user: 'foo', project: '' }, statsMap).stars
+    ).toBeUndefined();
+    expect(applyBlogStats({ project: 'bar' }, statsMap).stars).toBeUndefined();
+    expect(applyBlogStats({ user: 'foo' }, statsMap).stars).toBeUndefined();
+    expect(
+      applyBlogStats(
+        { user: 123 as unknown as string, project: 'bar' },
+        statsMap
+      ).stars
+    ).toBeUndefined();
+  });
+});
+
+describe('loadBlogStats', () => {
+  it('loads cached or file stats map', () => {
+    const stats = loadBlogStats();
+    expect(typeof stats).toBe('object');
+    expect(stats).not.toBeNull();
+    // Subsequent calls return the same cached instance
+    expect(loadBlogStats()).toBe(stats);
   });
 });

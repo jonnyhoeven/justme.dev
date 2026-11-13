@@ -32,6 +32,7 @@ from process_requests import (
     fetch_repo_stats,
     fetch_text,
     get_wrapper_template,
+    parse_frontmatter,
 )
 
 URLOPEN = "process_requests.urllib.request.urlopen"
@@ -107,6 +108,8 @@ def generator(tmp_path: Path) -> GenerateFiles:
     gen = GenerateFiles()
     gen.req_path = tmp_path / "requests"
     gen.dst_dir = tmp_path / "projects"
+    gen.blog_path = tmp_path / "blog"
+    gen.blog_stats_path = tmp_path / "projects-cache" / "blog-stats.json"
     gen.req_path.mkdir()
     gen.dst_dir.mkdir()
     return gen
@@ -612,3 +615,81 @@ class TestStatsFrontmatter:
             generator.get_stats(req)
         token_messages = [rec.message for rec in caplog.records if "GITHUB_TOKEN not set" in rec.message]
         assert len(token_messages) == 1
+
+
+class TestParseFrontmatter:
+    def test_parses_valid_frontmatter(self, tmp_path: Path):
+        file = tmp_path / "post.md"
+        file.write_text("---\nuser: alice\nproject: bob\n---\nBody text\n")
+        assert parse_frontmatter(file) == {"user": "alice", "project": "bob"}
+
+    def test_missing_file_returns_empty_dict(self, tmp_path: Path):
+        assert parse_frontmatter(tmp_path / "nonexistent.md") == {}
+
+    def test_missing_leading_dashes_returns_empty_dict(self, tmp_path: Path):
+        file = tmp_path / "post.md"
+        file.write_text("user: alice\nproject: bob\n---\nBody\n")
+        assert parse_frontmatter(file) == {}
+
+    def test_missing_closing_dashes_returns_empty_dict(self, tmp_path: Path):
+        file = tmp_path / "post.md"
+        file.write_text("---\nuser: alice\nproject: bob\nBody\n")
+        assert parse_frontmatter(file) == {}
+
+    def test_invalid_yaml_returns_empty_dict(self, tmp_path: Path):
+        file = tmp_path / "post.md"
+        file.write_text("---\n: [invalid yaml\n---\nBody\n")
+        assert parse_frontmatter(file) == {}
+
+    def test_non_dict_yaml_returns_empty_dict(self, tmp_path: Path):
+        file = tmp_path / "post.md"
+        file.write_text("---\n- item1\n- item2\n---\nBody\n")
+        assert parse_frontmatter(file) == {}
+
+
+class TestProcessBlogStats:
+    def test_no_op_when_blog_path_missing(self, generator):
+        generator.process_blog_stats()
+        assert not generator.blog_stats_path.exists()
+
+    def test_fetches_stats_deduplicates_and_writes_json(self, generator):
+        generator.blog_path.mkdir(parents=True)
+        (generator.blog_path / "post1.md").write_text("---\nuser: repo-owner\nproject: repo-one\n---\n")
+        (generator.blog_path / "post2.md").write_text("---\nuser: repo-owner\nproject: repo-one\n---\n")
+        (generator.blog_path / "post3.md").write_text("---\nuser: second-owner\nproject: repo-two\n---\n")
+        (generator.blog_path / "post4.md").write_text("---\ntitle: No Repo\n---\n")
+
+        with patch(URLOPEN, return_value=api_ok()) as m:
+            generator.process_blog_stats()
+
+        assert m.call_count == 2
+        assert generator.blog_stats_path.exists()
+
+        data = json.loads(generator.blog_stats_path.read_text(encoding="utf-8"))
+        assert set(data.keys()) == {"repo-owner/repo-one", "second-owner/repo-two"}
+        assert data["repo-owner/repo-one"]["stars"] == 1234
+        assert data["repo-owner/repo-one"]["forks"] == 34
+        assert data["repo-owner/repo-one"]["watchers"] == 7
+        assert data["repo-owner/repo-one"]["statsFetched"] == datetime.now(UTC).date().isoformat()
+
+    def test_skips_cleanly_on_fetch_error(self, generator):
+        generator.blog_path.mkdir(parents=True)
+        (generator.blog_path / "post.md").write_text("---\nuser: fail-owner\nproject: fail-repo\n---\n")
+
+        with patch(URLOPEN, side_effect=http_error(404)):
+            generator.process_blog_stats()
+
+        assert generator.blog_stats_path.exists()
+        data = json.loads(generator.blog_stats_path.read_text(encoding="utf-8"))
+        assert data == {}
+
+    def test_process_requests_runs_process_blog_stats(self, generator):
+        generator.blog_path.mkdir(parents=True)
+        (generator.blog_path / "post.md").write_text("---\nuser: my-user\nproject: my-proj\n---\n")
+
+        with patch(URLOPEN, return_value=api_ok()):
+            assert generator.process_requests() is True
+
+        assert generator.blog_stats_path.exists()
+        data = json.loads(generator.blog_stats_path.read_text(encoding="utf-8"))
+        assert "my-user/my-proj" in data

@@ -280,8 +280,14 @@ export default defineConfig({
     ],
     footer: {
       message:
-        `<a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/deploy.yml" target="_blank" rel="noopener noreferrer">Deploy status</a> &middot; ` +
-        `<a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/github-code-scanning/codeql" target="_blank" rel="noopener noreferrer">Code scanning</a>`,
+        `<span class="badge-wrapper" style="display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem;">` +
+        `<a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/deploy.yml" target="_blank" rel="noopener noreferrer">` +
+        `<img alt="GitHub deploy workflow status badge" height="20" src="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/deploy.yml/badge.svg?branch=main">` +
+        '</a>' +
+        `<a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/github-code-scanning/codeql" target="_blank" rel="noopener noreferrer">` +
+        `<img alt="GitHub code scanning badge" height="20" src="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main">` +
+        '</a>' +
+        '</span>',
       copyright:
         `&copy; ${new Date().getFullYear()} ${SITE_CONSTANTS.AUTHOR} &middot; ` +
         `<a href="${SITE_CONSTANTS.SOCIAL_LINKS.REPO}">Justme.dev</a> source code under ` +

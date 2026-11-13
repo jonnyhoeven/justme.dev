@@ -9,6 +9,7 @@ import urllib.error
 import urllib.request
 from datetime import UTC, date, datetime
 from pathlib import Path
+from typing import Any
 from urllib.parse import urljoin, urlsplit
 
 import yaml
@@ -155,11 +156,39 @@ def absolutize_links(readme: str, user: str, project: str, branch: str, readme_f
     return _MD_TOKEN.sub(rewrite, readme)
 
 
+_FRONTMATTER_PATTERN = re.compile(r"^---[ \t]*\r?\n(.*?)\r?\n---[ \t]*(?:\r?\n|$)", re.DOTALL)
+
+
+def parse_frontmatter(path: Path) -> dict[str, Any]:
+    """Read YAML frontmatter between leading `---` and closing `---` from a file.
+
+    Returns an empty dict if the file is missing, does not contain frontmatter,
+    or the frontmatter is invalid.
+    """
+    try:
+        content = path.read_text(encoding="utf-8-sig")
+    except OSError:
+        return {}
+
+    match = _FRONTMATTER_PATTERN.match(content)
+    if not match:
+        return {}
+
+    try:
+        data = yaml.safe_load(match.group(1))
+        return data if isinstance(data, dict) else {}
+    except yaml.YAMLError:
+        return {}
+
+
 class GenerateFiles:
     def __init__(self) -> None:
         self.req_path = Path("requests")
         self.dst_dir = Path("projects")
+        self.blog_path = Path("blog")
+        self.blog_stats_path = Path("public/projects-cache/blog-stats.json")
         self._github_token_warned: bool = False
+        self._stats_cache: dict[tuple[str, str], dict[str, int | str]] = {}
 
     def get_readme(self, user: str, project: str, branch: str, readme_file: str) -> str:
         """Fetch README content from GitHub."""
@@ -212,7 +241,28 @@ class GenerateFiles:
                 error_count += 1
                 logger.error("File I/O error for %s: %s", req_file, e)
 
+        if self.blog_path.exists():
+            self.process_blog_stats()
+
         return error_count == 0
+
+    def process_blog_stats(self) -> None:
+        """Fetch and cache GitHub repo stats for blog posts."""
+        if not self.blog_path.exists():
+            return
+
+        results: dict[str, dict[str, int | str]] = {}
+        for md_file in sorted(self.blog_path.glob("*.md")):
+            frontmatter = parse_frontmatter(md_file)
+            user = frontmatter.get("user")
+            project = frontmatter.get("project")
+            if isinstance(user, str) and user and isinstance(project, str) and project:
+                stats = self.get_repo_stats(user, project)
+                if stats:
+                    results[f"{user}/{project}"] = stats
+
+        self.blog_stats_path.parent.mkdir(parents=True, exist_ok=True)
+        self.blog_stats_path.write_text(f"{json.dumps(results, indent=2)}\n", encoding="utf-8")
 
     def process_request(self, request: ProjectRequest, req_file: Path) -> None:
         """Process a single request and generate the markdown file."""
@@ -236,24 +286,32 @@ class GenerateFiles:
 
         self.save_post(request, dst_path, readme, self.get_stats(request))
 
-    def get_stats(self, request: ProjectRequest) -> dict[str, int | str]:
-        """Fetch repository stats for the badges; never fails the build.
-
-        Returns an empty dict when the repo is unknown or the fetch fails.
-        """
-        if not request.user or not request.project:
+    def get_repo_stats(self, user: str | None, project: str | None) -> dict[str, int | str]:
+        """Fetch repository stats for a GitHub repo; caches results and never fails the build."""
+        if not user or not project:
             return {}
+        if (user, project) in self._stats_cache:
+            return dict(self._stats_cache[(user, project)])
+
         token = os.environ.get("GITHUB_TOKEN") or None
         if not token and not self._github_token_warned:
             logger.info("GITHUB_TOKEN not set; fetching repo stats unauthenticated (60 requests/hour)")
             self._github_token_warned = True
         try:
-            stats: dict[str, int | str] = dict(fetch_repo_stats(request.user, request.project, token))
+            stats: dict[str, int | str] = dict(fetch_repo_stats(user, project, token))
         except FetchError as e:
-            logger.warning("Could not fetch repo stats for %s/%s: %s", request.user, request.project, e)
+            logger.warning("Could not fetch repo stats for %s/%s: %s", user, project, e)
             return {}
         stats["statsFetched"] = datetime.now(UTC).date().isoformat()
-        return stats
+        self._stats_cache[(user, project)] = stats
+        return dict(stats)
+
+    def get_stats(self, request: ProjectRequest) -> dict[str, int | str]:
+        """Fetch repository stats for the badges; never fails the build.
+
+        Returns an empty dict when the repo is unknown or the fetch fails.
+        """
+        return self.get_repo_stats(request.user, request.project)
 
     @staticmethod
     def save_post(
