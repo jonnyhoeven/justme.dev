@@ -76,5 +76,3 @@ The evaluation of bootable containers points toward a new paradigm for infrastru
 Bootable containers represent the final piece of the "Infrastructure as Code" puzzle. By blurring the line between the application and the OS, the platform becomes truly resilient, auditable, and scalable.
 
 The goal remains the same: simplifying complexity through elegant, standard-based abstractions. **bootc** represents that vision for the modern operating system.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

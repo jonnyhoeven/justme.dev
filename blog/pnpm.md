@@ -78,5 +78,3 @@ minimumReleaseAgeExclude=my-critical-framework,security-patch-lib
 ## Conclusion
 
 Migrating from `npm` to `pnpm` was a seamless process thanks to tools like `corepack`. Between strict dependency isolation and built-in protections against zero-day compromised packages, `pnpm` provides a vastly superior security posture for any Node.js project.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

@@ -69,5 +69,3 @@ relearning their query language or redesigning their entire observability stack.
 
 Check out the [VictoriaMetrics documentation](https://docs.victoriametrics.com/) for more information on how to get
 started.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

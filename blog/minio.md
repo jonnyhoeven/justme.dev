@@ -77,5 +77,3 @@ The implementation of immutable object storage has redefined the disaster recove
 Immutability is the ultimate defense in a cloud-native world. By treating object storage as a "Black Box" vault with MinIO and S3 Object Lock, the infrastructure is built to be fundamentally resilient.
 
 This approach bridges the gap between hardware-level security and software-level SRE, bringing physical fail-safes into the cloud-native era.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

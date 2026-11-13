@@ -92,5 +92,3 @@ The impact of these optimizations was measurable during peak load periods:
 Performance tuning is the bridge between a "functional" database and a "reliable" one. By treating **CloudNativePG** configurations as version-controlled code, a level of performance was achieved that allowed **BigQuery** pipelines to scale without interruption.
 
 This journey from application-level development to kernel-level infrastructure tuning remains at the core of SRE philosophy: understanding the data layer is the only way to truly guarantee the application layer.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

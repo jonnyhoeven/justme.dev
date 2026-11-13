@@ -65,5 +65,3 @@ Spearheading AI-assisted operations is designed to deliver measurable results:
 K8sGPT is not a replacement for an SRE, but it functions as an essential force multiplier. By automating the "discovery" phase of incident response, the focus shifts to "recovery" and "prevention"—the high-value work that makes systems truly resilient.
 
 As an **Internal Developer Platform** continues to mature, AI-driven observability remains a key pillar for high-performance infrastructure.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

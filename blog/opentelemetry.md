@@ -93,5 +93,3 @@ The transition to a unified observability stack driven by OpenTelemetry had a pr
 OpenTelemetry is not just a standard; it's the foundation for a modern, resilient SRE practice. By unifying observability signals, engineers can focus on keeping public safety infrastructure running flawlessly.
 
 As the platform matures with **Cilium** (for kernel-level networking insights) and **Logseq** (for organizational knowledge), OpenTelemetry remains the lens through which system health is viewed.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

@@ -79,5 +79,3 @@ The transition from individual `kubectl` proxies to a centralized portal transfo
 pgAdmin on Kubernetes is more than a GUI; it's a critical component of a professional SRE toolchain. By providing a secure, identity-aware interface, both developer velocity and security posture have been increased.
 
 As the data platform continues to expand with **BigQuery** and **Vector Databases**, this centralized governance model serves as the blueprint for all internal developer tooling.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

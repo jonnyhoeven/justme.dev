@@ -75,5 +75,3 @@ Optimizing the physical-to-digital bridge has had a profound impact on daily pro
 The physical environment is the foundation of digital performance. By applying a "Systems Integration" mindset to development hardware, a workspace has been built that is as resilient and high-performance as the clusters being managed.
 
 For the modern SRE, the interface is not just a peripheral; it is a strategic tool for excellence. **QMK** has allowed that tool to become a professional-grade extension of the engineering workflow.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

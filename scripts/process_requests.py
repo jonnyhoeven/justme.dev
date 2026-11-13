@@ -118,11 +118,7 @@ class ProjectRequest(BaseModel):
 
 def get_wrapper_template(readme_content: str) -> str:
     """Returns the Vue component wrapper for the post."""
-    return (
-        f'<ArticleItem :frontmatter="$frontmatter"/>\n\n'
-        f"{readme_content}\n\n"
-        f'<ArticleFooter :frontmatter="$frontmatter"/>\n'
-    )
+    return f'<ArticleItem :frontmatter="$frontmatter"/>\n\n{readme_content}\n'
 
 
 # Fenced code blocks (```...``` or ~~~...~~~) and Markdown links/images

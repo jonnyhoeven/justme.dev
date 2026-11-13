@@ -86,5 +86,3 @@ needs of disaster management systems.
 
 Looking back at the journey through **Full-Stack Development and Systems Integration**, the goal has always been the
 same: simplifying complexity to let engineers focus on the high-value work of building and protecting the system.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

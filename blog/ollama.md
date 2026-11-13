@@ -67,5 +67,3 @@ The adoption of local LLMs has been a positive development for engineering cultu
 Local AI is not just a security preference; it's a strategic necessity for the modern enterprise. By leveraging tools like **Ollama**, it has been demonstrated that cutting-edge productivity can coexist with rigid data privacy.
 
 The secure adoption of GenAI ensures that the platform remains at the forefront of the industry while maintaining high standards of trust.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

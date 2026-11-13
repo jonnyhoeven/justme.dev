@@ -59,5 +59,3 @@ The transition to ArgoCD was a cornerstone of the successful migration to Kubern
 ArgoCD is not just a deployment tool; it's a fundamental part of a modern reliability strategy. By enforcing the GitOps pattern, a platform is built that is resilient enough for public safety and flexible enough for rapid developer innovation.
 
 As the Internal Developer Platform (IDP) scales with **Crossplane**, ArgoCD remains the engine that ensures "Infrastructure as Data" is always synchronized and secure.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

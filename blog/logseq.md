@@ -66,5 +66,3 @@ Building a private knowledge graph has fundamentally changed operations for a **
 Logseq is more than a note-taking application; it is an **Integrated Thinking Environment**. For an SRE whose career arcs across data engineering, hardware integration, and cloud-native leadership, it is the glue that connects these disparate worlds.
 
 By treating knowledge as a version-controlled graph, the 26 years of experience developed are not just a list of jobs, but a living asset that makes every managed system more resilient.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

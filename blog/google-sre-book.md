@@ -69,5 +69,3 @@ The practical application of SRE principles in engineering teams has led to:
 ## Conclusion
 
 Reliability is a journey, not a destination. Whether tuning **PostgreSQL** or deploying **Crossplane**, the SRE mindset ensures that every decision is backed by data and a commitment to operational excellence.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

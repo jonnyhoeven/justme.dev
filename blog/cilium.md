@@ -63,5 +63,3 @@ By spearheading the adoption of Cilium during this migration, a foundation is bu
 ## Conclusion
 
 Cilium is the cornerstone of the multi-cloud and hybrid-cloud networking strategy. While the move to Kubernetes is ongoing, the decision to lead with eBPF ensures that the foundation being built is fast, secure, and observable enough to support the mission-critical needs of public safety.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

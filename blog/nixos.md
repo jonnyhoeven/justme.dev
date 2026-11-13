@@ -97,5 +97,3 @@ The real business value of NixOS was realized during the **Kubernetes migration*
 NixOS is more than just a distribution; it's a strategic tool for the modern SRE. By moving from imperative automation (doing things) to declarative definition (being things), a platform has been built that is not only faster to deploy but fundamentally more secure and reliable.
 
 As the evolution of the **Internal Developer Platform (IDP)** continues using tools like Crossplane and ArgoCD, the immutable foundation provided by NixOS remains the anchor of the reliability strategy.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

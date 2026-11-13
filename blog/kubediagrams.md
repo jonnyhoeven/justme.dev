@@ -67,5 +67,3 @@ The transition to visual systems mapping has delivered significant operational v
 A system that cannot be visualized is a system that cannot be truly managed. By applying the "Wiring Diagram" philosophy to the modern Kubernetes stack, it is ensured that critical systems remain transparent and resilient.
 
 Whether mapping out **DMX lighting networks** or **Global SRE architectures**, the focus remains on building shared mental models and eliminating the "Black Boxes" that hide potential failures.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

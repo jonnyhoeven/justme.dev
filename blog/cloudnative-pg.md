@@ -92,5 +92,3 @@ built that matches the features of AWS RDS while providing the flexibility that 
 
 As migration efforts continue, the automated, self-healing nature of CNPG remains the bedrock of the stateful resilience
 strategy.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

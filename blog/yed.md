@@ -62,5 +62,3 @@ The results of this data-driven visualization approach were felt across the enti
 yEd may not have the modern, cloud-native UI of its competitors, but for a "Systems Thinker," its power is unmatched. It’s an indispensable tool in the SRE kit, bridging the gap between raw data and architectural wisdom.
 
 Whether mapping a **DMX lighting network** or a **global microservices fleet**, the work always starts with the data. yEd ensures that the data is always legible, structured, and strategic.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

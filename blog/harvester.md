@@ -79,5 +79,3 @@ The move to Harvester fundamentally changed the approach to hybrid-cloud:
 Harvester represents the logical conclusion of the "Everything as Code" movement. Treating virtualization as just another Kubernetes workload removes the silos that slow down enterprise innovation.
 
 Whether integrating **DMX lighting** or **Enterprise SQL databases**, the goal remains the same: to build a system that is unified, auditable, and resilient. Harvester is the foundation that makes this possible in a hybrid-cloud world.
-
-<ArticleFooter :frontmatter="$frontmatter"/>

@@ -76,5 +76,3 @@ neglected.
 For organizations that need more control than RDS provides (e.g., specific extensions, custom kernel tuning) but don't
 want the operational overhead of manual management, TPA offers a robust, code-first approach to running PostgreSQL on
 AWS.
-
-<ArticleFooter :frontmatter="$frontmatter"/>
