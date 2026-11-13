@@ -1,7 +1,11 @@
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { describe, it, expect, beforeAll } from 'vitest';
-import { XMPlayer } from '../../lib/audio/xm-player';
+import {
+  XMPlayer,
+  createXMEngine,
+  type XMInstrument
+} from '../../lib/audio/xm-player';
 import type { InstrumentInfo } from '../../.vitepress/theme/composables/useMusic';
 
 export function buildSampleXMBuffer(): ArrayBuffer {
@@ -897,5 +901,311 @@ describe('XMPlayer', () => {
       looplen: 2048,
       type: 1
     });
+  });
+
+  it('triggers K00 key-off (release = 1) on tick 0', () => {
+    const engine = createXMEngine();
+    const sample = {
+      sampname: 'test',
+      len: 100,
+      loop: 0,
+      looplen: 0,
+      note: 0,
+      fine: 0,
+      pan: 128,
+      type: 0,
+      vol: 64,
+      fileoffset: 0,
+      sampledata: new Float32Array(100)
+    };
+    const inst: XMInstrument = {
+      name: 'test',
+      number: 0,
+      samplemap: new Uint8Array(96),
+      samples: [sample],
+      env_vol: new engine.Envelope([0, 64, 1, 0], 2, 0, 0, 0),
+      env_pan: new engine.Envelope([0, 32], 0, 0, 0, 0)
+    };
+    engine.xm = {
+      flags: 1,
+      bpm: 125,
+      tempo: 6,
+      nchan: 1,
+      global_volume: 128,
+      songpats: [0],
+      patterns: [[[[48, 1, -1, 20, 0]]]], // note 48, inst 1, K00
+      instruments: [inst],
+      channelinfo: [
+        {
+          number: 0,
+          vol: 64,
+          pan: 128,
+          period: 0,
+          vL: 0,
+          vR: 0,
+          vLprev: 0,
+          vRprev: 0,
+          mute: 0,
+          volE: 64,
+          panE: 32,
+          retrig: 0,
+          vibratopos: 0,
+          vibratodepth: 0,
+          vibratospeed: 0,
+          vibratotype: 0,
+          filterstate: new Float32Array(3)
+        }
+      ]
+    };
+    engine.cur_songpos = 0;
+    engine.cur_pat = 0;
+    engine.cur_row = -1;
+    engine.next_row = 0;
+    engine.cur_tick = 5;
+
+    // Advance to tick 0 of row 0
+    engine.nextTick();
+    const ch = engine.xm.channelinfo![0];
+    expect(engine.cur_tick).toBe(0);
+    expect(ch.release).toBe(1);
+    expect(ch.keyofftick).toBeUndefined();
+  });
+
+  it('handles Kxx effect leaving release unset before tick xx and releasing on tick xx with envelope decay', () => {
+    const engine = createXMEngine();
+    const sample = {
+      sampname: 'test',
+      len: 100,
+      loop: 0,
+      looplen: 0,
+      note: 0,
+      fine: 0,
+      pan: 128,
+      type: 0,
+      vol: 64,
+      fileoffset: 0,
+      sampledata: new Float32Array(100)
+    };
+    // 3-point envelope: (0, 64), sustain at (4, 64), decay to (10, 0)
+    const envVol = new engine.Envelope([0, 64, 4, 64, 10, 0], 1, 1, 0, 0);
+    const inst: XMInstrument = {
+      name: 'test',
+      number: 0,
+      samplemap: new Uint8Array(96),
+      samples: [sample],
+      env_vol: envVol,
+      env_pan: new engine.Envelope([0, 32], 0, 0, 0, 0)
+    };
+    engine.xm = {
+      flags: 1,
+      bpm: 125,
+      tempo: 12,
+      nchan: 1,
+      global_volume: 128,
+      songpats: [0],
+      patterns: [
+        [
+          [[48, 1, -1, 20, 2]], // row 0: K02
+          [[-1, -1, -1, 0, 0]]
+        ]
+      ],
+      instruments: [inst],
+      channelinfo: [
+        {
+          number: 0,
+          vol: 64,
+          pan: 128,
+          period: 0,
+          vL: 0,
+          vR: 0,
+          vLprev: 0,
+          vRprev: 0,
+          mute: 0,
+          volE: 64,
+          panE: 32,
+          retrig: 0,
+          vibratopos: 0,
+          vibratodepth: 0,
+          vibratospeed: 0,
+          vibratotype: 0,
+          filterstate: new Float32Array(3)
+        }
+      ]
+    };
+    engine.cur_songpos = 0;
+    engine.cur_pat = 0;
+    engine.cur_row = -1;
+    engine.next_row = 0;
+    engine.cur_tick = 11;
+
+    const ch = engine.xm.channelinfo![0];
+
+    // Tick 0: note triggered, release not set yet
+    engine.nextTick();
+    expect(engine.cur_tick).toBe(0);
+    expect(ch.release).toBe(0);
+    expect(ch.keyofftick).toBe(2);
+    expect(ch.volE).toBe(64);
+
+    // Tick 1: release still 0
+    engine.nextTick();
+    expect(engine.cur_tick).toBe(1);
+    expect(ch.release).toBe(0);
+    expect(ch.keyofftick).toBe(2);
+    expect(ch.volE).toBe(64);
+
+    // Tick 2: K02 fires, setting release = 1 and clearing keyofftick
+    engine.nextTick();
+    expect(engine.cur_tick).toBe(2);
+    expect(ch.release).toBe(1);
+    expect(ch.keyofftick).toBeUndefined();
+
+    // Advance through sustain point (tick 4) - because release = 1, it exits sustain and decays
+    engine.nextTick(); // tick 3
+    engine.nextTick(); // tick 4: volE 64
+    expect(engine.cur_tick).toBe(4);
+    expect(ch.volE).toBe(64);
+
+    engine.nextTick(); // tick 5
+    engine.nextTick(); // tick 6
+    engine.nextTick(); // tick 7: midway between tick 4 (64) and tick 10 (0) -> 32
+    expect(engine.cur_tick).toBe(7);
+    expect(ch.volE).toBe(32);
+
+    engine.nextTick(); // tick 8
+    engine.nextTick(); // tick 9
+    engine.nextTick(); // tick 10: reaches 0
+    expect(engine.cur_tick).toBe(10);
+    expect(ch.volE).toBe(0);
+  });
+
+  it('triggers ED0 on tick 0 and delays ED2 note trigger until tick 2', () => {
+    const engine = createXMEngine();
+    const sample = {
+      sampname: 'test',
+      len: 100,
+      loop: 0,
+      looplen: 0,
+      note: 0,
+      fine: 0,
+      pan: 128,
+      type: 0,
+      vol: 64,
+      fileoffset: 0,
+      sampledata: new Float32Array(100)
+    };
+    const inst: XMInstrument = {
+      name: 'test',
+      number: 0,
+      samplemap: new Uint8Array(96),
+      samples: [sample],
+      env_vol: new engine.Envelope([0, 64, 1, 0], 2, 0, 0, 0),
+      env_pan: new engine.Envelope([0, 32], 0, 0, 0, 0)
+    };
+
+    // 1. ED0: immediate trigger on tick 0
+    engine.xm = {
+      flags: 1,
+      bpm: 125,
+      tempo: 6,
+      nchan: 1,
+      global_volume: 128,
+      songpats: [0],
+      patterns: [[[[48, 1, -1, 14, 0xd0]]]], // ED0
+      instruments: [inst],
+      channelinfo: [
+        {
+          number: 0,
+          vol: 64,
+          pan: 128,
+          period: 0,
+          vL: 0,
+          vR: 0,
+          vLprev: 0,
+          vRprev: 0,
+          mute: 0,
+          volE: 64,
+          panE: 32,
+          retrig: 0,
+          vibratopos: 0,
+          vibratodepth: 0,
+          vibratospeed: 0,
+          vibratotype: 0,
+          filterstate: new Float32Array(3)
+        }
+      ]
+    };
+    engine.cur_songpos = 0;
+    engine.cur_pat = 0;
+    engine.cur_row = -1;
+    engine.next_row = 0;
+    engine.cur_tick = 5;
+
+    engine.nextTick();
+    const ch0 = engine.xm.channelinfo![0];
+    expect(engine.cur_tick).toBe(0);
+    expect(ch0.note).toBe(48);
+    expect(ch0.period).toBeGreaterThan(0);
+    expect(ch0.doff).toBeGreaterThan(0);
+
+    // 2. ED2: delay note trigger until tick 2
+    engine.xm.patterns = [[[[48, 1, -1, 14, 0xd2]]]]; // ED2
+    engine.xm.channelinfo = [
+      {
+        number: 0,
+        vol: 64,
+        pan: 128,
+        period: 0,
+        vL: 0,
+        vR: 0,
+        vLprev: 0,
+        vRprev: 0,
+        mute: 0,
+        volE: 64,
+        panE: 32,
+        retrig: 0,
+        vibratopos: 0,
+        vibratodepth: 0,
+        vibratospeed: 0,
+        vibratotype: 0,
+        filterstate: new Float32Array(3)
+      }
+    ];
+    engine.cur_songpos = 0;
+    engine.cur_pat = 0;
+    engine.cur_row = -1;
+    engine.next_row = 0;
+    engine.cur_tick = 5;
+
+    // Tick 0: note not triggered, doff inactive
+    engine.nextTick();
+    const ch2 = engine.xm.channelinfo![0];
+    expect(engine.cur_tick).toBe(0);
+    expect(ch2.delayednote).toEqual([48, 1, -1, 14, 0xd2]);
+    expect(ch2.notedelaytick).toBe(2);
+    expect(ch2.inst).toBeUndefined();
+    expect(ch2.doff).toBeUndefined();
+
+    // Tick 1: still delayed, doff inactive
+    engine.nextTick();
+    expect(engine.cur_tick).toBe(1);
+    expect(ch2.delayednote).toBeDefined();
+    expect(ch2.inst).toBeUndefined();
+    expect(ch2.doff).toBeUndefined();
+
+    // Tick 2: note delay reached -> triggers note, doff becomes active
+    engine.nextTick();
+    expect(engine.cur_tick).toBe(2);
+    expect(ch2.delayednote).toBeUndefined();
+    expect(ch2.notedelaytick).toBeUndefined();
+    expect(ch2.note).toBe(48);
+    expect(ch2.inst).toBeDefined();
+    expect(ch2.period).toBeGreaterThan(0);
+    expect(ch2.doff).toBeGreaterThan(0);
+
+    // Tick 3: note continues playing
+    engine.nextTick();
+    expect(engine.cur_tick).toBe(3);
+    expect(ch2.doff).toBeGreaterThan(0);
   });
 });

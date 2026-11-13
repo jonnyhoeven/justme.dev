@@ -148,6 +148,9 @@ export interface XMChannelState {
   ramp?: number;
   filter?: [number, number, number];
   release?: number;
+  keyofftick?: number;
+  delayednote?: XMNoteData;
+  notedelaytick?: number;
   envtick?: number;
   env_vol?: EnvelopeFollower;
   env_pan?: EnvelopeFollower;
@@ -523,18 +526,31 @@ export function createXMEngine(): XMEngine {
         break;
       case 0x0c: // note cut handled in eff_t1_e
         break;
+      case 0x0d: // note delay
+        ch.notedelaytick = data;
+        break;
       default:
         break;
     }
   }
 
   function eff_t1_e(ch: XMChannelState): void {
-    // note cut
     if (ch.effectdata !== undefined) {
       switch (ch.effectdata >> 4) {
         case 0x0c:
           if (player.cur_tick == (ch.effectdata & 0x0f)) {
             ch.vol = 0;
+          }
+          break;
+        case 0x0d:
+          if (
+            ch.notedelaytick !== undefined &&
+            player.cur_tick === ch.notedelaytick &&
+            ch.delayednote
+          ) {
+            triggerRowNote(ch, ...ch.delayednote);
+            ch.delayednote = undefined;
+            ch.notedelaytick = undefined;
           }
           break;
       }
@@ -644,6 +660,22 @@ export function createXMEngine(): XMEngine {
     const interval = ch.retrig & 0x0f;
     if (interval !== 0 && player.cur_tick % interval === 0) {
       ch.off = 0;
+    }
+  }
+
+  function eff_t0_k(ch: XMChannelState, data: number): void {
+    if (data === 0) {
+      ch.release = 1;
+      ch.keyofftick = undefined;
+    } else {
+      ch.keyofftick = data;
+    }
+  }
+
+  function eff_t1_k(ch: XMChannelState): void {
+    if (ch.keyofftick !== undefined && player.cur_tick === ch.keyofftick) {
+      ch.release = 1;
+      ch.keyofftick = undefined;
     }
   }
 
@@ -764,6 +796,154 @@ export function createXMEngine(): XMEngine {
     player.cur_pat = nextPat;
   }
 
+  function triggerRowNote(
+    ch: XMChannelState,
+    note: number,
+    instIdx: number,
+    vol: number,
+    efftype: number,
+    effparam: number
+  ): void {
+    void effparam;
+    const instruments = player.xm.instruments || [];
+    let inst = ch.inst;
+    let triggernote = false;
+    // instrument trigger
+    if (instIdx != -1) {
+      inst = instruments[instIdx - 1];
+      if (inst && inst.samplemap && inst.samples) {
+        ch.inst = inst;
+        // retrigger unless overridden below
+        triggernote = true;
+        if (ch.note !== undefined && inst.samplemap) {
+          ch.samp = inst.samples[inst.samplemap[ch.note]];
+          if (ch.samp) {
+            ch.vol = ch.samp.vol;
+            ch.pan = ch.samp.pan;
+            ch.fine = ch.samp.fine;
+          } else {
+            ch.samp = undefined;
+          }
+        } else {
+          ch.samp = undefined;
+        }
+      }
+    }
+
+    // note trigger
+    if (note != -1) {
+      if (note == 96) {
+        ch.release = 1;
+        triggernote = false;
+      } else {
+        if (inst && inst.samplemap && inst.samples) {
+          ch.note = note;
+          ch.samp = inst.samples[inst.samplemap[ch.note]];
+          if (ch.samp) {
+            if (triggernote) {
+              // if we were already triggering the note, reset vol/pan using
+              // (potentially) new sample
+              ch.pan = ch.samp.pan;
+              ch.vol = ch.samp.vol;
+              ch.fine = ch.samp.fine;
+            }
+          } else {
+            ch.samp = undefined;
+          }
+          triggernote = true;
+        }
+      }
+    }
+
+    ch.voleffectfn = undefined;
+    if (vol != -1) {
+      // volume column
+      const v = vol;
+      ch.voleffectdata = v & 0x0f;
+      if (v >= 0x10 && v <= 0x50) {
+        ch.vol = v - 0x10;
+      } else if (v >= 0x60 && v < 0x70) {
+        // volume slide down
+        ch.voleffectfn = function (ch: XMChannelState): void {
+          ch.vol = Math.max(0, ch.vol - (ch.voleffectdata ?? 0));
+        };
+      } else if (v >= 0x70 && v < 0x80) {
+        // volume slide up
+        ch.voleffectfn = function (ch: XMChannelState): void {
+          ch.vol = Math.min(64, ch.vol + (ch.voleffectdata ?? 0));
+        };
+      } else if (v >= 0x80 && v < 0x90) {
+        // fine volume slide down
+        ch.vol = Math.max(0, ch.vol - (v & 0x0f));
+      } else if (v >= 0x90 && v < 0xa0) {
+        // fine volume slide up
+        ch.vol = Math.min(64, ch.vol + (v & 0x0f));
+      } else if (v >= 0xa0 && v < 0xb0) {
+        // vibrato speed
+        ch.vibratospeed = v & 0x0f;
+      } else if (v >= 0xb0 && v < 0xc0) {
+        // vibrato w/ depth
+        ch.vibratodepth = v & 0x0f;
+        ch.voleffectfn = player.effects_t1[4] ?? undefined; // use vibrato effect directly
+        const eff4 = player.effects_t1[4];
+        if (eff4) eff4(ch); // and also call it on tick 0
+      } else if (v >= 0xc0 && v < 0xd0) {
+        // set panning
+        ch.pan = (v & 0x0f) * 0x11;
+      } else if (v >= 0xf0 && v <= 0xff) {
+        // portamento
+        if (v & 0x0f) {
+          ch.portaspeed = (v & 0x0f) << 4;
+        }
+        ch.voleffectfn = player.effects_t1[3] ?? undefined; // just run 3x0
+      }
+    }
+
+    // special handling for portamentos: don't trigger the note
+    if (efftype == 3 || efftype == 5 || vol >= 0xf0) {
+      if (note != -1 && ch.note !== undefined) {
+        ch.periodtarget = periodForNote(ch, ch.note);
+      }
+      triggernote = false;
+      if (inst && inst.samplemap) {
+        if (ch.env_vol == undefined) {
+          // note wasn't already playing; we basically have to ignore the
+          // portamento and just trigger
+          triggernote = true;
+        } else if (ch.release) {
+          // reset envelopes if note was released but leave offset/pitch/etc
+          // alone
+          ch.envtick = 0;
+          ch.release = 0;
+          if (inst.env_vol) ch.env_vol = new EnvelopeFollower(inst.env_vol);
+          if (inst.env_pan) ch.env_pan = new EnvelopeFollower(inst.env_pan);
+        }
+      }
+    }
+
+    if (triggernote) {
+      // there's gotta be a less hacky way to handle offset commands...
+      if (efftype != 9) ch.off = 0;
+      ch.release = 0;
+      ch.envtick = 0;
+      if (inst && inst.env_vol) ch.env_vol = new EnvelopeFollower(inst.env_vol);
+      if (inst && inst.env_pan) ch.env_pan = new EnvelopeFollower(inst.env_pan);
+      if (ch.note !== undefined) {
+        ch.period = periodForNote(ch, ch.note);
+      }
+      // Micro-declick (8 samples ~0.18ms) only when retriggering an already-playing voice
+      if (ch.inst && (ch.vL > 0.05 || ch.vR > 0.05)) {
+        ch.ramp = 0.0;
+      } else {
+        ch.ramp = 1.0;
+      }
+      // waveforms 0-3 are retriggered on new notes while 4-7 are continuous
+      if (ch.vibratotype < 4) {
+        ch.vibratopos = 0;
+      }
+    }
+  }
+
   function nextRow(): void {
     if (typeof player.next_row === 'undefined') {
       player.next_row = player.cur_row + 1;
@@ -797,157 +977,30 @@ export function createXMEngine(): XMEngine {
     const r = p[player.cur_row];
     if (!r) return;
     const channelinfo = player.xm.channelinfo || [];
-    const instruments = player.xm.instruments || [];
     for (let i = 0; i < r.length; i++) {
       const ch = channelinfo[i];
       if (!ch) continue;
-      let inst = ch.inst;
-      let triggernote = false;
-      // instrument trigger
-      if (r[i][1] != -1) {
-        inst = instruments[r[i][1] - 1];
-        if (inst && inst.samplemap && inst.samples) {
-          ch.inst = inst;
-          // retrigger unless overridden below
-          triggernote = true;
-          if (ch.note !== undefined && inst.samplemap) {
-            ch.samp = inst.samples[inst.samplemap[ch.note]];
-            if (ch.samp) {
-              ch.vol = ch.samp.vol;
-              ch.pan = ch.samp.pan;
-              ch.fine = ch.samp.fine;
-            } else {
-              ch.samp = undefined;
-            }
-          } else {
-            ch.samp = undefined;
-          }
-        }
+      ch.keyofftick = undefined;
+      ch.delayednote = undefined;
+      ch.notedelaytick = undefined;
+
+      const [note, inst, vol, efftype, effparam] = r[i];
+      const isDelayed =
+        efftype === 0x0e && effparam >> 4 === 0x0d && (effparam & 0x0f) > 0;
+
+      if (isDelayed) {
+        ch.delayednote = r[i];
+      } else {
+        triggerRowNote(ch, note, inst, vol, efftype, effparam);
       }
 
-      // note trigger
-      if (r[i][0] != -1) {
-        if (r[i][0] == 96) {
-          ch.release = 1;
-          triggernote = false;
-        } else {
-          if (inst && inst.samplemap && inst.samples) {
-            const note = r[i][0];
-            ch.note = note;
-            ch.samp = inst.samples[inst.samplemap[ch.note]];
-            if (ch.samp) {
-              if (triggernote) {
-                // if we were already triggering the note, reset vol/pan using
-                // (potentially) new sample
-                ch.pan = ch.samp.pan;
-                ch.vol = ch.samp.vol;
-                ch.fine = ch.samp.fine;
-              }
-            } else {
-              ch.samp = undefined;
-            }
-            triggernote = true;
-          }
-        }
-      }
-
-      ch.voleffectfn = undefined;
-      if (r[i][2] != -1) {
-        // volume column
-        const v = r[i][2];
-        ch.voleffectdata = v & 0x0f;
-        if (v >= 0x10 && v <= 0x50) {
-          ch.vol = v - 0x10;
-        } else if (v >= 0x60 && v < 0x70) {
-          // volume slide down
-          ch.voleffectfn = function (ch: XMChannelState): void {
-            ch.vol = Math.max(0, ch.vol - (ch.voleffectdata ?? 0));
-          };
-        } else if (v >= 0x70 && v < 0x80) {
-          // volume slide up
-          ch.voleffectfn = function (ch: XMChannelState): void {
-            ch.vol = Math.min(64, ch.vol + (ch.voleffectdata ?? 0));
-          };
-        } else if (v >= 0x80 && v < 0x90) {
-          // fine volume slide down
-          ch.vol = Math.max(0, ch.vol - (v & 0x0f));
-        } else if (v >= 0x90 && v < 0xa0) {
-          // fine volume slide up
-          ch.vol = Math.min(64, ch.vol + (v & 0x0f));
-        } else if (v >= 0xa0 && v < 0xb0) {
-          // vibrato speed
-          ch.vibratospeed = v & 0x0f;
-        } else if (v >= 0xb0 && v < 0xc0) {
-          // vibrato w/ depth
-          ch.vibratodepth = v & 0x0f;
-          ch.voleffectfn = player.effects_t1[4] ?? undefined; // use vibrato effect directly
-          const eff4 = player.effects_t1[4];
-          if (eff4) eff4(ch); // and also call it on tick 0
-        } else if (v >= 0xc0 && v < 0xd0) {
-          // set panning
-          ch.pan = (v & 0x0f) * 0x11;
-        } else if (v >= 0xf0 && v <= 0xff) {
-          // portamento
-          if (v & 0x0f) {
-            ch.portaspeed = (v & 0x0f) << 4;
-          }
-          ch.voleffectfn = player.effects_t1[3] ?? undefined; // just run 3x0
-        }
-      }
-
-      ch.effect = r[i][3];
-      ch.effectdata = r[i][4];
+      ch.effect = efftype;
+      ch.effectdata = effparam;
       if (ch.effect < 36) {
         ch.effectfn = player.effects_t1[ch.effect];
         const eff_t0 = player.effects_t0[ch.effect];
-        if (eff_t0 && eff_t0(ch, ch.effectdata)) {
-          triggernote = false;
-        }
-      }
-
-      // special handling for portamentos: don't trigger the note
-      if (ch.effect == 3 || ch.effect == 5 || r[i][2] >= 0xf0) {
-        if (r[i][0] != -1 && ch.note !== undefined) {
-          ch.periodtarget = periodForNote(ch, ch.note);
-        }
-        triggernote = false;
-        if (inst && inst.samplemap) {
-          if (ch.env_vol == undefined) {
-            // note wasn't already playing; we basically have to ignore the
-            // portamento and just trigger
-            triggernote = true;
-          } else if (ch.release) {
-            // reset envelopes if note was released but leave offset/pitch/etc
-            // alone
-            ch.envtick = 0;
-            ch.release = 0;
-            if (inst.env_vol) ch.env_vol = new EnvelopeFollower(inst.env_vol);
-            if (inst.env_pan) ch.env_pan = new EnvelopeFollower(inst.env_pan);
-          }
-        }
-      }
-
-      if (triggernote) {
-        // there's gotta be a less hacky way to handle offset commands...
-        if (ch.effect != 9) ch.off = 0;
-        ch.release = 0;
-        ch.envtick = 0;
-        if (inst && inst.env_vol)
-          ch.env_vol = new EnvelopeFollower(inst.env_vol);
-        if (inst && inst.env_pan)
-          ch.env_pan = new EnvelopeFollower(inst.env_pan);
-        if (ch.note !== undefined) {
-          ch.period = periodForNote(ch, ch.note);
-        }
-        // Micro-declick (8 samples ~0.18ms) only when retriggering an already-playing voice
-        if (ch.inst && (ch.vL > 0.05 || ch.vR > 0.05)) {
-          ch.ramp = 0.0;
-        } else {
-          ch.ramp = 1.0;
-        }
-        // waveforms 0-3 are retriggered on new notes while 4-7 are continuous
-        if (ch.vibratotype < 4) {
-          ch.vibratopos = 0;
+        if (eff_t0) {
+          eff_t0(ch, ch.effectdata);
         }
       }
     }
@@ -970,11 +1023,11 @@ export function createXMEngine(): XMEngine {
     for (j = 0; j < nchan; j++) {
       ch = channelinfo[j];
       if (!ch) continue;
-      const inst = ch.inst;
       if (player.cur_tick !== 0) {
         if (ch.voleffectfn) ch.voleffectfn(ch);
         if (ch.effectfn) ch.effectfn(ch);
       }
+      const inst = ch.inst;
       if (inst === undefined) continue;
       if (ch.env_vol === undefined || ch.env_pan === undefined) continue;
       ch.volE = ch.env_vol.Tick(ch.release ?? 0);
@@ -1811,6 +1864,9 @@ export function createXMEngine(): XMEngine {
       ch.retrig = 0;
       ch.periodoffset = 0;
       ch.ramp = 1.0;
+      ch.keyofftick = undefined;
+      ch.delayednote = undefined;
+      ch.notedelaytick = undefined;
       if (ch.filterstate) {
         ch.filterstate[0] = 0;
         ch.filterstate[1] = 0;
@@ -1911,7 +1967,7 @@ export function createXMEngine(): XMEngine {
     eff_t0_h, // h
     eff_unimplemented_t0, // i
     eff_unimplemented_t0, // j
-    eff_unimplemented_t0, // k
+    eff_t0_k, // k
     eff_unimplemented_t0, // l
     eff_unimplemented_t0, // m
     eff_unimplemented_t0, // n
@@ -1951,7 +2007,7 @@ export function createXMEngine(): XMEngine {
     eff_t1_h, // h
     eff_unimplemented, // i
     eff_unimplemented, // j
-    eff_unimplemented, // k
+    eff_t1_k, // k
     eff_unimplemented, // l
     eff_unimplemented, // m
     eff_unimplemented, // n
