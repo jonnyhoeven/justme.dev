@@ -54,7 +54,7 @@ Open items from a full read of the components, `lib/`, theme CSS, ETL scripts, C
 ### 6. Design and layout
 
 - [ ] **Reduce `!important` (about 145 uses)**: most of `components.css` restyles VitePress internals by force. Prefer the theme's CSS variables where they exist (`--vp-nav-bg-color`, `--vp-local-search-bg`, button variables), put custom rules in an `@layer`, and keep `!important` for the few scoped-style overrides that need it.
-- [ ] **Search placeholder is dimmed below AA** _(from code)_ ([`components.css`](.vitepress/theme/components.css) `.VPLocalSearchBox .search-input::placeholder`): `opacity: 0.5 !important` on `--vp-c-text-2`. `.post-intro` at `opacity: 0.85` is borderline too. Add both to `tests/unit/contrast.test.ts`.
+- [x] **Search placeholder is dimmed below AA** _(from code)_ ([`components.css`](.vitepress/theme/components.css) `.VPLocalSearchBox .search-input::placeholder`): `opacity: 0.5 !important` on `--vp-c-text-2`. `.post-intro` at `opacity: 0.85` is borderline too. Add both to `tests/unit/contrast.test.ts`.
 - [ ] **Hero avatar source is 307px** but shown at up to 240 CSS px, so it is soft on 2x phones. Export a 480px version (needs a larger source image).
 
 ### 7. Documentation

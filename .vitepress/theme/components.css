@@ -162,7 +162,7 @@
 
 .VPLocalSearchBox .search-input::placeholder {
   color: var(--vp-c-text-2) !important;
-  opacity: 0.5 !important;
+  opacity: 1 !important;
 }
 
 .VPLocalSearchBox .results {
@@ -364,6 +364,18 @@
   cursor: pointer;
 }
 
+.clickable-card .post-title {
+  position: static !important;
+}
+
+.clickable-card .badge-bar {
+  pointer-events: none;
+}
+
+.clickable-card .badge-bar a {
+  pointer-events: auto;
+}
+
 .stretched-link::after {
   content: '';
   position: absolute;
@@ -395,7 +407,6 @@
   margin-bottom: 0.8rem;
   padding-top: 0;
   border-top: none;
-  position: relative;
   font-family: var(--vp-font-family-heading);
   font-weight: 600;
   font-size: 1.25rem;

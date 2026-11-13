@@ -16,6 +16,23 @@ const css = readFileSync(
   'utf8'
 ).replace(/\/\*[\s\S]*?\*\//g, '');
 
+const componentsCss = readFileSync(
+  resolve(__dirname, '../../.vitepress/theme/components.css'),
+  'utf8'
+).replace(/\/\*[\s\S]*?\*\//g, '');
+
+function extractComponentVar(
+  selectorRe: string,
+  varName: string
+): string | undefined {
+  const m = new RegExp(`${selectorRe}\\s*\\{([^}]*)\\}`, 'm').exec(
+    componentsCss
+  );
+  if (!m) return undefined;
+  const varMatch = new RegExp(`${varName}\\s*:\\s*([^;!]+)`).exec(m[1]);
+  return varMatch ? varMatch[1].trim() : undefined;
+}
+
 function extractVars(selectorRe: string): Record<string, string> {
   // Anchored at line start so indented :root blocks inside @media are skipped.
   const m = new RegExp(`^${selectorRe}\\s*\\{([^}]*)\\}`, 'm').exec(css);
@@ -143,6 +160,95 @@ describe('tokens.css contrast (WCAG AA)', () => {
           }
         );
       }
+    });
+  }
+});
+
+describe('components.css contrast (WCAG AA)', () => {
+  it('.VPLocalSearchBox .search-input::placeholder does not apply opacity < 1', () => {
+    const placeholderBlock =
+      /\.VPLocalSearchBox\s+\.search-input::placeholder\s*\{([^}]+)\}/.exec(
+        componentsCss
+      );
+    expect(placeholderBlock).not.toBeNull();
+    const opacityMatch = /opacity:\s*([^;!]+)/.exec(placeholderBlock![1]);
+    const opacityVal = opacityMatch ? parseFloat(opacityMatch[1].trim()) : 1;
+    expect(opacityVal).toBeGreaterThanOrEqual(1);
+  });
+
+  const postIntroBlock = /\.post-intro\s*\{([^}]+)\}/.exec(componentsCss);
+  const postIntroOpacityMatch = postIntroBlock
+    ? /opacity:\s*([^;!]+)/.exec(postIntroBlock[1])
+    : null;
+  const postIntroOpacity = postIntroOpacityMatch
+    ? parseFloat(postIntroOpacityMatch[1].trim())
+    : 0.85;
+
+  const searchModalBgs = {
+    light:
+      extractComponentVar('\\.VPLocalSearchBox', '--vp-local-search-bg') ??
+      'rgba(255, 255, 255, 0.75)',
+    dark:
+      extractComponentVar(
+        '\\.dark\\s+\\.VPLocalSearchBox',
+        '--vp-local-search-bg'
+      ) ?? 'rgba(16, 21, 35, 0.75)'
+  };
+
+  for (const mode of ['light', 'dark'] as const) {
+    describe(mode, () => {
+      for (const bg of backgrounds) {
+        it(`.post-intro (--vp-c-text-1 with opacity ${postIntroOpacity}) on ${bg} >= ${AA}:1`, () => {
+          const text1 = resolveToken(themes[mode], '--vp-c-text-1');
+          const bgCol = resolveToken(themes[mode], bg);
+          expect(text1).not.toBeNull();
+          expect(bgCol).not.toBeNull();
+          const postIntroFg: RGBA = {
+            ...text1!,
+            a: text1!.a * postIntroOpacity
+          };
+          const ratio = contrastRatio(postIntroFg, bgCol!);
+          expect(ratio).toBeGreaterThanOrEqual(AA);
+        });
+      }
+
+      it(`search placeholder (--vp-c-text-2) on --vp-local-search-bg >= ${AA}:1`, () => {
+        const text2 = resolveToken(themes[mode], '--vp-c-text-2');
+        const searchBg = parseColor(searchModalBgs[mode]);
+        const pageBg = resolveToken(themes[mode], '--vp-c-bg');
+        expect(text2).not.toBeNull();
+        expect(searchBg).not.toBeNull();
+        expect(pageBg).not.toBeNull();
+        const placeholderRule =
+          /\.VPLocalSearchBox\s+\.search-input::placeholder\s*\{([^}]+)\}/.exec(
+            componentsCss
+          );
+        const opacityMatch = placeholderRule
+          ? /opacity:\s*([^;!]+)/.exec(placeholderRule[1])
+          : null;
+        const opacity = opacityMatch ? parseFloat(opacityMatch[1].trim()) : 1;
+        const placeholderFg: RGBA = { ...text2!, a: text2!.a * opacity };
+        const ratio = contrastRatio(placeholderFg, searchBg!, pageBg!);
+        expect(ratio).toBeGreaterThanOrEqual(AA);
+      });
+
+      it(`search placeholder (--vp-c-text-2) on --vp-c-bg >= ${AA}:1`, () => {
+        const text2 = resolveToken(themes[mode], '--vp-c-text-2');
+        const pageBg = resolveToken(themes[mode], '--vp-c-bg');
+        expect(text2).not.toBeNull();
+        expect(pageBg).not.toBeNull();
+        const placeholderRule =
+          /\.VPLocalSearchBox\s+\.search-input::placeholder\s*\{([^}]+)\}/.exec(
+            componentsCss
+          );
+        const opacityMatch = placeholderRule
+          ? /opacity:\s*([^;!]+)/.exec(placeholderRule[1])
+          : null;
+        const opacity = opacityMatch ? parseFloat(opacityMatch[1].trim()) : 1;
+        const placeholderFg: RGBA = { ...text2!, a: text2!.a * opacity };
+        const ratio = contrastRatio(placeholderFg, pageBg!);
+        expect(ratio).toBeGreaterThanOrEqual(AA);
+      });
     });
   }
 });
