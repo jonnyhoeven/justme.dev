@@ -97,6 +97,7 @@ derived by reading the source and have not been checked in a browser. Ordered by
       "GITHUB_TOKEN not set" for every manifest when run locally.
 - [ ] **TypeScript 7 is available** (7.0.2; the project is on 6.0.3): check `vue-tsc` and `@typescript-eslint` peer
       support before upgrading.
+  - Checked 2026-11-13: `vue-tsc` (`>=5.0.0`) and `@vue/eslint-config-typescript` (`>=4.8.4`) allow it, but `typescript-eslint` pins `typescript: ">=4.8.4 <6.1.0"` — blocked on `typescript-eslint` supporting TS 7.
 - [ ] **No end-to-end smoke test**: `data-animation` / `data-scene` / `data-phase` were added for testing but nothing
       uses them. Add one Playwright test: the home page hydrates without console errors, the director advances on click, and
       play/next works with a fixture `.xm`.
@@ -111,9 +112,10 @@ derived by reading the source and have not been checked in a browser. Ordered by
 
 ### 6. Design and layout
 
-- [ ] **Reduce `!important` (about 145 uses)**: most of `components.css` restyles VitePress internals by force. Prefer
+- [x] **Reduce `!important` (about 145 uses)**: most of `components.css` restyles VitePress internals by force. Prefer
       the theme's CSS variables where they exist (`--vp-nav-bg-color`, `--vp-local-search-bg`, button variables), put custom
       rules in an `@layer`, and keep `!important` for the few scoped-style overrides that need it.
+  - Reduced from 109 to 18 `!important` declarations in `components.css`, keeping only the scoped `[data-v-...]` VitePress overrides that need them.
 - [x] **Search placeholder is dimmed below AA** _(from code)_ ([`components.css`](.vitepress/theme/components.css)
       `.VPLocalSearchBox .search-input::placeholder`): `opacity: 0.5 !important` on `--vp-c-text-2`. `.post-intro` at
       `opacity: 0.85` is borderline too. Add both to `tests/unit/contrast.test.ts`.
