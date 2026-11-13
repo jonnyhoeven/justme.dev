@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later
-import { describe, it, expect } from 'vitest';
+import fs from 'node:fs';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import transformPage, {
   applyBlogStats,
   loadBlogStats
@@ -200,11 +201,49 @@ describe('applyBlogStats', () => {
 });
 
 describe('loadBlogStats', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.resetModules();
+  });
+
   it('loads cached or file stats map', () => {
     const stats = loadBlogStats();
     expect(typeof stats).toBe('object');
     expect(stats).not.toBeNull();
     // Subsequent calls return the same cached instance
     expect(loadBlogStats()).toBe(stats);
+  });
+
+  it('reads and caches stats from blog-stats.json when present', async () => {
+    vi.resetModules();
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+    vi.spyOn(fs, 'readFileSync').mockReturnValue(
+      JSON.stringify({ 'cilium/cilium': { stars: 19000 } })
+    );
+
+    const { loadBlogStats: freshLoad } =
+      await import('../../lib/transformPage');
+    const stats = freshLoad();
+    expect(stats).toEqual({ 'cilium/cilium': { stars: 19000 } });
+    expect(freshLoad()).toBe(stats);
+  });
+
+  it('returns empty map when blog-stats.json is missing', async () => {
+    vi.resetModules();
+    vi.spyOn(fs, 'existsSync').mockReturnValue(false);
+
+    const { loadBlogStats: freshLoad } =
+      await import('../../lib/transformPage');
+    expect(freshLoad()).toEqual({});
+  });
+
+  it('falls back to empty map on read or parse error', async () => {
+    vi.resetModules();
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+    vi.spyOn(fs, 'readFileSync').mockReturnValue('{invalid json');
+
+    const { loadBlogStats: freshLoad } =
+      await import('../../lib/transformPage');
+    expect(freshLoad()).toEqual({});
   });
 });
