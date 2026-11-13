@@ -330,7 +330,7 @@
 .shieldButton {
   display: inline-flex;
   align-items: center;
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius-full);
   transition:
     color var(--duration-normal) var(--ease-smooth),
     background-color var(--duration-normal) var(--ease-smooth),

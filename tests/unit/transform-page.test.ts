@@ -39,6 +39,19 @@ describe('transformPage', () => {
     expect(result.frontmatter.externalUrlLabel).toBe('View on Github');
   });
 
+  it('defaults externalUrlLabel to "View site" when externalUrl is non-GitHub even if gitlink is set', () => {
+    const result = transformPage({
+      url: '/project',
+      frontmatter: {
+        gitlink: 'https://github.com/cilium/cilium',
+        externalUrl: 'https://cilium.io/'
+      }
+    });
+
+    expect(result.frontmatter.externalUrl).toBe('https://cilium.io/');
+    expect(result.frontmatter.externalUrlLabel).toBe('View site');
+  });
+
   it('parses languages as comma-separated string or array', () => {
     const stringResult = transformPage({
       url: '/post1',

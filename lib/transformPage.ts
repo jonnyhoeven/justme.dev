@@ -22,7 +22,8 @@ export default function transformPage<T extends PageLike>(
   pf.image = rawImage;
   pf.externalUrl = pf.externalUrl ?? (pf.gitlink ? `${pf.gitlink}` : undefined);
   pf.externalUrlLabel =
-    pf.externalUrlLabel ?? (pf.gitlink ? 'View on Github' : 'View site');
+    pf.externalUrlLabel ??
+    (pf.externalUrl?.includes('github.com') ? 'View on Github' : 'View site');
 
   const description: string =
     pf.intro ||
