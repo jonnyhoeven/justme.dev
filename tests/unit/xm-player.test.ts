@@ -1208,4 +1208,282 @@ describe('XMPlayer', () => {
     expect(engine.cur_tick).toBe(3);
     expect(ch2.doff).toBeGreaterThan(0);
   });
+
+  function setupEffectEngine(
+    patterns: [number, number, number, number, number][][][],
+    songpats = [0],
+    tempo = 3
+  ) {
+    const engine = createXMEngine();
+    const sample = {
+      sampname: 'test',
+      len: 1000,
+      loop: 0,
+      looplen: 0,
+      note: 0,
+      fine: 0,
+      pan: 128,
+      type: 0,
+      vol: 64,
+      fileoffset: 0,
+      sampledata: new Float32Array(1000)
+    };
+    const inst: XMInstrument = {
+      name: 'test',
+      number: 0,
+      samplemap: new Uint8Array(96),
+      samples: [sample],
+      env_vol: new engine.Envelope([0, 64, 10, 0], 1, 1, 0, 0),
+      env_pan: new engine.Envelope([0, 32, 10, 64], 1, 1, 0, 0)
+    };
+    engine.xm = {
+      flags: 1,
+      bpm: 125,
+      tempo,
+      initial_tempo: tempo,
+      initial_bpm: 125,
+      song_looppos: 0,
+      nchan: 1,
+      global_volume: 128,
+      songpats,
+      patterns,
+      instruments: [inst],
+      channelinfo: [
+        {
+          number: 0,
+          vol: 64,
+          pan: 128,
+          period: 0,
+          vL: 0,
+          vR: 0,
+          vLprev: 0,
+          vRprev: 0,
+          mute: 0,
+          volE: 64,
+          panE: 32,
+          retrig: 0,
+          vibratopos: 0,
+          vibratodepth: 0,
+          vibratospeed: 0,
+          vibratotype: 0,
+          filterstate: new Float32Array(3)
+        }
+      ]
+    };
+    engine.cur_songpos = 0;
+    engine.cur_pat = songpats[0] ?? 0;
+    engine.cur_row = -1;
+    engine.next_row = 0;
+    engine.cur_tick = tempo - 1;
+    return engine;
+  }
+
+  it('holds cur_row for x extra row durations on EEx pattern delay', () => {
+    const engine = setupEffectEngine(
+      [
+        [
+          [[48, 1, -1, 14, 0xe2]], // row 0: EE2 (delay 2 extra rows)
+          [[-1, -1, -1, 0, 0]] // row 1
+        ]
+      ],
+      [0],
+      2
+    );
+
+    // Row 0, tick 0 & 1
+    engine.nextTick();
+    expect(engine.cur_row).toBe(0);
+    expect(engine.cur_tick).toBe(0);
+    engine.nextTick();
+    expect(engine.cur_row).toBe(0);
+    expect(engine.cur_tick).toBe(1);
+
+    // Extra row duration 1 (tick 0 & 1, still on row 0)
+    engine.nextTick();
+    expect(engine.cur_row).toBe(0);
+    expect(engine.cur_tick).toBe(0);
+    engine.nextTick();
+    expect(engine.cur_row).toBe(0);
+    expect(engine.cur_tick).toBe(1);
+
+    // Extra row duration 2 (tick 0 & 1, still on row 0)
+    engine.nextTick();
+    expect(engine.cur_row).toBe(0);
+    expect(engine.cur_tick).toBe(0);
+    engine.nextTick();
+    expect(engine.cur_row).toBe(0);
+    expect(engine.cur_tick).toBe(1);
+
+    // Now advances to row 1
+    engine.nextTick();
+    expect(engine.cur_row).toBe(1);
+    expect(engine.cur_tick).toBe(0);
+  });
+
+  it('retriggers sample offset every x ticks on E9x (and ignores E90)', () => {
+    const engine = setupEffectEngine(
+      [[[[48, 1, -1, 14, 0x92]]]], // E92
+      [0],
+      5
+    );
+    const ch = engine.xm.channelinfo![0];
+
+    engine.nextTick(); // tick 0
+    expect(ch.off).toBe(0);
+
+    ch.off = 50;
+    engine.nextTick(); // tick 1 (1 % 2 !== 0)
+    expect(ch.off).toBe(50);
+
+    engine.nextTick(); // tick 2 (2 % 2 === 0 -> retrigger)
+    expect(ch.off).toBe(0);
+
+    ch.off = 75;
+    engine.nextTick(); // tick 3
+    expect(ch.off).toBe(75);
+
+    engine.nextTick(); // tick 4 (4 % 2 === 0 -> retrigger)
+    expect(ch.off).toBe(0);
+  });
+
+  it('cuts volume on tick 0 for EC0', () => {
+    const engine = setupEffectEngine(
+      [[[[48, 1, -1, 14, 0xc0]]]], // EC0
+      [0],
+      3
+    );
+    const ch = engine.xm.channelinfo![0];
+
+    engine.nextTick(); // tick 0
+    expect(ch.vol).toBe(0);
+  });
+
+  it('remembers fine porta up/down (E10/E20) and sample offset (900)', () => {
+    const engine = setupEffectEngine(
+      [
+        [
+          [[48, 1, -1, 14, 0x14]], // row 0: E14
+          [[-1, -1, -1, 14, 0x10]], // row 1: E10 (reuses 4)
+          [[-1, -1, -1, 14, 0x23]], // row 2: E23
+          [[-1, -1, -1, 14, 0x20]], // row 3: E20 (reuses 3)
+          [[48, 1, -1, 9, 0x02]], // row 4: 902 (off = 512)
+          [[48, 1, -1, 9, 0x00]] // row 5: 900 (reuses 0x02 -> off = 512)
+        ]
+      ],
+      [0],
+      1
+    );
+    const ch = engine.xm.channelinfo![0];
+
+    engine.nextTick(); // row 0: E14
+    const p0 = ch.period;
+    engine.nextTick(); // row 1: E10
+    expect(ch.period).toBe(p0 - 4);
+    engine.nextTick(); // row 2: E23
+    expect(ch.period).toBe(p0 - 4 + 3);
+    engine.nextTick(); // row 3: E20
+    expect(ch.period).toBe(p0 - 4 + 3 + 3);
+    engine.nextTick(); // row 4: 902
+    expect(ch.off).toBe(512);
+    engine.nextTick(); // row 5: 900
+    expect(ch.off).toBe(512);
+  });
+
+  it('stops song and fires onEnded on F00', async () => {
+    const engine = setupEffectEngine(
+      [[[[48, 1, -1, 15, 0x00]]]], // F00
+      [0],
+      3
+    );
+    let ended = 0;
+    engine.onEnded = () => {
+      ended++;
+    };
+
+    engine.nextTick();
+    expect(engine.cur_pat).toBe(-1);
+    expect(engine.cur_songpos).toBe(-1);
+    expect(engine.xm.channelinfo![0].inst).toBeUndefined();
+
+    await new Promise((r) => setTimeout(r, 10));
+    expect(ended).toBe(1);
+  });
+
+  it('fires onEnded and validates pattern on Dxx wrap past last order', async () => {
+    // songpats [0, 99] -> D00 on order 0 advances to order 1 (pattern 99 out of range),
+    // setCurrentPattern skips out-of-range 99 and wraps to order 0;
+    // D00 on order 1 wraps past end and fires onEnded.
+    const engine = setupEffectEngine(
+      [
+        [
+          [[48, 1, -1, 13, 0x00]], // row 0: D00
+          [[-1, -1, -1, 0, 0]]
+        ]
+      ],
+      [0, 99],
+      1
+    );
+    let ended = 0;
+    engine.onEnded = () => {
+      ended++;
+    };
+
+    // Row 0 of order 0: D00 advances to order 1, pattern 99 is out of range -> setCurrentPattern wraps to order 0 (pat 0)
+    engine.nextTick();
+    expect(engine.cur_pat).toBe(0);
+    expect(engine.cur_songpos).toBe(0);
+
+    // Now test wrapping past last order directly
+    engine.xm.songpats = [0];
+    engine.cur_songpos = 0;
+    engine.next_row = 0;
+    engine.nextTick();
+    expect(engine.cur_songpos).toBe(0);
+    await new Promise((r) => setTimeout(r, 10));
+    expect(ended).toBe(1);
+  });
+
+  it('sets envelope tick on Lxx and slides panning on Pxy and volume Dx/Ex', () => {
+    const engine = setupEffectEngine(
+      [
+        [
+          [[48, 1, -1, 21, 0x05]], // row 0: L05 (set env tick = 5)
+          [[-1, -1, -1, 25, 0x20]], // row 1: P20 (pan slide right +2/tick)
+          [[-1, -1, -1, 25, 0x00]], // row 2: P00 (reuses +2/tick)
+          [[-1, -1, 0xd4, 0, 0]], // row 3: vol col D4 (pan slide left -4/tick)
+          [[-1, -1, 0xe3, 0, 0]] // row 4: vol col E3 (pan slide right +3/tick)
+        ]
+      ],
+      [0],
+      2
+    );
+    const ch = engine.xm.channelinfo![0];
+
+    // Row 0, tick 0: L05 sets tick=5, then nextTick() ticks once -> tick=6
+    engine.nextTick();
+    expect(ch.env_vol?.tick).toBe(6);
+    expect(ch.env_pan?.tick).toBe(6);
+    engine.nextTick(); // tick 1
+
+    // Row 1: P20 (+2 on tick 1)
+    ch.pan = 100;
+    engine.nextTick(); // tick 0
+    engine.nextTick(); // tick 1
+    expect(ch.pan).toBe(102);
+
+    // Row 2: P00 (memory +2 on tick 1)
+    engine.nextTick(); // tick 0
+    engine.nextTick(); // tick 1
+    expect(ch.pan).toBe(104);
+
+    // Row 3: vol col D4 (-4 on tick 1)
+    engine.nextTick(); // tick 0
+    engine.nextTick(); // tick 1
+    expect(ch.pan).toBe(100);
+
+    // Row 4: vol col E3 (+3 on tick 1)
+    engine.nextTick(); // tick 0
+    engine.nextTick(); // tick 1
+    expect(ch.pan).toBe(103);
+  });
 });

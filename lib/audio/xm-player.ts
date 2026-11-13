@@ -160,8 +160,12 @@ export interface XMChannelState {
   slideupspeed?: number;
   slidedownspeed?: number;
   volumeslide?: number;
+  panslide?: number;
   finevolup?: number;
   finevoldown?: number;
+  fineportaup?: number;
+  fineportadown?: number;
+  sampleoffset?: number;
   loopstart?: number;
   loopend?: number;
   loopremaining?: number;
@@ -211,6 +215,7 @@ export interface XMEngine {
   next_row?: number;
   cur_ticksamp: number;
   cur_tick: number;
+  pattern_delay: number;
   max_global_volume: number;
   playing: boolean;
   audioctx: AudioContext | null;
@@ -434,7 +439,12 @@ export function createXMEngine(): XMEngine {
   }
 
   function eff_t0_9(ch: XMChannelState, data: number): void {
-    // sample offset
+    // sample offset (with parameter memory)
+    if (data !== 0) {
+      ch.sampleoffset = data;
+    } else if (ch.sampleoffset !== undefined) {
+      data = ch.sampleoffset;
+    }
     ch.off = data * 256;
   }
 
@@ -471,9 +481,15 @@ export function createXMEngine(): XMEngine {
     // pattern jump
     player.cur_songpos++;
     const songpats = player.xm.songpats || [];
-    if (player.cur_songpos >= songpats.length)
+    if (player.cur_songpos >= songpats.length) {
       player.cur_songpos = player.xm.song_looppos ?? 0;
-    player.cur_pat = songpats[player.cur_songpos] ?? 0;
+      if (player.onEnded) {
+        setTimeout(() => {
+          if (player.onEnded) player.onEnded();
+        }, 0);
+      }
+    }
+    setCurrentPattern();
     player.next_row = (data >> 4) * 10 + (data & 0x0f);
   }
 
@@ -482,11 +498,16 @@ export function createXMEngine(): XMEngine {
     const eff = data >> 4;
     data = data & 0x0f;
     switch (eff) {
-      case 1: // fine porta up
+      case 1: // fine porta up (with memory)
+        if (data === 0 && ch.fineportaup !== undefined) data = ch.fineportaup;
         ch.period -= data;
+        ch.fineportaup = data;
         break;
-      case 2: // fine porta down
+      case 2: // fine porta down (with memory)
+        if (data === 0 && ch.fineportadown !== undefined)
+          data = ch.fineportadown;
         ch.period += data;
+        ch.fineportadown = data;
         break;
       case 4: // set vibrato waveform
         ch.vibratotype = data & 0x07;
@@ -524,10 +545,14 @@ export function createXMEngine(): XMEngine {
         ch.vol = Math.max(0, ch.vol - data);
         ch.finevoldown = data;
         break;
-      case 0x0c: // note cut handled in eff_t1_e
+      case 0x0c: // note cut (EC0 cuts on tick 0; ECx > 0 handled in eff_t1_e)
+        if (data === 0) ch.vol = 0;
         break;
       case 0x0d: // note delay
         ch.notedelaytick = data;
+        break;
+      case 0x0e: // pattern delay
+        player.pattern_delay = data;
         break;
       default:
         break;
@@ -537,6 +562,13 @@ export function createXMEngine(): XMEngine {
   function eff_t1_e(ch: XMChannelState): void {
     if (ch.effectdata !== undefined) {
       switch (ch.effectdata >> 4) {
+        case 0x09: {
+          const interval = ch.effectdata & 0x0f;
+          if (interval !== 0 && player.cur_tick % interval === 0) {
+            ch.off = 0;
+          }
+          break;
+        }
         case 0x0c:
           if (player.cur_tick == (ch.effectdata & 0x0f)) {
             ch.vol = 0;
@@ -558,8 +590,14 @@ export function createXMEngine(): XMEngine {
   }
 
   function eff_t0_f(_ch: XMChannelState, data: number): void {
-    // set tempo
+    // set tempo (F00 stops the song)
     if (data === 0) {
+      stop();
+      if (player.onEnded) {
+        setTimeout(() => {
+          if (player.onEnded) player.onEnded();
+        }, 0);
+      }
       return;
     } else if (data < 0x20) {
       player.xm.tempo = data;
@@ -676,6 +714,26 @@ export function createXMEngine(): XMEngine {
     if (ch.keyofftick !== undefined && player.cur_tick === ch.keyofftick) {
       ch.release = 1;
       ch.keyofftick = undefined;
+    }
+  }
+
+  function eff_t0_l(ch: XMChannelState, data: number): void {
+    // set envelope position
+    if (ch.env_vol) ch.env_vol.tick = data;
+    if (ch.env_pan) ch.env_pan.tick = data;
+  }
+
+  function eff_t0_p(ch: XMChannelState, data: number): void {
+    // panning slide
+    if (data) {
+      ch.panslide = (data >> 4) - (data & 0x0f);
+    }
+  }
+
+  function eff_t1_p(ch: XMChannelState): void {
+    // panning slide
+    if (ch.panslide !== undefined) {
+      ch.pan = Math.max(0, Math.min(255, ch.pan + ch.panslide));
     }
   }
 
@@ -890,6 +948,16 @@ export function createXMEngine(): XMEngine {
       } else if (v >= 0xc0 && v < 0xd0) {
         // set panning
         ch.pan = (v & 0x0f) * 0x11;
+      } else if (v >= 0xd0 && v < 0xe0) {
+        // panning slide left
+        ch.voleffectfn = function (ch: XMChannelState): void {
+          ch.pan = Math.max(0, ch.pan - (ch.voleffectdata ?? 0));
+        };
+      } else if (v >= 0xe0 && v < 0xf0) {
+        // panning slide right
+        ch.voleffectfn = function (ch: XMChannelState): void {
+          ch.pan = Math.min(255, ch.pan + (ch.voleffectdata ?? 0));
+        };
       } else if (v >= 0xf0 && v <= 0xff) {
         // portamento
         if (v & 0x0f) {
@@ -1018,7 +1086,11 @@ export function createXMEngine(): XMEngine {
     }
     if (player.cur_tick >= (player.xm.tempo ?? 6)) {
       player.cur_tick = 0;
-      nextRow();
+      if (player.pattern_delay > 0) {
+        player.pattern_delay--;
+      } else {
+        nextRow();
+      }
     }
     for (j = 0; j < nchan; j++) {
       ch = channelinfo[j];
@@ -1401,6 +1473,7 @@ export function createXMEngine(): XMEngine {
     while (buflen > 0) {
       if (player.cur_pat == -1 || player.cur_ticksamp >= ticklen) {
         nextTick();
+        if (!player.playing) break;
         player.cur_ticksamp -= ticklen;
       }
       const tickduration = Math.min(buflen, ticklen - player.cur_ticksamp);
@@ -1826,6 +1899,7 @@ export function createXMEngine(): XMEngine {
     player.cur_row = 64;
     player.cur_songpos = -1;
     player.cur_ticksamp = 0;
+    player.pattern_delay = 0;
     silenceChannels();
     player.xm.global_volume = player.max_global_volume;
     player.xm.tempo = player.xm.initial_tempo;
@@ -1941,6 +2015,7 @@ export function createXMEngine(): XMEngine {
     player.cur_row = 0;
     player.next_row = 0;
     player.cur_ticksamp = 0;
+    player.pattern_delay = 0;
     player.cur_tick = (player.xm.tempo || 6) - 1;
     setCurrentPattern();
   }
@@ -1968,11 +2043,11 @@ export function createXMEngine(): XMEngine {
     eff_unimplemented_t0, // i
     eff_unimplemented_t0, // j
     eff_t0_k, // k
-    eff_unimplemented_t0, // l
+    eff_t0_l, // l
     eff_unimplemented_t0, // m
     eff_unimplemented_t0, // n
     eff_unimplemented_t0, // o
-    eff_unimplemented_t0, // p
+    eff_t0_p, // p
     eff_unimplemented_t0, // q
     eff_t0_r, // r
     eff_unimplemented_t0, // s
@@ -2008,11 +2083,11 @@ export function createXMEngine(): XMEngine {
     eff_unimplemented, // i
     eff_unimplemented, // j
     eff_t1_k, // k
-    eff_unimplemented, // l
+    null, // l
     eff_unimplemented, // m
     eff_unimplemented, // n
     eff_unimplemented, // o
-    eff_unimplemented, // p
+    eff_t1_p, // p
     eff_unimplemented, // q
     eff_t1_r, // r
     eff_unimplemented, // s
@@ -2031,6 +2106,7 @@ export function createXMEngine(): XMEngine {
     cur_row: 64,
     cur_ticksamp: 0,
     cur_tick: 6,
+    pattern_delay: 0,
     xm: {
       global_volume: 128
     },
