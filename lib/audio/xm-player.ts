@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: 2015 Andy Sloane <andy@a1k0n.net> (jsxm, MIT License)
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later AND MIT
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, @typescript-eslint/ban-ts-comment, no-var */
-// @ts-nocheck -- untyped jsxm port (113 strict errors, mostly implicit any); typing it is a separate item. Remove once the engine is typed.
 /**
  * FastTracker 2 (.XM) Player for Web Audio API.
  * Adapted from Andy Sloane's jsxm for modern TypeScript / ES Module environments.
@@ -15,45 +13,323 @@ export interface XMPlayerOptions {
   onEnded?: () => void;
 }
 
-function createXMEngine() {
-  const player: any = {
-    cur_songpos: -1,
-    cur_pat: -1,
-    cur_row: 64,
-    cur_ticksamp: 0,
-    cur_tick: 6,
-    xm: {},
-    max_global_volume: 128,
-    playing: false,
-    audioctx: null,
-    onEnded: null
-  };
+export type XMNoteData = [
+  note: number,
+  inst: number,
+  vol: number,
+  efftype: number,
+  effparam: number
+];
+export type XMPatternRow = XMNoteData[];
+export type XMPattern = XMPatternRow[];
 
-  const XMView: any = {
+export interface XMSample {
+  sampname: string;
+  len: number;
+  loop: number;
+  looplen: number;
+  note: number;
+  fine: number;
+  pan: number;
+  type: number;
+  vol: number;
+  fileoffset: number;
+  sampledata: Float32Array;
+}
+
+export class Envelope {
+  points: number[];
+  type: number;
+  sustain: number;
+  loopstart: number;
+  loopend: number;
+
+  constructor(
+    points: number[],
+    type: number,
+    sustain: number,
+    loopstart: number,
+    loopend: number
+  ) {
+    this.points = points;
+    this.type = type;
+    this.sustain = sustain;
+    this.loopstart = points[loopstart * 2] ?? 0;
+    this.loopend = points[loopend * 2] ?? 0;
+  }
+
+  Get(ticks: number): number {
+    let y0 = 0;
+    const env = this.points;
+    for (let i = 0; i < env.length; i += 2) {
+      y0 = env[i + 1];
+      if (ticks < env[i]) {
+        const x0 = env[i - 2];
+        y0 = env[i - 1];
+        const dx = env[i] - x0;
+        const dy = env[i + 1] - y0;
+        return y0 + ((ticks - x0) * dy) / dx;
+      }
+    }
+    return y0;
+  }
+}
+
+export class EnvelopeFollower {
+  env: Envelope;
+  tick: number;
+
+  constructor(env: Envelope) {
+    this.env = env;
+    this.tick = 0;
+  }
+
+  Tick(release: number): number {
+    const value = this.env.Get(this.tick);
+
+    // if we're sustaining a note, stop advancing the tick counter
+    const sustainTick = this.env.points[this.env.sustain * 2];
+    if (!release && sustainTick !== undefined && this.tick >= sustainTick) {
+      return this.env.points[this.env.sustain * 2 + 1] ?? value;
+    }
+
+    this.tick++;
+    if (this.env.type & 4) {
+      // envelope loop?
+      if (!release && this.tick >= this.env.loopend) {
+        this.tick -= this.env.loopend - this.env.loopstart;
+      }
+    }
+    return value;
+  }
+}
+
+export interface XMInstrument {
+  name: string;
+  number: number;
+  samplemap?: Uint8Array;
+  samples?: XMSample[];
+  env_vol?: Envelope;
+  env_pan?: Envelope;
+}
+
+export type XMEffectTick0Fn = (
+  ch: XMChannelState,
+  data: number
+) => void | boolean;
+export type XMEffectTick1Fn = (ch: XMChannelState) => void;
+
+export interface XMChannelState {
+  number: number;
+  filterstate: Float32Array;
+  vol: number;
+  pan: number;
+  period: number;
+  vL: number;
+  vR: number;
+  vLprev: number;
+  vRprev: number;
+  mute: number;
+  volE: number;
+  panE: number;
+  retrig: number;
+  vibratopos: number;
+  vibratodepth: number;
+  vibratospeed: number;
+  vibratotype: number;
+
+  // Dynamic voice / effect state
+  inst?: XMInstrument;
+  samp?: XMSample;
+  note?: number;
+  fine?: number;
+  off?: number;
+  doff?: number;
+  ramp?: number;
+  filter?: [number, number, number];
+  release?: number;
+  envtick?: number;
+  env_vol?: EnvelopeFollower;
+  env_pan?: EnvelopeFollower;
+  periodoffset?: number;
+  periodtarget?: number;
+  portaspeed?: number;
+  slideupspeed?: number;
+  slidedownspeed?: number;
+  volumeslide?: number;
+  finevolup?: number;
+  finevoldown?: number;
+  loopstart?: number;
+  loopend?: number;
+  loopremaining?: number;
+  effect?: number;
+  effectdata?: number;
+  effectfn?: XMEffectTick1Fn | null;
+  voleffectdata?: number;
+  voleffectfn?: XMEffectTick1Fn;
+}
+
+export interface XMSong {
+  songname?: string;
+  song_looppos?: number;
+  nchan?: number;
+  flags?: number;
+  tempo?: number;
+  bpm?: number;
+  initial_tempo?: number;
+  initial_bpm?: number;
+  channelinfo?: XMChannelState[];
+  global_volume?: number;
+  global_volumeslide?: number;
+  songpats?: number[];
+  patterns?: XMPattern[];
+  instruments?: XMInstrument[];
+  xm_songlen?: number;
+}
+
+export interface XMScopeFrame {
+  t: number;
+  vu: Float32Array;
+  scopes?: Float32Array[];
+  songpos: number;
+  pat: number;
+  row: number;
+}
+
+export interface XMViewInternal {
+  scope_width: number;
+  pushEvent: ((frame: XMScopeFrame) => void) | null;
+}
+
+export interface XMEngine {
+  cur_songpos: number;
+  cur_pat: number;
+  cur_row: number;
+  next_row?: number;
+  cur_ticksamp: number;
+  cur_tick: number;
+  max_global_volume: number;
+  playing: boolean;
+  audioctx: AudioContext | null;
+  onEnded: (() => void) | null;
+  xm: XMSong;
+  XMView: XMViewInternal;
+  effects_t0: XMEffectTick0Fn[];
+  effects_t1: (XMEffectTick1Fn | null)[];
+  periodForNote: (ch: XMChannelState, note: number) => number;
+  updateChannelPeriod: (ch: XMChannelState, period: number) => void;
+  prettify_effect: (t: number, p: number) => string;
+  prettify_note?: (note: number) => string;
+  init: (
+    existingCtx?: AudioContext | null,
+    bufferSize?: number
+  ) => GainNode | null;
+  load: (arrayBuf: ArrayBuffer) => boolean;
+  play: () => void;
+  pause: () => void;
+  stop: () => void;
+  nextTick: (f_smp?: number) => void;
+  nextRow: () => void;
+  Envelope: typeof Envelope;
+  getGainNode: () => GainNode | null;
+  getJsNode: () => ScriptProcessorNode | null;
+  setCurrentPattern: () => void;
+  silenceChannels: () => void;
+  scanSongStateUpTo: (
+    targetSongPos: number,
+    targetRow?: number
+  ) => { tempo: number; bpm: number; globalVolume: number };
+  seekToOrder: (targetIdx: number) => void;
+}
+
+export interface XMTrackerState {
+  curSongPos: number;
+  curPat: number;
+  curRow: number;
+  bpm: number;
+  tempo: number;
+  songlen: number;
+  songpats: number[];
+  numChannels: number;
+}
+export type TrackerState = XMTrackerState;
+
+export interface XMInstrumentSampleInfo {
+  name: string;
+  len: number;
+  vol: number;
+  pan: number;
+  loop: number;
+  looplen: number;
+  type: number;
+}
+
+export interface XMInstrumentInfo {
+  index: number;
+  name: string;
+  samples: XMInstrumentSampleInfo[];
+}
+export type InstrumentInfo = XMInstrumentInfo;
+export type InstrumentSampleInfo = XMInstrumentSampleInfo;
+
+export function createXMEngine(): XMEngine {
+  const XMView: XMViewInternal = {
     scope_width: 0,
     pushEvent: null
   };
 
-  var jsNode: any = null;
-  var gainNode: any = null;
+  let jsNode: ScriptProcessorNode | null = null;
+  let gainNode: GainNode | null = null;
+  let f_smp = 44100; // updated by play callback, default value here
 
-  function eff_t1_0(ch) {
+  // per-sample exponential moving average for volume changes (to prevent pops
+  // and clicks); evaluated every 8 samples
+  const popfilter_alpha = 0.9837;
+
+  // for pretty-printing notes
+  const _note_names = [
+    'C-',
+    'C#',
+    'D-',
+    'D#',
+    'E-',
+    'F-',
+    'F#',
+    'G-',
+    'G#',
+    'A-',
+    'A#',
+    'B-'
+  ];
+
+  const AMIGA_PERIOD_TAB = [
+    907, 900, 894, 887, 881, 875, 868, 862, 856, 850, 844, 838, 832, 826, 820,
+    814, 808, 802, 796, 791, 785, 779, 774, 768, 762, 757, 752, 746, 741, 736,
+    730, 725, 720, 715, 709, 704, 699, 694, 689, 684, 678, 675, 670, 665, 660,
+    655, 651, 646, 640, 636, 632, 628, 623, 619, 614, 610, 604, 601, 597, 592,
+    588, 584, 580, 575, 570, 567, 563, 559, 555, 551, 547, 543, 538, 535, 532,
+    528, 524, 520, 516, 513, 508, 505, 502, 498, 494, 491, 487, 484, 480, 477,
+    474, 470, 467, 463, 460, 457
+  ];
+
+  function eff_t1_0(ch: XMChannelState): void {
     // arpeggio
     if (ch.effectdata !== 0 && ch.inst !== undefined) {
-      const arpeggio = [0, ch.effectdata >> 4, ch.effectdata & 15];
-      const note = ch.note + arpeggio[player.cur_tick % 3];
+      const effectdata = ch.effectdata ?? 0;
+      const arpeggio = [0, effectdata >> 4, effectdata & 15];
+      const note = (ch.note ?? 0) + arpeggio[player.cur_tick % 3];
       ch.period = player.periodForNote(ch, note);
     }
   }
 
-  function eff_t0_1(ch, data) {
+  function eff_t0_1(ch: XMChannelState, data: number): void {
     // pitch slide up
     if (data !== 0) {
       ch.slideupspeed = data;
     }
   }
 
-  function eff_t1_1(ch) {
+  function eff_t1_1(ch: XMChannelState): void {
     // pitch slide up
     if (ch.slideupspeed !== undefined) {
       // is this limited? it appears not
@@ -61,29 +337,29 @@ function createXMEngine() {
     }
   }
 
-  function eff_t0_2(ch, data) {
+  function eff_t0_2(ch: XMChannelState, data: number): void {
     // pitch slide down
     if (data !== 0) {
       ch.slidedownspeed = data;
     }
   }
 
-  function eff_t1_2(ch) {
+  function eff_t1_2(ch: XMChannelState): void {
     // pitch slide down
     if (ch.slidedownspeed !== undefined) {
-      const maxPeriod = player.xm.flags & 1 ? 1920 : 6848;
+      const maxPeriod = (player.xm.flags ?? 0) & 1 ? 1920 : 6848;
       ch.period = Math.min(maxPeriod, ch.period + ch.slidedownspeed);
     }
   }
 
-  function eff_t0_3(ch, data) {
+  function eff_t0_3(ch: XMChannelState, data: number): void {
     // portamento
     if (data !== 0) {
       ch.portaspeed = data;
     }
   }
 
-  function eff_t1_3(ch) {
+  function eff_t1_3(ch: XMChannelState): void {
     // portamento
     if (ch.periodtarget !== undefined && ch.portaspeed !== undefined) {
       if (ch.period > ch.periodtarget) {
@@ -94,7 +370,7 @@ function createXMEngine() {
     }
   }
 
-  function eff_t0_4(ch, data) {
+  function eff_t0_4(ch: XMChannelState, data: number): void {
     // vibrato
     if (data & 0x0f) {
       ch.vibratodepth = (data & 0x0f) * 2;
@@ -105,7 +381,7 @@ function createXMEngine() {
     eff_t1_4(ch);
   }
 
-  function eff_t1_4(ch) {
+  function eff_t1_4(ch: XMChannelState): void {
     // vibrato
     ch.periodoffset =
       getVibratoDelta(ch.vibratotype, ch.vibratopos) * ch.vibratodepth;
@@ -119,7 +395,7 @@ function createXMEngine() {
     }
   }
 
-  function getVibratoDelta(type, x) {
+  function getVibratoDelta(type: number, x: number): number {
     let delta = 0;
     switch (type & 0x03) {
       case 1: // sawtooth (ramp-down)
@@ -137,66 +413,68 @@ function createXMEngine() {
     return delta;
   }
 
-  function eff_t1_5(ch) {
+  function eff_t1_5(ch: XMChannelState): void {
     // portamento + volume slide
     eff_t1_a(ch);
     eff_t1_3(ch);
   }
 
-  function eff_t1_6(ch) {
+  function eff_t1_6(ch: XMChannelState): void {
     // vibrato + volume slide
     eff_t1_a(ch);
     eff_t1_4(ch);
   }
 
-  function eff_t0_8(ch, data) {
+  function eff_t0_8(ch: XMChannelState, data: number): void {
     // set panning
     ch.pan = data;
   }
 
-  function eff_t0_9(ch, data) {
+  function eff_t0_9(ch: XMChannelState, data: number): void {
     // sample offset
     ch.off = data * 256;
   }
 
-  function eff_t0_a(ch, data) {
+  function eff_t0_a(ch: XMChannelState, data: number): void {
     // volume slide
     if (data) {
       ch.volumeslide = -(data & 0x0f) + (data >> 4);
     }
   }
 
-  function eff_t1_a(ch) {
+  function eff_t1_a(ch: XMChannelState): void {
     // volume slide
     if (ch.volumeslide !== undefined) {
       ch.vol = Math.max(0, Math.min(64, ch.vol + ch.volumeslide));
     }
   }
 
-  function eff_t0_b(ch, data) {
+  function eff_t0_b(_ch: XMChannelState, data: number): void {
     // song jump
-    if (data < player.xm.songpats.length) {
+    const songpats = player.xm.songpats || [];
+    if (data < songpats.length) {
       player.cur_songpos = data - 1;
       player.cur_pat = -1;
       player.cur_row = -1;
     }
   }
 
-  function eff_t0_c(ch, data) {
+  function eff_t0_c(ch: XMChannelState, data: number): void {
     // set volume
     ch.vol = Math.min(64, data);
   }
 
-  function eff_t0_d(ch, data) {
+  function eff_t0_d(_ch: XMChannelState, data: number): void {
     // pattern jump
     player.cur_songpos++;
-    if (player.cur_songpos >= player.xm.songpats.length)
-      player.cur_songpos = player.xm.song_looppos;
-    player.cur_pat = player.xm.songpats[player.cur_songpos];
+    const songpats = player.xm.songpats || [];
+    if (player.cur_songpos >= songpats.length)
+      player.cur_songpos = player.xm.song_looppos ?? 0;
+    player.cur_pat = songpats[player.cur_songpos] ?? 0;
     player.next_row = (data >> 4) * 10 + (data & 0x0f);
   }
 
-  function eff_t0_e(ch, data) {
+  function eff_t0_e(ch: XMChannelState, data: number): void {
     // extended effects!
     const eff = data >> 4;
     data = data & 0x0f;
@@ -221,7 +499,7 @@ function createXMEngine() {
             ch.loopend = player.cur_row;
             ch.loopremaining = data;
           }
-          if (ch.loopremaining !== 0) {
+          if (ch.loopremaining !== undefined && ch.loopremaining !== 0) {
             ch.loopremaining--;
             player.next_row = ch.loopstart || 0;
           } else {
@@ -250,18 +528,20 @@ function createXMEngine() {
     }
   }
 
-  function eff_t1_e(ch) {
+  function eff_t1_e(ch: XMChannelState): void {
     // note cut
-    switch (ch.effectdata >> 4) {
-      case 0x0c:
-        if (player.cur_tick == (ch.effectdata & 0x0f)) {
-          ch.vol = 0;
-        }
-        break;
+    if (ch.effectdata !== undefined) {
+      switch (ch.effectdata >> 4) {
+        case 0x0c:
+          if (player.cur_tick == (ch.effectdata & 0x0f)) {
+            ch.vol = 0;
+          }
+          break;
+      }
     }
   }
 
-  function eff_t0_f(ch, data) {
+  function eff_t0_f(_ch: XMChannelState, data: number): void {
     // set tempo
     if (data === 0) {
       return;
@@ -272,7 +552,7 @@ function createXMEngine() {
     }
   }
 
-  function eff_t0_g(ch, data) {
+  function eff_t0_g(_ch: XMChannelState, data: number): void {
     // set global volume
     if (data <= 0x40) {
       // volume gets multiplied by 2 to match
@@ -283,7 +563,7 @@ function createXMEngine() {
     }
   }
 
-  function eff_t0_h(ch, data) {
+  function eff_t0_h(_ch: XMChannelState, data: number): void {
     // global volume slide
     if (data) {
       // same as Axy but multiplied by 2
@@ -291,20 +571,21 @@ function createXMEngine() {
     }
   }
 
-  function eff_t1_h(ch) {
+  function eff_t1_h(): void {
     // global volume slide
     if (player.xm.global_volumeslide !== undefined) {
       player.xm.global_volume = Math.max(
         0,
         Math.min(
           player.max_global_volume,
-          player.xm.global_volume + player.xm.global_volumeslide
+          (player.xm.global_volume ?? player.max_global_volume) +
+            player.xm.global_volumeslide
         )
       );
     }
   }
 
-  function eff_t0_r(ch, data) {
+  function eff_t0_r(ch: XMChannelState, data: number): void {
     // retrigger
     if (data & 0x0f) ch.retrig = (ch.retrig & 0xf0) + (data & 0x0f);
     if (data & 0xf0) ch.retrig = (ch.retrig & 0x0f) + (data & 0xf0);
@@ -359,153 +640,30 @@ function createXMEngine() {
     ch.vol = Math.min(64, Math.max(0, ch.vol));
   }
 
-  function eff_t1_r(ch) {
-    if (player.cur_tick % (ch.retrig & 0x0f) === 0) {
+  function eff_t1_r(ch: XMChannelState): void {
+    const interval = ch.retrig & 0x0f;
+    if (interval !== 0 && player.cur_tick % interval === 0) {
       ch.off = 0;
     }
   }
 
-  function eff_unimplemented() {}
-  function eff_unimplemented_t0() {}
+  function eff_unimplemented(): void {}
+  function eff_unimplemented_t0(): void {}
 
-  player.effects_t0 = [
-    // effect functions on tick 0
-    eff_t1_0, // 1, arpeggio is processed on all ticks
-    eff_t0_1,
-    eff_t0_2,
-    eff_t0_3,
-    eff_t0_4, // 4
-    eff_t0_a, // 5, same as A on first tick
-    eff_t0_a, // 6, same as A on first tick
-    eff_unimplemented_t0, // 7
-    eff_t0_8, // 8
-    eff_t0_9, // 9
-    eff_t0_a, // a
-    eff_t0_b, // b
-    eff_t0_c, // c
-    eff_t0_d, // d
-    eff_t0_e, // e
-    eff_t0_f, // f
-    eff_t0_g, // g
-    eff_t0_h, // h
-    eff_unimplemented_t0, // i
-    eff_unimplemented_t0, // j
-    eff_unimplemented_t0, // k
-    eff_unimplemented_t0, // l
-    eff_unimplemented_t0, // m
-    eff_unimplemented_t0, // n
-    eff_unimplemented_t0, // o
-    eff_unimplemented_t0, // p
-    eff_unimplemented_t0, // q
-    eff_t0_r, // r
-    eff_unimplemented_t0, // s
-    eff_unimplemented_t0, // t
-    eff_unimplemented_t0, // u
-    eff_unimplemented_t0, // v
-    eff_unimplemented_t0, // w
-    eff_unimplemented_t0, // x
-    eff_unimplemented_t0, // y
-    eff_unimplemented_t0 // z
-  ];
-
-  player.effects_t1 = [
-    // effect functions on tick 1+
-    eff_t1_0,
-    eff_t1_1,
-    eff_t1_2,
-    eff_t1_3,
-    eff_t1_4,
-    eff_t1_5, // 5
-    eff_t1_6, // 6
-    eff_unimplemented, // 7
-    null, // 8
-    null, // 9
-    eff_t1_a, // a
-    null, // b
-    null, // c
-    null, // d
-    eff_t1_e, // e
-    null, // f
-    null, // g
-    eff_t1_h, // h
-    eff_unimplemented, // i
-    eff_unimplemented, // j
-    eff_unimplemented, // k
-    eff_unimplemented, // l
-    eff_unimplemented, // m
-    eff_unimplemented, // n
-    eff_unimplemented, // o
-    eff_unimplemented, // p
-    eff_unimplemented, // q
-    eff_t1_r, // r
-    eff_unimplemented, // s
-    eff_unimplemented, // t
-    eff_unimplemented, // u
-    eff_unimplemented, // v
-    eff_unimplemented, // w
-    eff_unimplemented, // x
-    eff_unimplemented, // y
-    eff_unimplemented // z
-  ];
-
-  player.periodForNote = periodForNote;
-  player.updateChannelPeriod = updateChannelPeriod;
-  player.prettify_effect = prettify_effect;
-  player.init = init;
-  player.load = load;
-  player.play = play;
-  player.pause = pause;
-  player.stop = stop;
-  player.cur_songpos = -1;
-  player.cur_pat = -1;
-  player.cur_row = 64;
-  player.cur_ticksamp = 0;
-  player.cur_tick = 6;
-  player.xm = {}; // contains all song data
-  player.xm.global_volume = player.max_global_volume = 128;
-
-  // exposed for testing
-  player.nextTick = nextTick;
-  player.nextRow = nextRow;
-  player.Envelope = Envelope;
-
-  // for pretty-printing notes
-  const _note_names = [
-    'C-',
-    'C#',
-    'D-',
-    'D#',
-    'E-',
-    'F-',
-    'F#',
-    'G-',
-    'G#',
-    'A-',
-    'A#',
-    'B-'
-  ];
-
-  let f_smp = 44100; // updated by play callback, default value here
-
-  // per-sample exponential moving average for volume changes (to prevent pops
-  // and clicks); evaluated every 8 samples
-  const popfilter_alpha = 0.9837;
-
-  function prettify_note(note) {
+  function prettify_note(note: number): string {
     if (note < 0) return '---';
     if (note == 96) return '^^^';
     return _note_names[note % 12] + ~~(note / 12);
   }
 
-  function prettify_effect(t, p) {
-    if (t >= 10) t = String.fromCharCode(55 + t);
-    if (p < 16) p = '0' + p.toString(16);
-    else p = p.toString(16);
-    return t + p;
+  function prettify_effect(t: number, p: number): string {
+    const tStr = t >= 10 ? String.fromCharCode(55 + t) : t.toString();
+    const pStr = p < 16 ? '0' + p.toString(16) : p.toString(16);
+    return tStr + pStr;
   }
 
-  function getstring(dv, offset, len) {
-    const str = [];
+  function getstring(dv: DataView, offset: number, len: number): string {
+    const str: string[] = [];
     for (let i = offset; i < offset + len; i++) {
       const c = dv.getUint8(i);
       if (c === 0) break;
@@ -515,8 +673,8 @@ function createXMEngine() {
   }
 
   // Return 2-pole Butterworth lowpass filter coefficients for
-  // center frequncy f_c (relative to sampling frequency)
-  function filterCoeffs(f_c) {
+  // center frequency f_c (relative to sampling frequency)
+  function filterCoeffs(f_c: number): [number, number, number] {
     if (f_c > 0.5) {
       // we can't lowpass above the nyquist frequency...
       f_c = 0.5;
@@ -528,19 +686,9 @@ function createXMEngine() {
     return [gain, 2 * c, -e * e];
   }
 
-  const AMIGA_PERIOD_TAB = [
-    907, 900, 894, 887, 881, 875, 868, 862, 856, 850, 844, 838, 832, 826, 820,
-    814, 808, 802, 796, 791, 785, 779, 774, 768, 762, 757, 752, 746, 741, 736,
-    730, 725, 720, 715, 709, 704, 699, 694, 689, 684, 678, 675, 670, 665, 660,
-    655, 651, 646, 640, 636, 632, 628, 623, 619, 614, 610, 604, 601, 597, 592,
-    588, 584, 580, 575, 570, 567, 563, 559, 555, 551, 547, 543, 538, 535, 532,
-    528, 524, 520, 516, 513, 508, 505, 502, 498, 494, 491, 487, 484, 480, 477,
-    474, 470, 467, 463, 460, 457
-  ];
-
-  function updateChannelPeriod(ch, period) {
-    let freq;
-    if (player.xm.flags & 1) {
+  function updateChannelPeriod(ch: XMChannelState, period: number): void {
+    let freq: number;
+    if ((player.xm.flags ?? 0) & 1) {
       // Linear frequency table
       freq = 8363 * Math.pow(2, (1152.0 - period) / 192.0);
     } else {
@@ -556,13 +704,13 @@ function createXMEngine() {
     ch.filter = filterCoeffs(ch.doff / 2);
   }
 
-  function periodForNote(ch, note) {
+  function periodForNote(ch: XMChannelState, note: number): number {
     // channel was silenced (e.g. by a seek) and has no sample yet
     if (!ch.samp) return ch.period;
 
-    if (player.xm.flags & 1) {
+    if ((player.xm.flags ?? 0) & 1) {
       // Linear frequency table
-      return 1920 - (note + ch.samp.note) * 16 - ch.fine / 8.0;
+      return 1920 - (note + ch.samp.note) * 16 - (ch.fine || 0) / 8.0;
     } else {
       // Amiga frequency table
       // In FT2: RealNote = PatternNote + RelativeTone (1 = C-0, 49 = C-4)
@@ -578,57 +726,64 @@ function createXMEngine() {
       const pIdx0 = Math.max(0, Math.min(95, Math.floor(finePos)));
       const pIdx1 = Math.min(95, pIdx0 + 1);
       const frac = finePos - Math.floor(finePos);
-      const p0 = AMIGA_PERIOD_TAB[pIdx0];
-      const p1 = pIdx1 < 96 ? AMIGA_PERIOD_TAB[pIdx1] : AMIGA_PERIOD_TAB[0] / 2;
+      const p0 = AMIGA_PERIOD_TAB[pIdx0]!;
+      const p1 =
+        pIdx1 < 96 ? AMIGA_PERIOD_TAB[pIdx1]! : AMIGA_PERIOD_TAB[0]! / 2;
       const tabVal = p0 * (1 - frac) + p1 * frac;
       const ft2Period = (tabVal * 32.0) / Math.pow(2, octave);
       return ft2Period / 4.0;
     }
   }
 
-  function setCurrentPattern() {
-    let nextPat = player.xm.songpats[player.cur_songpos];
+  function setCurrentPattern(): void {
+    const songpats = player.xm.songpats || [];
+    const patterns = player.xm.patterns || [];
+    let nextPat = songpats[player.cur_songpos] ?? 0;
 
     // check for out of range pattern index
-    while (nextPat >= player.xm.patterns.length) {
-      if (player.cur_songpos + 1 < player.xm.songpats.length) {
+    while (nextPat >= patterns.length) {
+      if (player.cur_songpos + 1 < songpats.length) {
         // first try skipping the position
         player.cur_songpos++;
       } else if (
         (player.cur_songpos === player.xm.song_looppos &&
           player.cur_songpos !== 0) ||
-        player.xm.song_looppos >= player.xm.songpats.length
+        (player.xm.song_looppos ?? 0) >= songpats.length
       ) {
         // if we allready tried song_looppos or if song_looppos
         // is out of range, go to the first position
         player.cur_songpos = 0;
       } else {
         // try going to song_looppos
-        player.cur_songpos = player.xm.song_looppos;
+        player.cur_songpos = player.xm.song_looppos ?? 0;
       }
 
-      nextPat = player.xm.songpats[player.cur_songpos];
+      nextPat = songpats[player.cur_songpos] ?? 0;
     }
 
     player.cur_pat = nextPat;
   }
 
-  function nextRow() {
+  function nextRow(): void {
     if (typeof player.next_row === 'undefined') {
       player.next_row = player.cur_row + 1;
     }
     player.cur_row = player.next_row;
     player.next_row++;
 
+    const patterns = player.xm.patterns || [];
+    const curPattern = patterns[player.cur_pat];
+    const songpats = player.xm.songpats || [];
     if (
       player.cur_pat == -1 ||
-      player.cur_row >= player.xm.patterns[player.cur_pat].length
+      !curPattern ||
+      player.cur_row >= curPattern.length
     ) {
       player.cur_row = 0;
       player.next_row = 1;
       player.cur_songpos++;
-      if (player.cur_songpos >= player.xm.songpats.length) {
-        player.cur_songpos = player.xm.song_looppos;
+      if (player.cur_songpos >= songpats.length) {
+        player.cur_songpos = player.xm.song_looppos ?? 0;
         if (player.onEnded) {
           setTimeout(() => {
             if (player.onEnded) player.onEnded();
@@ -637,18 +792,21 @@ function createXMEngine() {
       }
       setCurrentPattern();
     }
-    const p = player.xm.patterns[player.cur_pat];
+    const p = patterns[player.cur_pat];
     if (!p) return;
     const r = p[player.cur_row];
     if (!r) return;
+    const channelinfo = player.xm.channelinfo || [];
+    const instruments = player.xm.instruments || [];
     for (let i = 0; i < r.length; i++) {
-      const ch = player.xm.channelinfo[i];
+      const ch = channelinfo[i];
+      if (!ch) continue;
       let inst = ch.inst;
       let triggernote = false;
       // instrument trigger
       if (r[i][1] != -1) {
-        inst = player.xm.instruments[r[i][1] - 1];
-        if (inst && inst.samplemap) {
+        inst = instruments[r[i][1] - 1];
+        if (inst && inst.samplemap && inst.samples) {
           ch.inst = inst;
           // retrigger unless overridden below
           triggernote = true;
@@ -673,7 +831,7 @@ function createXMEngine() {
           ch.release = 1;
           triggernote = false;
         } else {
-          if (inst && inst.samplemap) {
+          if (inst && inst.samplemap && inst.samples) {
             const note = r[i][0];
             ch.note = note;
             ch.samp = inst.samples[inst.samplemap[ch.note]];
@@ -702,13 +860,13 @@ function createXMEngine() {
           ch.vol = v - 0x10;
         } else if (v >= 0x60 && v < 0x70) {
           // volume slide down
-          ch.voleffectfn = function (ch) {
-            ch.vol = Math.max(0, ch.vol - ch.voleffectdata);
+          ch.voleffectfn = function (ch: XMChannelState): void {
+            ch.vol = Math.max(0, ch.vol - (ch.voleffectdata ?? 0));
           };
         } else if (v >= 0x70 && v < 0x80) {
           // volume slide up
-          ch.voleffectfn = function (ch) {
-            ch.vol = Math.min(64, ch.vol + ch.voleffectdata);
+          ch.voleffectfn = function (ch: XMChannelState): void {
+            ch.vol = Math.min(64, ch.vol + (ch.voleffectdata ?? 0));
           };
         } else if (v >= 0x80 && v < 0x90) {
           // fine volume slide down
@@ -722,8 +880,9 @@ function createXMEngine() {
         } else if (v >= 0xb0 && v < 0xc0) {
           // vibrato w/ depth
           ch.vibratodepth = v & 0x0f;
-          ch.voleffectfn = player.effects_t1[4]; // use vibrato effect directly
-          player.effects_t1[4](ch); // and also call it on tick 0
+          ch.voleffectfn = player.effects_t1[4] ?? undefined; // use vibrato effect directly
+          const eff4 = player.effects_t1[4];
+          if (eff4) eff4(ch); // and also call it on tick 0
         } else if (v >= 0xc0 && v < 0xd0) {
           // set panning
           ch.pan = (v & 0x0f) * 0x11;
@@ -732,7 +891,7 @@ function createXMEngine() {
           if (v & 0x0f) {
             ch.portaspeed = (v & 0x0f) << 4;
           }
-          ch.voleffectfn = player.effects_t1[3]; // just run 3x0
+          ch.voleffectfn = player.effects_t1[3] ?? undefined; // just run 3x0
         }
       }
 
@@ -748,7 +907,7 @@ function createXMEngine() {
 
       // special handling for portamentos: don't trigger the note
       if (ch.effect == 3 || ch.effect == 5 || r[i][2] >= 0xf0) {
-        if (r[i][0] != -1) {
+        if (r[i][0] != -1 && ch.note !== undefined) {
           ch.periodtarget = periodForNote(ch, ch.note);
         }
         triggernote = false;
@@ -762,8 +921,8 @@ function createXMEngine() {
             // alone
             ch.envtick = 0;
             ch.release = 0;
-            ch.env_vol = new EnvelopeFollower(inst.env_vol);
-            ch.env_pan = new EnvelopeFollower(inst.env_pan);
+            if (inst.env_vol) ch.env_vol = new EnvelopeFollower(inst.env_vol);
+            if (inst.env_pan) ch.env_pan = new EnvelopeFollower(inst.env_pan);
           }
         }
       }
@@ -773,9 +932,11 @@ function createXMEngine() {
         if (ch.effect != 9) ch.off = 0;
         ch.release = 0;
         ch.envtick = 0;
-        ch.env_vol = new EnvelopeFollower(inst.env_vol);
-        ch.env_pan = new EnvelopeFollower(inst.env_pan);
-        if (ch.note) {
+        if (inst && inst.env_vol)
+          ch.env_vol = new EnvelopeFollower(inst.env_vol);
+        if (inst && inst.env_pan)
+          ch.env_pan = new EnvelopeFollower(inst.env_pan);
+        if (ch.note !== undefined) {
           ch.period = periodForNote(ch, ch.note);
         }
         // Micro-declick (8 samples ~0.18ms) only when retriggering an already-playing voice
@@ -792,89 +953,50 @@ function createXMEngine() {
     }
   }
 
-  function Envelope(points, type, sustain, loopstart, loopend) {
-    this.points = points;
-    this.type = type;
-    this.sustain = sustain;
-    this.loopstart = points[loopstart * 2];
-    this.loopend = points[loopend * 2];
-  }
-
-  Envelope.prototype.Get = function (ticks) {
-    // TODO: optimize follower with ptr
-    // or even do binary search here
-    let y0;
-    const env = this.points;
-    for (let i = 0; i < env.length; i += 2) {
-      y0 = env[i + 1];
-      if (ticks < env[i]) {
-        const x0 = env[i - 2];
-        y0 = env[i - 1];
-        const dx = env[i] - x0;
-        const dy = env[i + 1] - y0;
-        return y0 + ((ticks - x0) * dy) / dx;
-      }
-    }
-    return y0;
-  };
-
-  function EnvelopeFollower(env) {
-    this.env = env;
-    this.tick = 0;
-  }
-
-  EnvelopeFollower.prototype.Tick = function (release) {
-    const value = this.env.Get(this.tick);
-
-    // if we're sustaining a note, stop advancing the tick counter
-    if (!release && this.tick >= this.env.points[this.env.sustain * 2]) {
-      return this.env.points[this.env.sustain * 2 + 1];
-    }
-
-    this.tick++;
-    if (this.env.type & 4) {
-      // envelope loop?
-      if (!release && this.tick >= this.env.loopend) {
-        this.tick -= this.env.loopend - this.env.loopstart;
-      }
-    }
-    return value;
-  };
-
-  function nextTick() {
+  function nextTick(): void {
     player.cur_tick++;
-    let j, ch;
-    for (j = 0; j < player.xm.nchan; j++) {
-      ch = player.xm.channelinfo[j];
-      ch.periodoffset = 0;
+    const nchan = player.xm.nchan ?? 0;
+    const channelinfo = player.xm.channelinfo ?? [];
+    let j: number;
+    let ch: XMChannelState;
+    for (j = 0; j < nchan; j++) {
+      ch = channelinfo[j];
+      if (ch) ch.periodoffset = 0;
     }
-    if (player.cur_tick >= player.xm.tempo) {
+    if (player.cur_tick >= (player.xm.tempo ?? 6)) {
       player.cur_tick = 0;
       nextRow();
     }
-    for (j = 0; j < player.xm.nchan; j++) {
-      ch = player.xm.channelinfo[j];
+    for (j = 0; j < nchan; j++) {
+      ch = channelinfo[j];
+      if (!ch) continue;
       const inst = ch.inst;
       if (player.cur_tick !== 0) {
         if (ch.voleffectfn) ch.voleffectfn(ch);
         if (ch.effectfn) ch.effectfn(ch);
       }
       if (inst === undefined) continue;
-      if (ch.env_vol === undefined) continue;
-      ch.volE = ch.env_vol.Tick(ch.release);
-      ch.panE = ch.env_pan.Tick(ch.release);
-      updateChannelPeriod(ch, ch.period + ch.periodoffset);
+      if (ch.env_vol === undefined || ch.env_pan === undefined) continue;
+      ch.volE = ch.env_vol.Tick(ch.release ?? 0);
+      ch.panE = ch.env_pan.Tick(ch.release ?? 0);
+      updateChannelPeriod(ch, ch.period + (ch.periodoffset ?? 0));
     }
   }
 
   // This function gradually brings the channel back down to zero if it isn't
   // already to avoid clicks and pops when samples end.
-  function MixSilenceIntoBuf(ch, start, end, dataL, dataR) {
+  function MixSilenceIntoBuf(
+    ch: XMChannelState,
+    start: number,
+    end: number,
+    dataL: Float32Array,
+    dataR: Float32Array
+  ): number {
     let s = ch.filterstate[1];
     if (isNaN(s)) {
-      return;
+      return 0;
     }
-    for (var i = start; i < end; i++) {
+    for (let i = start; i < end; i++) {
       if (Math.abs(s) < 1.526e-5) {
         // == 1/65536.0
         s = 0;
@@ -890,18 +1012,21 @@ function createXMEngine() {
     }
     ch.filterstate[1] = s;
     ch.filterstate[2] = s;
-    if (isNaN(s)) {
-      return;
-    }
     return 0;
   }
 
-  function MixChannelIntoBuf(ch, start, end, dataL, dataR) {
+  function MixChannelIntoBuf(
+    ch: XMChannelState,
+    start: number,
+    end: number,
+    dataL: Float32Array,
+    dataR: Float32Array
+  ): number {
     const inst = ch.inst;
     const instsamp = ch.samp;
     let loop = false;
-    let looplen = 0,
-      loopstart = 0;
+    let looplen = 0;
+    let loopstart = 0;
 
     // nothing on this channel, just filter the last dc offset back down to zero
     if (instsamp == undefined || inst == undefined || ch.mute) {
@@ -916,26 +1041,25 @@ function createXMEngine() {
       looplen = instsamp.looplen;
       sample_end = loopstart + looplen;
     }
-    const samplen = instsamp.len;
     const volE = ch.volE / 64.0; // current volume envelope
     const panE = 4 * (ch.panE - 32); // current panning envelope
     const p = panE + ch.pan - 128; // final pan
-    let volL =
-      (player.xm.global_volume * volE * (128 - p) * ch.vol) / (64 * 128 * 128);
-    let volR =
-      (player.xm.global_volume * volE * (128 + p) * ch.vol) / (64 * 128 * 128);
+    const global_vol = player.xm.global_volume ?? player.max_global_volume;
+    let volL = (global_vol * volE * (128 - p) * ch.vol) / (64 * 128 * 128);
+    let volR = (global_vol * volE * (128 + p) * ch.vol) / (64 * 128 * 128);
     if (volL < 0) volL = 0;
     if (volR < 0) volR = 0;
-    if (volR === 0 && volL === 0) return;
+    if (volR === 0 && volL === 0) return 0;
     if (isNaN(volR) || isNaN(volL)) {
-      return;
+      return 0;
     }
-    let k = ch.off;
-    const dk = ch.doff;
+    let k = ch.off ?? 0;
+    const dk = ch.doff ?? 0;
     let Vrms = 0;
-    const f0 = ch.filter[0],
-      f1 = ch.filter[1],
-      f2 = ch.filter[2];
+    const filter = ch.filter ?? [1, 0, 0];
+    const f0 = filter[0],
+      f1 = filter[1],
+      f2 = filter[2];
     let fs0 = ch.filterstate[0],
       fs1 = ch.filterstate[1],
       fs2 = ch.filterstate[2];
@@ -958,6 +1082,8 @@ function createXMEngine() {
     // we can mix up to this many bytes before running into a sample end/loop
     let i = start;
     let failsafe = 100;
+    let s = 0;
+    let y = 0;
     while (i < end) {
       if (failsafe-- === 0) {
         break;
@@ -976,7 +1102,6 @@ function createXMEngine() {
       // this is the inner loop of the player
 
       // unrolled 8x
-      var s, y;
       for (; i + 7 < next_event; i += 8) {
         if (ramp < 1.0) {
           s = samp[k | 0];
@@ -1190,9 +1315,9 @@ function createXMEngine() {
   // Buffers handed to the scope listener are reused across ticks and only
   // reallocated when the channel count or scope width changes.
   let vuBuf = new Float32Array(0);
-  let scopeBufs = [];
+  let scopeBufs: Float32Array[] = [];
   let scopeBufsWidth = -1;
-  const scopeEvent = {
+  const scopeEvent: XMScopeFrame = {
     t: 0,
     vu: vuBuf,
     scopes: undefined,
@@ -1201,13 +1326,15 @@ function createXMEngine() {
     row: 0
   };
 
-  function audio_cb(e) {
+  function audio_cb(e: AudioProcessingEvent): void {
+    if (!player.audioctx) return;
     f_smp = player.audioctx.sampleRate;
-    let time_sound_started;
     let buflen = e.outputBuffer.length;
     const dataL = e.outputBuffer.getChannelData(0);
     const dataR = e.outputBuffer.getChannelData(1);
-    let i, j, k;
+    let i: number;
+    let j: number;
+    let k: number;
 
     for (i = 0; i < buflen; i++) {
       dataL[i] = 0;
@@ -1215,16 +1342,16 @@ function createXMEngine() {
     }
 
     let offset = 0;
-    const ticklen = 0 | ((f_smp * 2.5) / player.xm.bpm);
+    const ticklen = 0 | ((f_smp * 2.5) / (player.xm.bpm || 125));
     const scopewidth = XMView.scope_width;
 
     while (buflen > 0) {
       if (player.cur_pat == -1 || player.cur_ticksamp >= ticklen) {
-        nextTick(f_smp);
+        nextTick();
         player.cur_ticksamp -= ticklen;
       }
       const tickduration = Math.min(buflen, ticklen - player.cur_ticksamp);
-      const nchan = player.xm.nchan;
+      const nchan = player.xm.nchan ?? 0;
       if (vuBuf.length !== nchan) vuBuf = new Float32Array(nchan);
       const VU = vuBuf;
       const wantScopes = tickduration >= 4 * scopewidth;
@@ -1237,9 +1364,12 @@ function createXMEngine() {
           scopeBufs.push(new Float32Array(scopewidth));
         scopeBufsWidth = scopewidth;
       }
-      for (j = 0; j < player.xm.nchan; j++) {
-        var scope;
-        if (wantScopes) {
+      const channelinfo = player.xm.channelinfo || [];
+      for (j = 0; j < nchan; j++) {
+        const ch = channelinfo[j];
+        if (!ch) continue;
+        let scope: Float32Array | undefined;
+        if (wantScopes && scopeBufs[j]) {
           scope = scopeBufs[j];
           for (k = 0; k < scopewidth; k++) {
             scope[k] = -dataL[offset + k * 4] - dataR[offset + k * 4];
@@ -1247,15 +1377,10 @@ function createXMEngine() {
         }
 
         VU[j] =
-          MixChannelIntoBuf(
-            player.xm.channelinfo[j],
-            offset,
-            offset + tickduration,
-            dataL,
-            dataR
-          ) / tickduration;
+          MixChannelIntoBuf(ch, offset, offset + tickduration, dataL, dataR) /
+          tickduration;
 
-        if (wantScopes) {
+        if (wantScopes && scope) {
           for (k = 0; k < scopewidth; k++) {
             scope[k] += dataL[offset + k * 4] + dataR[offset + k * 4];
           }
@@ -1276,10 +1401,12 @@ function createXMEngine() {
     }
   }
 
-  function ConvertSample(array, bits) {
+  function ConvertSample(array: Uint8Array, bits: number): Float32Array {
     let len = array.length;
     let acc = 0;
-    let samp, b, k;
+    let samp: Float32Array;
+    let b: number;
+    let k: number;
     if (bits === 0) {
       // 8 bit sample
       samp = new Float32Array(len);
@@ -1305,20 +1432,22 @@ function createXMEngine() {
 
   // optimization: unroll short sample loops so we can run our inner mixing loop
   // uninterrupted for as long as possible; this also handles pingpong loops.
-  function UnrollSampleLoop(samp) {
-    let nloops = ((2048 + samp.looplen - 1) / samp.looplen) | 0;
+  function UnrollSampleLoop(samp: XMSample): void {
+    const nloopsBase = ((2048 + samp.looplen - 1) / samp.looplen) | 0;
     const pingpong = samp.type & 2;
+    let nloops = nloopsBase;
     if (pingpong) {
       // make sure we have an even number of loops if we are pingponging
       nloops = (nloops + 1) & ~1;
     }
     const samplesiz = samp.loop + nloops * samp.looplen;
     const data = new Float32Array(samplesiz);
-    for (var i = 0; i < samp.loop; i++) {
+    let i = 0;
+    for (; i < samp.loop; i++) {
       data[i] = samp.sampledata[i];
     }
     for (let j = 0; j < nloops; j++) {
-      var k;
+      let k: number;
       if (j & 1 && pingpong) {
         for (k = samp.looplen - 1; k >= 0; k--) {
           data[i++] = samp.sampledata[samp.loop + k];
@@ -1334,7 +1463,7 @@ function createXMEngine() {
     samp.type = 1;
   }
 
-  function load(arrayBuf) {
+  function load(arrayBuf: ArrayBuffer): boolean {
     const dv = new DataView(arrayBuf);
     player.xm = {};
 
@@ -1353,7 +1482,9 @@ function createXMEngine() {
     player.xm.channelinfo = [];
     player.xm.global_volume = player.max_global_volume;
 
-    let i, j, k;
+    let i: number;
+    let j: number;
+    let k: number;
 
     for (i = 0; i < player.xm.nchan; i++) {
       player.xm.channelinfo.push({
@@ -1385,21 +1516,20 @@ function createXMEngine() {
     let idx = hlen;
     player.xm.patterns = [];
     for (i = 0; i < npat; i++) {
-      const pattern = [];
-      const patheaderlen = dv.getUint32(idx, true);
+      const pattern: XMPattern = [];
       const patrows = dv.getUint16(idx + 5, true);
       const patsize = dv.getUint16(idx + 7, true);
       idx += 9;
       for (j = 0; patsize > 0 && j < patrows; j++) {
-        const row = [];
+        const row: XMPatternRow = [];
         for (k = 0; k < player.xm.nchan; k++) {
           const byte0 = dv.getUint8(idx);
           idx++;
-          var note = -1,
-            inst = -1,
-            vol = -1,
-            efftype = 0,
-            effparam = 0;
+          let note = -1;
+          let inst = -1;
+          let vol = -1;
+          let efftype = 0;
+          let effparam = 0;
           if (byte0 & 0x80) {
             if (byte0 & 0x01) {
               note = dv.getUint8(idx) - 1;
@@ -1434,7 +1564,7 @@ function createXMEngine() {
             effparam = dv.getUint8(idx);
             idx++;
           }
-          const notedata = [note, inst, vol, efftype, effparam];
+          const notedata: XMNoteData = [note, inst, vol, efftype, effparam];
           row.push(notedata);
         }
         pattern.push(row);
@@ -1448,7 +1578,7 @@ function createXMEngine() {
       const hdrsiz = dv.getUint32(idx, true);
       const instname = getstring(dv, idx + 0x4, 22);
       const nsamp = dv.getUint16(idx + 0x1b, true);
-      var inst = {
+      const inst: XMInstrument = {
         name: instname,
         number: i
       };
@@ -1466,18 +1596,18 @@ function createXMEngine() {
         const env_pan_loop_start = dv.getUint8(idx + 231);
         const env_pan_loop_end = dv.getUint8(idx + 232);
         const vol_fadeout = dv.getUint16(idx + 239, true);
-        const env_vol = [];
+        const env_vol: number[] = [];
         for (j = 0; j < env_nvol * 2; j++) {
           env_vol.push(dv.getUint16(idx + 129 + j * 2, true));
         }
-        const env_pan = [];
+        const env_pan: number[] = [];
         for (j = 0; j < env_npan * 2; j++) {
           env_pan.push(dv.getUint16(idx + 177 + j * 2, true));
         }
         const samphdrsiz = dv.getUint32(idx + 0x1d, true);
         idx += hdrsiz;
         let totalsamples = 0;
-        const samps = [];
+        const samps: XMSample[] = [];
         for (j = 0; j < nsamp; j++) {
           const samplen = dv.getUint32(idx, true);
           const samploop = dv.getUint32(idx + 4, true);
@@ -1492,7 +1622,7 @@ function createXMEngine() {
           if (samplooplen === 0) {
             samptype &= ~3;
           }
-          var samp = {
+          const samp: XMSample = {
             sampname,
             len: samplen,
             loop: samploop,
@@ -1502,15 +1632,15 @@ function createXMEngine() {
             pan: samppan,
             type: samptype,
             vol: sampvol,
-            fileoffset: sampleoffset
+            fileoffset: sampleoffset,
+            sampledata: new Float32Array(0)
           };
-          // length / pointers are all specified in bytes; fixup for 16-bit samples
           samps.push(samp);
           idx += samphdrsiz;
           totalsamples += samplen;
         }
         for (j = 0; j < nsamp; j++) {
-          var samp = samps[j];
+          const samp = samps[j];
           samp.sampledata = ConvertSample(
             new Uint8Array(arrayBuf, idx + samp.fileoffset, samp.len),
             samp.type & 16
@@ -1577,8 +1707,10 @@ function createXMEngine() {
     return true;
   }
 
-  var jsNode, gainNode;
-  function init(existingCtx, bufferSize) {
+  function init(
+    existingCtx?: AudioContext | null,
+    bufferSize?: number
+  ): GainNode | null {
     if (existingCtx) {
       player.audioctx = existingCtx;
     } else if (!player.audioctx && typeof window !== 'undefined') {
@@ -1595,11 +1727,12 @@ function createXMEngine() {
     return gainNode;
   }
 
-  player.playing = false;
-  function play() {
+  function play(): void {
     if (!player.playing) {
       // start playing
-      jsNode.connect(gainNode);
+      if (jsNode && gainNode) {
+        jsNode.connect(gainNode);
+      }
 
       try {
         if (player.audioctx && player.audioctx.createOscillator) {
@@ -1609,21 +1742,25 @@ function createXMEngine() {
           if (temp_osc.stop) temp_osc.stop(0);
           temp_osc.disconnect();
         }
-      } catch (e) {
+      } catch {
         // Ignore oscillator hack failure on headless / mocked environments
       }
     }
     player.playing = true;
   }
 
-  function pause() {
-    if (player.playing) {
-      jsNode.disconnect(gainNode);
+  function pause(): void {
+    if (player.playing && jsNode && gainNode) {
+      try {
+        jsNode.disconnect(gainNode);
+      } catch {
+        // Disconnect can throw if not connected
+      }
     }
     player.playing = false;
   }
 
-  function stop() {
+  function stop(): void {
     if (player.playing && jsNode && gainNode) {
       try {
         jsNode.disconnect(gainNode);
@@ -1636,25 +1773,23 @@ function createXMEngine() {
     player.cur_row = 64;
     player.cur_songpos = -1;
     player.cur_ticksamp = 0;
-    player.silenceChannels();
+    silenceChannels();
     player.xm.global_volume = player.max_global_volume;
     player.xm.tempo = player.xm.initial_tempo;
     player.xm.bpm = player.xm.initial_bpm;
   }
 
-  player.getGainNode = function () {
+  function getGainNode(): GainNode | null {
     return gainNode;
-  };
+  }
 
-  player.getJsNode = function () {
+  function getJsNode(): ScriptProcessorNode | null {
     return jsNode;
-  };
-
-  player.setCurrentPattern = setCurrentPattern;
+  }
 
   // Cut every voice and clear per-channel effect state, so notes started
   // before a jump don't keep ringing (their note-offs are never reached).
-  player.silenceChannels = function () {
+  function silenceChannels(): void {
     const channels = player.xm.channelinfo || [];
     for (const ch of channels) {
       ch.inst = undefined;
@@ -1683,11 +1818,14 @@ function createXMEngine() {
       }
     }
     player.xm.global_volumeslide = undefined;
-  };
+  }
 
   // Pre-scan pattern sequence from order 0 to target position/row
   // to restore active BPM, tempo (ticks/row), and global volume.
-  player.scanSongStateUpTo = function (targetSongPos, targetRow = 0) {
+  function scanSongStateUpTo(
+    targetSongPos: number,
+    targetRow = 0
+  ): { tempo: number; bpm: number; globalVolume: number } {
     let curTempo = player.xm.initial_tempo || 6;
     let curBpm = player.xm.initial_bpm || 125;
     let curGlobalVol = player.max_global_volume || 128;
@@ -1729,17 +1867,17 @@ function createXMEngine() {
     }
 
     return { tempo: curTempo, bpm: curBpm, globalVolume: curGlobalVol };
-  };
+  }
 
-  player.seekToOrder = function (targetIdx) {
+  function seekToOrder(targetIdx: number): void {
     if (!player.xm || !player.xm.songpats || player.xm.songpats.length === 0)
       return;
     const clampedIdx = Math.max(
       0,
       Math.min(player.xm.songpats.length - 1, targetIdx)
     );
-    const state = player.scanSongStateUpTo(clampedIdx, 0);
-    player.silenceChannels();
+    const state = scanSongStateUpTo(clampedIdx, 0);
+    silenceChannels();
     player.xm.tempo = state.tempo;
     player.xm.bpm = state.bpm;
     player.xm.global_volume = state.globalVolume;
@@ -1748,16 +1886,130 @@ function createXMEngine() {
     player.next_row = 0;
     player.cur_ticksamp = 0;
     player.cur_tick = (player.xm.tempo || 6) - 1;
-    player.setCurrentPattern();
-  };
+    setCurrentPattern();
+  }
 
-  player.XMView = XMView;
+  const effects_t0: XMEffectTick0Fn[] = [
+    // effect functions on tick 0
+    eff_t1_0, // 1, arpeggio is processed on all ticks
+    eff_t0_1,
+    eff_t0_2,
+    eff_t0_3,
+    eff_t0_4, // 4
+    eff_t0_a, // 5, same as A on first tick
+    eff_t0_a, // 6, same as A on first tick
+    eff_unimplemented_t0, // 7
+    eff_t0_8, // 8
+    eff_t0_9, // 9
+    eff_t0_a, // a
+    eff_t0_b, // b
+    eff_t0_c, // c
+    eff_t0_d, // d
+    eff_t0_e, // e
+    eff_t0_f, // f
+    eff_t0_g, // g
+    eff_t0_h, // h
+    eff_unimplemented_t0, // i
+    eff_unimplemented_t0, // j
+    eff_unimplemented_t0, // k
+    eff_unimplemented_t0, // l
+    eff_unimplemented_t0, // m
+    eff_unimplemented_t0, // n
+    eff_unimplemented_t0, // o
+    eff_unimplemented_t0, // p
+    eff_unimplemented_t0, // q
+    eff_t0_r, // r
+    eff_unimplemented_t0, // s
+    eff_unimplemented_t0, // t
+    eff_unimplemented_t0, // u
+    eff_unimplemented_t0, // v
+    eff_unimplemented_t0, // w
+    eff_unimplemented_t0, // x
+    eff_unimplemented_t0, // y
+    eff_unimplemented_t0 // z
+  ];
+
+  const effects_t1: (XMEffectTick1Fn | null)[] = [
+    // effect functions on tick 1+
+    eff_t1_0,
+    eff_t1_1,
+    eff_t1_2,
+    eff_t1_3,
+    eff_t1_4,
+    eff_t1_5, // 5
+    eff_t1_6, // 6
+    eff_unimplemented, // 7
+    null, // 8
+    null, // 9
+    eff_t1_a, // a
+    null, // b
+    null, // c
+    null, // d
+    eff_t1_e, // e
+    null, // f
+    null, // g
+    eff_t1_h, // h
+    eff_unimplemented, // i
+    eff_unimplemented, // j
+    eff_unimplemented, // k
+    eff_unimplemented, // l
+    eff_unimplemented, // m
+    eff_unimplemented, // n
+    eff_unimplemented, // o
+    eff_unimplemented, // p
+    eff_unimplemented, // q
+    eff_t1_r, // r
+    eff_unimplemented, // s
+    eff_unimplemented, // t
+    eff_unimplemented, // u
+    eff_unimplemented, // v
+    eff_unimplemented, // w
+    eff_unimplemented, // x
+    eff_unimplemented, // y
+    eff_unimplemented // z
+  ];
+
+  const player: XMEngine = {
+    cur_songpos: -1,
+    cur_pat: -1,
+    cur_row: 64,
+    cur_ticksamp: 0,
+    cur_tick: 6,
+    xm: {
+      global_volume: 128
+    },
+    max_global_volume: 128,
+    playing: false,
+    audioctx: null,
+    onEnded: null,
+    XMView,
+    effects_t0,
+    effects_t1,
+    periodForNote,
+    updateChannelPeriod,
+    prettify_effect,
+    prettify_note,
+    init,
+    load,
+    play,
+    pause,
+    stop,
+    nextTick,
+    nextRow,
+    Envelope,
+    getGainNode,
+    getJsNode,
+    setCurrentPattern,
+    silenceChannels,
+    scanSongStateUpTo,
+    seekToOrder
+  };
 
   return player;
 }
 
 export class XMPlayer {
-  private engine: any;
+  public engine: XMEngine;
   public audioctx: AudioContext | null = null;
   public outputNode: GainNode | null = null;
   private bufferSize: number;
@@ -1779,11 +2031,11 @@ export class XMPlayer {
   }
 
   get songTitle(): string {
-    return (this.engine.xm?.songname || '').trim();
+    return (this.engine.xm.songname || '').trim();
   }
 
   get numChannels(): number {
-    return this.engine.xm?.nchan || 0;
+    return this.engine.xm.nchan || 0;
   }
 
   init(ctx?: AudioContext): GainNode | null {
@@ -1811,8 +2063,8 @@ export class XMPlayer {
         this.totalRows = 0;
         return false;
       }
-      const songpats = this.engine.xm?.songpats || [];
-      const patterns = this.engine.xm?.patterns || [];
+      const songpats = this.engine.xm.songpats || [];
+      const patterns = this.engine.xm.patterns || [];
       this.orderOffsets = [];
       let total = 0;
       for (let i = 0; i < songpats.length; i++) {
@@ -1881,7 +2133,7 @@ export class XMPlayer {
     this.engine.seekToOrder(orderIdx);
   }
 
-  getTrackerState(includeSongpats = true) {
+  getTrackerState(includeSongpats = true): XMTrackerState {
     const xm = this.engine.xm || {};
     return {
       curSongPos: this.engine.cur_songpos,
@@ -1895,17 +2147,17 @@ export class XMPlayer {
     };
   }
 
-  getPattern(patIndex: number) {
+  getPattern(patIndex: number): XMPattern | null {
     if (!this.engine.xm?.patterns) return null;
     return this.engine.xm.patterns[patIndex] || null;
   }
 
-  getInstruments() {
+  getInstruments(): XMInstrumentInfo[] {
     if (!this.engine.xm?.instruments) return [];
-    return this.engine.xm.instruments.map((inst: any, idx: number) => ({
+    return this.engine.xm.instruments.map((inst, idx) => ({
       index: idx + 1,
       name: (inst.name || '').trim(),
-      samples: (inst.samples || []).map((s: any) => ({
+      samples: (inst.samples || []).map((s) => ({
         name: (s.sampname || '').trim(),
         len: s.len || 0,
         vol: s.vol ?? 64,
@@ -1951,7 +2203,7 @@ export class XMPlayer {
       vu: new Float32Array(0)
     };
     this.engine.XMView.pushEvent = listener
-      ? (event: any) => {
+      ? (event: XMScopeFrame) => {
           payload.vu = event.vu;
           payload.scopes = event.scopes;
           listener(payload);

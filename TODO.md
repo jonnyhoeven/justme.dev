@@ -72,7 +72,7 @@ derived by reading the source and have not been checked in a browser. Ordered by
 
 ### 4. Dependencies and tooling
 
-- [ ] **Type `xm-player.ts`**: it is excluded from `pnpm run typecheck` with `// @ts-nocheck` (113 strict errors) and
+- [x] **Type `xm-player.ts`**: it is excluded from `pnpm run typecheck` with `// @ts-nocheck` (113 strict errors) and
       runs under `/* eslint-disable no-explicit-any, no-unused-vars, no-var */`; `engine` is `any`. Give channels,
       instruments, samples and the song typed interfaces, then drop the `@ts-nocheck`.
 - [ ] **Plan the VitePress 2 move** ([`pnpm-workspace.yaml`](pnpm-workspace.yaml)): VitePress 1.6.4 targets Vite 5, the
