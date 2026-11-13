@@ -64,6 +64,7 @@ def ok(text: str) -> FakeResponse:
 def http_error(code: int) -> urllib.error.HTTPError:
     return urllib.error.HTTPError("http://x", code, "err", Message(), io.BytesIO(b""))
 
+
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -205,14 +206,10 @@ class TestAbsolutizeLinks:
 
     def test_dot_slash_and_parent_paths_resolve(self):
         assert self._run("[a](./docs/a.md)") == f"[a]({self.BLOB}/docs/a.md)"
-        assert (
-            self._run("[b](../b.md)", "docs/README.md") == f"[b]({self.BLOB}/b.md)"
-        )
+        assert self._run("[b](../b.md)", "docs/README.md") == f"[b]({self.BLOB}/b.md)"
 
     def test_image_points_at_raw_content(self):
-        assert self._run("![x](img/x.png)") == (
-            "![x](https://raw.githubusercontent.com/foo/bar/main/img/x.png)"
-        )
+        assert self._run("![x](img/x.png)") == ("![x](https://raw.githubusercontent.com/foo/bar/main/img/x.png)")
 
     def test_absolute_anchor_and_root_links_untouched(self):
         for text in (
@@ -328,10 +325,7 @@ class TestGetReadme:
         with patch(URLOPEN, return_value=ok("# Hello World")) as m:
             result = generator.get_readme("foo", "bar", "main", "README.md")
         assert result == "# Hello World"
-        assert (
-            m.call_args.args[0].full_url
-            == "https://raw.githubusercontent.com/foo/bar/main/README.md"
-        )
+        assert m.call_args.args[0].full_url == "https://raw.githubusercontent.com/foo/bar/main/README.md"
 
     def test_returns_empty_on_404(self, generator):
         with patch(URLOPEN, side_effect=http_error(404)):
@@ -355,10 +349,7 @@ class TestGetReadme:
         with patch(URLOPEN, return_value=ok("# Docs")) as m:
             result = generator.get_readme("foo", "bar", "develop", "DOCS.md")
         assert result == "# Docs"
-        assert (
-            m.call_args.args[0].full_url
-            == "https://raw.githubusercontent.com/foo/bar/develop/DOCS.md"
-        )
+        assert m.call_args.args[0].full_url == "https://raw.githubusercontent.com/foo/bar/develop/DOCS.md"
 
 
 # ---------------------------------------------------------------------------
@@ -609,3 +600,15 @@ class TestStatsFrontmatter:
         self._write(generator, full_yaml_data)
         with patch(URLOPEN, side_effect=http_error(404)):
             assert generator.process_requests() is False
+
+    def test_missing_github_token_logged_only_once(self, generator, full_yaml_data, monkeypatch, caplog):
+        import logging
+
+        caplog.set_level(logging.INFO)
+        monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+        req = ProjectRequest(**full_yaml_data)
+        with patch(URLOPEN, return_value=api_ok()):
+            generator.get_stats(req)
+            generator.get_stats(req)
+        token_messages = [rec.message for rec in caplog.records if "GITHUB_TOKEN not set" in rec.message]
+        assert len(token_messages) == 1

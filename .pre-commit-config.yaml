@@ -31,3 +31,10 @@ repos:
         language: system
         types: [python]
         require_serial: true
+
+      - id: ruff-format
+        name: Ruff format
+        entry: direnv exec . ruff format
+        language: system
+        types: [python]
+        require_serial: true

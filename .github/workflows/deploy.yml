@@ -59,6 +59,9 @@ jobs:
       - name: Lint Python
         run: nix develop .#ci --command ruff check .
 
+      - name: Check Python formatting
+        run: nix develop .#ci --command ruff format --check .
+
       - name: Audit dependencies
         run: nix develop .#ci --command pnpm audit
 

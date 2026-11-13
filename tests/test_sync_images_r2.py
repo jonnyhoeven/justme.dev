@@ -38,9 +38,7 @@ def test_list_existing_r2_objects() -> None:
     mock_s3 = MagicMock()
     mock_paginator = MagicMock()
     mock_s3.get_paginator.return_value = mock_paginator
-    mock_paginator.paginate.return_value = [
-        {"Contents": [{"Key": "images/test.webp", "ETag": '"etag1"', "Size": 123}]}
-    ]
+    mock_paginator.paginate.return_value = [{"Contents": [{"Key": "images/test.webp", "ETag": '"etag1"', "Size": 123}]}]
 
     objs = list_existing_r2_objects(mock_s3, "test-bucket", "images")
     assert "images/test.webp" in objs

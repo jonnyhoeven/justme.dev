@@ -53,9 +53,7 @@ def fetch_text(url: str, timeout: float = 10) -> str:
 GITHUB_API = "https://api.github.com"
 
 
-def fetch_repo_stats(
-    user: str, project: str, token: str | None = None, timeout: float = 10
-) -> dict[str, int]:
+def fetch_repo_stats(user: str, project: str, token: str | None = None, timeout: float = 10) -> dict[str, int]:
     """Fetch star, fork and watcher counts for a GitHub repository.
 
     Returns a dict with `stars`, `forks` and `watchers` (GitHub's
@@ -134,9 +132,7 @@ _MD_TOKEN = re.compile(
 )
 
 
-def absolutize_links(
-    readme: str, user: str, project: str, branch: str, readme_file: str
-) -> str:
+def absolutize_links(readme: str, user: str, project: str, branch: str, readme_file: str) -> str:
     """Point relative links in a fetched README at the source repository.
 
     A README links to sibling files (`LICENSE`, `docs/x.md`) relative to its own
@@ -167,6 +163,7 @@ class GenerateFiles:
     def __init__(self) -> None:
         self.req_path = Path("requests")
         self.dst_dir = Path("projects")
+        self._github_token_warned: bool = False
 
     def get_readme(self, user: str, project: str, branch: str, readme_file: str) -> str:
         """Fetch README content from GitHub."""
@@ -239,14 +236,11 @@ class GenerateFiles:
                 request.readmeFile,
             )
             if not readme:
-                raise FetchError(
-                    f"Failed to fetch README for {request.title}"
-                )
+                raise FetchError(f"Failed to fetch README for {request.title}")
 
         self.save_post(request, dst_path, readme, self.get_stats(request))
 
-    @staticmethod
-    def get_stats(request: ProjectRequest) -> dict[str, int | str]:
+    def get_stats(self, request: ProjectRequest) -> dict[str, int | str]:
         """Fetch repository stats for the badges; never fails the build.
 
         Returns an empty dict when the repo is unknown or the fetch fails.
@@ -254,8 +248,9 @@ class GenerateFiles:
         if not request.user or not request.project:
             return {}
         token = os.environ.get("GITHUB_TOKEN") or None
-        if not token:
+        if not token and not self._github_token_warned:
             logger.info("GITHUB_TOKEN not set; fetching repo stats unauthenticated (60 requests/hour)")
+            self._github_token_warned = True
         try:
             stats: dict[str, int | str] = dict(fetch_repo_stats(request.user, request.project, token))
         except FetchError as e:

@@ -59,11 +59,7 @@ def generate_splats(image_path: Path | str | None = None, out_path: Path | None 
     min_x, max_x = float("inf"), float("-inf")
     min_y, max_y = float("inf"), float("-inf")
 
-    pixel_data = (
-        img.get_flattened_data()
-        if hasattr(img, "get_flattened_data")
-        else img.getdata()
-    )
+    pixel_data = img.get_flattened_data() if hasattr(img, "get_flattened_data") else img.getdata()
 
     for i, (r, g, b, a) in enumerate(pixel_data):
         if a < 50:
@@ -94,10 +90,7 @@ def generate_splats(image_path: Path | str | None = None, out_path: Path | None 
             s["ox"] -= offset_cx
             s["oy"] -= offset_cy
 
-    compact_splats = [
-        [round(s["ox"], 2), round(s["oy"], 2), s["r"], s["g"], s["b"]]
-        for s in splats
-    ]
+    compact_splats = [[round(s["ox"], 2), round(s["oy"], 2), s["r"], s["g"], s["b"]] for s in splats]
 
     try:
         out_path.parent.mkdir(parents=True, exist_ok=True)

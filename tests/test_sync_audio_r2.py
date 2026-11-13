@@ -79,9 +79,7 @@ def test_list_existing_r2_objects() -> None:
     mock_s3 = MagicMock()
     mock_paginator = MagicMock()
     mock_s3.get_paginator.return_value = mock_paginator
-    mock_paginator.paginate.return_value = [
-        {"Contents": [{"Key": "audio/track1.xm", "ETag": '"etag1"', "Size": 1234}]}
-    ]
+    mock_paginator.paginate.return_value = [{"Contents": [{"Key": "audio/track1.xm", "ETag": '"etag1"', "Size": 1234}]}]
 
     objs = list_existing_r2_objects(mock_s3, "test-bucket", "audio")
     assert "audio/track1.xm" in objs

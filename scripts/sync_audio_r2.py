@@ -148,10 +148,7 @@ def build_track_entry(
     if "title" not in entry or not entry["title"]:
         stem = local_path.stem
         # Clean common keygen prefix / separators for display title
-        clean = (
-            stem.replace("_", " ")
-            .replace("-", " ")
-        )
+        clean = stem.replace("_", " ").replace("-", " ")
         entry["title"] = " ".join(word.capitalize() for word in clean.split())
 
     return entry
@@ -295,12 +292,7 @@ def main() -> None:
             tracks.append(track)
 
     # Sort tracks deterministically using natural numeric sort
-    tracks.sort(
-        key=lambda t: [
-            int(c) if c.isdigit() else c.lower()
-            for c in re.split(r"(\d+)", t["filename"])
-        ]
-    )
+    tracks.sort(key=lambda t: [int(c) if c.isdigit() else c.lower() for c in re.split(r"(\d+)", t["filename"])])
     print(f"Discovered {len(local_files)} files to consider (Playable XM tracks: {len(tracks)}).")
 
     # Check remote objects for delta sync and deletions
