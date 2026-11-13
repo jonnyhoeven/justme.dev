@@ -600,4 +600,126 @@ describe('XMPlayer', () => {
     for (const s of seen[0].scopes) expect(s.length).toBe(32);
     for (const s of seen) expect(s.scopes).toBe(seen[0].scopes);
   });
+
+  it('handles out-of-range samplemap indices gracefully without throwing and clears stale ch.samp', () => {
+    let processCallback: ((e: unknown) => void) | null = null;
+    const mockAudioContext = {
+      sampleRate: 44100,
+      createGain: () => ({ gain: { value: 1.0 }, connect: () => {} }),
+      createScriptProcessor: () => ({
+        connect: () => {},
+        disconnect: () => {},
+        set onaudioprocess(cb: (e: unknown) => void) {
+          processCallback = cb;
+        }
+      }),
+      destination: {}
+    } as unknown as AudioContext;
+    void mockAudioContext;
+
+    const player = new XMPlayer();
+    player.init(mockAudioContext);
+    const ok = player.loadBuffer(getSampleBuffer());
+    expect(ok).toBe(true);
+
+    const engine = (
+      player as unknown as {
+        engine: {
+          cur_pat: number;
+          cur_row: number;
+          next_row: number;
+          cur_songpos: number;
+          nextRow: () => void;
+          xm: {
+            instruments: Array<{
+              samples: unknown[];
+              samplemap?: Uint8Array;
+            }>;
+            patterns: Array<Array<Array<Array<number>>>>;
+            songpats: number[];
+            channelinfo: Array<{
+              samp?: unknown;
+              note?: number;
+              inst?: unknown;
+            }>;
+          };
+          play: () => void;
+        };
+      }
+    ).engine;
+
+    const inst = engine.xm.instruments[0];
+    expect(inst).toBeDefined();
+    expect(inst.samples.length).toBe(1);
+
+    // Set samplemap such that note 49 maps to out-of-range index 5
+    inst.samplemap = new Uint8Array(96);
+    inst.samplemap[49] = 5;
+
+    player.play();
+    engine.cur_songpos = 0;
+    engine.next_row = 0;
+    engine.nextRow(); // executes row 0 (which reads pattern 0 row 0)
+
+    const pat = engine.xm.patterns[engine.cur_pat];
+    expect(pat).toBeDefined();
+    while (pat.length <= 1) {
+      pat.push([
+        [-1, -1, -1, 0, 0],
+        [-1, -1, -1, 0, 0],
+        [-1, -1, -1, 0, 0],
+        [-1, -1, -1, 0, 0]
+      ]);
+    }
+    pat[1][0] = [49, 1, -1, 0, 0];
+    // Test note-trigger branch with out-of-range samplemap entry
+    const ch = engine.xm.channelinfo[0];
+    ch.samp = inst.samples[0]; // pre-populate with a valid sample to verify clearing
+
+    expect(() => engine.nextRow()).not.toThrow();
+    // ch.samp should be undefined because sample index 5 is out of range
+    expect(ch.samp).toBeUndefined();
+
+    // Also run an audio process tick to verify silence mixes cleanly without throwing
+    const buflen = 4096;
+    const mockEvent = {
+      playbackTime: 0,
+      outputBuffer: {
+        length: buflen,
+        getChannelData: () => new Float32Array(buflen)
+      }
+    };
+    if (processCallback) {
+      const cb = processCallback as (e: unknown) => void;
+      expect(() => cb(mockEvent)).not.toThrow();
+    }
+
+    engine.cur_songpos = 0;
+    engine.cur_row = 1;
+    engine.next_row = 2;
+
+    ch.samp = inst.samples[0]; // pre-populate with valid sample
+    ch.note = 49;
+    ch.inst = inst; // pre-populate instrument
+    const pat2 = engine.xm.patterns[engine.cur_pat];
+    while (pat2.length <= 2) {
+      pat2.push([
+        [-1, -1, -1, 0, 0],
+        [-1, -1, -1, 0, 0],
+        [-1, -1, -1, 0, 0],
+        [-1, -1, -1, 0, 0]
+      ]);
+    }
+    // Instrument change (inst 1, which has samplemap mapping 49 to out-of-range index 5) without note trigger (note = -1)
+    pat2[2][0] = [-1, 1, -1, 0, 0];
+
+    engine.cur_row = 1;
+    engine.next_row = 2;
+    expect(() => engine.nextRow()).not.toThrow();
+    expect(ch.samp).toBeUndefined();
+    if (processCallback) {
+      const cb = processCallback as (e: unknown) => void;
+      expect(() => cb(mockEvent)).not.toThrow();
+    }
+  });
 });

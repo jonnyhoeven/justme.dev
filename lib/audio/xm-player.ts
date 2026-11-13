@@ -652,11 +652,17 @@ function createXMEngine() {
           ch.inst = inst;
           // retrigger unless overridden below
           triggernote = true;
-          if (ch.note && inst.samplemap) {
+          if (ch.note !== undefined && inst.samplemap) {
             ch.samp = inst.samples[inst.samplemap[ch.note]];
-            ch.vol = ch.samp.vol;
-            ch.pan = ch.samp.pan;
-            ch.fine = ch.samp.fine;
+            if (ch.samp) {
+              ch.vol = ch.samp.vol;
+              ch.pan = ch.samp.pan;
+              ch.fine = ch.samp.fine;
+            } else {
+              ch.samp = undefined;
+            }
+          } else {
+            ch.samp = undefined;
           }
         }
       }
@@ -671,12 +677,16 @@ function createXMEngine() {
             const note = r[i][0];
             ch.note = note;
             ch.samp = inst.samples[inst.samplemap[ch.note]];
-            if (triggernote) {
-              // if we were already triggering the note, reset vol/pan using
-              // (potentially) new sample
-              ch.pan = ch.samp.pan;
-              ch.vol = ch.samp.vol;
-              ch.fine = ch.samp.fine;
+            if (ch.samp) {
+              if (triggernote) {
+                // if we were already triggering the note, reset vol/pan using
+                // (potentially) new sample
+                ch.pan = ch.samp.pan;
+                ch.vol = ch.samp.vol;
+                ch.fine = ch.samp.fine;
+              }
+            } else {
+              ch.samp = undefined;
             }
             triggernote = true;
           }
@@ -953,7 +963,6 @@ function createXMEngine() {
         break;
       }
       if (k >= sample_end) {
-        // TODO: implement pingpong looping
         if (loop) {
           k = loopstart + ((k - loopstart) % looplen);
         } else {
@@ -1465,8 +1474,6 @@ function createXMEngine() {
         for (j = 0; j < env_npan * 2; j++) {
           env_pan.push(dv.getUint16(idx + 177 + j * 2, true));
         }
-        // FIXME: ignoring keymaps for now and assuming 1 sample / instrument
-        // var keymap = getarray(dv, idx+0x21);
         const samphdrsiz = dv.getUint32(idx + 0x1d, true);
         idx += hdrsiz;
         let totalsamples = 0;
