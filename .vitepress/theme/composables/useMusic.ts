@@ -6,6 +6,9 @@ import { INITIAL_TRACK_FILENAMES } from '../../../data/initial-tracks';
 import { expandCatalog, type MusicTrack } from '../../../lib/music-catalog';
 export { INITIAL_TRACK_FILENAMES };
 import type { XMPlayer } from '../../../lib/audio/xm-player';
+import defaultRatingsJson from '../../../data/music-ratings.json';
+
+const defaultRatings = defaultRatingsJson as Record<string, number>;
 
 // Module-scoped reactive refs (shared singleton state)
 const isPlaying = ref(false);
@@ -96,28 +99,96 @@ let skipTimeout: ReturnType<typeof setTimeout> | null = null;
 let scopesEnabled = false;
 let loadSeq = 0;
 
-// Favorites & Track deep-linking
+// Favorites, Ratings & Track deep-linking
 export const FAVORITES_STORAGE_KEY = 'justme_music_favorites';
+export const RATINGS_STORAGE_KEY = 'justme_music_ratings';
 const favorites = ref<Set<string>>(new Set());
+const ratings = ref<Record<string, number>>({});
 
 const loadFavorites = () => {
-  try {
-    if (typeof localStorage === 'undefined') return;
-    const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        favorites.value = new Set(parsed);
+  const loaded: Record<string, number> = {};
+
+  // 1. Start with valid 1..5 entries from data/music-ratings.json
+  if (defaultRatings && typeof defaultRatings === 'object') {
+    for (const [key, val] of Object.entries(defaultRatings)) {
+      if (
+        typeof val === 'number' &&
+        Number.isInteger(val) &&
+        val >= 1 &&
+        val <= 5
+      ) {
+        loaded[key] = val;
       }
     }
-  } catch {
-    // Ignore localStorage errors (e.g. private mode or SSR)
   }
+
+  if (typeof localStorage !== 'undefined') {
+    // 2. Migrate any array entries from FAVORITES_STORAGE_KEY to 5 stars unless already rated
+    try {
+      const favRaw = localStorage.getItem(FAVORITES_STORAGE_KEY);
+      if (favRaw) {
+        const favParsed = JSON.parse(favRaw);
+        if (Array.isArray(favParsed)) {
+          for (const key of favParsed) {
+            if (typeof key === 'string' && key && !loaded[key]) {
+              loaded[key] = 5;
+            }
+          }
+        }
+      }
+    } catch {
+      // Ignore localStorage parse errors
+    }
+
+    // 3. Merge valid 1..5 integer entries from RATINGS_STORAGE_KEY (0 or invalid removes entry)
+    try {
+      const ratingsRaw = localStorage.getItem(RATINGS_STORAGE_KEY);
+      if (ratingsRaw) {
+        const parsedRatings = JSON.parse(ratingsRaw);
+        if (
+          parsedRatings &&
+          typeof parsedRatings === 'object' &&
+          !Array.isArray(parsedRatings)
+        ) {
+          for (const [key, val] of Object.entries(parsedRatings)) {
+            if (
+              typeof val === 'number' &&
+              Number.isInteger(val) &&
+              val >= 1 &&
+              val <= 5
+            ) {
+              loaded[key] = val;
+            } else {
+              delete loaded[key];
+            }
+          }
+        }
+      }
+    } catch {
+      // Ignore localStorage parse errors
+    }
+  }
+
+  ratings.value = loaded;
+  favorites.value = new Set(
+    Object.keys(ratings.value).filter((k) => (ratings.value[k] ?? 0) > 0)
+  );
 };
 
 const saveFavorites = () => {
   try {
     if (typeof localStorage === 'undefined') return;
+    for (const fav of favorites.value) {
+      if (!ratings.value[fav]) {
+        ratings.value[fav] = 5;
+      }
+    }
+    for (const key of Object.keys(ratings.value)) {
+      if (!favorites.value.has(key)) {
+        delete ratings.value[key];
+      }
+    }
+    localStorage.setItem(RATINGS_STORAGE_KEY, JSON.stringify(ratings.value));
     localStorage.setItem(
       FAVORITES_STORAGE_KEY,
       JSON.stringify(Array.from(favorites.value))
@@ -127,21 +198,65 @@ const saveFavorites = () => {
   }
 };
 
+const getRating = (filename?: string): number => {
+  const target = filename ?? currentTrack.value?.filename;
+  if (!target) return 0;
+  const r = ratings.value[target];
+  return typeof r === 'number' && Number.isInteger(r) && r >= 1 && r <= 5
+    ? r
+    : 0;
+};
+
+const currentTrackRating = computed(() => getRating());
+
+const setRating = (rating: number, filename?: string) => {
+  const target = filename ?? currentTrack.value?.filename;
+  if (!target) return;
+
+  const current = getRating(target);
+  const rounded = Math.max(0, Math.min(5, Math.round(rating)));
+
+  const nextRatings = { ...ratings.value };
+  if (rounded === 0 || rounded === current) {
+    delete nextRatings[target];
+  } else {
+    nextRatings[target] = rounded;
+  }
+  ratings.value = nextRatings;
+  favorites.value = new Set(
+    Object.keys(ratings.value).filter((k) => (ratings.value[k] ?? 0) > 0)
+  );
+  saveFavorites();
+};
+
 const isCurrentFavorite = computed(() => {
   const fn = currentTrack.value?.filename;
   return fn ? favorites.value.has(fn) : false;
 });
 
 const toggleFavorite = (filename?: string) => {
-  const target = filename || currentTrack.value?.filename;
+  const target = filename ?? currentTrack.value?.filename;
   if (!target) return;
-  if (favorites.value.has(target)) {
-    favorites.value.delete(target);
+  if (getRating(target) > 0) {
+    setRating(0, target);
   } else {
-    favorites.value.add(target);
+    setRating(5, target);
   }
-  favorites.value = new Set(favorites.value);
-  saveFavorites();
+};
+
+const exportRatings = (): string => {
+  const sortedKeys = Object.keys(ratings.value)
+    .filter((k) => {
+      const v = ratings.value[k];
+      return typeof v === 'number' && Number.isInteger(v) && v >= 1 && v <= 5;
+    })
+    .sort((a, b) => a.localeCompare(b));
+
+  const sortedObj: Record<string, number> = {};
+  for (const k of sortedKeys) {
+    sortedObj[k] = ratings.value[k];
+  }
+  return JSON.stringify(sortedObj, null, 2) + '\n';
 };
 
 export const cleanTitle = (track?: MusicTrack, liveTitle?: string): string => {
@@ -737,13 +852,19 @@ const musicState = {
   history,
   liveSongTitle,
 
-  // Favorites & Title
+  // Favorites, Ratings & Title
   FAVORITES_STORAGE_KEY,
+  RATINGS_STORAGE_KEY,
   favorites,
+  ratings,
   loadFavorites,
   saveFavorites,
   isCurrentFavorite,
   toggleFavorite,
+  getRating,
+  currentTrackRating,
+  setRating,
+  exportRatings,
   cleanTitle,
   applyTrackQueryParam,
   initMusicOnce,

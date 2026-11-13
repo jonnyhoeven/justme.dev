@@ -38,6 +38,7 @@ describe('usePlaylist', () => {
     const music = useMusic();
     music.resetCatalog();
     music.favorites.value = new Set();
+    music.ratings.value = {};
   });
 
   it('lists every track by default with original indices', () => {
@@ -74,6 +75,56 @@ describe('usePlaylist', () => {
     ]);
   });
 
+  it('filters by minimum star rating and combines with search', () => {
+    const music = useMusic();
+    const { filteredTracks, minRating, searchQuery } = setup();
+    music.setRating(3, 'alpha.xm');
+    music.setRating(5, 'beta.xm');
+
+    minRating.value = 4;
+    expect(filteredTracks.value.map((i) => i.track.filename)).toEqual([
+      'beta.xm'
+    ]);
+
+    minRating.value = 3;
+    expect(filteredTracks.value.map((i) => i.track.filename)).toEqual([
+      'alpha.xm',
+      'beta.xm'
+    ]);
+
+    searchQuery.value = 'alpha';
+    expect(filteredTracks.value.map((i) => i.track.filename)).toEqual([
+      'alpha.xm'
+    ]);
+
+    minRating.value = 0;
+    searchQuery.value = '';
+    expect(filteredTracks.value).toHaveLength(3);
+  });
+
+  it('sorts tracks by star rating descending with tie-break on original index', () => {
+    const music = useMusic();
+    const { filteredTracks, sortByRating } = setup();
+    music.setRating(2, 'alpha.xm');
+    music.setRating(5, 'beta.xm');
+    // uCF-TeleportPro-kg.xm is unrated (0)
+
+    sortByRating.value = true;
+    expect(filteredTracks.value.map((i) => i.track.filename)).toEqual([
+      'beta.xm',
+      'alpha.xm',
+      'uCF-TeleportPro-kg.xm'
+    ]);
+
+    // Same rating tie-breaks by original index
+    music.setRating(5, 'alpha.xm');
+    expect(filteredTracks.value.map((i) => i.track.filename)).toEqual([
+      'alpha.xm',
+      'beta.xm',
+      'uCF-TeleportPro-kg.xm'
+    ]);
+  });
+
   it('reacts when the catalog swaps the tracks array', async () => {
     const music = useMusic();
     const { filteredTracks, searchQuery } = setup();
@@ -86,10 +137,21 @@ describe('usePlaylist', () => {
   });
 
   it('resets scroll when the filter changes', async () => {
-    const { searchQuery, containerProps } = setup();
+    const { searchQuery, minRating, sortByRating, containerProps } = setup();
     const el = { scrollTop: 120, scrollTo: vi.fn() } as unknown as HTMLElement;
     containerProps.ref.value = el;
+
     searchQuery.value = 'a';
+    await nextTick();
+    expect(el.scrollTop).toBe(0);
+
+    el.scrollTop = 80;
+    minRating.value = 3;
+    await nextTick();
+    expect(el.scrollTop).toBe(0);
+
+    el.scrollTop = 50;
+    sortByRating.value = true;
     await nextTick();
     expect(el.scrollTop).toBe(0);
   });
@@ -109,11 +171,11 @@ describe('initMusicOnce', () => {
     try {
       music.initMusicOnce();
       music.initMusicOnce();
-      expect(getItem).toHaveBeenCalledTimes(1);
+      expect(getItem).toHaveBeenCalledTimes(2);
       expect(music.favorites.value.has('alpha.xm')).toBe(true);
       music.resetMusicInit();
       music.initMusicOnce();
-      expect(getItem).toHaveBeenCalledTimes(2);
+      expect(getItem).toHaveBeenCalledTimes(4);
     } finally {
       vi.unstubAllGlobals();
     }

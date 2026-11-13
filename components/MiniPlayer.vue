@@ -12,7 +12,7 @@ import {
 import { useResizeObserver } from '@vueuse/core';
 import useMusic from '../.vitepress/theme/composables/useMusic';
 import usePlaylist from '../.vitepress/theme/composables/usePlaylist';
-import IconHeart from './icons/IconHeart.vue';
+import StarRating from './icons/StarRating.vue';
 import IconTransport from './icons/IconTransport.vue';
 import { seekKeyStep } from '../lib/player-a11y';
 
@@ -28,10 +28,10 @@ const {
   catalogFailed,
   ensureCatalog,
   liveSongTitle,
-  favorites,
-  isCurrentFavorite,
+  currentTrackRating,
+  getRating,
+  setRating,
   initMusicOnce,
-  toggleFavorite,
   cleanTitle,
   togglePlay,
   toggleShuffle,
@@ -107,6 +107,8 @@ const isPlaylistOpen = ref(false);
 const {
   searchQuery,
   onlyFavorites,
+  minRating,
+  sortByRating,
   filteredTracks,
   virtualList,
   containerProps,
@@ -127,6 +129,7 @@ const scrollToCurrentTrack = async () => {
   if (targetIndex === -1) {
     searchQuery.value = '';
     onlyFavorites.value = false;
+    minRating.value = 0;
   }
 
   await nextTick();
@@ -140,13 +143,11 @@ const scrollToCurrentTrack = async () => {
   }, 50);
 };
 
-// The panel is v-if'd, so its list remounts at the top on every open. While
-// playing, jump to the current track (e.g. the random one picked on load).
+// The panel is v-if'd, so its list remounts at the top on every open. When opened,
+// jump to the active initial curated track even if paused.
 watch(isPlaylistOpen, (open) => {
-  if (open && isPlaying.value) {
+  if (open) {
     void scrollToCurrentTrack();
-  } else if (open) {
-    void ensureCatalog();
   }
 });
 
@@ -277,21 +278,16 @@ onBeforeUnmount(() => {
           <IconTransport name="repeat" :size="14" />
         </button>
 
-        <!-- Favorite Toggle Button -->
-        <button
-          class="mini-btn fav-toggle"
-          :class="{ active: isCurrentFavorite }"
-          @click.stop="toggleFavorite()"
-          type="button"
-          :title="isCurrentFavorite ? 'Favorited' : 'Add to Favorites'"
-          :aria-pressed="isCurrentFavorite"
-        >
-          <IconHeart
-            :filled="isCurrentFavorite"
-            :plus="!isCurrentFavorite"
+        <!-- Star Rating on Mini Player Bar -->
+        <div class="mini-star-rating-wrap" title="Rate current track">
+          <StarRating
+            :model-value="currentTrackRating"
             :size="13"
+            compact
+            :label="currentTrack?.title || 'current track'"
+            @update:model-value="setRating($event)"
           />
-        </button>
+        </div>
 
         <!-- Inline volume: speaker button mutes/unmutes, slider sets level -->
         <div class="volume-inline">
@@ -457,14 +453,24 @@ onBeforeUnmount(() => {
               :class="{ active: onlyFavorites }"
               @click="onlyFavorites = !onlyFavorites"
               type="button"
-              :title="onlyFavorites ? 'Show all tracks' : 'Show favorites only'"
+              :aria-pressed="onlyFavorites"
+              :title="
+                onlyFavorites ? 'Show all tracks' : 'Show rated tracks only'
+              "
             >
-              <IconHeart
-                :filled="onlyFavorites"
-                accent
-                :size="12"
-                class="filter-heart-icon"
-              />
+              ★ Rated
+            </button>
+            <button
+              class="sort-rating-btn"
+              :class="{ active: sortByRating }"
+              @click="sortByRating = !sortByRating"
+              type="button"
+              :aria-pressed="sortByRating"
+              :title="
+                sortByRating ? 'Default track order' : 'Sort by star rating'
+              "
+            >
+              Sort ★
             </button>
             <span class="track-count-badge">
               {{ filteredTracks.length }}
@@ -503,29 +509,15 @@ onBeforeUnmount(() => {
                 'is-active': item.originalIndex === currentTrackIndex
               }"
             >
-              <button
-                type="button"
-                class="item-fav-col"
-                @click.stop="toggleFavorite(item.track.filename)"
-                :aria-pressed="favorites.has(item.track.filename)"
-                :aria-label="
-                  favorites.has(item.track.filename)
-                    ? `Remove ${item.displayTitle} from favourites`
-                    : `Add ${item.displayTitle} to favourites`
-                "
-                :title="
-                  favorites.has(item.track.filename)
-                    ? 'Remove from Favorites'
-                    : 'Add to Favorites'
-                "
-              >
-                <IconHeart
-                  :filled="favorites.has(item.track.filename)"
-                  :size="13"
-                  class="item-heart"
-                  :class="{ starred: favorites.has(item.track.filename) }"
+              <div class="item-fav-col" @click.stop>
+                <StarRating
+                  :model-value="getRating(item.track.filename)"
+                  :size="12"
+                  compact
+                  :label="item.displayTitle"
+                  @update:model-value="setRating($event, item.track.filename)"
                 />
-              </button>
+              </div>
 
               <button
                 type="button"
@@ -676,8 +668,11 @@ a.mini-btn {
   background: var(--vp-c-bg-mute);
 }
 
-.mini-btn.fav-toggle.active {
-  color: var(--c-favorite);
+.mini-star-rating-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
 }
 
 .mini-btn.play {
@@ -957,9 +952,37 @@ a.mini-btn {
 }
 
 .filter-fav-btn.active {
-  background: color-mix(in srgb, var(--c-favorite) 15%, transparent);
-  color: var(--c-favorite);
-  border-color: var(--c-favorite);
+  background: color-mix(in srgb, var(--c-star, #f59e0b) 15%, transparent);
+  color: var(--c-star-text, #b45309);
+  border-color: var(--c-star, #f59e0b);
+}
+
+.sort-rating-btn {
+  background: var(--vp-c-bg-mute);
+  border: 1px solid var(--vp-c-divider);
+  color: var(--vp-c-text-2);
+  border-radius: 12px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--duration-fast) ease;
+  line-height: 1.2;
+}
+
+.sort-rating-btn:hover {
+  border-color: var(--c-star, #f59e0b);
+}
+
+.sort-rating-btn.active {
+  background: color-mix(in srgb, var(--c-star, #f59e0b) 15%, transparent);
+  color: var(--c-star-text, #b45309);
+  border-color: var(--c-star, #f59e0b);
+}
+
+.sort-rating-btn:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1, #6366f1);
+  outline-offset: 1px;
 }
 
 .track-count-badge {
@@ -1040,24 +1063,11 @@ a.mini-btn {
 }
 
 .item-fav-col {
-  padding: 4px;
-  cursor: pointer;
+  padding: 2px 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.item-heart {
-  color: var(--vp-c-text-3);
-  transition: color var(--duration-fast) ease;
-}
-
-.item-fav-col:hover .item-heart:not(.starred) {
-  color: var(--vp-c-brand-1);
-}
-
-.item-heart.starred {
-  color: var(--c-favorite);
+  flex-shrink: 0;
 }
 
 .item-content-col {
@@ -1179,6 +1189,10 @@ a.mini-btn {
 /* Narrow viewports: drop the filename column (it repeats the row's title
    attribute) so the tracker tag keeps the room it needs at 11px. */
 @media (max-width: 479.98px) {
+  .mini-star-rating-wrap {
+    display: none;
+  }
+
   .meta-filename {
     display: none;
   }

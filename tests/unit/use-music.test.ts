@@ -33,6 +33,7 @@ vi.mock('../../data/music.data', () => {
 import defaultUseMusic, {
   INITIAL_TRACK_FILENAMES,
   FAVORITES_STORAGE_KEY,
+  RATINGS_STORAGE_KEY,
   cleanTitle,
   useMusic
 } from '../../.vitepress/theme/composables/useMusic';
@@ -50,6 +51,7 @@ describe('useMusic composable', () => {
     music.isShuffle.value = false;
     music.history.value = [];
     music.favorites.value = new Set();
+    music.ratings.value = {};
   });
 
   it('exports default and named useMusic returning identical singleton state', () => {
@@ -268,6 +270,118 @@ describe('useMusic composable', () => {
       loadFavorites();
       expect(favorites.value.has('track1.xm')).toBe(true);
       expect(favorites.value.has('track2.xm')).toBe(true);
+
+      vi.unstubAllGlobals();
+    });
+
+    it('sets and gets track rating, updating currentTrackRating and favorites', () => {
+      const {
+        setRating,
+        getRating,
+        currentTrackRating,
+        currentTrackIndex,
+        favorites
+      } = useMusic();
+
+      currentTrackIndex.value = 0; // 'track1.xm'
+      expect(getRating()).toBe(0);
+      expect(currentTrackRating.value).toBe(0);
+
+      // Set rating for current track
+      setRating(4);
+      expect(getRating()).toBe(4);
+      expect(currentTrackRating.value).toBe(4);
+      expect(getRating('track1.xm')).toBe(4);
+      expect(favorites.value.has('track1.xm')).toBe(true);
+
+      // Set rating for another track
+      setRating(2, 'track2.xm');
+      expect(getRating('track2.xm')).toBe(2);
+      expect(favorites.value.has('track2.xm')).toBe(true);
+
+      // Unrated track returns 0
+      expect(getRating('nonexistent.xm')).toBe(0);
+    });
+
+    it('toggles rating to clear when setRating is called twice with same value or 0', () => {
+      const { setRating, getRating, favorites } = useMusic();
+
+      setRating(3, 'track1.xm');
+      expect(getRating('track1.xm')).toBe(3);
+      expect(favorites.value.has('track1.xm')).toBe(true);
+
+      // Clicking same star toggles to 0 / deletes
+      setRating(3, 'track1.xm');
+      expect(getRating('track1.xm')).toBe(0);
+      expect(favorites.value.has('track1.xm')).toBe(false);
+
+      // Setting to 0 explicitly clears
+      setRating(5, 'track2.xm');
+      expect(getRating('track2.xm')).toBe(5);
+      setRating(0, 'track2.xm');
+      expect(getRating('track2.xm')).toBe(0);
+      expect(favorites.value.has('track2.xm')).toBe(false);
+    });
+
+    it('clamps and rounds rating to 0..5', () => {
+      const { setRating, getRating } = useMusic();
+
+      setRating(7, 'track1.xm');
+      expect(getRating('track1.xm')).toBe(5);
+
+      setRating(-3, 'track2.xm');
+      expect(getRating('track2.xm')).toBe(0);
+
+      setRating(3.7, 'track1.xm');
+      expect(getRating('track1.xm')).toBe(4);
+    });
+
+    it('exports ratings sorted alphabetically with localeCompare and newline', () => {
+      const { setRating, exportRatings } = useMusic();
+
+      setRating(4, 'zzz.xm');
+      setRating(5, 'aaa.xm');
+      setRating(3, 'mmm.xm');
+
+      const exported = exportRatings();
+      expect(exported.endsWith('\n')).toBe(true);
+      const parsed = JSON.parse(exported);
+      expect(parsed).toEqual({
+        'aaa.xm': 5,
+        'mmm.xm': 3,
+        'zzz.xm': 4
+      });
+      // Check key order
+      expect(Object.keys(parsed)).toEqual(['aaa.xm', 'mmm.xm', 'zzz.xm']);
+    });
+
+    it('migrates FAVORITES_STORAGE_KEY entries to 5 stars unless already rated in RATINGS_STORAGE_KEY', () => {
+      const { loadFavorites, getRating, favorites } = useMusic();
+      const mockStorage: Record<string, string> = {
+        [FAVORITES_STORAGE_KEY]: JSON.stringify(['fav1.xm', 'fav2.xm']),
+        [RATINGS_STORAGE_KEY]: JSON.stringify({ 'fav2.xm': 3, 'other.xm': 4 })
+      };
+      const storageMock = {
+        getItem: vi.fn((key: string) => mockStorage[key] ?? null),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
+        clear: vi.fn()
+      };
+      vi.stubGlobal('localStorage', storageMock);
+
+      loadFavorites();
+
+      // fav1.xm was in favorites only -> migrated to 5
+      expect(getRating('fav1.xm')).toBe(5);
+      expect(favorites.value.has('fav1.xm')).toBe(true);
+
+      // fav2.xm was in ratings storage with 3 -> ratings takes precedence
+      expect(getRating('fav2.xm')).toBe(3);
+      expect(favorites.value.has('fav2.xm')).toBe(true);
+
+      // other.xm was in ratings storage with 4
+      expect(getRating('other.xm')).toBe(4);
+      expect(favorites.value.has('other.xm')).toBe(true);
 
       vi.unstubAllGlobals();
     });

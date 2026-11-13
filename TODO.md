@@ -47,6 +47,7 @@ derived by reading the source and have not been checked in a browser. Ordered by
   - CSS stretched-link containment and `.badge-bar` pointer-events fix committed; live browser check still needed for click response and 2s navigation timing.
 - [ ] the music player does not seem to start on one of the random "suggested" starting song on page load, to prevent
       user from being introduced to the player with bad sounding music.
+  - Scroll playlist to active initial track on open even while paused (`MiniPlayer.vue`, `TrackerPlayer.vue`) and added 5-star ratings (`localStorage` + `data/music-ratings.json` export, sort/filter); live browser check of initial track selection pending.
 - [x] the code language pills need to be rounded
 - [x] The icons used for git watchers/forks/stars are unclear, too small, ugly dingbat fonts. they don't really match
       the icons used by github.

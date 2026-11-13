@@ -1,12 +1,19 @@
 <!-- SPDX-FileCopyrightText: Jonny van der Hoeven -->
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import {
+  ref,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  watch,
+  nextTick
+} from 'vue';
 import { useElementSize, useElementVisibility } from '@vueuse/core';
 import useMusic from '../.vitepress/theme/composables/useMusic';
 import { XMPlayer } from '../lib/audio/xm-player';
 import usePlaylist from '../.vitepress/theme/composables/usePlaylist';
-import IconHeart from './icons/IconHeart.vue';
+import StarRating from './icons/StarRating.vue';
 import IconTransport from './icons/IconTransport.vue';
 import { seekKeyStep, isChannelSoloed } from '../lib/player-a11y';
 
@@ -23,10 +30,11 @@ const {
   trackerState,
   defaultBpm,
   instruments,
-  favorites,
-  isCurrentFavorite,
+  currentTrackRating,
+  getRating,
+  setRating,
+  exportRatings,
   initMusicOnce,
-  toggleFavorite,
   cleanTitle,
   catalogLoaded,
   catalogFailed,
@@ -77,10 +85,72 @@ const displaySongTitle = computed(() => {
 const {
   searchQuery,
   onlyFavorites,
+  minRating,
+  sortByRating,
+  filteredTracks,
   virtualList,
   containerProps,
-  wrapperProps
+  wrapperProps,
+  scrollTo
 } = usePlaylist({ itemHeight: 44, overscan: 10 });
+
+// Scroll playlist into view when switching to playlist tab
+const scrollToArchiveTrack = async () => {
+  await ensureCatalog();
+  await nextTick();
+  const idx = filteredTracks.value.findIndex(
+    (item) => item.originalIndex === currentTrackIndex.value
+  );
+  if (idx !== -1) {
+    scrollTo(Math.max(0, idx - 2));
+  }
+};
+
+watch(activeTab, (tab) => {
+  if (tab === 'playlist') {
+    void scrollToArchiveTrack();
+  }
+});
+
+// Export ratings to JSON file & clipboard
+const exportFeedback = ref(false);
+let feedbackTimer: ReturnType<typeof setTimeout> | null = null;
+
+const exportRatingsToFile = async () => {
+  const jsonString = exportRatings();
+  try {
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'music-ratings.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch {
+    // Ignore blob download errors
+  }
+
+  if (
+    typeof navigator !== 'undefined' &&
+    navigator.clipboard &&
+    typeof navigator.clipboard.writeText === 'function'
+  ) {
+    try {
+      await navigator.clipboard.writeText(jsonString);
+    } catch {
+      // Ignore clipboard errors
+    }
+  }
+
+  exportFeedback.value = true;
+  if (feedbackTimer) clearTimeout(feedbackTimer);
+  feedbackTimer = setTimeout(() => {
+    exportFeedback.value = false;
+    feedbackTimer = null;
+  }, 2000);
+};
 
 // Deep-link copying
 const copyFailedUrl = ref<string | null>(null);
@@ -643,6 +713,7 @@ watch(
 );
 
 onBeforeUnmount(() => {
+  if (feedbackTimer) clearTimeout(feedbackTimer);
   window.removeEventListener('resize', markAllDirty);
   setScopesEnabled(false);
   if (rafId !== null) {
@@ -735,16 +806,14 @@ onBeforeUnmount(() => {
           <button type="button" @click="copyFailedUrl = null">✕</button>
         </div>
 
-        <button
-          class="tracker-btn fav-btn"
-          :class="{ active: isCurrentFavorite }"
-          @click="toggleFavorite()"
-          type="button"
-          :title="isCurrentFavorite ? 'Remove Favorite' : 'Save Favorite'"
-          :aria-pressed="isCurrentFavorite"
-        >
-          <IconHeart :filled="isCurrentFavorite" accent :size="14" />
-        </button>
+        <div class="tracker-star-rating" title="Rate current track">
+          <StarRating
+            :model-value="currentTrackRating"
+            :size="16"
+            :label="currentTrack?.title || 'current track'"
+            @update:model-value="setRating($event)"
+          />
+        </div>
       </div>
     </div>
 
@@ -1112,14 +1181,45 @@ onBeforeUnmount(() => {
             class="playlist-search-box"
             aria-label="Search track archive"
           />
+          <select
+            v-model.number="minRating"
+            class="playlist-filter-select"
+            aria-label="Filter by minimum star rating"
+          >
+            <option :value="0">All Stars</option>
+            <option :value="1">★ 1+ (Rated)</option>
+            <option :value="2">★ 2+</option>
+            <option :value="3">★ 3+</option>
+            <option :value="4">★ 4+</option>
+            <option :value="5">★ 5 only</option>
+          </select>
           <button
             class="filter-fav-btn"
             :class="{ active: onlyFavorites }"
             @click="onlyFavorites = !onlyFavorites"
             type="button"
             :aria-pressed="onlyFavorites"
+            title="Toggle favorites only"
           >
-            {{ onlyFavorites ? '★ Favorites Only' : '☆ All' }}
+            {{ onlyFavorites ? '★ Favs Only' : '☆ All' }}
+          </button>
+          <button
+            class="sort-rating-btn"
+            :class="{ active: sortByRating }"
+            @click="sortByRating = !sortByRating"
+            type="button"
+            :aria-pressed="sortByRating"
+            title="Sort tracks by star rating"
+          >
+            Sort ★
+          </button>
+          <button
+            class="export-ratings-btn"
+            @click="exportRatingsToFile"
+            type="button"
+            title="Export ratings to music-ratings.json"
+          >
+            {{ exportFeedback ? 'Exported!' : 'Export ★' }}
           </button>
         </div>
 
@@ -1138,24 +1238,15 @@ onBeforeUnmount(() => {
               class="archive-item"
               :class="{ active: item.originalIndex === currentTrackIndex }"
             >
-              <button
-                type="button"
-                class="archive-item-fav"
-                @click.stop="toggleFavorite(item.track.filename)"
-                :aria-pressed="favorites.has(item.track.filename)"
-                :aria-label="
-                  favorites.has(item.track.filename)
-                    ? `Remove ${item.displayTitle} from favourites`
-                    : `Add ${item.displayTitle} to favourites`
-                "
-                :title="
-                  favorites.has(item.track.filename)
-                    ? 'Remove from Favorites'
-                    : 'Add to Favorites'
-                "
-              >
-                {{ favorites.has(item.track.filename) ? '❤️' : '🤍' }}
-              </button>
+              <div class="archive-item-fav" @click.stop>
+                <StarRating
+                  :model-value="getRating(item.track.filename)"
+                  :size="12"
+                  compact
+                  :label="item.displayTitle"
+                  @update:model-value="setRating($event, item.track.filename)"
+                />
+              </div>
               <button
                 type="button"
                 class="archive-item-select"
@@ -1343,9 +1434,14 @@ onBeforeUnmount(() => {
   color: var(--vp-c-brand-1);
 }
 
-.tracker-btn.fav-btn.active {
-  background: color-mix(in srgb, var(--c-favorite) 15%, transparent);
-  border-color: var(--c-favorite);
+.tracker-star-rating {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  background: var(--vp-c-bg-mute);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
 }
 
 /* Transport */
@@ -1832,6 +1928,71 @@ onBeforeUnmount(() => {
   display: flex;
   gap: 8px;
   margin-bottom: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.playlist-filter-select {
+  background: var(--vp-c-bg-mute);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: var(--vp-c-text-1);
+  font-size: 0.85rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.playlist-filter-select:focus,
+.playlist-filter-select:focus-visible {
+  border-color: var(--vp-c-brand-1, #6366f1);
+  outline: 2px solid var(--vp-c-brand-1, #6366f1);
+  outline-offset: 1px;
+}
+
+.filter-fav-btn,
+.sort-rating-btn,
+.export-ratings-btn {
+  background: var(--vp-c-bg-mute);
+  border: 1px solid var(--vp-c-divider);
+  color: var(--vp-c-text-1);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.filter-fav-btn:hover,
+.sort-rating-btn:hover,
+.export-ratings-btn:hover {
+  border-color: var(--c-star, #f59e0b);
+  color: var(--c-star-text, #b45309);
+}
+
+.filter-fav-btn.active,
+.sort-rating-btn.active {
+  background: color-mix(in srgb, var(--c-star, #f59e0b) 15%, transparent);
+  color: var(--c-star-text, #b45309);
+  border-color: var(--c-star, #f59e0b);
+  font-weight: 600;
+}
+
+.filter-fav-btn:focus-visible,
+.sort-rating-btn:focus-visible,
+.export-ratings-btn:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1, #6366f1);
+  outline-offset: 1px;
+}
+
+.archive-item-fav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 2px 4px;
 }
 
 .playlist-search-box {

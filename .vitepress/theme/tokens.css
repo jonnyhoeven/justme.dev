@@ -77,8 +77,10 @@
     transparent
   );
 
-  /* Favorite / heart accent (players) */
+  /* Favorite / heart accent & star ratings (players) */
   --c-favorite: #ef4444;
+  --c-star: #f59e0b;
+  --c-star-text: #b45309;
 
   --vp-c-tip-1: var(--vp-c-brand-1);
   --vp-c-tip-2: var(--vp-c-brand-2);
@@ -231,6 +233,7 @@
 
   --glass-bg-light: var(--glass-bg-dark);
   --glass-border-light: var(--glass-border-dark);
+  --c-star-text: #fbbf24;
 }
 
 /* ── Responsive breakpoints ──────────────────────────────────────────── */
