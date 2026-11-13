@@ -10,7 +10,6 @@
 export const INITIAL_TRACK_FILENAMES: readonly string[] = [
   'TSRh-Xi-soft-NetXfer-2.55.392-crk.xm',
   'uCF-Real7ime-Converte-intro.xm',
-  'uCF-TeleportPro-kg.xm',
   'uCF-ZoneAlarm-Pro-3.0.2.6-kg.xm',
   'uCF-ZoneAlarm-Pro-3.1.395-kg.xm',
   'Under-SEH-File-And-Folder-Protector-3.2-crk.xm',

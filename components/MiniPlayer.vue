@@ -114,10 +114,11 @@ const {
   scrollTo
 } = usePlaylist({ itemHeight: 48, overscan: 10 });
 
-const scrollToCurrentTrack = () => {
+const scrollToCurrentTrack = async () => {
   if (!isPlaylistOpen.value) {
     isPlaylistOpen.value = true;
   }
+  await ensureCatalog();
   // Clear any search filter or fav filter if current track isn't visible
   const targetIndex = filteredTracks.value.findIndex(
     (item) => item.originalIndex === currentTrackIndex.value
@@ -128,6 +129,7 @@ const scrollToCurrentTrack = () => {
     onlyFavorites.value = false;
   }
 
+  await nextTick();
   setTimeout(() => {
     const idx = filteredTracks.value.findIndex(
       (item) => item.originalIndex === currentTrackIndex.value
@@ -141,9 +143,11 @@ const scrollToCurrentTrack = () => {
 // The panel is v-if'd, so its list remounts at the top on every open. While
 // playing, jump to the current track (e.g. the random one picked on load).
 watch(isPlaylistOpen, (open) => {
-  // The full catalog is lazy: fetch it the first time the playlist opens.
-  if (open) void ensureCatalog();
-  if (open && isPlaying.value) scrollToCurrentTrack();
+  if (open && isPlaying.value) {
+    void scrollToCurrentTrack();
+  } else if (open) {
+    void ensureCatalog();
+  }
 });
 
 let volumeBeforeMute = 0.7;
@@ -346,6 +350,29 @@ onBeforeUnmount(() => {
                 </span>
               </button>
             </div>
+
+            <a
+              href="/blog/tracker"
+              class="mini-btn full-player-link"
+              title="Open Full Tracker Player"
+              aria-label="Open Full Tracker Player"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="13"
+                height="13"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <path
+                  d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </a>
 
             <!-- Playlist Dropdown Toggle Button (Right side) -->
             <button
@@ -637,6 +664,10 @@ onBeforeUnmount(() => {
   padding: 4px;
   border-radius: 50%;
   transition: all var(--duration-fast) ease;
+}
+
+a.mini-btn {
+  text-decoration: none;
 }
 
 .mini-btn:hover,

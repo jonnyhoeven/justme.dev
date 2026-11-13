@@ -73,6 +73,7 @@ Merged from the former known-issues file. The XM feature table backs the "missin
   - **Found:** 2026-10-07, while measuring instrument-name usage across `public/audio/*.xm` (3,405 files; 3,212 parsed).
   - **What failed:** a throwaway Python parser walking the XM header, patterns and instrument headers raised `struct.error` (ran out of bytes) on the 193 files below. They may be truncated or corrupt, or the throwaway parser may simply not handle some variant, so a failure here is not proof the file is bad.
   - **Follow-up:** try loading each in the player (`XMPlayer`) to see which really fail; remove or re-source the broken ones from the R2 bucket.
+  - **Done (partial):** removed `uCF-TeleportPro-kg.xm` from `data/initial-tracks.ts`; checking all 193 files against R2 remains.
 
   <details><summary>193 files</summary>
 
@@ -275,6 +276,7 @@ Merged from the former known-issues file. The XM feature table backs the "missin
 - [ ] **Tests for the full player**:
   - **Deferred:** 2026-10-07, by choice, while the full-player overlay is being built.
   - **To add (Vitest, `tests/unit/`):** instrument-name loader (trim, CP437 decoding, slot order, blank-slot gaps, trailing blanks dropped), `useMusic` state shared between the mini player and the overlay, `?track=` deep-link opening the overlay.
+  - **Done (partial):** multi-instrument loader test added in `tests/unit/xm-player.test.ts`; shared `useMusic` and `?track=` overlay tests remain.
 - [ ] **Idea: attract attention from the hero button while music plays**:
   - **Later:** show something interesting in the hero button while a track is playing (now playing, a small visualizer, pulsing with the beat) to draw people to the full player.
 - [ ] **XM features the player does not support**:

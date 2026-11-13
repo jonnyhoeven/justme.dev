@@ -7,7 +7,7 @@ const { catalogImports, INITIAL_MOCK } = vi.hoisted(() => ({
   INITIAL_MOCK: [
     ['track1.xm', 'Track 1'],
     ['track2.xm', 'Track 2'],
-    ['uCF-TeleportPro-kg.xm', 'Toilet Story 5']
+    ['TSRh-Xi-soft-NetXfer-2.55.392-crk.xm', 'Toilet Story 5']
   ]
 }));
 
@@ -143,12 +143,14 @@ describe('useMusic composable', () => {
   it('selects initial track from curated list on load', () => {
     const { pickRandomInitialTrack, currentTrackIndex } = useMusic();
 
-    expect(INITIAL_TRACK_FILENAMES.length).toBe(15);
-    expect(INITIAL_TRACK_FILENAMES).toContain('uCF-TeleportPro-kg.xm');
+    expect(INITIAL_TRACK_FILENAMES.length).toBe(14);
+    expect(INITIAL_TRACK_FILENAMES).toContain(
+      'TSRh-Xi-soft-NetXfer-2.55.392-crk.xm'
+    );
 
     expect(currentTrackIndex.value).toBe(0);
     pickRandomInitialTrack();
-    // In mock data, only track index 2 ('uCF-TeleportPro-kg.xm') is in INITIAL_TRACK_FILENAMES
+    // In mock data, only track index 2 ('TSRh-Xi-soft-NetXfer-2.55.392-crk.xm') is in INITIAL_TRACK_FILENAMES
     expect(currentTrackIndex.value).toBe(2);
 
     // Should not re-pick when already picked
@@ -316,7 +318,7 @@ describe('useMusic composable', () => {
         resetInitialTrackPicked
       } = useMusic();
 
-      // Absent query param -> picks curated track (uCF-TeleportPro-kg.xm = index 2)
+      // Absent query param -> picks curated track (TSRh-Xi-soft-NetXfer-2.55.392-crk.xm = index 2)
       await applyTrackQueryParam('');
       expect(currentTrackIndex.value).toBe(2);
 
@@ -356,13 +358,15 @@ describe('useMusic composable', () => {
         ensureCatalog
       } = useMusic();
 
-      currentTrackIndex.value = 2; // uCF-TeleportPro-kg.xm
+      currentTrackIndex.value = 2; // TSRh-Xi-soft-NetXfer-2.55.392-crk.xm
       history.value = [0, 1]; // track1, track2
       isShuffle.value = true;
       await ensureCatalog();
 
       expect(currentTrackIndex.value).toBe(3);
-      expect(currentTrack.value?.filename).toBe('uCF-TeleportPro-kg.xm');
+      expect(currentTrack.value?.filename).toBe(
+        'TSRh-Xi-soft-NetXfer-2.55.392-crk.xm'
+      );
       expect(history.value).toEqual([1, 2]);
       expect(tracks.value[history.value[0]].filename).toBe('track1.xm');
     });

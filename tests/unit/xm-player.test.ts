@@ -127,6 +127,134 @@ export function buildSampleXMBuffer(): ArrayBuffer {
   return buffer;
 }
 
+export function buildMultiInstrumentXMBuffer(): ArrayBuffer {
+  // Preamble (60) + XM Header (276) = 336
+  // Pattern 0: Header (9) + 1 row for 1 channel (1) = 10
+  // Inst 1: Header (263) + 1 sample header (40) + sample data (16) = 319
+  // Inst 2: Header (29) with nsamp = 0 = 29
+  // Inst 3: Header (263) + 1 sample header (40) + sample data (32) = 335
+  // Total size: 336 + 10 + 319 + 29 + 335 = 1029 bytes.
+  const totalSize = 1029;
+  const buffer = new ArrayBuffer(totalSize);
+  const view = new DataView(buffer);
+  const bytes = new Uint8Array(buffer);
+
+  function writeAscii(offset: number, str: string, len: number): void {
+    for (let i = 0; i < len; i++) {
+      bytes[offset + i] = i < str.length ? str.charCodeAt(i) : 0x20;
+    }
+  }
+
+  // Preamble (60 bytes)
+  writeAscii(0, 'Extended Module: ', 17);
+  writeAscii(17, 'Multi Inst Test', 20);
+  bytes[37] = 0x1a;
+  writeAscii(38, 'FastTracker v2.00', 20);
+  view.setUint16(58, 0x0104, true);
+
+  // XM Header
+  view.setUint32(0x3c, 276, true);
+  view.setUint16(0x40, 1, true); // songlen = 1
+  view.setUint16(0x42, 0, true); // song_looppos = 0
+  view.setUint16(0x44, 1, true); // nchan = 1
+  view.setUint16(0x46, 1, true); // npat = 1
+  view.setUint16(0x48, 3, true); // ninst = 3 instruments
+  view.setUint16(0x4a, 1, true); // flags (linear freq)
+  view.setUint16(0x4c, 6, true); // tempo = 6
+  view.setUint16(0x4e, 125, true); // bpm = 125
+  bytes[0x50] = 0; // pattern 0 in order table
+
+  // Pattern 0 at 336
+  let idx = 336;
+  view.setUint32(idx, 9, true); // patheaderlen
+  bytes[idx + 4] = 0; // patpacking
+  view.setUint16(idx + 5, 1, true); // patrows = 1
+  view.setUint16(idx + 7, 1, true); // patsize = 1
+  idx += 9;
+  bytes[idx++] = 0x80; // row 0, ch 0 empty cell
+
+  // --- Instrument 1: Has 1 sample, CP437 name, trailing spaces & NULs ---
+  const inst1Idx = idx;
+  view.setUint32(inst1Idx, 263, true); // hdrsiz
+  // CP437: 'Fl' + 0x81 ('ü') + 'te' + trailing spaces and NULs
+  bytes[inst1Idx + 4] = 0x46; // 'F'
+  bytes[inst1Idx + 5] = 0x6c; // 'l'
+  bytes[inst1Idx + 6] = 0x81; // 'ü' in CP437
+  bytes[inst1Idx + 7] = 0x74; // 't'
+  bytes[inst1Idx + 8] = 0x65; // 'e'
+  bytes[inst1Idx + 9] = 0x20; // ' '
+  bytes[inst1Idx + 10] = 0x20; // ' '
+  bytes[inst1Idx + 11] = 0x00; // NUL terminator
+  view.setUint16(inst1Idx + 0x1b, 1, true); // nsamp = 1
+  view.setUint32(inst1Idx + 0x1d, 40, true); // samphdrsiz = 40
+  idx += 263;
+
+  // Instrument 1 - Sample 1 header (40 bytes)
+  const s1Hdr = idx;
+  view.setUint32(s1Hdr, 16, true); // samplen = 16
+  view.setUint32(s1Hdr + 4, 0, true); // samploop = 0
+  view.setUint32(s1Hdr + 8, 0, true); // samplooplen = 0
+  bytes[s1Hdr + 12] = 48; // sampvol = 48
+  bytes[s1Hdr + 13] = 0; // sampfinetune = 0
+  bytes[s1Hdr + 14] = 0; // samptype = 0 (no loop)
+  bytes[s1Hdr + 15] = 64; // samppan = 64
+  bytes[s1Hdr + 16] = 0; // sampnote = 0
+  // CP437: 'S' + 0x84 ('ä') + 'mple' + trailing spaces and NUL
+  bytes[s1Hdr + 18] = 0x53; // 'S'
+  bytes[s1Hdr + 19] = 0x84; // 'ä' in CP437
+  bytes[s1Hdr + 20] = 0x6d; // 'm'
+  bytes[s1Hdr + 21] = 0x70; // 'p'
+  bytes[s1Hdr + 22] = 0x6c; // 'l'
+  bytes[s1Hdr + 23] = 0x65; // 'e'
+  bytes[s1Hdr + 24] = 0x20; // ' '
+  bytes[s1Hdr + 25] = 0x20; // ' '
+  bytes[s1Hdr + 26] = 0x00; // NUL
+  idx += 40;
+
+  // Instrument 1 - Sample 1 data (16 bytes delta PCM)
+  for (let b = 0; b < 16; b++) {
+    bytes[idx++] = 0;
+  }
+
+  // --- Instrument 2: Blank name / zero-sample slot (nsamp === 0) ---
+  const inst2Idx = idx;
+  view.setUint32(inst2Idx, 29, true); // hdrsiz = 29
+  // 22 bytes of spaces from inst2Idx + 4
+  for (let b = 0; b < 22; b++) {
+    bytes[inst2Idx + 4 + b] = 0x20;
+  }
+  view.setUint16(inst2Idx + 0x1b, 0, true); // nsamp = 0
+  idx += 29;
+
+  // --- Instrument 3: Has 1 sample with forward loop, ASCII name with trailing spaces ---
+  const inst3Idx = idx;
+  view.setUint32(inst3Idx, 263, true); // hdrsiz = 263
+  writeAscii(inst3Idx + 4, 'Lead Synth', 22); // 'Lead Synth            '
+  view.setUint16(inst3Idx + 0x1b, 1, true); // nsamp = 1
+  view.setUint32(inst3Idx + 0x1d, 40, true); // samphdrsiz = 40
+  idx += 263;
+
+  // Instrument 3 - Sample 1 header (40 bytes)
+  const s3Hdr = idx;
+  view.setUint32(s3Hdr, 32, true); // samplen = 32
+  view.setUint32(s3Hdr + 4, 0, true); // samploop = 0
+  view.setUint32(s3Hdr + 8, 32, true); // samplooplen = 32
+  bytes[s3Hdr + 12] = 55; // sampvol = 55
+  bytes[s3Hdr + 13] = 0; // sampfinetune = 0
+  bytes[s3Hdr + 14] = 1; // samptype = 1 (forward loop)
+  bytes[s3Hdr + 15] = 192; // samppan = 192
+  bytes[s3Hdr + 16] = 0; // sampnote = 0
+  writeAscii(s3Hdr + 18, 'Square Wave', 22); // 'Square Wave           '
+  idx += 40;
+
+  // Instrument 3 - Sample 1 data (32 bytes delta PCM)
+  for (let b = 0; b < 32; b++) {
+    bytes[idx++] = 0;
+  }
+
+  return buffer;
+}
+
 let sampleBuffer: ArrayBuffer | null = null;
 
 const getSampleBuffer = (): ArrayBuffer => {
@@ -721,5 +849,53 @@ describe('XMPlayer', () => {
       const cb = processCallback as (e: unknown) => void;
       expect(() => cb(mockEvent)).not.toThrow();
     }
+  });
+
+  it('loads instruments from a binary XM buffer with slot order, trimming, CP437 decoding, blank slots, and sample metadata', () => {
+    const player = new XMPlayer();
+    const buf = buildMultiInstrumentXMBuffer();
+    const success = player.loadBuffer(buf);
+    expect(success).toBe(true);
+
+    const instruments: InstrumentInfo[] = player.getInstruments();
+    expect(instruments).toHaveLength(3);
+
+    // 1. Slot order (index: 1, 2, 3)
+    expect(instruments.map((inst) => inst.index)).toEqual([1, 2, 3]);
+
+    // 2. Instrument 1: CP437 decoding ('Flüte'), trimming trailing spaces and NULs
+    expect(instruments[0].index).toBe(1);
+    expect(instruments[0].name).toBe('Flüte');
+    expect(instruments[0].samples).toHaveLength(1);
+
+    // Sample metadata: name ('Sämple' with CP437 0x84 'ä' and trimmed), len, vol, pan, loop, looplen, type
+    expect(instruments[0].samples[0]).toEqual({
+      name: 'Sämple',
+      len: 16,
+      vol: 48,
+      pan: 64,
+      loop: 0,
+      looplen: 0,
+      type: 0
+    });
+
+    // 3. Instrument 2: Blank name and zero-sample (nsamp === 0) slot
+    expect(instruments[1].index).toBe(2);
+    expect(instruments[1].name).toBe('');
+    expect(instruments[1].samples).toEqual([]);
+
+    // 4. Instrument 3: Trailing spaces trimmed, forward-loop sample metadata
+    expect(instruments[2].index).toBe(3);
+    expect(instruments[2].name).toBe('Lead Synth');
+    expect(instruments[2].samples).toHaveLength(1);
+    expect(instruments[2].samples[0]).toEqual({
+      name: 'Square Wave',
+      len: 32,
+      vol: 55,
+      pan: 192,
+      loop: 0,
+      looplen: 2048,
+      type: 1
+    });
   });
 });
