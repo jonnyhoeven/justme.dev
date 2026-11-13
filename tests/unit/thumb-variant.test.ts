@@ -27,8 +27,8 @@ describe('thumbVariantUrl', () => {
     expect(thumbVariantUrl(`${base}/a.webp`, false)).toBeNull();
   });
 
-  it('is disabled by default until the variants are synced', () => {
-    expect(SITE_CONSTANTS.IMAGES.THUMB_VARIANTS).toBe(false);
-    expect(thumbVariantUrl(`${base}/a.webp`)).toBeNull();
+  it('is enabled by default now that variants are synced to R2', () => {
+    expect(SITE_CONSTANTS.IMAGES.THUMB_VARIANTS).toBe(true);
+    expect(thumbVariantUrl(`${base}/a.webp`)).toBe(`${base}/a-266w.webp`);
   });
 });

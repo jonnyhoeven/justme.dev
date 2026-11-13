@@ -56,7 +56,7 @@ derived by reading the source and have not been checked in a browser. Ordered by
 
 ### 3. Performance
 
-- [ ] **Roll out the 266px list thumbnails** ([`ArticleList.vue`](components/ArticleList.vue), [
+- [x] **Roll out the 266px list thumbnails** ([`ArticleList.vue`](components/ArticleList.vue), [
       `gen_image.sh`](gen_image.sh)): the `<name>-266w.webp` variants exist locally (28, made from the 653px webps because
       the PNG sources are not in this checkout) and `srcset` is wired up behind
       `SITE_CONSTANTS.IMAGES.THUMB_VARIANTS = false`. Run `pnpm run images:sync`, then set the flag to `true`.

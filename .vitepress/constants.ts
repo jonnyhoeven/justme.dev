@@ -16,10 +16,9 @@ export const SITE_CONSTANTS = {
     LOGO_DARK: 'https://media.justme.dev/images/logo_dark.webp',
     GOOGLE_ICON: 'https://media.justme.dev/images/google.webp',
     /**
-     * Serve `<name>-266w.webp` list thumbnails via srcset. Keep false until
-     * `pnpm run images:sync` has uploaded the -266w files to R2, then flip to true.
+     * Serve `<name>-266w.webp` list thumbnails via srcset.
      */
-    THUMB_VARIANTS: false,
+    THUMB_VARIANTS: true,
     FAVICON_MASK_COLOR: '#4f46e5',
     THEME_COLOR_LIGHT: '#ffffff',
     THEME_COLOR_DARK: '#14181f'
