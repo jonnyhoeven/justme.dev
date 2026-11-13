@@ -462,6 +462,7 @@ const doInitAudio = async () => {
   });
 
   const xmGain = xmPlayer.init(audioContext);
+  await xmPlayer.ready;
   if (xmGain) {
     xmGain.connect(animationGain);
     outputGain = audioContext.createGain();

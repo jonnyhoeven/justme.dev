@@ -2,16 +2,6 @@ packages:
   - '.'
 
 overrides:
-  # Pinned exactly to 0.25.0 (1531760, "add esbuild override"; 0717a64 was an
-  # "npm audit" lock refresh). Commits state no reason; most likely esbuild
-  # <=0.24.2 dev-server advisory GHSA-67mh-4wv8-2f99 (inferred, not recorded).
-  # Remove once vite/vitepress resolve a patched esbuild on their own.
-  esbuild: '0.25.0'
-  # VitePress 1.6.4 targets Vite 5; forcing Vite 6 is unsupported but works.
-  # Added in 9a9cdd4 (dependency upgrade, no reason recorded; presumably Vite
-  # advisories fixed only in 6.x, inferred). Also needed so vitest 5 shares one
-  # vite. Remove when VitePress supports Vite 6+ natively.
-  vite: '^6.4.5'
   # Forces one vitest version for both vitest and coverage-v8 (41803fb added
   # them, 9a9cdd4 added the override). Reason for the override is not recorded;
   # likely to keep the two in lockstep. Safe to drop if versions already match.
@@ -28,7 +18,3 @@ overrides:
   'brace-expansion@5': '^5.0.12'
   # GHSA-g3hv-75wg-m249 (moderate, via ESLint), added in ba6cedc; see TODO.md. Remove once ESLint's minimatch resolves to a patched version unaided.
   minimatch: '>=11.0.1'
-
-allowBuilds:
-  'esbuild': true
-  '@esbuild/*': true

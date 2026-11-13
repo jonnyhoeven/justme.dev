@@ -7,7 +7,7 @@ import {
   type CompactCatalog,
   type CompactTrack,
   type MusicTrack
-} from '../lib/music-catalog';
+} from '../lib/music-catalog.ts';
 
 export type { MusicTrack };
 
@@ -20,7 +20,10 @@ const byFilename = (a: CompactTrack, b: CompactTrack) =>
  */
 export function loadCompactCatalog(): CompactCatalog {
   const empty: CompactCatalog = { trackers: [], tracks: [] };
-  const catalogPath = path.resolve(__dirname, '../data/music-tracks.json');
+  const catalogPath = path.resolve(
+    import.meta.dirname,
+    '../data/music-tracks.json'
+  );
   if (!fs.existsSync(catalogPath)) return empty;
 
   try {

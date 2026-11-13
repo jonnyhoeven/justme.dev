@@ -5,7 +5,7 @@ It includes or derives from the following third-party works, all under licenses 
 
 ## jsxm (MIT)
 
-[`lib/audio/xm-player.ts`](lib/audio/xm-player.ts) is adapted from [jsxm](https://github.com/a1k0n/jsxm)
+[`lib/audio/xm-engine.ts`](lib/audio/xm-engine.ts) and [`lib/audio/xm-player.ts`](lib/audio/xm-player.ts) are adapted from [jsxm](https://github.com/a1k0n/jsxm)
 by Andy Sloane.
 
 ```

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { defineLoader } from 'vitepress';
 import type { CompactCatalog } from '../lib/music-catalog';
-import { INITIAL_TRACK_FILENAMES } from './initial-tracks';
-import { loadCompactCatalog } from './music-catalog-source';
+import { INITIAL_TRACK_FILENAMES } from './initial-tracks.ts';
+import { loadCompactCatalog } from './music-catalog-source.ts';
 
 declare const data: CompactCatalog;
 export { data };

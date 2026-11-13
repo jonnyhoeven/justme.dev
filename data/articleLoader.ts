@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { createContentLoader } from 'vitepress';
-import transformPage from '../lib/transformPage';
+import transformPage from '../lib/transformPage.ts';
 import type { ArticlePage } from '../types/frontmatter';
 
 export function createArticleLoader(pattern: string) {

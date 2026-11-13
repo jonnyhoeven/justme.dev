@@ -37,8 +37,8 @@ Code: `components/HeroSplat.vue`, `lib/splat-animations/` and `lib/splat-scenes/
 
 ### XM tracker player
 
-`lib/audio/xm-player.ts` plays FastTracker 2 modules in the browser. It is derived from
-[jsxm](https://github.com/a1k0n/jsxm) (MIT) and mixes the samples in a `ScriptProcessorNode`.
+`lib/audio/xm-player.ts` and `lib/audio/xm-engine.ts` play FastTracker 2 modules in the browser. They are derived from
+[jsxm](https://github.com/a1k0n/jsxm) (MIT) and mix the samples off the main thread in an `AudioWorklet` (`lib/audio/xm-worklet.ts`).
 
 - A mini player docks at the bottom of every page and keeps playing while you navigate.
 - The [tracker page](https://justme.dev/blog/tracker) has the full player with a per-channel oscilloscope, a scrolling

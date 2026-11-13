@@ -3,11 +3,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { defineConfig, HeadConfig } from 'vitepress';
-import { createArticleLoader } from '../data/articleLoader';
-import { buildRssFeed } from '../lib/rss';
-import { buildStructuredData, serializeJsonLd } from '../lib/structured-data';
-import transformPage from '../lib/transformPage';
-import { SITE_CONSTANTS } from './constants';
+import { createArticleLoader } from '../data/articleLoader.ts';
+import { buildRssFeed } from '../lib/rss.ts';
+import { buildStructuredData, serializeJsonLd } from '../lib/structured-data.ts';
+import transformPage from '../lib/transformPage.ts';
+import { SITE_CONSTANTS } from './constants.ts';
 
 const isProd = process.env.NODE_ENV === 'production';
 const fontBase = isProd ? SITE_CONSTANTS.MEDIA_URL : '';
@@ -246,7 +246,7 @@ export default defineConfig({
   cleanUrls: true,
   markdown: {
     image: {
-      lazyLoading: true
+      lazyLoad: true
     }
   },
   lastUpdated: true,
@@ -325,16 +325,7 @@ export default defineConfig({
       }
     ],
     build: {
-      chunkSizeWarningLimit: 750,
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (id.includes('music.data')) {
-              return 'music-catalog';
-            }
-          }
-        }
-      }
+      chunkSizeWarningLimit: 750
     }
   },
   transformPageData: transformPage,
