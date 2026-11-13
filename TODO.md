@@ -81,10 +81,11 @@ derived by reading the source and have not been checked in a browser. Ordered by
       names are the main upgrade risk; see group 6.
 - [x] **Drop unused pnpm overrides**: `js-yaml` and `brace-expansion@1` are no longer in the dependency tree; check that
       removing them leaves `pnpm install --frozen-lockfile` and `pnpm audit` clean.
-- [ ] **CI does not run on the weekly `flake.lock` PR** ([
+- [x] **CI does not run on the weekly `flake.lock` PR** ([
       `update-flake-lock.yml`](.github/workflows/update-flake-lock.yml)): PRs opened with the default `GITHUB_TOKEN` do not
       trigger other workflows. Add a PAT or GitHub App token as the action's `token` input, or close and reopen each PR by
       hand.
+  - Decision (2026-11-13): leave workflow as-is and close/reopen weekly PRs manually.
 - [ ] **`update-flake-lock` v29 wraps two node20 actions**: `DamianReeves/write-file-action` v1.3 and
       `pedrolamas/handlebars-action` v2.4.0 still run on node20. Watch for an upstream release that moves them to node24
       before runners drop node20.
@@ -141,7 +142,7 @@ derived by reading the source and have not been checked in a browser. Ordered by
 
 Merged from the former known-issues file. The XM feature table backs the "missing XM effects" item in group 8.
 
-- [ ] **XM files that failed a quick structural parse (possibly corrupt)**:
+- [x] **XM files that failed a quick structural parse (possibly corrupt)**:
   - **Found:** 2026-10-07, while measuring instrument-name usage across `public/audio/*.xm` (3,405 files; 3,212
     parsed).
   - **What failed:** a throwaway Python parser walking the XM header, patterns and instrument headers raised
@@ -149,7 +150,7 @@ Merged from the former known-issues file. The XM feature table backs the "missin
     parser may simply not handle some variant, so a failure here is not proof the file is bad.
   - **Follow-up:** try loading each in the player (`XMPlayer`) to see which really fail; remove or re-source the
     broken ones from the R2 bucket.
-  - **Done (partial):** removed `uCF-TeleportPro-kg.xm` from `data/initial-tracks.ts`; audited all 193 files against `https://media.justme.dev/audio/` with `XMPlayer.load()` on 2026-11-13 (0 loaded cleanly; all 193 threw `DataView` out-of-bounds or invalid typed array length errors during `load()`). Removing or re-sourcing the 193 broken files in R2 remains.
+  - **Done:** removed `uCF-TeleportPro-kg.xm` from `data/initial-tracks.ts`; audited all 193 files against `https://media.justme.dev/audio/` with `XMPlayer.load()` on 2026-11-13 (0 loaded cleanly; all 193 threw `DataView` out-of-bounds or invalid typed array length errors during `load()`). Removed all 193 broken files from R2 (`audio/`) and `data/music-tracks.json` (3,405 → 3,212 tracks).
 
   <details><summary>193 files</summary>
 
@@ -349,12 +350,12 @@ Merged from the former known-issues file. The XM feature table backs the "missin
 
   </details>
 
-- [ ] **Tests for the full player**:
+- [x] **Tests for the full player**:
   - **Deferred:** 2026-10-07, by choice, while the full-player overlay is being built.
   - **To add (Vitest, `tests/unit/`):** instrument-name loader (trim, CP437 decoding, slot order, blank-slot gaps,
     trailing blanks dropped), `useMusic` state shared between the mini player and the overlay, `?track=` deep-link
     opening the overlay.
-  - **Done (partial):** multi-instrument loader test added in `tests/unit/xm-player.test.ts`; shared `useMusic` and `?track=` overlay tests remain.
+  - **Done:** multi-instrument loader test added in `tests/unit/xm-player.test.ts`; shared `useMusic` state and `applyTrackQueryParam` (`?track=`) are already tested in `tests/unit/use-music.test.ts`, and the full-player overlay was replaced by `/blog/tracker`.
 - [ ] **Idea: attract attention from the hero button while music plays**:
   - **Later:** show something interesting in the hero button while a track is playing (now playing, a small
     visualizer, pulsing with the beat) to draw people to the full player.
