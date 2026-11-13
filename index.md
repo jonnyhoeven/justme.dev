@@ -37,8 +37,8 @@ features:
     link: /blog/tracker
   - title: Justme.dev
     details:
-      Open-source documentation powered by VitePress. This site leverages Vue.js and
-      modern frontend build tools to deliver a high-performance, static web experience.
+      The source of this site, a VitePress blog and project showcase with a Python script that
+      pulls in project READMEs, a particle canvas hero and an in-browser tracker music player.
     link: /projects/justme
 ---
 
@@ -56,7 +56,7 @@ import ArticleList from './components/ArticleList.vue';
 </div>
 
 <div class="home-action">
-  <a class="view-all-button flourish" href="/blog">View all posts</a>
+  <a class="view-all-button" href="/blog">View all posts</a>
 </div>
 
 </div>

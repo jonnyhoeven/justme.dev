@@ -1,78 +1,149 @@
 ## Phone Layout Follow-ups
 
-Needs a real-device or emulator check at 375px, 414px and 700px wide. Found 2026-10-04 from a static code review; not yet checked on a device or in an emulator.
+Needs a real-device or emulator check at 375px, 414px and 700px wide. Found 2026-10-04 from a static code review; not
+yet checked on a device or in an emulator.
 
-- [ ] **Backdrop blur cost on mobile**: the navbar, `.VPFeature` and `.custom-block` all use `backdrop-filter: blur(...)`. Profile scrolling on a low-end phone and reduce or drop the blur below 768px if it janks.
+- [ ] **Backdrop blur cost on mobile**: the navbar, `.VPFeature` and `.custom-block` all use
+      `backdrop-filter: blur(...)`. Profile scrolling on a low-end phone and reduce or drop the blur below 768px if it
+      janks.
 
 ## Codebase Review (2026-11-12)
 
-Open items from a full read of the components, `lib/`, theme CSS, ETL scripts, CI and docs at commit `8139ff1`, plus follow-ups found while working through it (2026-11-12/13, branch `todo-cleanup`). Items marked _(from code)_ were derived by reading the source and have not been checked in a browser. Ordered by impact within each group.
+Open items from a full read of the components, `lib/`, theme CSS, ETL scripts, CI and docs at commit `8139ff1`, plus
+follow-ups found while working through it (2026-11-12/13, branch `todo-cleanup`). Items marked _(from code)_ were
+derived by reading the source and have not been checked in a browser. Ordered by impact within each group.
 
 ### 1. Verification
 
-- [ ] **First CI run after pushing `todo-cleanup`**: the branch adds a `typecheck` step, moves the flake to Node 24, drops `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`, passes `GITHUB_TOKEN` to the ETL step and switches README fetching to `urllib`. None of it has run in GitHub Actions yet; check the deploy run and the generated project pages (stats pills, README bodies).
-- [ ] **Browser pass over unverified UI changes**: nothing from the cleanup was checked in a browser. Check in light and dark mode, desktop and phone width:
+- [ ] **First CI run after pushing `todo-cleanup`**: the branch adds a `typecheck` step, moves the flake to Node 24,
+      drops `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`, passes `GITHUB_TOKEN` to the ETL step and switches README fetching to
+      `urllib`. None of it has run in GitHub Actions yet; check the deploy run and the generated project pages (stats pills,
+      README bodies).
+- [ ] **Browser pass over unverified UI changes**: nothing from the cleanup was checked in a browser. Check in light and
+      dark mode, desktop and phone width:
   - Hover is colour/border only now; the hero "alt" button relies on VitePress' own hover colours.
   - Brand button hover/active colours (`#4f46e5` / `#4338ca` / `#3730a3`) and the footer text without dimming.
   - The `--audio-dock-space` bottom padding (74px, 64px below 768px) against the dock on posts and the home page.
-  - Mini player: 11px text floor, filename column hidden below 480px, title button with paused marquee, select/favourite buttons in playlist rows, "Loading catalog…" state.
-  - Tracker page: mute/solo button row, seek sliders with arrow keys, scope glow (double stroke, alpha 0.28, width 4.5; may need tuning), redraw after tab switches.
+  - Mini player: 11px text floor, filename column hidden below 480px, title button with paused marquee,
+    select/favourite buttons in playlist rows, "Loading catalog…" state.
+  - Tracker page: mute/solo button row, seek sliders with arrow keys, scope glow (double stroke, alpha 0.28, width
+    4.5; may need tuning), redraw after tab switches.
   - Project cards: watcher/star/fork pills.
   - `prefers-reduced-motion: reduce`: no hero/feature fade-in, panel without slide.
 
 ### 2. Bugs
 
-- [x] **Out-of-range keymap entry gives an undefined sample** _(from code)_ ([`xm-player.ts`](lib/audio/xm-player.ts) `nextRow`): `inst.samples[inst.samplemap[note]]` is not bounds-checked, so a malformed instrument could make the mixer read `undefined`. Guard it, and drop the stale `TODO: implement pingpong looping` (`MixChannelIntoBuf`) and `FIXME: ignoring keymaps` (`load`) comments.
-- [x] **Catalog v2 assumes the default media URL** _(from code)_ ([`sync_audio_r2.py`](scripts/sync_audio_r2.py)): the client derives `url` as `MEDIA_URL/audio/<filename>`, so a sync run with `--prefix` other than `audio` or a different `R2_PUBLIC_URL` writes a catalog whose URLs no longer resolve. Refuse or warn in that case.
-- [x] **Junk bytes in tracker names** ([`sync_audio_r2.py`](scripts/sync_audio_r2.py) `parse_xm_header`): several catalog trackers read as e.g. `MadTracker 2.0\u0000\u0019%Õó`. Cut the field at the first NUL and trim.
+- [x] **Out-of-range keymap entry gives an undefined sample** _(from code)_ ([`xm-player.ts`](lib/audio/xm-player.ts)
+      `nextRow`): `inst.samples[inst.samplemap[note]]` is not bounds-checked, so a malformed instrument could make the mixer
+      read `undefined`. Guard it, and drop the stale `TODO: implement pingpong looping` (`MixChannelIntoBuf`) and
+      `FIXME: ignoring keymaps` (`load`) comments.
+- [x] **Catalog v2 assumes the default media URL** _(from code)_ ([`sync_audio_r2.py`](scripts/sync_audio_r2.py)): the
+      client derives `url` as `MEDIA_URL/audio/<filename>`, so a sync run with `--prefix` other than `audio` or a different
+      `R2_PUBLIC_URL` writes a catalog whose URLs no longer resolve. Refuse or warn in that case.
+- [x] **Junk bytes in tracker names** ([`sync_audio_r2.py`](scripts/sync_audio_r2.py) `parse_xm_header`): several
+      catalog trackers read as e.g. `MadTracker 2.0\u0000\u0019%Õó`. Cut the field at the first NUL and trim.
+- [ ] when in http://localhost:5173/projects and i click on a item in the list sometimes it does not change
+      pages/register the click. sometimes it does but it takes about 2 seconds to change the page
+  - CSS stretched-link containment and `.badge-bar` pointer-events fix committed; live browser check still needed for click response and 2s navigation timing.
+- [ ] the music player does not seem to start on one of the random "suggested" starting song on page load, to prevent
+      user from being introduced to the player with bad sounding music.
+- [x] the code language pills need to be rounded
+- [x] The icons used for git watchers/forks/stars are unclear, too small, ugly dingbat fonts. they don't really match
+      the icons used by github.
+- [x] some items like http://localhost:5173/blog/cilium hae 2 "View on github" pill buttons
+- [ ] the deploy status and code scanning images from github don't work anymore?
+- [ ] why is everything connected ti github suddenly broken?
 
 ### 3. Performance
 
-- [ ] **Roll out the 266px list thumbnails** ([`ArticleList.vue`](components/ArticleList.vue), [`gen_image.sh`](gen_image.sh)): the `<name>-266w.webp` variants exist locally (28, made from the 653px webps because the PNG sources are not in this checkout) and `srcset` is wired up behind `SITE_CONSTANTS.IMAGES.THUMB_VARIANTS = false`. Run `pnpm run images:sync`, then set the flag to `true`.
-- [ ] **Audio is mixed on the main thread** ([`xm-player.ts`](lib/audio/xm-player.ts)): `ScriptProcessorNode` is deprecated and competes with the hero canvas and Vue for the same thread. Port the mixer to an `AudioWorklet` (the engine is already self-contained in `createXMEngine`); send scope/VU data back with `postMessage`.
-- [ ] **Hero canvas ignores `devicePixelRatio`**: it is sized in CSS pixels, so it is soft on HiDPI screens. Try `min(dpr, 2)` backing size and measure the frame cost before keeping it.
-- [ ] **Blog posts lost their GitHub counts**: they used shields.io badges too, but are not generated by the ETL, so they now only show the "View on Github" link. A VitePress data loader could fetch stats for posts with `user`/`project` at build time.
+- [ ] **Roll out the 266px list thumbnails** ([`ArticleList.vue`](components/ArticleList.vue), [
+      `gen_image.sh`](gen_image.sh)): the `<name>-266w.webp` variants exist locally (28, made from the 653px webps because
+      the PNG sources are not in this checkout) and `srcset` is wired up behind
+      `SITE_CONSTANTS.IMAGES.THUMB_VARIANTS = false`. Run `pnpm run images:sync`, then set the flag to `true`.
+- [ ] **Audio is mixed on the main thread** ([`xm-player.ts`](lib/audio/xm-player.ts)): `ScriptProcessorNode` is
+      deprecated and competes with the hero canvas and Vue for the same thread. Port the mixer to an `AudioWorklet` (the
+      engine is already self-contained in `createXMEngine`); send scope/VU data back with `postMessage`.
+- [ ] **Hero canvas ignores `devicePixelRatio`**: it is sized in CSS pixels, so it is soft on HiDPI screens. Try
+      `min(dpr, 2)` backing size and measure the frame cost before keeping it.
+- [ ] **Blog posts lost their GitHub counts**: they used shields.io badges too, but are not generated by the ETL, so
+      they now only show the "View on Github" link. A VitePress data loader could fetch stats for posts with `user`/
+      `project` at build time.
 
 ### 4. Dependencies and tooling
 
-- [ ] **Type `xm-player.ts`**: it is excluded from `pnpm run typecheck` with `// @ts-nocheck` (113 strict errors) and runs under `/* eslint-disable no-explicit-any, no-unused-vars, no-var */`; `engine` is `any`. Give channels, instruments, samples and the song typed interfaces, then drop the `@ts-nocheck`.
-- [ ] **Plan the VitePress 2 move** ([`pnpm-workspace.yaml`](pnpm-workspace.yaml)): VitePress 1.6.4 targets Vite 5, the override forces `^6.4.5` (latest is 8.x) and esbuild is pinned to exactly `0.25.0` (latest 0.28.x). Each override now has a comment (only `minimatch` has a recorded reason). The roughly 145 `!important` rules targeting internal class names are the main upgrade risk; see group 6.
-- [x] **Drop unused pnpm overrides**: `js-yaml` and `brace-expansion@1` are no longer in the dependency tree; check that removing them leaves `pnpm install --frozen-lockfile` and `pnpm audit` clean.
-- [ ] **CI does not run on the weekly `flake.lock` PR** ([`update-flake-lock.yml`](.github/workflows/update-flake-lock.yml)): PRs opened with the default `GITHUB_TOKEN` do not trigger other workflows. Add a PAT or GitHub App token as the action's `token` input, or close and reopen each PR by hand.
-- [ ] **`update-flake-lock` v29 wraps two node20 actions**: `DamianReeves/write-file-action` v1.3 and `pedrolamas/handlebars-action` v2.4.0 still run on node20. Watch for an upstream release that moves them to node24 before runners drop node20.
-- [x] **`pyproject.toml` mirrors the flake by hand**: the `[project]` dependency lower bounds will drift as `flake.lock` updates. Add a small test or pre-commit check that compares the flake's Python package list with `pyproject.toml`.
-- [x] **`ruff format` is not enforced**: `ruff format --check .` reports six Python files (including `generate_splats.py`, `sync_audio_r2.py` and their tests) as unformatted. Format them once and add the `ruff-format` hook to `.pre-commit-config.yaml`.
-- [x] **Log the missing `GITHUB_TOKEN` once** ([`process_requests.py`](scripts/process_requests.py)): the ETL prints "GITHUB_TOKEN not set" for every manifest when run locally.
-- [ ] **TypeScript 7 is available** (7.0.2; the project is on 6.0.3): check `vue-tsc` and `@typescript-eslint` peer support before upgrading.
-- [ ] **No end-to-end smoke test**: `data-animation` / `data-scene` / `data-phase` were added for testing but nothing uses them. Add one Playwright test: the home page hydrates without console errors, the director advances on click, and play/next works with a fixture `.xm`.
+- [ ] **Type `xm-player.ts`**: it is excluded from `pnpm run typecheck` with `// @ts-nocheck` (113 strict errors) and
+      runs under `/* eslint-disable no-explicit-any, no-unused-vars, no-var */`; `engine` is `any`. Give channels,
+      instruments, samples and the song typed interfaces, then drop the `@ts-nocheck`.
+- [ ] **Plan the VitePress 2 move** ([`pnpm-workspace.yaml`](pnpm-workspace.yaml)): VitePress 1.6.4 targets Vite 5, the
+      override forces `^6.4.5` (latest is 8.x) and esbuild is pinned to exactly `0.25.0` (latest 0.28.x). Each override now
+      has a comment (only `minimatch` has a recorded reason). The roughly 145 `!important` rules targeting internal class
+      names are the main upgrade risk; see group 6.
+- [x] **Drop unused pnpm overrides**: `js-yaml` and `brace-expansion@1` are no longer in the dependency tree; check that
+      removing them leaves `pnpm install --frozen-lockfile` and `pnpm audit` clean.
+- [ ] **CI does not run on the weekly `flake.lock` PR** ([
+      `update-flake-lock.yml`](.github/workflows/update-flake-lock.yml)): PRs opened with the default `GITHUB_TOKEN` do not
+      trigger other workflows. Add a PAT or GitHub App token as the action's `token` input, or close and reopen each PR by
+      hand.
+- [ ] **`update-flake-lock` v29 wraps two node20 actions**: `DamianReeves/write-file-action` v1.3 and
+      `pedrolamas/handlebars-action` v2.4.0 still run on node20. Watch for an upstream release that moves them to node24
+      before runners drop node20.
+- [x] **`pyproject.toml` mirrors the flake by hand**: the `[project]` dependency lower bounds will drift as `flake.lock`
+      updates. Add a small test or pre-commit check that compares the flake's Python package list with `pyproject.toml`.
+- [x] **`ruff format` is not enforced**: `ruff format --check .` reports six Python files (including
+      `generate_splats.py`, `sync_audio_r2.py` and their tests) as unformatted. Format them once and add the `ruff-format`
+      hook to `.pre-commit-config.yaml`.
+- [x] **Log the missing `GITHUB_TOKEN` once** ([`process_requests.py`](scripts/process_requests.py)): the ETL prints
+      "GITHUB_TOKEN not set" for every manifest when run locally.
+- [ ] **TypeScript 7 is available** (7.0.2; the project is on 6.0.3): check `vue-tsc` and `@typescript-eslint` peer
+      support before upgrading.
+- [ ] **No end-to-end smoke test**: `data-animation` / `data-scene` / `data-phase` were added for testing but nothing
+      uses them. Add one Playwright test: the home page hydrates without console errors, the director advances on click, and
+      play/next works with a fixture `.xm`.
 
 ### 5. Dead code and duplication
 
-- [ ] **`ArticleFooter` renders nothing on any post** ([`ArticleFooter.vue`](components/ArticleFooter.vue)): it only shows when frontmatter `model` is set, and no post sets it. Either use it or remove it (and its global registration and the ETL wrapper tag).
-- [ ] **`.flourish` has no styles left** ([`index.md`](index.md)): the shimmer it carried was removed with the hover cleanup; drop the class from the "View all posts" link.
+- [x] **`ArticleFooter` renders nothing on any post** ([`ArticleFooter.vue`](components/ArticleFooter.vue)): it only
+      shows when frontmatter `model` is set, and no post sets it. Either use it or remove it (and its global registration
+      and the ETL wrapper tag).
+- [x] **`.flourish` has no styles left** ([`index.md`](index.md)): the shimmer it carried was removed with the hover
+      cleanup; drop the class from the "View all posts" link.
 
 ### 6. Design and layout
 
-- [ ] **Reduce `!important` (about 145 uses)**: most of `components.css` restyles VitePress internals by force. Prefer the theme's CSS variables where they exist (`--vp-nav-bg-color`, `--vp-local-search-bg`, button variables), put custom rules in an `@layer`, and keep `!important` for the few scoped-style overrides that need it.
-- [x] **Search placeholder is dimmed below AA** _(from code)_ ([`components.css`](.vitepress/theme/components.css) `.VPLocalSearchBox .search-input::placeholder`): `opacity: 0.5 !important` on `--vp-c-text-2`. `.post-intro` at `opacity: 0.85` is borderline too. Add both to `tests/unit/contrast.test.ts`.
-- [ ] **Hero avatar source is 307px** but shown at up to 240 CSS px, so it is soft on 2x phones. Export a 480px version (needs a larger source image).
+- [ ] **Reduce `!important` (about 145 uses)**: most of `components.css` restyles VitePress internals by force. Prefer
+      the theme's CSS variables where they exist (`--vp-nav-bg-color`, `--vp-local-search-bg`, button variables), put custom
+      rules in an `@layer`, and keep `!important` for the few scoped-style overrides that need it.
+- [x] **Search placeholder is dimmed below AA** _(from code)_ ([`components.css`](.vitepress/theme/components.css)
+      `.VPLocalSearchBox .search-input::placeholder`): `opacity: 0.5 !important` on `--vp-c-text-2`. `.post-intro` at
+      `opacity: 0.85` is borderline too. Add both to `tests/unit/contrast.test.ts`.
+- [ ] **Hero avatar source is 307px** but shown at up to 240 CSS px, so it is soft on 2x phones. Export a 480px version
+      (needs a larger source image).
 
 ### 7. Documentation
 
-- [ ] **README rewrite**: the old README oversold the site ("scalable, cloud-native", "zero-maintenance", "high availability") and was out of date (Node 22, `pyyaml` and `requests` only, no media sync, tests or pre-commit). A plain draft of `README.md`, the `requests/justme.yaml` intro and the home feature card is in the working tree, uncommitted, waiting for the owner's review.
+- [x] **README rewrite**: the old README oversold the site ("scalable, cloud-native", "zero-maintenance", "high
+      availability") and was out of date (Node 22, `pyyaml` and `requests` only, no media sync, tests or pre-commit). A
+      plain draft of `README.md`, the `requests/justme.yaml` intro and the home feature card is in the working tree,
+      uncommitted, waiting for the owner's review.
 
 ### 8. Audio engine
 
-- [ ] **Implement the most audible missing XM effects** ([`xm-player.ts`](lib/audio/xm-player.ts)): `Kxx` key off first (the key-off note path already exists), then `EDx` note delay (needs the note trigger split out of `nextRow`, which `EEx`, `E9x` and `Rxy` also need). The full list of unsupported and partial features is in group 9.
+- [ ] **Implement the most audible missing XM effects** ([`xm-player.ts`](lib/audio/xm-player.ts)): `Kxx` key off first
+      (the key-off note path already exists), then `EDx` note delay (needs the note trigger split out of `nextRow`, which
+      `EEx`, `E9x` and `Rxy` also need). The full list of unsupported and partial features is in group 9.
 
 ### 9. Known issues
 
 Merged from the former known-issues file. The XM feature table backs the "missing XM effects" item in group 8.
 
 - [ ] **XM files that failed a quick structural parse (possibly corrupt)**:
-  - **Found:** 2026-10-07, while measuring instrument-name usage across `public/audio/*.xm` (3,405 files; 3,212 parsed).
-  - **What failed:** a throwaway Python parser walking the XM header, patterns and instrument headers raised `struct.error` (ran out of bytes) on the 193 files below. They may be truncated or corrupt, or the throwaway parser may simply not handle some variant, so a failure here is not proof the file is bad.
-  - **Follow-up:** try loading each in the player (`XMPlayer`) to see which really fail; remove or re-source the broken ones from the R2 bucket.
+  - **Found:** 2026-10-07, while measuring instrument-name usage across `public/audio/*.xm` (3,405 files; 3,212
+    parsed).
+  - **What failed:** a throwaway Python parser walking the XM header, patterns and instrument headers raised
+    `struct.error` (ran out of bytes) on the 193 files below. They may be truncated or corrupt, or the throwaway
+    parser may simply not handle some variant, so a failure here is not proof the file is bad.
+  - **Follow-up:** try loading each in the player (`XMPlayer`) to see which really fail; remove or re-source the
+    broken ones from the R2 bucket.
   - **Done (partial):** removed `uCF-TeleportPro-kg.xm` from `data/initial-tracks.ts`; checking all 193 files against R2 remains.
 
   <details><summary>193 files</summary>
@@ -275,14 +346,23 @@ Merged from the former known-issues file. The XM feature table backs the "missin
 
 - [ ] **Tests for the full player**:
   - **Deferred:** 2026-10-07, by choice, while the full-player overlay is being built.
-  - **To add (Vitest, `tests/unit/`):** instrument-name loader (trim, CP437 decoding, slot order, blank-slot gaps, trailing blanks dropped), `useMusic` state shared between the mini player and the overlay, `?track=` deep-link opening the overlay.
+  - **To add (Vitest, `tests/unit/`):** instrument-name loader (trim, CP437 decoding, slot order, blank-slot gaps,
+    trailing blanks dropped), `useMusic` state shared between the mini player and the overlay, `?track=` deep-link
+    opening the overlay.
   - **Done (partial):** multi-instrument loader test added in `tests/unit/xm-player.test.ts`; shared `useMusic` and `?track=` overlay tests remain.
 - [ ] **Idea: attract attention from the hero button while music plays**:
-  - **Later:** show something interesting in the hero button while a track is playing (now playing, a small visualizer, pulsing with the beat) to draw people to the full player.
+  - **Later:** show something interesting in the hero button while a track is playing (now playing, a small
+    visualizer, pulsing with the beat) to draw people to the full player.
+  - [x] the player bar itself also needs a link to the "big player" page.
 - [ ] **XM features the player does not support**:
-  - **Found:** 2026-11-12, by reading [`lib/audio/xm-player.ts`](lib/audio/xm-player.ts) (effect tables, `eff_t0_e`, volume column in `nextRow`, `MixChannelIntoBuf`, `UnrollSampleLoop`, `load`). Line numbers are approximate. Nothing was run or listened to.
-  - **What:** `player.effects_t0` / `player.effects_t1` map unused or unimplemented slots to `eff_unimplemented*` no-ops, so a song using them plays silently wrong rather than failing. Status below is from reading the code.
-  - **Impact counts:** not measured. `public/audio/*.xm` is not present locally (the files live on R2), so no per-effect file counts exist. To measure later, scan pattern data of the R2 files (throwaway script outside the repo).
+  - **Found:** 2026-11-12, by reading [`lib/audio/xm-player.ts`](lib/audio/xm-player.ts) (effect tables, `eff_t0_e`,
+    volume column in `nextRow`, `MixChannelIntoBuf`, `UnrollSampleLoop`, `load`). Line numbers are approximate.
+    Nothing was run or listened to.
+  - **What:** `player.effects_t0` / `player.effects_t1` map unused or unimplemented slots to `eff_unimplemented*`
+    no-ops, so a song using them plays silently wrong rather than failing. Status below is from reading the code.
+  - **Impact counts:** not measured. `public/audio/*.xm` is not present locally (the files live on R2), so no
+    per-effect file counts exist. To measure later, scan pattern data of the R2 files (throwaway script outside the
+    repo).
 
   | Effect                                             | Status      | Where in `xm-player.ts`                              | Notes                                                                                                                                                                                                                                               |
   | :------------------------------------------------- | :---------- | :--------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -311,13 +391,24 @@ Merged from the former known-issues file. The XM feature table backs the "missin
 
   **Suggested order:**
 
-  1. Key off: do the `Kxx` effect together with the key-off note path, since the note path is already there. Check key off on instruments without a volume envelope and with fadeout 0 (see the fadeout row) at the same time.
-  2. Note delay (`EDx`): needs the larger refactor of `nextRow`. Do it before `EEx`, `E9x` and `Rxy`, which also depend on separating "row start" from "note trigger".
+  1. Key off: do the `Kxx` effect together with the key-off note path, since the note path is already there. Check key
+     off on instruments without a volume envelope and with fadeout 0 (see the fadeout row) at the same time.
+  2. Note delay (`EDx`): needs the larger refactor of `nextRow`. Do it before `EEx`, `E9x` and `Rxy`, which also
+     depend on separating "row start" from "note trigger".
 
   **Already supported (no work needed):**
 
-  - **Ping-pong sample loops (type bit 1):** handled. `load` calls `UnrollSampleLoop` for every ping-pong loop (and every forward loop shorter than 2048 samples), which writes the loop forwards then reversed into the sample data and rewrites `type` to forward. The `// TODO: implement pingpong looping` comment in `MixChannelIntoBuf` (about 955) is stale because the mixer only ever sees forward loops (removal tracked in group 2). Unverified: whether the doubled edge sample at each turnaround matches FastTracker 2 exactly (needs an audio comparison). Side effect: `getInstruments` reports `type` as forward for those samples.
-  - **Multi-sample keymaps:** handled. `load` keeps the 96-byte `samplemap` and `nextRow` picks `inst.samples[inst.samplemap[note]]`. The `// FIXME: ignoring keymaps` comment in `load` (about 1466) is stale. A keymap entry pointing past the sample count gives an undefined sample (group 2).
-  - **Also fine:** `0` arpeggio, `3`/`5`/`6` portamento and combos, `4` vibrato with `E4` waveform (random uses the square wave), `E5` finetune, `E6` loop, `E8` pan, `EA`/`EB`, `Gxx`, `Hxx`, `Bxx`, and both linear and Amiga frequency tables (`flags & 1`).
+  - **Ping-pong sample loops (type bit 1):** handled. `load` calls `UnrollSampleLoop` for every ping-pong loop (and
+    every forward loop shorter than 2048 samples), which writes the loop forwards then reversed into the sample data
+    and rewrites `type` to forward. The `// TODO: implement pingpong looping` comment in `MixChannelIntoBuf` (about 955) is stale because the mixer only ever sees forward loops (removal tracked in group 2). Unverified: whether the
+    doubled edge sample at each turnaround matches FastTracker 2 exactly (needs an audio comparison). Side effect:
+    `getInstruments` reports `type` as forward for those samples.
+  - **Multi-sample keymaps:** handled. `load` keeps the 96-byte `samplemap` and `nextRow` picks
+    `inst.samples[inst.samplemap[note]]`. The `// FIXME: ignoring keymaps` comment in `load` (about 1466) is stale. A
+    keymap entry pointing past the sample count gives an undefined sample (group 2).
+  - **Also fine:** `0` arpeggio, `3`/`5`/`6` portamento and combos, `4` vibrato with `E4` waveform (random uses the
+    square wave), `E5` finetune, `E6` loop, `E8` pan, `EA`/`EB`, `Gxx`, `Hxx`, `Bxx`, and both linear and Amiga
+    frequency tables (`flags & 1`).
 
-  - **Follow-up:** implement in the order above (group 8). Measure per-effect file counts first if the order should be driven by the archive.
+  - **Follow-up:** implement in the order above (group 8). Measure per-effect file counts first if the order should be
+    driven by the archive.

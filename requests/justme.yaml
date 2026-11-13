@@ -12,6 +12,5 @@ readmeFile: README.md
 outline: deep
 languages: CSS,Typescript,Vue
 intro:
-  A scalable, cloud-native architecture demonstrating automated content aggregation and static site generation.
-  Implements a custom Python ETL pipeline to centralize documentation from distributed repositories, leveraging VitePress
-  and Vue.js for high-performance, serverless delivery via GitHub Pages.
+  A personal blog and project showcase, built with VitePress and hosted on GitHub Pages. Project pages are generated from
+  GitHub READMEs by a Python script. The home page has a particle canvas and a player for FastTracker 2 music.
