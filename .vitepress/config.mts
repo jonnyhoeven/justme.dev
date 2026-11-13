@@ -5,7 +5,10 @@ import path from 'node:path';
 import { defineConfig, HeadConfig } from 'vitepress';
 import { createArticleLoader } from '../data/articleLoader.ts';
 import { buildRssFeed } from '../lib/rss.ts';
-import { buildStructuredData, serializeJsonLd } from '../lib/structured-data.ts';
+import {
+  buildStructuredData,
+  serializeJsonLd
+} from '../lib/structured-data.ts';
 import transformPage from '../lib/transformPage.ts';
 import { SITE_CONSTANTS } from './constants.ts';
 
