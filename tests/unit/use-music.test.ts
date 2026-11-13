@@ -542,12 +542,6 @@ describe('useMusic composable', () => {
           disconnect: vi.fn()
         };
       }
-      createScriptProcessor() {
-        return {
-          connect: vi.fn(),
-          disconnect: vi.fn()
-        };
-      }
       resume = vi.fn().mockResolvedValue(undefined);
     }
 

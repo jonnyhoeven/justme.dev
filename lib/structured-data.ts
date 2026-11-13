@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later
-import { SITE_CONSTANTS } from '../.vitepress/constants';
+import { SITE_CONSTANTS } from '../.vitepress/constants.ts';
 
 export interface StructuredDataInput {
   /** Path relative to the source root, e.g. `index.md` or `blog/argocd.md`. */

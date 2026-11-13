@@ -1,12 +1,76 @@
 // SPDX-FileCopyrightText: Jonny van der Hoeven
 // SPDX-License-Identifier: GPL-3.0-or-later
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import {
   XMPlayer,
   createXMEngine,
   type XMInstrument
 } from '../../lib/audio/xm-player';
+import { XMWorkletProcessor } from '../../lib/audio/xm-worklet';
 import type { InstrumentInfo } from '../../.vitepress/theme/composables/useMusic';
+
+function createWorkletHarness() {
+  let processor: XMWorkletProcessor | null = null;
+  let nodePortOnMessage: ((e: MessageEvent) => void) | null = null;
+  let procPortOnMessage: ((e: MessageEvent) => void) | null = null;
+  const connectedNodes: unknown[] = [];
+
+  class MockProcessor extends XMWorkletProcessor {}
+  Object.defineProperty(MockProcessor.prototype, 'port', {
+    get(): MessagePort {
+      return {
+        postMessage: (data: unknown) => {
+          nodePortOnMessage?.({ data } as MessageEvent);
+        },
+        set onmessage(fn: ((e: MessageEvent) => void) | null) {
+          procPortOnMessage = fn;
+        }
+      } as unknown as MessagePort;
+    }
+  });
+
+  class MockAudioWorkletNode {
+    port = {
+      postMessage: (data: unknown) => {
+        procPortOnMessage?.({ data } as MessageEvent);
+      },
+      set onmessage(fn: ((e: MessageEvent) => void) | null) {
+        nodePortOnMessage = fn;
+      },
+      get onmessage() {
+        return nodePortOnMessage;
+      }
+    };
+    connect = vi.fn((target: unknown) => connectedNodes.push(target));
+    disconnect = vi.fn();
+  }
+
+  vi.stubGlobal('AudioWorkletNode', MockAudioWorkletNode);
+
+  const mockAudioContext = {
+    sampleRate: 44100,
+    audioWorklet: {
+      addModule: vi.fn(async () => {
+        processor = new MockProcessor();
+      })
+    },
+    createGain: () => ({
+      gain: { value: 1.0 },
+      connect: (target: unknown) => connectedNodes.push(target)
+    }),
+    destination: {}
+  } as unknown as AudioContext;
+
+  const pumpQuanta = (count: number, quantumSize = 128) => {
+    const outL = new Float32Array(quantumSize);
+    const outR = new Float32Array(quantumSize);
+    for (let i = 0; i < count; i++) {
+      processor!.process([], [[outL, outR]]);
+    }
+  };
+
+  return { mockAudioContext, connectedNodes, pumpQuanta };
+}
 
 export function buildSampleXMBuffer(): ArrayBuffer {
   const totalSize = 1235;
@@ -304,93 +368,63 @@ describe('XMPlayer', () => {
     );
   });
 
-  it('initializes with mock AudioContext and controls playback lifecycle', () => {
+  it('initializes with mock AudioContext and controls playback lifecycle', async () => {
     const arrayBuffer = getSampleBuffer();
+    const { mockAudioContext } = createWorkletHarness();
 
-    const connectedNodes: unknown[] = [];
-    const mockAudioContext = {
-      sampleRate: 44100,
-      createGain: () => ({
-        gain: { value: 1.0 },
-        connect: (target: unknown) => connectedNodes.push(target)
-      }),
-      createScriptProcessor: () => ({
-        connect: (target: unknown) => connectedNodes.push(target),
-        disconnect: () => {}
-      }),
-      destination: {}
-    } as unknown as AudioContext;
+    try {
+      const player = new XMPlayer();
+      const outputGain = player.init(mockAudioContext);
+      await player.ready;
 
-    const player = new XMPlayer();
-    const outputGain = player.init(mockAudioContext);
+      expect(outputGain).toBeDefined();
+      expect(player.outputNode).toBe(outputGain);
 
-    expect(outputGain).toBeDefined();
-    expect(player.outputNode).toBe(outputGain);
+      player.loadBuffer(arrayBuffer);
+      expect(player.isPlaying).toBe(false);
 
-    player.loadBuffer(arrayBuffer);
-    expect(player.isPlaying).toBe(false);
+      player.play();
+      expect(player.isPlaying).toBe(true);
 
-    player.play();
-    expect(player.isPlaying).toBe(true);
+      player.setVolume(0.5);
+      expect(outputGain?.gain.value).toBe(0.5);
 
-    player.setVolume(0.5);
-    expect(outputGain?.gain.value).toBe(0.5);
+      player.pause();
+      expect(player.isPlaying).toBe(false);
 
-    player.pause();
-    expect(player.isPlaying).toBe(false);
-
-    player.stop();
-    expect(player.isPlaying).toBe(false);
-    expect(player.getProgress()).toBe(0);
+      player.stop();
+      expect(player.isPlaying).toBe(false);
+      expect(player.getProgress()).toBe(0);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
-  it('does not fire onEnded prematurely during initial pattern playback', () => {
+  it('does not fire onEnded prematurely during initial pattern playback', async () => {
     const arrayBuffer = getSampleBuffer();
+    const { mockAudioContext, pumpQuanta } = createWorkletHarness();
 
     let endedCalled = false;
-    let processCallback: ((e: unknown) => void) | null = null;
-    const mockAudioContext = {
-      sampleRate: 44100,
-      createGain: () => ({
-        gain: { value: 1.0 },
-        connect: () => {}
-      }),
-      createScriptProcessor: () => ({
-        connect: () => {},
-        disconnect: () => {},
-        set onaudioprocess(cb: (e: unknown) => void) {
-          processCallback = cb;
+    try {
+      const player = new XMPlayer({
+        onEnded: () => {
+          endedCalled = true;
         }
-      }),
-      destination: {}
-    } as unknown as AudioContext;
+      });
 
-    const player = new XMPlayer({
-      onEnded: () => {
-        endedCalled = true;
-      }
-    });
+      player.init(mockAudioContext);
+      await player.ready;
+      player.loadBuffer(arrayBuffer);
+      player.play();
 
-    player.init(mockAudioContext);
-    player.loadBuffer(arrayBuffer);
-    player.play();
+      // 25 * 4096 = 102400 samples = 800 quanta of 128 samples
+      pumpQuanta(800);
 
-    expect(processCallback).toBeDefined();
-
-    const buflen = 4096;
-    const mockEvent = {
-      outputBuffer: {
-        length: buflen,
-        getChannelData: () => new Float32Array(buflen)
-      }
-    };
-
-    for (let i = 0; i < 25; i++) {
-      processCallback!(mockEvent);
+      expect(endedCalled).toBe(false);
+      expect(player.getProgress()).toBeGreaterThan(0);
+    } finally {
+      vi.unstubAllGlobals();
     }
-
-    expect(endedCalled).toBe(false);
-    expect(player.getProgress()).toBeGreaterThan(0);
   });
 
   it('returns tracker state with songpats conditionally based on includeSongpats', () => {
@@ -657,94 +691,115 @@ describe('XMPlayer', () => {
     expect(player.orderOffsets).toEqual([0, 64]);
   });
 
-  it('reuses scope and VU buffers across ticks and reallocates on width change', () => {
-    let processCallback: ((e: unknown) => void) | null = null;
-    const mockAudioContext = {
-      sampleRate: 44100,
-      createGain: () => ({ gain: { value: 1.0 }, connect: () => {} }),
-      createScriptProcessor: () => ({
-        connect: () => {},
-        disconnect: () => {},
-        set onaudioprocess(cb: (e: unknown) => void) {
-          processCallback = cb;
+  it('reuses scope and VU buffers across ticks and reallocates on width change', async () => {
+    const { mockAudioContext, pumpQuanta } = createWorkletHarness();
+
+    try {
+      const player = new XMPlayer();
+      player.init(mockAudioContext);
+      await player.ready;
+      player.loadBuffer(getSampleBuffer());
+      player.play();
+
+      const seen: {
+        payload: object;
+        vu: Float32Array;
+        scopes: Float32Array[];
+      }[] = [];
+      player.setScopeListener((data) => {
+        if (data.scopes) {
+          seen.push({
+            payload: data,
+            vu: data.vu,
+            scopes: data.scopes
+          });
         }
-      }),
-      destination: {}
-    } as unknown as AudioContext;
+      }, 64);
 
-    const player = new XMPlayer();
-    player.init(mockAudioContext);
-    player.loadBuffer(getSampleBuffer());
-    player.play();
+      // 160 quanta of 128 samples (~20480 samples, >20 ticks at 125 BPM)
+      pumpQuanta(160);
 
-    const buflen = 4096;
-    const mockEvent = {
-      playbackTime: 0,
-      outputBuffer: {
-        length: buflen,
-        getChannelData: () => new Float32Array(buflen)
+      expect(seen.length).toBeGreaterThan(2);
+      const first = seen[0];
+      expect(first.scopes.length).toBe(player.numChannels);
+      expect(first.vu.length).toBe(player.numChannels);
+      for (const s of first.scopes) expect(s.length).toBe(64);
+      for (const s of seen) {
+        expect(s.payload).toBe(first.payload);
+        expect(s.vu).toBe(first.vu);
+        expect(s.scopes).toBe(first.scopes);
+        s.scopes.forEach((buf, i) => expect(buf).toBe(first.scopes[i]));
       }
-    };
+      for (const v of first.vu) expect(Number.isFinite(v)).toBe(true);
+      for (const buf of first.scopes)
+        for (const v of buf) expect(Number.isFinite(v)).toBe(true);
 
-    const seen: {
-      payload: object;
-      vu: Float32Array;
-      scopes: Float32Array[];
-    }[] = [];
-    player.setScopeListener((data) => {
-      if (data.scopes) {
-        seen.push({
-          payload: data,
-          vu: data.vu,
-          scopes: data.scopes
-        });
-      }
-    }, 64);
-
-    for (let i = 0; i < 5; i++) processCallback!(mockEvent);
-
-    expect(seen.length).toBeGreaterThan(2);
-    const first = seen[0];
-    expect(first.scopes.length).toBe(player.numChannels);
-    expect(first.vu.length).toBe(player.numChannels);
-    for (const s of first.scopes) expect(s.length).toBe(64);
-    for (const s of seen) {
-      expect(s.payload).toBe(first.payload);
-      expect(s.vu).toBe(first.vu);
-      expect(s.scopes).toBe(first.scopes);
-      s.scopes.forEach((buf, i) => expect(buf).toBe(first.scopes[i]));
+      // Changing the width reallocates, then buffers are stable again.
+      const before = first.scopes;
+      seen.length = 0;
+      player.setScopeListener((data) => {
+        if (data.scopes) {
+          seen.push({ payload: data, vu: data.vu, scopes: data.scopes });
+        }
+      }, 32);
+      pumpQuanta(96);
+      expect(seen.length).toBeGreaterThan(0);
+      expect(seen[0].scopes).not.toBe(before);
+      for (const s of seen[0].scopes) expect(s.length).toBe(32);
+      for (const s of seen) expect(s.scopes).toBe(seen[0].scopes);
+    } finally {
+      vi.unstubAllGlobals();
     }
-    for (const v of first.vu) expect(Number.isFinite(v)).toBe(true);
-    for (const buf of first.scopes)
-      for (const v of buf) expect(Number.isFinite(v)).toBe(true);
+  });
 
-    // Changing the width reallocates, then buffers are stable again.
-    const before = first.scopes;
-    seen.length = 0;
-    player.setScopeListener((data) => {
-      if (data.scopes) {
-        seen.push({ payload: data, vu: data.vu, scopes: data.scopes });
-      }
-    }, 32);
-    for (let i = 0; i < 3; i++) processCallback!(mockEvent);
-    expect(seen.length).toBeGreaterThan(0);
-    expect(seen[0].scopes).not.toBe(before);
-    for (const s of seen[0].scopes) expect(s.length).toBe(32);
-    for (const s of seen) expect(s.scopes).toBe(seen[0].scopes);
+  it('syncs pending state to the worklet on ready and forwards control commands', async () => {
+    const { mockAudioContext, pumpQuanta } = createWorkletHarness();
+    let endedCount = 0;
+
+    try {
+      const player = new XMPlayer({
+        onEnded: () => {
+          endedCount++;
+        }
+      });
+
+      // Configure before worklet ready resolves
+      player.loadBuffer(getSampleBuffer());
+      player.setChannelMute(0, true);
+      player.setBpm(140);
+      player.setScopeListener(() => {}, 16);
+      player.play();
+
+      player.init(mockAudioContext);
+      await player.ready;
+
+      pumpQuanta(16);
+      expect(player.getTrackerState(false).bpm).toBe(140);
+
+      player.resetBpm();
+      player.jumpToOrder(1);
+      player.seek(0);
+      pumpQuanta(8);
+      expect(player.getTrackerState(false).curSongPos).toBe(0);
+
+      // Simulate worklet posting an ended event
+      const workletNode = (
+        player as unknown as {
+          workletNode: { port: { onmessage: (e: MessageEvent) => void } };
+        }
+      ).workletNode;
+      workletNode.port.onmessage({ data: { type: 'ended' } } as MessageEvent);
+      expect(endedCount).toBe(1);
+      expect(player.isPlaying).toBe(false);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it('handles out-of-range samplemap indices gracefully without throwing and clears stale ch.samp', () => {
-    let processCallback: ((e: unknown) => void) | null = null;
     const mockAudioContext = {
       sampleRate: 44100,
       createGain: () => ({ gain: { value: 1.0 }, connect: () => {} }),
-      createScriptProcessor: () => ({
-        connect: () => {},
-        disconnect: () => {},
-        set onaudioprocess(cb: (e: unknown) => void) {
-          processCallback = cb;
-        }
-      }),
       destination: {}
     } as unknown as AudioContext;
     void mockAudioContext;
@@ -812,19 +867,15 @@ describe('XMPlayer', () => {
     // ch.samp should be undefined because sample index 5 is out of range
     expect(ch.samp).toBeUndefined();
 
-    // Also run an audio process tick to verify silence mixes cleanly without throwing
-    const buflen = 4096;
-    const mockEvent = {
-      playbackTime: 0,
-      outputBuffer: {
-        length: buflen,
-        getChannelData: () => new Float32Array(buflen)
-      }
-    };
-    if (processCallback) {
-      const cb = processCallback as (e: unknown) => void;
-      expect(() => cb(mockEvent)).not.toThrow();
-    }
+    // Also run an audio render tick to verify silence mixes cleanly without throwing
+    const buflen = 128;
+    expect(() =>
+      (
+        player.engine as unknown as {
+          renderAudio: (l: Float32Array, r: Float32Array) => void;
+        }
+      ).renderAudio(new Float32Array(buflen), new Float32Array(buflen))
+    ).not.toThrow();
 
     engine.cur_songpos = 0;
     engine.cur_row = 1;
@@ -849,10 +900,13 @@ describe('XMPlayer', () => {
     engine.next_row = 2;
     expect(() => engine.nextRow()).not.toThrow();
     expect(ch.samp).toBeUndefined();
-    if (processCallback) {
-      const cb = processCallback as (e: unknown) => void;
-      expect(() => cb(mockEvent)).not.toThrow();
-    }
+    expect(() =>
+      (
+        player.engine as unknown as {
+          renderAudio: (l: Float32Array, r: Float32Array) => void;
+        }
+      ).renderAudio(new Float32Array(buflen), new Float32Array(buflen))
+    ).not.toThrow();
   });
 
   it('loads instruments from a binary XM buffer with slot order, trimming, CP437 decoding, blank slots, and sample metadata', () => {
@@ -1485,5 +1539,205 @@ describe('XMPlayer', () => {
     engine.nextTick(); // tick 0
     engine.nextTick(); // tick 1
     expect(ch.pan).toBe(103);
+  });
+
+  it('applies tremolo (7xy) and tremolo waveform (E7x) via voloffset without mutating ch.vol', () => {
+    const engine = setupEffectEngine(
+      [
+        [
+          [[48, 1, -1, 14, 0x72]], // row 0: E72 (square waveform)
+          [[-1, -1, -1, 7, 0x84]], // row 1: 784 (speed=8, depth=4 -> *4 = 16)
+          [[48, 1, -1, 7, 0x00]] // row 2: 700 (new note resets tremolopos since type < 4)
+        ]
+      ],
+      [0],
+      6
+    );
+    const ch = engine.xm.channelinfo![0];
+
+    // Row 0: E72 sets tremolotype = 2
+    for (let t = 0; t < 6; t++) engine.nextTick();
+    expect(ch.tremolotype).toBe(2);
+
+    // Row 1: 784 with square waveform -> pos 0..31 is +16, pos 32..63 is -16
+    engine.nextTick(); // tick 0: pos=0 -> +16
+    expect(ch.vol).toBe(64);
+    expect(ch.voloffset).toBe(16);
+    for (let t = 1; t <= 4; t++) engine.nextTick(); // ticks 1..4: pos 0, 8, 16, 24 -> +16
+    expect(ch.voloffset).toBe(16);
+    engine.nextTick(); // tick 5: pos=32 -> -16
+    expect(ch.voloffset).toBe(-16);
+    expect(ch.vol).toBe(64);
+
+    // Row 2: new note resets tremolopos to 0 -> +16 again
+    engine.nextTick(); // tick 0
+    expect(ch.voloffset).toBe(16);
+  });
+
+  it('applies tremor (Txy) with (x+1) on ticks, (y+1) off ticks, and memory', () => {
+    const engine = setupEffectEngine(
+      [
+        [
+          [[48, 1, -1, 29, 0x12]], // row 0: T12 (2 ticks on, 3 ticks off)
+          [[-1, -1, -1, 29, 0x00]] // row 1: T00 (memory)
+        ]
+      ],
+      [0],
+      6
+    );
+    const ch = engine.xm.channelinfo![0];
+
+    engine.nextTick(); // tick 0: on (tremor only ticks on 1+)
+    expect(ch.voloffset).toBe(0);
+    engine.nextTick(); // tick 1: pos 0 < 2 -> on
+    expect(ch.voloffset).toBe(0);
+    engine.nextTick(); // tick 2: pos 1 < 2 -> on
+    expect(ch.voloffset).toBe(0);
+    engine.nextTick(); // tick 3: pos 2 >= 2 -> off
+    expect(ch.voloffset).toBe(-64);
+    engine.nextTick(); // tick 4: pos 3 >= 2 -> off
+    expect(ch.voloffset).toBe(-64);
+    engine.nextTick(); // tick 5: pos 4 >= 2 -> off (wraps to 0)
+    expect(ch.voloffset).toBe(-64);
+
+    // Row 1: T00 reuses 0x12
+    engine.nextTick(); // tick 0
+    expect(ch.voloffset).toBe(0);
+    engine.nextTick(); // tick 1: pos 0 < 2 -> on
+    expect(ch.voloffset).toBe(0);
+  });
+
+  it('applies extra-fine porta up/down (X1x/X2x) with separate memory and clamps 1xx at 1', () => {
+    const engine = setupEffectEngine(
+      [
+        [
+          [[48, 1, -1, 33, 0x14]], // row 0: X14 (-1.0)
+          [[-1, -1, -1, 33, 0x10]], // row 1: X10 (reuses 4 -> -1.0)
+          [[-1, -1, -1, 33, 0x28]], // row 2: X28 (+2.0)
+          [[-1, -1, -1, 33, 0x20]], // row 3: X20 (reuses 8 -> +2.0)
+          [[95, 1, -1, 1, 0xff]] // row 4: 1FF (clamps at 1)
+        ]
+      ],
+      [0],
+      4
+    );
+    const ch = engine.xm.channelinfo![0];
+
+    engine.nextTick(); // row 0, tick 0: X14
+    const p0 = ch.period;
+    for (let t = 1; t < 4; t++) engine.nextTick();
+
+    engine.nextTick(); // row 1, tick 0: X10
+    expect(ch.period).toBe(p0 - 1);
+    for (let t = 1; t < 4; t++) engine.nextTick();
+
+    engine.nextTick(); // row 2, tick 0: X28
+    expect(ch.period).toBe(p0 - 1 + 2);
+    for (let t = 1; t < 4; t++) engine.nextTick();
+
+    engine.nextTick(); // row 3, tick 0: X20
+    expect(ch.period).toBe(p0 - 1 + 2 + 2);
+    for (let t = 1; t < 4; t++) engine.nextTick();
+
+    engine.nextTick(); // row 4, tick 0
+    for (let t = 1; t < 4; t++) engine.nextTick();
+    expect(ch.period).toBe(1);
+  });
+
+  it('snaps tone portamento to semitones when glissando (E31) is enabled', () => {
+    const engine = setupEffectEngine(
+      [
+        [
+          [[48, 1, -1, 14, 0x31]], // row 0: C-4 + E31 (glissando on)
+          [[50, 1, -1, 3, 0x04]] // row 1: D-4 + 304 (slide -4/tick toward 50)
+        ]
+      ],
+      [0],
+      3
+    );
+    const ch = engine.xm.channelinfo![0];
+
+    for (let t = 0; t < 3; t++) engine.nextTick();
+    const startPeriod = ch.period; // C-4 = 1152
+
+    engine.nextTick(); // row 1, tick 0
+    engine.nextTick(); // row 1, tick 1: period = 1152 - 4 = 1148, nearest semitone = 1152 -> periodoffset = +4
+    expect(ch.period).toBe(startPeriod - 4);
+    expect(ch.periodoffset).toBe(4);
+  });
+
+  it('repeats volume change on every retrigger tick for Rxy', () => {
+    const engine = setupEffectEngine(
+      [
+        [
+          [[48, 1, -1, 27, 0x12]] // row 0: R12 (vol -1 every 2 ticks)
+        ]
+      ],
+      [0],
+      5
+    );
+    const ch = engine.xm.channelinfo![0];
+
+    engine.nextTick(); // tick 0: 64 - 1 = 63
+    expect(ch.vol).toBe(63);
+    engine.nextTick(); // tick 1: no retrigger
+    expect(ch.vol).toBe(63);
+    ch.off = 500;
+    engine.nextTick(); // tick 2: retrigger -> off=0, vol=62
+    expect(ch.off).toBe(0);
+    expect(ch.vol).toBe(62);
+    engine.nextTick(); // tick 3
+    expect(ch.vol).toBe(62);
+    ch.off = 500;
+    engine.nextTick(); // tick 4: retrigger -> off=0, vol=61
+    expect(ch.off).toBe(0);
+    expect(ch.vol).toBe(61);
+  });
+
+  it('loads instrument auto-vibrato, tests envelope bit 0, and applies fadeout on key off', () => {
+    const buf = buildSampleXMBuffer();
+    const bytes = new Uint8Array(buf);
+    const view = new DataView(buf);
+
+    // Find instrument 0 offset:
+    // Preamble (60) + Header (276) = 336
+    // Pattern 0: 9 + 258 = 267 -> 603
+    // Pattern 1: 9 + 256 = 265 -> 868
+    const instIdx = 868;
+    // Set auto-vibrato: type=1 (square), sweep=2, depth=4, rate=64
+    bytes[instIdx + 235] = 1;
+    bytes[instIdx + 236] = 2;
+    bytes[instIdx + 237] = 4;
+    bytes[instIdx + 238] = 64;
+    // Set vol_fadeout = 16384
+    view.setUint16(instIdx + 239, 16384, true);
+
+    const engine = createXMEngine();
+    expect(engine.load(buf)).toBe(true);
+    const inst = engine.xm.instruments![0];
+    expect(inst.vib_type).toBe(1);
+    expect(inst.vib_sweep).toBe(2);
+    expect(inst.vib_depth).toBe(4);
+    expect(inst.vib_rate).toBe(64);
+    expect(inst.vol_fadeout).toBe(16384);
+
+    // Tick 0: sweepProgress = 0/2 = 0 -> autovib offset = 0
+    engine.nextTick();
+    const ch = engine.xm.channelinfo![0];
+    expect(ch.periodoffset).toBe(0);
+    // Tick 1: sweepProgress = 1/2 = 0.5 -> square(+1) * 4 * 0.5 = 2
+    engine.nextTick();
+    expect(ch.periodoffset).toBe(2);
+
+    // Key off triggers immediate fadeout (16384 per tick)
+    ch.release = 1;
+    engine.nextTick();
+    expect(ch.fadeout).toBe(65536 - 16384);
+
+    // Also verify envelope bit 0: if env_vol_type = 2 (sustain bit only, bit 0 = 0), envelope is treated as off
+    bytes[instIdx + 233] = 2;
+    const engine2 = createXMEngine();
+    expect(engine2.load(buf)).toBe(true);
+    expect(engine2.xm.instruments![0].env_vol?.points).toEqual([0, 64, 1, 0]);
   });
 });

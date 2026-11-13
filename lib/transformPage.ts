@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import fs from 'node:fs';
 import path from 'node:path';
-import { SITE_CONSTANTS } from '../.vitepress/constants';
+import { SITE_CONSTANTS } from '../.vitepress/constants.ts';
 import type { ArticleFrontmatter } from '../types/frontmatter';
 
 export interface PageLike {
