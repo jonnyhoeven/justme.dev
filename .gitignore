@@ -29,20 +29,13 @@ coverage/
 # Generated Content
 /projects/*.md
 /public/projects-cache/
-
 # Audio library (synced to Cloudflare R2; keep initial demo tracks tracked)
 /public/audio/*
-
 # Image library (synced to Cloudflare R2)
 /public/images/*
 
-# Other
 /input_images/
 /bin/
 pnpm-debug.log*
 
-# Claude Code local config
 .claude/launch.json
-
-# Tracker music library (local only; far too many files to track)
-/backup/
