@@ -23,8 +23,8 @@ Open items from a full read of the components, `lib/`, theme CSS, ETL scripts, C
 ### 2. Bugs
 
 - [x] **Out-of-range keymap entry gives an undefined sample** _(from code)_ ([`xm-player.ts`](lib/audio/xm-player.ts) `nextRow`): `inst.samples[inst.samplemap[note]]` is not bounds-checked, so a malformed instrument could make the mixer read `undefined`. Guard it, and drop the stale `TODO: implement pingpong looping` (`MixChannelIntoBuf`) and `FIXME: ignoring keymaps` (`load`) comments.
-- [ ] **Catalog v2 assumes the default media URL** _(from code)_ ([`sync_audio_r2.py`](scripts/sync_audio_r2.py)): the client derives `url` as `MEDIA_URL/audio/<filename>`, so a sync run with `--prefix` other than `audio` or a different `R2_PUBLIC_URL` writes a catalog whose URLs no longer resolve. Refuse or warn in that case.
-- [ ] **Junk bytes in tracker names** ([`sync_audio_r2.py`](scripts/sync_audio_r2.py) `parse_xm_header`): several catalog trackers read as e.g. `MadTracker 2.0\u0000\u0019%Õó`. Cut the field at the first NUL and trim.
+- [x] **Catalog v2 assumes the default media URL** _(from code)_ ([`sync_audio_r2.py`](scripts/sync_audio_r2.py)): the client derives `url` as `MEDIA_URL/audio/<filename>`, so a sync run with `--prefix` other than `audio` or a different `R2_PUBLIC_URL` writes a catalog whose URLs no longer resolve. Refuse or warn in that case.
+- [x] **Junk bytes in tracker names** ([`sync_audio_r2.py`](scripts/sync_audio_r2.py) `parse_xm_header`): several catalog trackers read as e.g. `MadTracker 2.0\u0000\u0019%Õó`. Cut the field at the first NUL and trim.
 
 ### 3. Performance
 

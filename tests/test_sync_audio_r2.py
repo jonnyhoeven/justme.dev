@@ -221,3 +221,125 @@ def test_read_catalog_rejects_unknown_format(tmp_path: Path) -> None:
     path.write_text(json.dumps({"version": 1}), encoding="utf-8")
     with pytest.raises(ValueError):
         read_catalog(path)
+
+
+def test_parse_xm_header_interior_nul_bytes(tmp_path: Path) -> None:
+    buf = bytearray(80)
+    buf[0:17] = b"Extended Module: "
+    buf[17:37] = b"Clean Title\x00junk\x00\x00\x00"
+    buf[38:58] = b"FastTracker 2\x00junk\x00"
+    buf[68:70] = (8).to_bytes(2, "little")
+    buf[78:80] = (120).to_bytes(2, "little")
+
+    test_file = tmp_path / "test_nul.xm"
+    test_file.write_bytes(buf)
+
+    meta = parse_xm_header(test_file)
+    assert meta["title"] == "Clean Title"
+    assert meta["tracker"] == "FastTracker 2"
+
+
+def test_read_and_write_catalog_deduplicates_nul_trackers(tmp_path: Path) -> None:
+    path = tmp_path / "music-tracks.json"
+    raw_catalog = {
+        "version": 2,
+        "fields": ["filename", "title", "channels", "bpm", "tracker"],
+        "trackers": [
+            "FastTracker v2.00",
+            "MadTracker 2.0",
+            "MadTracker 2.0\x00\x19%Õó",
+            "MadTracker 2.0\x00:ã‰Ò",
+        ],
+        "tracks": [
+            ["a.xm", "Track A", 8, 125, 0],
+            ["b.xm", "Track B", 8, 125, 1],
+            ["c.xm", "Track C", 8, 125, 2],
+            ["d.xm", "Track D", 8, 125, 3],
+        ],
+    }
+    path.write_text(json.dumps(raw_catalog), encoding="utf-8")
+
+    # read_catalog_trackers cleans and deduplicates
+    cleaned_trackers = read_catalog_trackers(path)
+    assert cleaned_trackers == ["FastTracker v2.00", "MadTracker 2.0"]
+
+    # read_catalog reads tracks back and write_catalog remaps tracker indices
+    tracks = read_catalog(path)
+    for t in tracks:
+        if "tracker" in t:
+            t["tracker"] = t["tracker"].split("\x00", 1)[0].strip()
+
+    write_catalog(tracks, path)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    assert data["trackers"] == ["FastTracker v2.00", "MadTracker 2.0"]
+    assert data["tracks"] == [
+        ["a.xm", "Track A", 8, 125, 0],
+        ["b.xm", "Track B", 8, 125, 1],
+        ["c.xm", "Track C", 8, 125, 1],
+        ["d.xm", "Track D", 8, 125, 1],
+    ]
+
+
+def test_sync_main_warns_on_non_default_settings(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setenv("R2_ENDPOINT_URL", "https://example.com")
+    monkeypatch.setenv("R2_BUCKET_NAME", "media")
+    monkeypatch.setenv("R2_ACCESS_KEY_ID", "key")
+    monkeypatch.setenv("R2_SECRET_ACCESS_KEY", "secret")
+    monkeypatch.setenv("R2_PUBLIC_URL", "https://media.test.com")
+
+    audio_dir = tmp_path / "public" / "audio"
+    audio_dir.mkdir(parents=True)
+    sample_xm = audio_dir / "1_test.xm"
+    sample_xm.write_bytes(b"Extended Module: " + b"\x00" * 70)
+
+    monkeypatch.chdir(tmp_path)
+
+    with (
+        patch("boto3.client") as mock_client_factory,
+        patch("sys.argv", ["sync_audio_r2.py", "--dry-run", "--prefix", "other"]),
+    ):
+        mock_s3 = MagicMock()
+        mock_client_factory.return_value = mock_s3
+        mock_paginator = MagicMock()
+        mock_s3.get_paginator.return_value = mock_paginator
+        mock_paginator.paginate.return_value = []
+
+        main()
+
+        captured = capsys.readouterr()
+        assert "Warning: Non-default prefix ('other') or public URL ('https://media.test.com')" in captured.err
+        assert "data/music-tracks.json v2 assumes https://media.justme.dev/audio/<filename>" in captured.err
+
+
+def test_sync_main_no_warning_on_default_settings(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setenv("R2_ENDPOINT_URL", "https://example.com")
+    monkeypatch.setenv("R2_BUCKET_NAME", "media")
+    monkeypatch.setenv("R2_ACCESS_KEY_ID", "key")
+    monkeypatch.setenv("R2_SECRET_ACCESS_KEY", "secret")
+    monkeypatch.setenv("R2_PUBLIC_URL", "https://media.justme.dev")
+
+    audio_dir = tmp_path / "public" / "audio"
+    audio_dir.mkdir(parents=True)
+    sample_xm = audio_dir / "1_test.xm"
+    sample_xm.write_bytes(b"Extended Module: " + b"\x00" * 70)
+
+    monkeypatch.chdir(tmp_path)
+
+    with (
+        patch("boto3.client") as mock_client_factory,
+        patch("sys.argv", ["sync_audio_r2.py", "--dry-run"]),
+    ):
+        mock_s3 = MagicMock()
+        mock_client_factory.return_value = mock_s3
+        mock_paginator = MagicMock()
+        mock_s3.get_paginator.return_value = mock_paginator
+        mock_paginator.paginate.return_value = []
+
+        main()
+
+        captured = capsys.readouterr()
+        assert "Warning: Non-default prefix" not in captured.err

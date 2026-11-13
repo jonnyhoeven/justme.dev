@@ -74,14 +74,18 @@ MIME_TYPES: dict[str, str] = {
 }
 
 
+def _decode_xm_field(raw: bytes) -> str:
+    return raw.split(b"\x00", 1)[0].decode("cp437", errors="ignore").strip()
+
+
 def parse_xm_header(filepath: Path) -> dict[str, Any]:
     """Extract tracker metadata from XM module header."""
     try:
         with open(filepath, "rb") as f:
             buf = f.read(80)
             if len(buf) >= 80:
-                title = buf[17:37].decode("cp437", errors="ignore").rstrip("\x00").strip()
-                tracker = buf[38:58].decode("cp437", errors="ignore").rstrip("\x00").strip()
+                title = _decode_xm_field(buf[17:37])
+                tracker = _decode_xm_field(buf[38:58])
                 channels = int.from_bytes(buf[68:70], byteorder="little")
                 bpm = int.from_bytes(buf[78:80], byteorder="little")
                 res: dict[str, Any] = {}
@@ -163,7 +167,12 @@ def read_catalog_trackers(path: Path) -> list[str]:
         data = json.loads(path.read_text(encoding="utf-8"))
         trackers = data["trackers"]
         if data.get("version") == CATALOG_VERSION and all(isinstance(t, str) for t in trackers):
-            return list(trackers)
+            cleaned: list[str] = []
+            for t in trackers:
+                name = t.split("\x00", 1)[0].strip()
+                if name and name not in cleaned:
+                    cleaned.append(name)
+            return cleaned
     except (OSError, ValueError, KeyError, TypeError):
         pass
     return []
@@ -251,6 +260,12 @@ def main() -> None:
     args = parser.parse_args()
 
     cfg = load_env()
+    if args.prefix != "audio" or cfg["public_url"] != "https://media.justme.dev":
+        print(
+            f"Warning: Non-default prefix ({args.prefix!r}) or public URL ({cfg['public_url']!r}). "
+            "data/music-tracks.json v2 assumes https://media.justme.dev/audio/<filename>",
+            file=sys.stderr,
+        )
     s3 = create_s3_client(cfg)
 
     audio_root = Path("public/audio").resolve()
