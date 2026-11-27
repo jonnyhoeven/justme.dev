@@ -4,7 +4,7 @@ type: project
 date: 2026-10-31
 image: /images/whos-the-fool.webp
 fetchReadme: false
-externalUrl: https://wtf.justme.dev
+externalUrl: https://fool.justme.dev
 externalUrlLabel: Play Game
 languages: Next.js,TypeScript,Cloudflare Workers,Web Audio,Python
 outline: deep
@@ -17,7 +17,7 @@ content: |
 
   ::: tip Live Game Demo
   Ready to play with friends or test out the game?
-  **[Launch Who's the Fool! at wtf.justme.dev 🎮](https://wtf.justme.dev)**
+  **[Launch Who's the Fool! at fool.justme.dev 🎮](https://fool.justme.dev)**
   *Open the big screen on a laptop/TV, create a room, and join with your phones via QR code.*
   :::
 
@@ -29,7 +29,7 @@ content: |
 
   ## How It Plays
 
-  1. **Room Creation**: Open [wtf.justme.dev](https://wtf.justme.dev) on the big screen. A custom room code (e.g. `APPLE`) and QR code appear on screen.
+  1. **Room Creation**: Open [fool.justme.dev](https://fool.justme.dev) on the big screen. A custom room code (e.g. `APPLE`) and QR code appear on screen.
   2. **Phone Controllers**: Players scan the QR code on their phones, choose an avatar and enter their name. Any player in the lobby can tune match settings and start when ready.
   3. **Three Rounds of 15 Questions**: Each question is read aloud by the narrator. Players have 25 seconds on their phone buzzer to choose between four distinct buttons.
   4. **Dynamic Speed Scoring**: Correct answers score higher the faster you lock in (`500 * (1 + timeRemaining / totalTime)`), rewarding quick reflexes. Wrong answers cost points, with doubled stakes on the final round.
@@ -51,4 +51,4 @@ content: |
 
   ## Try It Out
 
-  Visit **[wtf.justme.dev](https://wtf.justme.dev)** on your laptop or TV, grab your phone, and discover who the fool really is!
+  Visit **[fool.justme.dev](https://fool.justme.dev)** on your laptop or TV, grab your phone, and discover who the fool really is!
