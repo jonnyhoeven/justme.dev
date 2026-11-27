@@ -42,7 +42,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Nix & Setup Cache
-        uses: DeterminateSystems/determinate-nix-action@4d65ea9cab522b6d9f29a170aed23ededc1b27af # v3.23.0
+        uses: DeterminateSystems/determinate-nix-action@4b040423529d49b1a19ba918742e0aa9aa95031a # v3.24.3
 
       - name: Install dependencies
         run: nix develop .#ci --command pnpm install --frozen-lockfile
